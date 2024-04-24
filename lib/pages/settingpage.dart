@@ -1,0 +1,1020 @@
+import 'package:dating/pages/profilepage.dart';
+import 'package:dating/utils/colors.dart';
+import 'package:dating/utils/images.dart';
+import 'package:dating/utils/textStyles.dart';
+import 'package:dating/widgets/buttons.dart';
+import 'package:dating/widgets/navbar.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class SettingPage extends StatefulWidget {
+  const SettingPage({super.key});
+
+  @override
+  State<SettingPage> createState() => _SettingPageState();
+}
+
+class _SettingPageState extends State<SettingPage> {
+  bool _isSwitched = false;
+
+  String seeking = 'SEEKING';
+  String country = 'COUNTRY';
+  String age = 'AGE';
+
+  int _selectedIndex = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 600) {
+              // For smaller screen sizes (e.g., mobile)
+              return MobileProfile();
+            } else {
+              // For larger screen sizes (e.g., tablet or desktop)
+              return DesktopProfile();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget MobileProfile() {
+    return Scaffold(
+      body: ListView(children: [
+        SizedBox(
+          height: 10,
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // profile
+
+              // search icon
+              ButtonWithLabel(
+                text: null,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(
+                  Icons.arrow_back,
+                ),
+                labelText: null,
+              ),
+
+              Text(
+                'Settings',
+                style: AppTextStyles().primaryStyle,
+              ),
+
+              // view icon
+
+              SizedBox(
+                width: 30,
+              )
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 30,
+        ),
+
+// details
+
+// tabbar
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: NeumorphicToggle(
+            padding: EdgeInsets.zero,
+            style: NeumorphicToggleStyle(
+              borderRadius: BorderRadius.circular(100),
+              depth: 10,
+              disableDepth: false,
+              backgroundColor: AppColors.backgroundColor,
+            ),
+            height: 40,
+            width: 150,
+            selectedIndex: _selectedIndex,
+            children: [
+              // Billing
+
+              ToggleElement(
+                background: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 202, 215, 225),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: Center(
+                      child: Text(
+                    'Billing',
+                    style: AppTextStyles().secondaryStyle.copyWith(
+                          color: Colors.black,
+                        ),
+                  )),
+                ),
+                foreground: Center(
+                  child: Text(
+                    'Billing',
+                    style: AppTextStyles().secondaryStyle.copyWith(
+                          color: Colors.black,
+                        ),
+                  ),
+                ),
+              ),
+
+              // profile
+
+              ToggleElement(
+                background: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 202, 215, 225),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: Center(
+                      child: Text(
+                    'Profile',
+                    style: AppTextStyles().secondaryStyle.copyWith(
+                          color: Colors.black,
+                        ),
+                  )),
+                ),
+                foreground: Center(
+                  child: Text(
+                    'Profile',
+                    style: AppTextStyles().secondaryStyle.copyWith(
+                          color: Colors.black,
+                        ),
+                  ),
+                ),
+              ),
+              ToggleElement(
+                background: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 202, 215, 225),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Email',
+                      style: AppTextStyles().secondaryStyle.copyWith(
+                            color: Colors.black,
+                          ),
+                    ),
+                  ),
+                ),
+                foreground: Center(
+                  child: Text(
+                    'Email',
+                    style: AppTextStyles().secondaryStyle.copyWith(
+                          color: Colors.black,
+                        ),
+                  ),
+                ),
+              )
+            ],
+            onChanged: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            thumb: Text(''),
+          ),
+        ),
+
+        SizedBox(
+          height: 30,
+        ),
+
+        IndexedStack(
+          index: _selectedIndex,
+          children: [
+            Container(
+                color: Colors.green, child: Center(child: Text('Billing'))),
+            // Profile tab
+            profileTab(),
+
+            Container(
+                color: Colors.orange, child: Center(child: Text('Email'))),
+          ],
+        ),
+
+        // details edit
+      ]),
+      bottomSheet: Container(
+        height: 60,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.backgroundColor,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // cancel
+            Neumorphic(
+              style: NeumorphicStyle(
+                boxShape: NeumorphicBoxShape.roundRect(
+                  BorderRadius.circular(16),
+                ),
+                depth: 5,
+                intensity: 0.75,
+              ),
+              child: NeumorphicButton(
+                padding: EdgeInsets.zero,
+                child: Container(
+                  height: 50,
+                  width: 100,
+                  child: Center(
+                    child: Text(
+                      'Cancel',
+                      style: AppTextStyles().secondaryStyle.copyWith(
+                            color: Colors.red,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // save
+            Neumorphic(
+              style: NeumorphicStyle(
+                boxShape: NeumorphicBoxShape.roundRect(
+                  BorderRadius.circular(16),
+                ),
+                depth: 5,
+                intensity: 0.75,
+              ),
+              child: NeumorphicButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                padding: EdgeInsets.zero,
+                child: Container(
+                  height: 50,
+                  width: 100,
+                  color: Colors.blue,
+                  child: Center(
+                    child: Text(
+                      'Save',
+                      style: AppTextStyles().secondaryStyle.copyWith(
+                            color: Colors.white,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Column profileTab() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text('Update your profile display options and localization.',
+              style: AppTextStyles().secondaryStyle),
+        ),
+        SizedBox(
+          height: 25,
+        ),
+
+        // online options
+
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'Online Options',
+            style: AppTextStyles().primaryStyle.copyWith(
+                  color: AppColors.black,
+                ),
+          ),
+        ),
+
+        SizedBox(height: 5),
+
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text('Online Status', style: AppTextStyles().secondaryStyle),
+        ),
+
+        SizedBox(height: 10),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 35,
+                child: NeumorphicSwitch(
+                  height: 20,
+                  value: _isSwitched,
+                  onChanged: (value) {
+                    setState(() {
+                      _isSwitched = value;
+                      // Do something when the switch is toggled
+                    });
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text('Show me as online',
+                  style: AppTextStyles().secondaryStyle.copyWith(
+                        fontSize: 14,
+                      )),
+            ],
+          ),
+        ),
+
+        // show busy
+
+        SizedBox(height: 10),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 35,
+                child: NeumorphicSwitch(
+                  height: 20,
+                  value: _isSwitched,
+                  onChanged: (value) {
+                    setState(() {
+                      _isSwitched = value;
+                      // Do something when the switch is toggled
+                    });
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text('Show me as busy',
+                  style: AppTextStyles().secondaryStyle.copyWith(
+                        fontSize: 14,
+                      )),
+            ],
+          ),
+        ),
+
+        SizedBox(height: 25),
+
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text('Display Profile', style: AppTextStyles().secondaryStyle),
+        ),
+
+        SizedBox(height: 10),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 35,
+                child: NeumorphicSwitch(
+                  height: 20,
+                  value: _isSwitched,
+                  onChanged: (value) {
+                    setState(() {
+                      _isSwitched = value;
+                      // Do something when the switch is toggled
+                    });
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text('Display my profile to users',
+                  style: AppTextStyles().secondaryStyle.copyWith(
+                        fontSize: 14,
+                      )),
+            ],
+          ),
+        ),
+
+        // show busy
+
+        SizedBox(height: 10),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 35,
+                child: NeumorphicSwitch(
+                  height: 20,
+                  value: _isSwitched,
+                  onChanged: (value) {
+                    setState(() {
+                      _isSwitched = value;
+                      // Do something when the switch is toggled
+                    });
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text('Hide my profile from users',
+                  style: AppTextStyles().secondaryStyle.copyWith(
+                        fontSize: 14,
+                      )),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget DesktopProfile() {
+    return Scaffold(
+      body: Column(children: [
+        SizedBox(
+          height: 10,
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // profile
+              Row(
+                children: [
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) => ProfilePage()));
+                      },
+                      child: profileButton()),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Text(
+                    'Dating App',
+                    style: GoogleFonts.poppins(
+                      color: AppColors.black,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+
+              // search icon
+              Row(
+                children: [
+                  ButtonWithLabel(
+                    text: null,
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.search,
+                    ),
+                    labelText: null,
+                  ),
+
+                  // settings icon
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(
+          height: 40,
+        ),
+
+        // icons
+        Container(
+          height: 90,
+          decoration: BoxDecoration(
+            color: AppColors.backgroundColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.25),
+                // spreadRadius: 5,
+                blurRadius: 20,
+                offset: Offset(0, 25), // horizontal and vertical offset
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: ListView(
+              // physics: NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              children: [
+                // matches
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        ButtonWithLabel(
+                          text: null,
+                          labelText: 'Matches',
+                          onPressed: () {},
+                          icon: Icon(Icons.people),
+                        ),
+                        SizedBox(
+                          width: 15,
+                        ),
+                        // messages
+                        ButtonWithLabel(
+                          text: null,
+                          labelText: 'Messages',
+                          onPressed: () {},
+                          icon: Icon(Icons.messenger_outline),
+                        ),
+
+                        SizedBox(
+                          width: 15,
+                        ),
+                        // popular
+                        ButtonWithLabel(
+                          text: null,
+                          labelText: 'Popular',
+                          onPressed: () {},
+                          icon: Icon(Icons.star),
+                        ),
+                        SizedBox(
+                          width: 15,
+                        ),
+                        // photos
+                        ButtonWithLabel(
+                          text: null,
+                          labelText: 'Photos',
+                          onPressed: () {},
+                          icon: Icon(Icons.photo_library_sharp),
+                        ),
+
+                        SizedBox(
+                          width: 15,
+                        ),
+                        // add friemd
+                        ButtonWithLabel(
+                          text: null,
+                          labelText: 'Add Friend',
+                          onPressed: () {},
+                          icon: Icon(Icons.add),
+                        ),
+
+                        SizedBox(
+                          width: 15,
+                        ),
+                        // online
+                        ButtonWithLabel(
+                          text: null,
+                          labelText: 'Online',
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.circle_outlined,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(
+                      width: 100,
+                    ),
+
+                    // age seeking
+
+                    Row(
+                      children: [
+                        // seeking
+
+                        Neumorphic(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          child: DropdownButton<String>(
+                            underline: Container(),
+                            style: AppTextStyles().secondaryStyle,
+                            value: seeking,
+                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                seeking = newValue!;
+                              });
+                            },
+                            items: <String>[
+                              'SEEKING',
+                              'English',
+                              'Spanish',
+                              'French',
+                              'German'
+                            ] // Language options
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: AppTextStyles().secondaryStyle,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 50,
+                        ),
+
+                        // country
+
+                        Neumorphic(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          child: DropdownButton<String>(
+                            underline: Container(),
+                            style: AppTextStyles().secondaryStyle,
+                            value: country,
+                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                country = newValue!;
+                              });
+                            },
+                            items: <String>[
+                              'COUNTRY',
+                              'English',
+                              'Spanish',
+                              'French',
+                              'German'
+                            ] // Language options
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: AppTextStyles().secondaryStyle,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 50,
+                        ),
+
+                        // age
+
+                        Neumorphic(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          child: DropdownButton<String>(
+                            underline: Container(),
+                            style: AppTextStyles().secondaryStyle,
+                            value: age,
+                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                age = newValue!;
+                              });
+                            },
+                            items: <String>[
+                              'AGE',
+                              'English',
+                              'Spanish',
+                              'French',
+                              'German'
+                            ] // Language options
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: AppTextStyles().secondaryStyle,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        //
+
+        // post
+        SizedBox(
+          height: 30,
+        ),
+
+        Expanded(
+          child: Row(
+            children: [
+// side bar
+              NavBarDesktop(),
+
+// posts
+              SizedBox(
+                width: 20,
+              ),
+              Expanded(
+                child: Column(
+                  verticalDirection: VerticalDirection.down,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Setting',
+                          style: GoogleFonts.poppins(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            height: 0,
+                          ),
+                        ),
+
+// tab bar
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: NeumorphicToggle(
+                            padding: EdgeInsets.zero,
+                            style: NeumorphicToggleStyle(
+                              borderRadius: BorderRadius.circular(100),
+                              depth: 10,
+                              disableDepth: false,
+                              backgroundColor: AppColors.backgroundColor,
+                            ),
+                            height: 40,
+                            width: 300,
+                            selectedIndex: _selectedIndex,
+                            children: [
+                              // Billing
+
+                              ToggleElement(
+                                background: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                        255, 202, 215, 225),
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Center(
+                                      child: Text(
+                                    'Billing',
+                                    style:
+                                        AppTextStyles().secondaryStyle.copyWith(
+                                              color: Colors.black,
+                                            ),
+                                  )),
+                                ),
+                                foreground: Center(
+                                  child: Text(
+                                    'Billing',
+                                    style:
+                                        AppTextStyles().secondaryStyle.copyWith(
+                                              color: Colors.black,
+                                            ),
+                                  ),
+                                ),
+                              ),
+
+                              // profile
+
+                              ToggleElement(
+                                background: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                        255, 202, 215, 225),
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Center(
+                                      child: Text(
+                                    'Profile',
+                                    style:
+                                        AppTextStyles().secondaryStyle.copyWith(
+                                              color: Colors.black,
+                                            ),
+                                  )),
+                                ),
+                                foreground: Center(
+                                  child: Text(
+                                    'Profile',
+                                    style:
+                                        AppTextStyles().secondaryStyle.copyWith(
+                                              color: Colors.black,
+                                            ),
+                                  ),
+                                ),
+                              ),
+                              ToggleElement(
+                                background: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                        255, 202, 215, 225),
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Email',
+                                      style: AppTextStyles()
+                                          .secondaryStyle
+                                          .copyWith(
+                                            color: Colors.black,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                                foreground: Center(
+                                  child: Text(
+                                    'Email',
+                                    style:
+                                        AppTextStyles().secondaryStyle.copyWith(
+                                              color: Colors.black,
+                                            ),
+                                  ),
+                                ),
+                              )
+                            ],
+                            onChanged: (index) {
+                              setState(() {
+                                _selectedIndex = index;
+                              });
+                            },
+                            thumb: Text(''),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        verticalDirection: VerticalDirection.down,
+                        children: [
+                          Expanded(
+                            child: ListView(
+                              scrollDirection: Axis.vertical,
+                              children: [
+                                // profile pic
+
+                                IndexedStack(
+                                  index: _selectedIndex,
+                                  children: [
+                                    Container(
+                                        color: Colors.green,
+                                        child: Center(child: Text('Billing'))),
+                                    // Profile tab
+                                    profileTab(),
+
+                                    Container(
+                                        color: Colors.orange,
+                                        child: Center(child: Text('Email'))),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                ),
+
+// details
+                                SizedBox(
+                                  height: 15,
+                                ),
+
+// edit
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      ]),
+      bottomSheet: Container(
+        height: 70,
+        decoration: BoxDecoration(
+          color: AppColors.backgroundColor,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // cancel
+            Neumorphic(
+              style: NeumorphicStyle(
+                boxShape: NeumorphicBoxShape.roundRect(
+                  BorderRadius.circular(16),
+                ),
+                depth: 5,
+                intensity: 0.75,
+              ),
+              child: NeumorphicButton(
+                padding: EdgeInsets.zero,
+                child: Container(
+                  height: 50,
+                  width: 100,
+                  child: Center(
+                    child: Text(
+                      'Cancel',
+                      style: AppTextStyles().secondaryStyle.copyWith(
+                            color: Colors.red,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(
+              width: 40,
+            ),
+
+            // save
+            Neumorphic(
+              style: NeumorphicStyle(
+                boxShape: NeumorphicBoxShape.roundRect(
+                  BorderRadius.circular(16),
+                ),
+                depth: 5,
+                intensity: 0.75,
+              ),
+              child: NeumorphicButton(
+                onPressed: () {
+                  Navigator.pop(
+                    context,
+                  );
+                },
+                padding: EdgeInsets.zero,
+                child: Container(
+                  height: 50,
+                  width: 100,
+                  color: Colors.blue,
+                  child: Center(
+                    child: Text(
+                      'Save',
+                      style: AppTextStyles().secondaryStyle.copyWith(
+                            color: Colors.white,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// profile button
+class profileButton extends StatelessWidget {
+  const profileButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Neumorphic(
+      style: NeumorphicStyle(
+        boxShape: NeumorphicBoxShape.circle(),
+      ),
+      child: Container(
+        height: 50,
+        width: 50,
+        child: Image.asset(
+          AppImages.loginimage,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}
