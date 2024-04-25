@@ -534,6 +534,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                 _auth.signInWithGoogle();
                 //signed in with google
                 //google
+                //this should do
               },
               text: 'Sign Up With',
               imagePath: 'assets/images/google.png',
