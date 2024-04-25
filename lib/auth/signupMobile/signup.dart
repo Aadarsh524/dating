@@ -532,6 +532,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
             child: Button(
               onPressed: () {
                 _auth.signInWithGoogle();
+                //signed in with google
               },
               text: 'Sign Up With',
               imagePath: 'assets/images/google.png',
