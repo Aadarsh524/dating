@@ -495,7 +495,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
             child: Button(
               onPressed: () {
                 _register().then((value) {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => const HomePage()));
@@ -531,7 +531,10 @@ class _SignUpMobileState extends State<SignUpMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _auth.signInWithGoogle();
+                _auth.signInWithGoogle().then((value) {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (_) => const HomePage()));
+                });
                 //signed in with google
                 //google
                 //this should do

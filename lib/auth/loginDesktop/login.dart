@@ -1,4 +1,6 @@
 import 'package:dating/auth/signupScreen.dart';
+import 'package:dating/pages/homepage.dart';
+import 'package:dating/services/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -20,8 +22,25 @@ class LoginDesktop extends StatefulWidget {
 class _LoginDesktopState extends State<LoginDesktop> {
   String _selectedLanguage = 'English'; // Initial selected language
   bool _isChecked = false;
-  final TextEditingController _emailcontroller = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  Future<bool> _login() async {
+    String? result = await _authService.signInWithEmailAndPassword(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (result == null) {
+      print('Login Successful');
+      return true;
+      // Login successful, navigate to the next screen or perform any other action
+    } else {
+      print('Login Error: $result');
+      return false;
+      // Login failed, show error message to the user
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +171,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
 
                     SizedBox(
                       child: AppTextField(
-                        inputcontroller: _emailcontroller,
+                        inputcontroller: _emailController,
                         hintText: 'Enter Email',
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
@@ -263,7 +282,24 @@ class _LoginDesktopState extends State<LoginDesktop> {
                     SizedBox(
                       height: 55,
                       child: Button(
-                        onPressed: () {},
+                        onPressed: () {
+                          _login().then((value) {
+                            if (value) {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const HomePage()));
+                            } else {
+                              showDialog(
+                                  context: context,
+                                  builder: (_) {
+                                    return const AlertDialog(
+                                      content: Text('Error Occured'),
+                                    );
+                                  });
+                            }
+                          });
+                        },
                         text: 'Login',
                       ),
                     ),
