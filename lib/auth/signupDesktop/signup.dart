@@ -2,13 +2,11 @@ import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/services/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
-import 'package:dating/utils/images.dart';
+// import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -30,6 +28,7 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
   final TextEditingController _confirmpasswordController =
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+
   Future<void> _register() async {
     String? result = await _auth.registerWithEmailAndPassword(
       email: _emailController.text.trim(),
@@ -40,13 +39,25 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
     );
 
     if (result == null) {
-      // Registration successful, navigate to home page or perform any other action
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const HomePage()));
+      // Registration successful, show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful!'),
+        ),
+      );
+
+      // Navigate to home page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
     } else {
       // Registration failed, show error message
-      // You can display the error message to the user
-      print('Registration error: $result');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Registration error: $result'),
+        ),
+      );
     }
   }
 
@@ -620,12 +631,18 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
                       height: 55,
                       child: Button(
                         onPressed: () {
-                          _register().then((value) {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const HomePage()));
-                          });
+                          bool passwordsMatch = _passwordController.text ==
+                              _confirmpasswordController.text;
+
+                          if (passwordsMatch) {
+                            _register();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Passwords do not match!'),
+                              ),
+                            );
+                          }
                         },
                         text: 'Sign Up',
                       ),
@@ -655,7 +672,25 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
                     SizedBox(
                       height: 55,
                       child: Button(
-                        onPressed: () {},
+                        onPressed: () {
+                          _auth.signInWithGoogle().then((user) {
+                            if (user != null) {
+                              // Sign-in successful, navigate to home page
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const HomePage()));
+                            } else {
+                              // Sign-in canceled or failed, show error message (optional)
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Google Sign-In canceled or failed.'),
+                                ),
+                              );
+                            }
+                          });
+                        },
                         text: 'Sign Up With',
                         imagePath: 'assets/images/google.png',
                       ),

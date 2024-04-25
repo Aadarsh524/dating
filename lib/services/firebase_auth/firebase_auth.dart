@@ -6,7 +6,8 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-   Future<String?> signInWithEmailAndPassword(String email, String password) async {
+  Future<String?> signInWithEmailAndPassword(
+      String email, String password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return null; // No error, login successful
@@ -50,10 +51,11 @@ class AuthService {
     }
   }
 
-    Future<User?> signInWithGoogle() async {
+  Future<User?> signInWithGoogle() async {
     try {
       // Trigger the Google Sign-In flow
-      final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
 
       if (googleSignInAccount != null) {
         // Obtain the GoogleSignInAuthentication object
@@ -67,12 +69,15 @@ class AuthService {
         );
 
         // Sign in to Firebase with the Google credentials
-        final UserCredential userCredential = await _auth.signInWithCredential(credential);
+        final UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
 
+        // Return the user object upon successful sign-in
         return userCredential.user;
       }
 
-      return null; // User canceled Google Sign-In
+      // User canceled Google Sign-In
+      return null;
     } catch (e) {
       print("Google Sign-In Error: $e");
       return null; // Return null if sign-in fails

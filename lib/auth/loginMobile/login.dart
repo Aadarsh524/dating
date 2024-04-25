@@ -1,4 +1,4 @@
-import 'package:dating/auth/signupMobile/signup.dart';
+// import 'package:dating/auth/signupMobile/signup.dart';
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/services/firebase_auth/firebase_auth.dart';
@@ -7,8 +7,6 @@ import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
 class LoginMobile extends StatefulWidget {
@@ -23,6 +21,7 @@ class _LoginMobileState extends State<LoginMobile> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+
   Future<bool> _login() async {
     String? result = await _authService.signInWithEmailAndPassword(
       _emailController.text.trim(),
@@ -30,11 +29,17 @@ class _LoginMobileState extends State<LoginMobile> {
     );
 
     if (result == null) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
       print('Login Successful');
       return true;
       // Login successful, navigate to the next screen or perform any other action
     } else {
-      print('Login Error: $result');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error login: $result'),
+        ),
+      );
       return false;
       // Login failed, show error message to the user
     }
@@ -205,20 +210,7 @@ class _LoginMobileState extends State<LoginMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _login().then((value) {
-                  if (value) {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (_) => const HomePage()));
-                  } else {
-                    showDialog(
-                        context: context,
-                        builder: (_) {
-                          return const AlertDialog(
-                            content: Text('Error Occured'),
-                          );
-                        });
-                  }
-                });
+                _login();
               },
               text: 'Login',
             ),
@@ -252,8 +244,19 @@ class _LoginMobileState extends State<LoginMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _authService.signInWithGoogle().then((value) {
-                  
+                _authService.signInWithGoogle().then((user) {
+                  if (user != null) {
+                    // Sign-in successful, navigate to home page
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (_) => const HomePage()));
+                  } else {
+                    // Sign-in canceled or failed, show error message (optional)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Google Sign-In canceled or failed.'),
+                      ),
+                    );
+                  }
                 });
               },
               text: 'Login With',

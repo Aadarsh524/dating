@@ -6,7 +6,6 @@ import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
 class SignUpMobile extends StatefulWidget {
@@ -17,7 +16,6 @@ class SignUpMobile extends StatefulWidget {
 }
 
 class _SignUpMobileState extends State<SignUpMobile> {
-  final bool _isChecked = false;
   String? selectedGender;
   String _selectedAge = '18'; // Initial age
   final AuthService _auth = AuthService();
@@ -37,13 +35,25 @@ class _SignUpMobileState extends State<SignUpMobile> {
     );
 
     if (result == null) {
-      // Registration successful, navigate to home page or perform any other action
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const HomePage()));
+      // Registration successful, show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful!'),
+        ),
+      );
+
+      // Navigate to home page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
     } else {
       // Registration failed, show error message
-      // You can display the error message to the user
-      print('Registration error: $result');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Registration error: $result'),
+        ),
+      );
     }
   }
 
@@ -494,12 +504,18 @@ class _SignUpMobileState extends State<SignUpMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _register().then((value) {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomePage()));
-                });
+                bool passwordsMatch =
+                    _passwordController.text == _confirmpasswordController.text;
+
+                if (passwordsMatch) {
+                  _register();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Passwords do not match!'),
+                    ),
+                  );
+                }
               },
               text: 'Sign Up',
             ),
@@ -531,13 +547,20 @@ class _SignUpMobileState extends State<SignUpMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _auth.signInWithGoogle().then((value) {
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (_) => const HomePage()));
+                _auth.signInWithGoogle().then((user) {
+                  if (user != null) {
+                    // Sign-in successful, navigate to home page
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (_) => const HomePage()));
+                  } else {
+                    // Sign-in canceled or failed, show error message (optional)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Google Sign-In canceled or failed.'),
+                      ),
+                    );
+                  }
                 });
-                //signed in with google
-                //google
-                //this should do
               },
               text: 'Sign Up With',
               imagePath: 'assets/images/google.png',
