@@ -8,17 +8,17 @@ class AppTextField extends StatefulWidget {
   final bool obscureText;
   final IconData? suffixIcon; // New parameter for suffix icon
   final IconData? prefixIcon;
-final TextEditingController inputcontroller; // New parameter for suffix icon
+  final TextEditingController inputcontroller; // New parameter for suffix icon
 
-   AppTextField({
-    Key? key,
+  const AppTextField({
+    super.key,
     required this.hintText,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
     this.suffixIcon, // Optional suffix icon
     this.prefixIcon,
-      required this.inputcontroller, // Optional suffix icon
-  }) : super(key: key);
+    required this.inputcontroller, // Optional suffix icon
+  });
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -26,7 +26,6 @@ final TextEditingController inputcontroller; // New parameter for suffix icon
 
 class _AppTextFieldState extends State<AppTextField> {
   bool _obscureText = false;
- 
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +39,11 @@ class _AppTextFieldState extends State<AppTextField> {
         lightSource: LightSource.topLeft,
       ),
       drawSurfaceAboveChild: false,
-      child: Container(
+      child: SizedBox(
         height: 55,
         width: double.infinity,
-        child: TextField(
-          controller:widget.inputcontroller,
+        child: TextFormField(
+          controller: widget.inputcontroller,
           keyboardType: widget.keyboardType,
           obscureText: widget.obscureText ? _obscureText : false,
           decoration: InputDecoration(
