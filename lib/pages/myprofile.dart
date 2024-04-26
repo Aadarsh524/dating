@@ -2,7 +2,7 @@
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/settingpage.dart';
-import 'package:dating/services/firebase_auth/firebase_auth.dart';
+import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';

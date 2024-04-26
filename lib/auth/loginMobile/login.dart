@@ -1,7 +1,7 @@
 // import 'package:dating/auth/signupMobile/signup.dart';
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/pages/homepage.dart';
-import 'package:dating/services/firebase_auth/firebase_auth.dart';
+import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';

@@ -1,7 +1,7 @@
 import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/backend/MongoDB/services.dart';
 import 'package:dating/firebase_options.dart';
 import 'package:dating/utils/colors.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -9,6 +9,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await MongoDatabase.connectToDatabase();
   runApp(const MyApp());
 }
 

@@ -1,10 +1,10 @@
+import 'package:dating/backend/MongoDB/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
+  final MongoDatabase mongoDatabase = MongoDatabase();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   Future<String?> signInWithEmailAndPassword(
       String email, String password) async {
@@ -30,12 +30,13 @@ class AuthService {
         password: password,
       );
       // Store additional user information in Firestore
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'email': email,
+
+      await mongoDatabase.sendUserDataToServer({
+        'uid': userCredential.user!.uid,
+        'email': userCredential.user!.email,
         'name': name,
         'gender': gender,
         'age': age,
-        // You can add more fields as needed
       });
 
       // Update user display name
@@ -71,6 +72,17 @@ class AuthService {
         // Sign in to Firebase with the Google credentials
         final UserCredential userCredential =
             await _auth.signInWithCredential(credential);
+
+        // Check if the user is signing in for the first time
+        if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+          await mongoDatabase.sendUserDataToServer({
+            'uid': userCredential.user!.uid,
+            'email': userCredential.user!.email,
+            'name': '',
+            'gender': '',
+            'age': '',
+          });
+        }
 
         // Return the user object upon successful sign-in
         return userCredential.user;
