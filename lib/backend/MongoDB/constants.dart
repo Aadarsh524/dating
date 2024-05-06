@@ -4,4 +4,4 @@ const MONGO_CONN_URL =
 const DATABASE = 'dating';
 const USER_COLLECTION = 'users';
 
-const URI = 'http://localhost:8001/api';
+const URI = 'http://10.0.2.2:8001/api';

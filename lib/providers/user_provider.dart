@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/widgets.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -14,5 +16,6 @@ class UserProvider extends ChangeNotifier {
     _userEmail = email;
     _userID = uid;
     notifyListeners();
+    log("added");
   }
 }
