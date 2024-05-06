@@ -42,6 +42,8 @@ dependencies:
   cloud_firestore: ^4.17.2
   google_sign_in: ^6.2.1
   mongo_dart: ^0.10.1
+  provider: ^6.1.2
+  http: ^1.2.1
 
 dev_dependencies:
   flutter_test:

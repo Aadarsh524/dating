@@ -1,7 +1,6 @@
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/utils/colors.dart';
-import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ChatPage extends StatefulWidget {
@@ -1355,8 +1353,10 @@ class _ChatPageState extends State<ChatPage> {
                             icon: Icon(Icons.add),
                           ),
                           Expanded(
-                              child:
-                                  AppTextField(hintText: 'Type your message',inputcontroller: _message,)),
+                              child: AppTextField(
+                            hintText: 'Type your message',
+                            inputcontroller: _message,
+                          )),
                           ButtonWithLabel(
                             text: null,
                             labelText: null,
