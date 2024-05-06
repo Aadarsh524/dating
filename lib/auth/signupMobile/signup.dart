@@ -48,6 +48,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } else {
+      print(result);
       // Registration failed, show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

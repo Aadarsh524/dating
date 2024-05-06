@@ -1,7 +1,10 @@
+import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
 import 'package:dating/pages/settingpage.dart';
+import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 // import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
@@ -14,6 +17,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +32,7 @@ class _HomePageState extends State<HomePage> {
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +54,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget MobileHome() {
+    String userName = Provider.of<UserProvider>(context).userName;
     return Scaffold(
       body: Column(children: [
         SizedBox(
@@ -218,10 +224,17 @@ class _HomePageState extends State<HomePage> {
                             // profile pic
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ProfilePage()));
+                                _authService.signOut().then((value) =>
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const LoginScreen())
+                                        // Navigator.push(
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //         builder: (context) => ProfilePage()));
+                                        ));
                               },
                               child: Row(
                                 children: [
@@ -420,7 +433,7 @@ class _HomePageState extends State<HomePage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Rehan Ritviz',
+                                        userName,
                                         style: AppTextStyles()
                                             .primaryStyle
                                             .copyWith(fontSize: 14),
@@ -717,6 +730,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget DesktopHome() {
+    String userName = Provider.of<UserProvider>(context).userName;
     return Scaffold(
       body: Column(
         children: [
@@ -743,7 +757,7 @@ class _HomePageState extends State<HomePage> {
                       width: 20,
                     ),
                     Text(
-                      'Dating App',
+                      userName,
                       style: GoogleFonts.poppins(
                         color: AppColors.black,
                         fontSize: 32,

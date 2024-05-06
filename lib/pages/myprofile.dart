@@ -497,7 +497,15 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 children: [
                   ButtonWithLabel(
                     text: null,
-                    onPressed: () {},
+                    onPressed: () {
+                      _authService
+                          .signOut()
+                          .then((value) => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginScreen()),
+                              ));
+                    },
                     icon: Icon(
                       Icons.search,
                     ),

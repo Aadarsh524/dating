@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:dating/auth/signupScreen.dart';
+import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/datamodel/user_model.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
@@ -8,6 +12,7 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class LoginDesktop extends StatefulWidget {
   const LoginDesktop({super.key});
@@ -29,7 +34,30 @@ class _LoginDesktopState extends State<LoginDesktop> {
       _passwordController.text.trim(),
     );
 
-    if (result == null) {
+    if (result != null) {
+      final response = await http.get(
+        Uri.parse(
+            '$URI/user/$result'), // Replace with your API endpoint to fetch user data
+      );
+
+      if (response.statusCode == 200) {
+        // Parse the response and update the currentUser object
+        final Map<String, dynamic> userData = jsonDecode(response.body);
+
+        final UserModel newUser = UserModel(
+          uid: result,
+          name: '',
+          email: '',
+          gender: '',
+        );
+        newUser.name = userData['name'];
+        newUser.email = userData['email'];
+        newUser.gender = userData['gender'];
+      } else {
+        // Handle error when user data retrieval fails
+        print(
+            'Failed to retrieve user data from MongoDB. Error: ${response.statusCode}');
+      }
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const HomePage()));
       print('Login Successful');
