@@ -3,6 +3,7 @@ import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
@@ -14,6 +15,7 @@ import 'package:dating/widgets/navbar.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class MyProfilePage extends StatefulWidget {
   const MyProfilePage({super.key});
@@ -68,11 +70,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -84,7 +86,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back,
                 ),
                 labelText: null,
@@ -114,7 +116,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
         Expanded(
@@ -146,11 +148,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 ),
               ),
               // details
-              SizedBox(
+              const SizedBox(
                 height: 15,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -159,16 +161,16 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Sekar Lia, 25',
+                          '${context.watch<UserProvider>().userName}, 25',
                           style: AppTextStyles().primaryStyle,
                         ),
-                        SizedBox(width: 5),
-                        Icon(Icons.female)
+                        const SizedBox(width: 5),
+                        const Icon(Icons.female)
                       ],
                     ),
 
                     // location and other details
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
 
@@ -178,11 +180,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.location_on_outlined,
                               color: AppColors.secondaryColor,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             Text(
@@ -191,7 +193,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                             )
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
                         // relationship status
@@ -199,32 +201,32 @@ class _MyProfilePageState extends State<MyProfilePage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.female,
                               color: AppColors.secondaryColor,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             Text(
-                              "Male / Single",
+                              context.watch<UserProvider>().gender,
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],
                         ),
 
                         // seeking
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.search,
                               color: AppColors.secondaryColor,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             Text(
@@ -241,14 +243,14 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
               // edit
 
-              SizedBox(
+              const SizedBox(
                 height: 25,
               ),
 
               Container(
                 height: 150,
                 width: double.infinity,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.backgroundColor,
                 ),
                 child: Padding(
@@ -260,7 +262,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       Column(
                         children: [
                           Neumorphic(
-                            style: NeumorphicStyle(
+                            style: const NeumorphicStyle(
                               boxShape: NeumorphicBoxShape.circle(),
                               depth: 5,
                               intensity: 0.75,
@@ -270,14 +272,15 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => SettingPage()));
+                                        builder: (context) =>
+                                            const SettingPage()));
                               },
                               padding: EdgeInsets.zero,
-                              child: Container(
+                              child: SizedBox(
                                 height: 60,
                                 width: 60,
                                 child: Padding(
-                                  padding: EdgeInsets.all(15),
+                                  padding: const EdgeInsets.all(15),
                                   child: SvgPicture.asset(
                                     AppIcons.setting,
                                     height: 20,
@@ -287,7 +290,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               ),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 8,
                           ),
                           Text(
@@ -304,11 +307,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       // chat
                       Column(
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           Neumorphic(
-                            style: NeumorphicStyle(
+                            style: const NeumorphicStyle(
                               boxShape: NeumorphicBoxShape.circle(),
                               depth: 5,
                               intensity: 0.75,
@@ -318,7 +321,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               child: Container(
                                 height: 70,
                                 width: 70,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
                                       Color.fromARGB(255, 33, 39, 93),
@@ -331,7 +334,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                   ),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsets.all(15),
+                                  padding: const EdgeInsets.all(15),
                                   child: SvgPicture.asset(
                                     AppIcons.camera,
                                     height: 20,
@@ -341,7 +344,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               ),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 8,
                           ),
                           Text(
@@ -359,7 +362,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       Column(
                         children: [
                           Neumorphic(
-                            style: NeumorphicStyle(
+                            style: const NeumorphicStyle(
                               boxShape: NeumorphicBoxShape.circle(),
                               depth: 5,
                               intensity: 0.75,
@@ -369,14 +372,15 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => EditInfo()));
+                                        builder: (context) =>
+                                            const EditInfo()));
                               },
                               padding: EdgeInsets.zero,
-                              child: Container(
+                              child: SizedBox(
                                 height: 60,
                                 width: 60,
                                 child: Padding(
-                                  padding: EdgeInsets.all(15),
+                                  padding: const EdgeInsets.all(15),
                                   child: SvgPicture.asset(
                                     AppIcons.edit,
                                     height: 20,
@@ -386,7 +390,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               ),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 8,
                           ),
                           Text(
@@ -412,9 +416,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 width: double.infinity,
                 height: 300,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2, // Number of items per row
                       crossAxisSpacing: 15, // Horizontal spacing between items
                       mainAxisSpacing: 15, // Vertical spacing between rows
@@ -445,7 +450,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
               ),
 
               // about
-              SizedBox(
+              const SizedBox(
                 height: 25,
               ),
             ],
@@ -466,19 +471,19 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // profile
               Row(
                 children: [
-                  profileButton(),
-                  SizedBox(
+                  const profileButton(),
+                  const SizedBox(
                     width: 20,
                   ),
                   Text(
@@ -506,7 +511,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                     builder: (context) => const LoginScreen()),
                               ));
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -520,9 +525,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => SettingPage()));
+                              builder: (context) => const SettingPage()));
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.settings,
                     ),
                     labelText: null,
@@ -533,7 +538,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -547,12 +552,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -567,9 +572,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           text: null,
                           labelText: 'Matches',
                           onPressed: () {},
-                          icon: Icon(Icons.people),
+                          icon: const Icon(Icons.people),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // messages
@@ -577,10 +582,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           text: null,
                           labelText: 'Messages',
                           onPressed: () {},
-                          icon: Icon(Icons.messenger_outline),
+                          icon: const Icon(Icons.messenger_outline),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // popular
@@ -588,9 +593,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           text: null,
                           labelText: 'Popular',
                           onPressed: () {},
-                          icon: Icon(Icons.star),
+                          icon: const Icon(Icons.star),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // photos
@@ -598,10 +603,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           text: null,
                           labelText: 'Photos',
                           onPressed: () {},
-                          icon: Icon(Icons.photo_library_sharp),
+                          icon: const Icon(Icons.photo_library_sharp),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // add friemd
@@ -609,10 +614,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           text: null,
                           labelText: 'Add Friend',
                           onPressed: () {},
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // online
@@ -620,7 +625,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           text: null,
                           labelText: 'Online',
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.circle_outlined,
                             color: Colors.green,
                           ),
@@ -628,7 +633,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       ],
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
 
@@ -639,13 +644,14 @@ class _MyProfilePageState extends State<MyProfilePage> {
                         // seeking
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: seeking,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 seeking = newValue!;
@@ -669,20 +675,21 @@ class _MyProfilePageState extends State<MyProfilePage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // country
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: country,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 country = newValue!;
@@ -706,20 +713,21 @@ class _MyProfilePageState extends State<MyProfilePage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // age
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: age,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 age = newValue!;
@@ -755,7 +763,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -763,10 +771,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
           child: Row(
             children: [
 // side bar
-              NavBarDesktop(),
+              const NavBarDesktop(),
 
 // posts
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Expanded(
@@ -795,7 +803,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               children: [
                                 // profile pic
 
-                                SizedBox(
+                                const SizedBox(
                                   height: 30,
                                 ),
                                 Row(
@@ -833,8 +841,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
 // details
 
                                     Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 20),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -849,13 +857,13 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                 style: AppTextStyles()
                                                     .primaryStyle,
                                               ),
-                                              SizedBox(width: 5),
-                                              Icon(Icons.female)
+                                              const SizedBox(width: 5),
+                                              const Icon(Icons.female)
                                             ],
                                           ),
 
 // location and other details
-                                          SizedBox(
+                                          const SizedBox(
                                             height: 10,
                                           ),
 
@@ -868,12 +876,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                 children: [
-                                                  Icon(
+                                                  const Icon(
                                                     Icons.location_on_outlined,
                                                     color: AppColors
                                                         .secondaryColor,
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                   Text(
@@ -883,7 +891,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                   )
                                                 ],
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 5,
                                               ),
 // relationship status
@@ -892,12 +900,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                 children: [
-                                                  Icon(
+                                                  const Icon(
                                                     Icons.female,
                                                     color: AppColors
                                                         .secondaryColor,
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                   Text(
@@ -909,19 +917,19 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                               ),
 
 // seeking
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 5,
                                               ),
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.start,
                                                 children: [
-                                                  Icon(
+                                                  const Icon(
                                                     Icons.search,
                                                     color: AppColors
                                                         .secondaryColor,
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                   Text(
@@ -939,20 +947,20 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                   ],
                                 ),
 // details
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
 
 // edit
 
-                                SizedBox(
+                                const SizedBox(
                                   height: 25,
                                 ),
 
                                 Container(
                                   height: 150,
                                   width: double.infinity,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: AppColors.backgroundColor,
                                   ),
                                   child: Padding(
@@ -966,7 +974,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                         Column(
                                           children: [
                                             Neumorphic(
-                                              style: NeumorphicStyle(
+                                              style: const NeumorphicStyle(
                                                 boxShape:
                                                     NeumorphicBoxShape.circle(),
                                                 depth: 5,
@@ -974,11 +982,13 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                               ),
                                               child: NeumorphicButton(
                                                 padding: EdgeInsets.zero,
-                                                child: Container(
+                                                child: SizedBox(
                                                   height: 60,
                                                   width: 60,
                                                   child: Padding(
-                                                    padding: EdgeInsets.all(15),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            15),
                                                     child: SvgPicture.asset(
                                                       AppIcons.setting,
                                                       height: 20,
@@ -988,7 +998,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 8,
                                             ),
                                             Text(
@@ -1005,11 +1015,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                         // chat
                                         Column(
                                           children: [
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 10,
                                             ),
                                             Neumorphic(
-                                              style: NeumorphicStyle(
+                                              style: const NeumorphicStyle(
                                                 boxShape:
                                                     NeumorphicBoxShape.circle(),
                                                 depth: 5,
@@ -1020,7 +1030,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                 child: Container(
                                                   height: 70,
                                                   width: 70,
-                                                  decoration: BoxDecoration(
+                                                  decoration:
+                                                      const BoxDecoration(
                                                     gradient: LinearGradient(
                                                       colors: [
                                                         Color.fromARGB(
@@ -1035,7 +1046,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                     ),
                                                   ),
                                                   child: Padding(
-                                                    padding: EdgeInsets.all(15),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            15),
                                                     child: SvgPicture.asset(
                                                       AppIcons.camera,
                                                       height: 20,
@@ -1045,7 +1058,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 8,
                                             ),
                                             Text(
@@ -1063,7 +1076,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                         Column(
                                           children: [
                                             Neumorphic(
-                                              style: NeumorphicStyle(
+                                              style: const NeumorphicStyle(
                                                 boxShape:
                                                     NeumorphicBoxShape.circle(),
                                                 depth: 5,
@@ -1075,14 +1088,16 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                       context,
                                                       MaterialPageRoute(
                                                           builder: (context) =>
-                                                              EditInfo()));
+                                                              const EditInfo()));
                                                 },
                                                 padding: EdgeInsets.zero,
-                                                child: Container(
+                                                child: SizedBox(
                                                   height: 60,
                                                   width: 60,
                                                   child: Padding(
-                                                    padding: EdgeInsets.all(15),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            15),
                                                     child: SvgPicture.asset(
                                                       AppIcons.edit,
                                                       height: 20,
@@ -1092,7 +1107,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 8,
                                             ),
                                             Text(
@@ -1118,11 +1133,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                   width: double.infinity,
                                   height: 900,
                                   child: Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 20),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
                                     child: GridView.builder(
                                       gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount:
                                             4, // Number of items per row
                                         crossAxisSpacing:
@@ -1183,10 +1198,10 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
-      child: Container(
+      child: SizedBox(
         height: 50,
         width: 50,
         child: Image.asset(

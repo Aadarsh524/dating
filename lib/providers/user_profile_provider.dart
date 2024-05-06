@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/widgets.dart';
 
-class UserProvider extends ChangeNotifier {
+class UserProfileProvider extends ChangeNotifier {
   String _userName = '';
   String _userEmail = '';
   String _userID = '';
@@ -20,11 +20,5 @@ class UserProvider extends ChangeNotifier {
     _gender = gender;
     notifyListeners();
     log("added");
-  }
-
-  updateName(String name) {
-    _userName = name;
-    notifyListeners();
-    return _userName;
   }
 }

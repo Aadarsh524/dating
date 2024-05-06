@@ -1,6 +1,8 @@
+import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 // import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -9,6 +11,7 @@ import 'package:dating/widgets/textField.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class SignUpDesktop extends StatefulWidget {
   const SignUpDesktop({super.key});
@@ -29,6 +32,13 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
 
+  Future<void> saveDataLocally() async {
+    DbClient dbClient = DbClient();
+    await dbClient.setData(dbKey: "userName", value: _nameController.text);
+    await dbClient.setData(dbKey: "gender", value: selectedGender!);
+    await dbClient.setData(dbKey: "age", value: _selectedAge);
+  }
+
   Future<void> _register() async {
     String? result = await _auth.registerWithEmailAndPassword(
       email: _emailController.text.trim(),
@@ -40,6 +50,7 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
 
     if (result == null) {
       // Registration successful, show success message
+      saveDataLocally();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration successful!'),
@@ -636,6 +647,10 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
 
                           if (passwordsMatch) {
                             _register();
+                            context.read<UserProvider>().addCurrentUser(
+                                _nameController.text,
+                                _emailController.text,
+                                AuthService().getUid(),selectedGender!);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

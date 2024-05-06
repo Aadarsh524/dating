@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_model.dart';
@@ -59,6 +60,10 @@ class _LoginDesktopState extends State<LoginDesktop> {
         newUser.email = userData['email'];
         newUser.gender = userData['gender'];
         log("desktop");
+         await DbClient().setData(dbKey: "uid", value: result);
+        await DbClient().setData(dbKey: "userName", value: newUser.name);
+        await DbClient().setData(dbKey: "gender", value: newUser.gender);
+        await DbClient().setData(dbKey: "email", value: newUser.email);
         log("userName: ${newUser.name}");
         log("email: ${newUser.email}");
         log("gender: ${newUser.gender}");
