@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_model.dart';
@@ -11,6 +12,12 @@ class AuthService {
   UserProvider userProvider = UserProvider();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  getUid() {
+    User? users = FirebaseAuth.instance.currentUser;
+    return users!.uid;
+  }
+
   Future<String?> signInWithEmailAndPassword(
       String email, String password) async {
     try {
@@ -19,6 +26,7 @@ class AuthService {
         email: email,
         password: password,
       );
+      log("uid:${userCredential.user!.uid}");
       return userCredential.user?.uid;
     } catch (e) {
       return e.toString(); // Return error message if login fails
@@ -45,23 +53,22 @@ class AuthService {
         email: email,
         gender: gender,
       );
+      log(newUser.toString());
 
       // Hit API to store user data in MongoDB
       final response = await http.post(
-        Uri.parse('$URI/user'), // Replace with your API endpoint
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        Uri.parse('$URI/User'), // Replace with your API endpoint
         body: jsonEncode(newUser.toJson()),
       );
+      log(newUser.toJson().toString());
+      log(response.statusCode.toString());
 
-      if (response.statusCode == 200) {
-        print(response.statusCode);
-        print(response.statusCode);
-        print(response.statusCode);
-        print(response.statusCode);
-        print(response.statusCode);
-        print(response.statusCode);
-        print(response.statusCode);
+      if (response.statusCode.toString() == "200") {
         print('User registered and data stored successfully.');
-        userProvider.addCurrentUser(newUser.name, newUser.email, newUser.uid);
       } else {
         print('Failed to register user. Error: ${response.statusCode}');
       }
@@ -113,8 +120,7 @@ class AuthService {
 
           if (response.statusCode == 200) {
             print('User registered and data stored successfully.');
-            userProvider.addCurrentUser(
-                newUser.name, newUser.email, newUser.uid);
+            // userProvider.setCurrentUser(newUser);
           } else {
             print('Failed to register user. Error: ${response.statusCode}');
           }

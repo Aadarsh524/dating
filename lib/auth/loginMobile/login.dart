@@ -1,11 +1,13 @@
 // import 'package:dating/auth/signupMobile/signup.dart';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_model.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -24,7 +26,7 @@ class LoginMobile extends StatefulWidget {
 
 class _LoginMobileState extends State<LoginMobile> {
   User? user = FirebaseAuth.instance.currentUser;
-
+  UserProvider userProvider = UserProvider();
   bool _isChecked = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -38,8 +40,12 @@ class _LoginMobileState extends State<LoginMobile> {
 
     if (result != null) {
       final response = await http.get(
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         Uri.parse(
-            '$URI/user/$result'), // Replace with your API endpoint to fetch user data
+            '$URI/User/$result'), // Replace with your API endpoint to fetch user data
       );
 
       if (response.statusCode == 200) {
@@ -55,6 +61,12 @@ class _LoginMobileState extends State<LoginMobile> {
         newUser.name = userData['name'];
         newUser.email = userData['email'];
         newUser.gender = userData['gender'];
+        log("mobile");
+        log(newUser.toString());
+        log("userName: ${newUser.name}");
+        log("email: ${newUser.email}");
+        log("gender: ${newUser.gender}");
+       
       } else {
         // Handle error when user data retrieval fails
         print(

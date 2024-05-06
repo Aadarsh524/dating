@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/pages/chatpage.dart';
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // final userProvider = Provider.of<UserProvider>(context);
     return SafeArea(
       child: Scaffold(
         body: LayoutBuilder(
@@ -54,14 +57,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget MobileHome() {
-    String userName = Provider.of<UserProvider>(context).userName;
+    final userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -71,9 +74,9 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                         context,
                         CupertinoPageRoute(
-                            builder: (context) => MyProfilePage()));
+                            builder: (context) => const MyProfilePage()));
                   },
-                  child: profileButton()),
+                  child: const profileButton()),
 
               // search icon
               Row(
@@ -81,7 +84,7 @@ class _HomePageState extends State<HomePage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -95,9 +98,9 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => SettingPage()));
+                              builder: (context) => const SettingPage()));
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.settings,
                     ),
                     labelText: null,
@@ -108,7 +111,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -122,12 +125,12 @@ class _HomePageState extends State<HomePage> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.only(left: 20),
+            padding: const EdgeInsets.only(left: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -137,9 +140,9 @@ class _HomePageState extends State<HomePage> {
                   text: null,
                   labelText: 'Matches',
                   onPressed: () {},
-                  icon: Icon(Icons.people),
+                  icon: const Icon(Icons.people),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 15,
                 ),
                 // messages
@@ -147,13 +150,15 @@ class _HomePageState extends State<HomePage> {
                   text: null,
                   labelText: 'Messages',
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ChatPage()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ChatPage()));
                   },
-                  icon: Icon(Icons.messenger_outline),
+                  icon: const Icon(Icons.messenger_outline),
                 ),
 
-                SizedBox(
+                const SizedBox(
                   width: 15,
                 ),
                 // popular
@@ -161,9 +166,9 @@ class _HomePageState extends State<HomePage> {
                   text: null,
                   labelText: 'Popular',
                   onPressed: () {},
-                  icon: Icon(Icons.star),
+                  icon: const Icon(Icons.star),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 15,
                 ),
                 // photos
@@ -171,10 +176,10 @@ class _HomePageState extends State<HomePage> {
                   text: null,
                   labelText: 'Photos',
                   onPressed: () {},
-                  icon: Icon(Icons.photo_library_sharp),
+                  icon: const Icon(Icons.photo_library_sharp),
                 ),
 
-                SizedBox(
+                const SizedBox(
                   width: 15,
                 ),
                 // add friemd
@@ -182,10 +187,10 @@ class _HomePageState extends State<HomePage> {
                   text: null,
                   labelText: 'Add Friend',
                   onPressed: () {},
-                  icon: Icon(Icons.add),
+                  icon: const Icon(Icons.add),
                 ),
 
-                SizedBox(
+                const SizedBox(
                   width: 15,
                 ),
                 // online
@@ -193,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                   text: null,
                   labelText: 'Online',
                   onPressed: () {},
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.circle_outlined,
                     color: Colors.green,
                   ),
@@ -206,7 +211,7 @@ class _HomePageState extends State<HomePage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -217,7 +222,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -247,7 +252,7 @@ class _HomePageState extends State<HomePage> {
                                     child: Container(
                                         height: 50,
                                         width: 50,
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
                                             image: DecorationImage(
                                               image:
@@ -257,7 +262,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
 
                                   // profile name and address
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 20,
                                   ),
                                   Column(
@@ -265,19 +270,19 @@ class _HomePageState extends State<HomePage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Rehan Ritviz',
+                                        context.watch<UserProvider>().userName,
                                         style: AppTextStyles()
                                             .primaryStyle
                                             .copyWith(fontSize: 14),
                                       ),
                                       Row(
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.circle,
                                             size: 8,
                                             color: AppColors.secondaryColor,
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             width: 10,
                                           ),
                                           Text(
@@ -300,12 +305,12 @@ class _HomePageState extends State<HomePage> {
 
                             Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.circle,
                                   size: 8,
                                   color: Colors.green,
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 5,
                                 ),
                                 Text(
@@ -322,7 +327,7 @@ class _HomePageState extends State<HomePage> {
                           ]),
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     // image
@@ -334,7 +339,7 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.grey.withOpacity(0.25),
                               // spreadRadius: 5,
                               blurRadius: 20,
-                              offset: Offset(
+                              offset: const Offset(
                                   0, 25), // horizontal and vertical offset
                             ),
                           ],
@@ -373,7 +378,7 @@ class _HomePageState extends State<HomePage> {
                                     Icon(Icons.ios_share_outlined),
                                   ]),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                           ],
@@ -384,7 +389,7 @@ class _HomePageState extends State<HomePage> {
 
               //  another post
 
-              SizedBox(
+              const SizedBox(
                 height: 50,
               ),
 
@@ -392,7 +397,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -402,7 +407,8 @@ class _HomePageState extends State<HomePage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ProfilePage()));
+                                        builder: (context) =>
+                                            const ProfilePage()));
                               },
                               child: Row(
                                 children: [
@@ -415,7 +421,7 @@ class _HomePageState extends State<HomePage> {
                                     child: Container(
                                         height: 50,
                                         width: 50,
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
                                             image: DecorationImage(
                                               image:
@@ -425,7 +431,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
 
                                   // profile name and address
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 20,
                                   ),
                                   Column(
@@ -433,19 +439,19 @@ class _HomePageState extends State<HomePage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        userName,
+                                        "Rehan Ritviz",
                                         style: AppTextStyles()
                                             .primaryStyle
                                             .copyWith(fontSize: 14),
                                       ),
                                       Row(
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.circle,
                                             size: 8,
                                             color: AppColors.secondaryColor,
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             width: 10,
                                           ),
                                           Text(
@@ -468,12 +474,12 @@ class _HomePageState extends State<HomePage> {
 
                             Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.circle,
                                   size: 8,
                                   color: Colors.green,
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 5,
                                 ),
                                 Text(
@@ -490,7 +496,7 @@ class _HomePageState extends State<HomePage> {
                           ]),
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     // image
@@ -502,7 +508,7 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.grey.withOpacity(0.25),
                               // spreadRadius: 5,
                               blurRadius: 20,
-                              offset: Offset(
+                              offset: const Offset(
                                   0, 25), // horizontal and vertical offset
                             ),
                           ],
@@ -541,7 +547,7 @@ class _HomePageState extends State<HomePage> {
                                     Icon(Icons.ios_share_outlined),
                                   ]),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                           ],
@@ -554,7 +560,7 @@ class _HomePageState extends State<HomePage> {
 
               //  another post
 
-              SizedBox(
+              const SizedBox(
                 height: 50,
               ),
 
@@ -562,7 +568,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -572,7 +578,8 @@ class _HomePageState extends State<HomePage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ProfilePage()));
+                                        builder: (context) =>
+                                            const ProfilePage()));
                               },
                               child: Row(
                                 children: [
@@ -585,7 +592,7 @@ class _HomePageState extends State<HomePage> {
                                     child: Container(
                                         height: 50,
                                         width: 50,
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
                                             image: DecorationImage(
                                               image:
@@ -595,7 +602,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
 
                                   // profile name and address
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 20,
                                   ),
                                   Column(
@@ -610,12 +617,12 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                       Row(
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.circle,
                                             size: 8,
                                             color: AppColors.secondaryColor,
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             width: 10,
                                           ),
                                           Text(
@@ -638,12 +645,12 @@ class _HomePageState extends State<HomePage> {
 
                             Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.circle,
                                   size: 8,
                                   color: Colors.green,
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 5,
                                 ),
                                 Text(
@@ -660,7 +667,7 @@ class _HomePageState extends State<HomePage> {
                           ]),
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     // image
@@ -672,7 +679,7 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.grey.withOpacity(0.25),
                               // spreadRadius: 5,
                               blurRadius: 20,
-                              offset: Offset(
+                              offset: const Offset(
                                   0, 25), // horizontal and vertical offset
                             ),
                           ],
@@ -711,7 +718,7 @@ class _HomePageState extends State<HomePage> {
                                     Icon(Icons.ios_share_outlined),
                                   ]),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                           ],
@@ -725,20 +732,19 @@ class _HomePageState extends State<HomePage> {
           ),
         )
       ]),
-      bottomSheet: NavBar(),
+      bottomSheet: const NavBar(),
     );
   }
 
   Widget DesktopHome() {
-    String userName = Provider.of<UserProvider>(context).userName;
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -750,14 +756,14 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => MyProfilePage()));
+                                  builder: (context) => const MyProfilePage()));
                         },
-                        child: profileButton()),
-                    SizedBox(
+                        child: const profileButton()),
+                    const SizedBox(
                       width: 20,
                     ),
                     Text(
-                      userName,
+                      "  currentUser!.name",
                       style: GoogleFonts.poppins(
                         color: AppColors.black,
                         fontSize: 32,
@@ -773,7 +779,7 @@ class _HomePageState extends State<HomePage> {
                     ButtonWithLabel(
                       text: null,
                       onPressed: () {},
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.search,
                       ),
                       labelText: null,
@@ -787,9 +793,9 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                             context,
                             CupertinoPageRoute(
-                                builder: (context) => SettingPage()));
+                                builder: (context) => const SettingPage()));
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.settings,
                       ),
                       labelText: null,
@@ -800,7 +806,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          SizedBox(
+          const SizedBox(
             height: 40,
           ),
 
@@ -814,12 +820,12 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.grey.withOpacity(0.25),
                   // spreadRadius: 5,
                   blurRadius: 20,
-                  offset: Offset(0, 25), // horizontal and vertical offset
+                  offset: const Offset(0, 25), // horizontal and vertical offset
                 ),
               ],
             ),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ListView(
                 // physics: NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.horizontal,
@@ -834,9 +840,9 @@ class _HomePageState extends State<HomePage> {
                             text: null,
                             labelText: 'Matches',
                             onPressed: () {},
-                            icon: Icon(Icons.people),
+                            icon: const Icon(Icons.people),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 15,
                           ),
                           // messages
@@ -847,12 +853,12 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                      builder: (context) => ChatPage()));
+                                      builder: (context) => const ChatPage()));
                             },
-                            icon: Icon(Icons.messenger_outline),
+                            icon: const Icon(Icons.messenger_outline),
                           ),
 
-                          SizedBox(
+                          const SizedBox(
                             width: 15,
                           ),
                           // popular
@@ -860,9 +866,9 @@ class _HomePageState extends State<HomePage> {
                             text: null,
                             labelText: 'Popular',
                             onPressed: () {},
-                            icon: Icon(Icons.star),
+                            icon: const Icon(Icons.star),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 15,
                           ),
                           // photos
@@ -870,10 +876,10 @@ class _HomePageState extends State<HomePage> {
                             text: null,
                             labelText: 'Photos',
                             onPressed: () {},
-                            icon: Icon(Icons.photo_library_sharp),
+                            icon: const Icon(Icons.photo_library_sharp),
                           ),
 
-                          SizedBox(
+                          const SizedBox(
                             width: 15,
                           ),
                           // add friemd
@@ -881,10 +887,10 @@ class _HomePageState extends State<HomePage> {
                             text: null,
                             labelText: 'Add Friend',
                             onPressed: () {},
-                            icon: Icon(Icons.add),
+                            icon: const Icon(Icons.add),
                           ),
 
-                          SizedBox(
+                          const SizedBox(
                             width: 15,
                           ),
                           // online
@@ -892,7 +898,7 @@ class _HomePageState extends State<HomePage> {
                             text: null,
                             labelText: 'Online',
                             onPressed: () {},
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.circle_outlined,
                               color: Colors.green,
                             ),
@@ -900,7 +906,7 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
 
-                      SizedBox(
+                      const SizedBox(
                         width: 100,
                       ),
 
@@ -911,14 +917,14 @@ class _HomePageState extends State<HomePage> {
                           // seeking
 
                           Neumorphic(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 2),
                             child: DropdownButton<String>(
                               underline: Container(),
                               style: AppTextStyles().secondaryStyle,
                               value: seeking,
-                              icon:
-                                  Icon(Icons.arrow_drop_down), // Dropdown icon
+                              icon: const Icon(
+                                  Icons.arrow_drop_down), // Dropdown icon
                               onChanged: (String? newValue) {
                                 setState(() {
                                   seeking = newValue!;
@@ -943,21 +949,21 @@ class _HomePageState extends State<HomePage> {
                               }).toList(),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 50,
                           ),
 
                           // country
 
                           Neumorphic(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 2),
                             child: DropdownButton<String>(
                               underline: Container(),
                               style: AppTextStyles().secondaryStyle,
                               value: country,
-                              icon:
-                                  Icon(Icons.arrow_drop_down), // Dropdown icon
+                              icon: const Icon(
+                                  Icons.arrow_drop_down), // Dropdown icon
                               onChanged: (String? newValue) {
                                 setState(() {
                                   country = newValue!;
@@ -982,21 +988,21 @@ class _HomePageState extends State<HomePage> {
                               }).toList(),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 50,
                           ),
 
                           // age
 
                           Neumorphic(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 2),
                             child: DropdownButton<String>(
                               underline: Container(),
                               style: AppTextStyles().secondaryStyle,
                               value: age,
-                              icon:
-                                  Icon(Icons.arrow_drop_down), // Dropdown icon
+                              icon: const Icon(
+                                  Icons.arrow_drop_down), // Dropdown icon
                               onChanged: (String? newValue) {
                                 setState(() {
                                   age = newValue!;
@@ -1033,7 +1039,7 @@ class _HomePageState extends State<HomePage> {
           //
 
           // post
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
 
@@ -1041,10 +1047,10 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               children: [
 // side bar
-                NavBarDesktop(),
+                const NavBarDesktop(),
 
 // posts
-                SizedBox(
+                const SizedBox(
                   width: 20,
                 ),
                 Expanded(
@@ -1064,16 +1070,16 @@ class _HomePageState extends State<HomePage> {
                           )
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 30,
                       ),
                       Expanded(
                         child: GridView.builder(
                           physics:
-                              AlwaysScrollableScrollPhysics(), // Allow vertical scrolling
+                              const AlwaysScrollableScrollPhysics(), // Allow vertical scrolling
                           itemCount: 20, // Total number of children
                           gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             mainAxisSpacing: 20,
                             crossAxisCount: 3, // 3 items per row
                           ),
@@ -1088,11 +1094,11 @@ class _HomePageState extends State<HomePage> {
                                   width: 380,
                                   child: Column(
                                     children: [
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 30,
                                       ),
                                       Padding(
-                                        padding: EdgeInsets.symmetric(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 20),
                                         child: Row(
                                             mainAxisAlignment:
@@ -1105,7 +1111,7 @@ class _HomePageState extends State<HomePage> {
                                                       context,
                                                       CupertinoPageRoute(
                                                           builder: (context) =>
-                                                              ProfilePage()));
+                                                              const ProfilePage()));
                                                 },
                                                 child: Row(
                                                   children: [
@@ -1122,7 +1128,7 @@ class _HomePageState extends State<HomePage> {
                                                           height: 50,
                                                           width: 50,
                                                           decoration:
-                                                              BoxDecoration(
+                                                              const BoxDecoration(
                                                                   shape: BoxShape
                                                                       .circle,
                                                                   image:
@@ -1136,7 +1142,7 @@ class _HomePageState extends State<HomePage> {
                                                     ),
 
                                                     // profile name and address
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 20,
                                                     ),
                                                     Column(
@@ -1153,13 +1159,13 @@ class _HomePageState extends State<HomePage> {
                                                         ),
                                                         Row(
                                                           children: [
-                                                            Icon(
+                                                            const Icon(
                                                               Icons.circle,
                                                               size: 8,
                                                               color: AppColors
                                                                   .secondaryColor,
                                                             ),
-                                                            SizedBox(
+                                                            const SizedBox(
                                                               width: 10,
                                                             ),
                                                             Text(
@@ -1185,12 +1191,12 @@ class _HomePageState extends State<HomePage> {
 
                                               Row(
                                                 children: [
-                                                  Icon(
+                                                  const Icon(
                                                     Icons.circle,
                                                     size: 8,
                                                     color: Colors.green,
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 5,
                                                   ),
                                                   Text(
@@ -1209,7 +1215,7 @@ class _HomePageState extends State<HomePage> {
                                             ]),
                                       ),
 
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 20,
                                       ),
                                       // image
@@ -1222,7 +1228,7 @@ class _HomePageState extends State<HomePage> {
                                                     .withOpacity(0.25),
                                                 // spreadRadius: 5,
                                                 blurRadius: 20,
-                                                offset: Offset(0,
+                                                offset: const Offset(0,
                                                     25), // horizontal and vertical offset
                                               ),
                                             ],
@@ -1269,7 +1275,7 @@ class _HomePageState extends State<HomePage> {
                                                           .ios_share_outlined),
                                                     ]),
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 10,
                                               ),
                                             ],
@@ -1307,10 +1313,10 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
-      child: Container(
+      child: SizedBox(
         height: 50,
         width: 50,
         child: Image.asset(

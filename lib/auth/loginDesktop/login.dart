@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
@@ -36,8 +37,12 @@ class _LoginDesktopState extends State<LoginDesktop> {
 
     if (result != null) {
       final response = await http.get(
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         Uri.parse(
-            '$URI/user/$result'), // Replace with your API endpoint to fetch user data
+            '$URI/User/$result'), // Replace with your API endpoint to fetch user data
       );
 
       if (response.statusCode == 200) {
@@ -53,6 +58,10 @@ class _LoginDesktopState extends State<LoginDesktop> {
         newUser.name = userData['name'];
         newUser.email = userData['email'];
         newUser.gender = userData['gender'];
+        log("desktop");
+        log("userName: ${newUser.name}");
+        log("email: ${newUser.email}");
+        log("gender: ${newUser.gender}");
       } else {
         // Handle error when user data retrieval fails
         print(
