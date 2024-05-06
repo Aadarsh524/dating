@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget MobileHome() {
-    final userProvider = Provider.of<UserProvider>(context);
+    
     return Scaffold(
       body: Column(children: [
         const SizedBox(

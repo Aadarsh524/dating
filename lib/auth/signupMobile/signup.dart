@@ -1,3 +1,4 @@
+import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
@@ -27,6 +28,13 @@ class _SignUpMobileState extends State<SignUpMobile> {
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
 
+  Future<void> saveDataLocally() async {
+    DbClient dbClient = DbClient();
+    await dbClient.setData(dbKey: "userName", value: _nameController.text);
+    await dbClient.setData(dbKey: "gender", value: selectedGender!);
+    await dbClient.setData(dbKey: "age", value: _selectedAge);
+  }
+
   Future<void> _register() async {
     String? result = await _auth.registerWithEmailAndPassword(
       email: _emailController.text.trim(),
@@ -38,6 +46,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
 
     if (result == null) {
       // Registration successful, show success message
+      saveDataLocally();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration successful!'),
@@ -506,16 +515,17 @@ class _SignUpMobileState extends State<SignUpMobile> {
           child: SizedBox(
             height: 55,
             child: Button(
-              onPressed: () async{
+              onPressed: () {
                 bool passwordsMatch =
                     _passwordController.text == _confirmpasswordController.text;
 
                 if (passwordsMatch) {
-                 await _register();
+                  _register();
                   context.read<UserProvider>().addCurrentUser(
                       _nameController.text,
                       _emailController.text,
-                      AuthService().getUid());
+                      AuthService().getUid(),
+                      selectedGender!);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

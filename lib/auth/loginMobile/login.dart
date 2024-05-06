@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_model.dart';
@@ -16,6 +17,7 @@ import 'package:dating/widgets/textField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class LoginMobile extends StatefulWidget {
   const LoginMobile({super.key});
@@ -31,6 +33,14 @@ class _LoginMobileState extends State<LoginMobile> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+
+  Future<void> getLocalData() async {
+    String userName = await DbClient().getData(dbKey: "userName");
+    String email = await DbClient().getData(dbKey: "email");
+    String uid = await DbClient().getData(dbKey: "uid");
+    String gender = await DbClient().getData(dbKey: "gender");
+    context.read<UserProvider>().addCurrentUser(userName, email, uid,gender);
+  }
 
   Future<bool> _login() async {
     String? result = await _authService.signInWithEmailAndPassword(
@@ -62,19 +72,19 @@ class _LoginMobileState extends State<LoginMobile> {
         newUser.email = userData['email'];
         newUser.gender = userData['gender'];
         log("mobile");
-        log(newUser.toString());
-        log("userName: ${newUser.name}");
-        log("email: ${newUser.email}");
-        log("gender: ${newUser.gender}");
-       
+        //save the data locally
+        await DbClient().setData(dbKey: "uid", value: result);
+        await DbClient().setData(dbKey: "userName", value: newUser.name);
+        await DbClient().setData(dbKey: "gender", value: newUser.gender);
+        await DbClient().setData(dbKey: "email", value: newUser.email);
+        String uid = await DbClient().getData(dbKey: "uid");
+        log("UID:$uid");
       } else {
         // Handle error when user data retrieval fails
         print(
             'Failed to retrieve user data from MongoDB. Error: ${response.statusCode}');
       }
 
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const HomePage()));
       print('Login Successful');
       return true;
       // Login successful, navigate to the next screen or perform any other action
@@ -254,7 +264,15 @@ class _LoginMobileState extends State<LoginMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _login();
+                _login().then((value) {
+                  if (value) {
+                    getLocalData();
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HomePage()));
+                  }
+                });
               },
               text: 'Login',
             ),

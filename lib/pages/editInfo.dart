@@ -1,5 +1,6 @@
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/myprofile.dart';
+import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class EditInfo extends StatefulWidget {
   const EditInfo({super.key});
@@ -23,22 +25,22 @@ class EditInfo extends StatefulWidget {
 
 class _EditInfoState extends State<EditInfo> {
   // for name
-  TextEditingController _controllerName = TextEditingController();
-  String _textName = 'Pankaj subedi';
+  final TextEditingController _controllerName = TextEditingController();
+
   bool _isEditingName = false;
 
   // for address
-  TextEditingController _controllerAddress = TextEditingController();
+  final TextEditingController _controllerAddress = TextEditingController();
   String _textAddress = 'Nepal, Kathmandu';
   bool _isEditingAddress = false;
 
 // for address
-  TextEditingController _controllerBio = TextEditingController();
+  final TextEditingController _controllerBio = TextEditingController();
   String _textBio = 'I value honesty,\nkindness, and a good\nsense of humor.';
   bool _isEditingBio = false;
 
 // for address
-  TextEditingController _controllerInterests = TextEditingController();
+  final TextEditingController _controllerInterests = TextEditingController();
   String _textInterests = 'Singing, Dancing, Cooking';
   bool _isEditingInterests = false;
 
@@ -81,14 +83,15 @@ class _EditInfoState extends State<EditInfo> {
       AppImages.profile,
       // Small photo 3
     ];
+    String textName = context.watch<UserProvider>().userName;
 
     return Scaffold(
       body: ListView(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -100,7 +103,7 @@ class _EditInfoState extends State<EditInfo> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back,
                 ),
                 labelText: null,
@@ -118,14 +121,14 @@ class _EditInfoState extends State<EditInfo> {
                   Navigator.push(
                     context,
                     CupertinoPageRoute(
-                      builder: (context) => MyProfilePage(),
+                      builder: (context) => const MyProfilePage(),
                     ),
                   );
                 },
                 child: Text(
                   'View',
                   style: GoogleFonts.poppins(
-                    color: Color(0xFF707070),
+                    color: const Color(0xFF707070),
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                     height: 0,
@@ -135,7 +138,7 @@ class _EditInfoState extends State<EditInfo> {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
         SizedBox(
@@ -154,12 +157,12 @@ class _EditInfoState extends State<EditInfo> {
                 width: 200,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(1000),
-                  image: DecorationImage(
+                  image: const DecorationImage(
                     image: AssetImage(AppImages.profile),
                     fit: BoxFit.cover,
                   ),
                 ),
-                padding: EdgeInsets.all(60),
+                padding: const EdgeInsets.all(60),
                 child: SvgPicture.asset(
                   AppIcons.editphoto,
                   fit: BoxFit.cover,
@@ -170,7 +173,7 @@ class _EditInfoState extends State<EditInfo> {
         ),
 // details
 
-        SizedBox(
+        const SizedBox(
           height: 25,
         ),
 
@@ -188,12 +191,12 @@ class _EditInfoState extends State<EditInfo> {
                     ),
               ),
 
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               // seperator
               Container(
-                decoration: ShapeDecoration(
+                decoration: const ShapeDecoration(
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
                       width: 0.50,
@@ -203,7 +206,7 @@ class _EditInfoState extends State<EditInfo> {
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 6,
               ),
               // text about
@@ -223,7 +226,7 @@ class _EditInfoState extends State<EditInfo> {
                   Expanded(
                     child: _isEditingName
                         ? TextField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                                 border: UnderlineInputBorder(
                               borderSide: BorderSide.none,
                             )),
@@ -231,11 +234,11 @@ class _EditInfoState extends State<EditInfo> {
                             controller: _controllerName,
                             autofocus: true,
                           )
-                        : Text(_textName,
+                        : Text(textName,
                             style: AppTextStyles().secondaryStyle),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.edit,
                       size: 20,
                       color: AppColors.secondaryColor,
@@ -243,20 +246,21 @@ class _EditInfoState extends State<EditInfo> {
                     onPressed: () {
                       setState(() {
                         _isEditingName = true;
-                        _controllerName.text = _textName;
+                        _controllerName.text =
+                            context.read<UserProvider>().updateName(_controllerName.text);
                       });
                     },
                   ),
                   if (_isEditingName)
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.save,
                         size: 20,
                         color: AppColors.secondaryColor,
                       ),
                       onPressed: () {
                         setState(() {
-                          _textName = _controllerName.text;
+                          textName = _controllerName.text;
                           _isEditingName = false;
                         });
                       },
@@ -281,7 +285,7 @@ class _EditInfoState extends State<EditInfo> {
                   Expanded(
                     child: _isEditingAddress
                         ? TextField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                                 border: UnderlineInputBorder(
                               borderSide: BorderSide.none,
                             )),
@@ -293,7 +297,7 @@ class _EditInfoState extends State<EditInfo> {
                             style: AppTextStyles().secondaryStyle),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.edit,
                       size: 20,
                       color: AppColors.secondaryColor,
@@ -307,7 +311,7 @@ class _EditInfoState extends State<EditInfo> {
                   ),
                   if (_isEditingAddress)
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.save,
                         size: 20,
                         color: AppColors.secondaryColor,
@@ -339,7 +343,7 @@ class _EditInfoState extends State<EditInfo> {
                   Expanded(
                     child: _isEditingBio
                         ? TextField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                                 border: UnderlineInputBorder(
                               borderSide: BorderSide.none,
                             )),
@@ -350,7 +354,7 @@ class _EditInfoState extends State<EditInfo> {
                         : Text(_textBio, style: AppTextStyles().secondaryStyle),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.edit,
                       size: 20,
                       color: AppColors.secondaryColor,
@@ -364,7 +368,7 @@ class _EditInfoState extends State<EditInfo> {
                   ),
                   if (_isEditingBio)
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.save,
                         size: 20,
                         color: AppColors.secondaryColor,
@@ -383,7 +387,7 @@ class _EditInfoState extends State<EditInfo> {
         ),
 
         // mored details
-        SizedBox(
+        const SizedBox(
           height: 25,
         ),
 
@@ -398,12 +402,12 @@ class _EditInfoState extends State<EditInfo> {
                   ),
             ),
 
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             // seperator
             Container(
-              decoration: ShapeDecoration(
+              decoration: const ShapeDecoration(
                 shape: RoundedRectangleBorder(
                   side: BorderSide(
                     width: 0.50,
@@ -413,7 +417,7 @@ class _EditInfoState extends State<EditInfo> {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 6,
             ),
             // text about
@@ -433,7 +437,7 @@ class _EditInfoState extends State<EditInfo> {
                 Expanded(
                   child: _isEditingInterests
                       ? TextField(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                               border: UnderlineInputBorder(
                             borderSide: BorderSide.none,
                           )),
@@ -445,7 +449,7 @@ class _EditInfoState extends State<EditInfo> {
                           style: AppTextStyles().secondaryStyle),
                 ),
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.edit,
                     size: 20,
                     color: AppColors.secondaryColor,
@@ -459,7 +463,7 @@ class _EditInfoState extends State<EditInfo> {
                 ),
                 if (_isEditingInterests)
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.save,
                       size: 20,
                       color: AppColors.secondaryColor,
@@ -475,7 +479,7 @@ class _EditInfoState extends State<EditInfo> {
             ),
           ]),
         ),
-        SizedBox(
+        const SizedBox(
           height: 50,
         ),
         // images
@@ -484,9 +488,9 @@ class _EditInfoState extends State<EditInfo> {
           width: double.infinity,
           height: 400,
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, // Number of items per row
                 crossAxisSpacing: 15, // Horizontal spacing between items
                 mainAxisSpacing: 15, // Vertical spacing between rows
@@ -523,7 +527,7 @@ class _EditInfoState extends State<EditInfo> {
                                 .removeAt(index); // Remove photo from the list
                           });
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.delete,
                           color: Colors.red,
                         ),
@@ -537,14 +541,14 @@ class _EditInfoState extends State<EditInfo> {
         ),
 
         // about
-        SizedBox(
+        const SizedBox(
           height: 25,
         ),
       ]),
       bottomSheet: Container(
         height: 60,
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.backgroundColor,
         ),
         child: Row(
@@ -561,7 +565,7 @@ class _EditInfoState extends State<EditInfo> {
               ),
               child: NeumorphicButton(
                 padding: EdgeInsets.zero,
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 100,
                   child: Center(
@@ -616,22 +620,23 @@ class _EditInfoState extends State<EditInfo> {
       AppImages.profile,
       // Small photo 3
     ];
+    String textName = context.watch<UserProvider>().userName;
 
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // profile
               Row(
                 children: [
-                  profileButton(),
-                  SizedBox(
+                  const profileButton(),
+                  const SizedBox(
                     width: 20,
                   ),
                   Text(
@@ -651,7 +656,7 @@ class _EditInfoState extends State<EditInfo> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -662,7 +667,7 @@ class _EditInfoState extends State<EditInfo> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.settings,
                     ),
                     labelText: null,
@@ -673,7 +678,7 @@ class _EditInfoState extends State<EditInfo> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -687,12 +692,12 @@ class _EditInfoState extends State<EditInfo> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -707,9 +712,9 @@ class _EditInfoState extends State<EditInfo> {
                           text: null,
                           labelText: 'Matches',
                           onPressed: () {},
-                          icon: Icon(Icons.people),
+                          icon: const Icon(Icons.people),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // messages
@@ -717,10 +722,10 @@ class _EditInfoState extends State<EditInfo> {
                           text: null,
                           labelText: 'Messages',
                           onPressed: () {},
-                          icon: Icon(Icons.messenger_outline),
+                          icon: const Icon(Icons.messenger_outline),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // popular
@@ -728,9 +733,9 @@ class _EditInfoState extends State<EditInfo> {
                           text: null,
                           labelText: 'Popular',
                           onPressed: () {},
-                          icon: Icon(Icons.star),
+                          icon: const Icon(Icons.star),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // photos
@@ -738,10 +743,10 @@ class _EditInfoState extends State<EditInfo> {
                           text: null,
                           labelText: 'Photos',
                           onPressed: () {},
-                          icon: Icon(Icons.photo_library_sharp),
+                          icon: const Icon(Icons.photo_library_sharp),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // add friemd
@@ -749,10 +754,10 @@ class _EditInfoState extends State<EditInfo> {
                           text: null,
                           labelText: 'Add Friend',
                           onPressed: () {},
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // online
@@ -760,7 +765,7 @@ class _EditInfoState extends State<EditInfo> {
                           text: null,
                           labelText: 'Online',
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.circle_outlined,
                             color: Colors.green,
                           ),
@@ -768,7 +773,7 @@ class _EditInfoState extends State<EditInfo> {
                       ],
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
 
@@ -779,13 +784,14 @@ class _EditInfoState extends State<EditInfo> {
                         // seeking
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: seeking,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 seeking = newValue!;
@@ -809,20 +815,21 @@ class _EditInfoState extends State<EditInfo> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // country
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: country,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 country = newValue!;
@@ -846,20 +853,21 @@ class _EditInfoState extends State<EditInfo> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // age
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: age,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 age = newValue!;
@@ -895,7 +903,7 @@ class _EditInfoState extends State<EditInfo> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -903,10 +911,10 @@ class _EditInfoState extends State<EditInfo> {
           child: Row(
             children: [
 // side bar
-              NavBarDesktop(),
+              const NavBarDesktop(),
 
 // posts
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Expanded(
@@ -937,7 +945,7 @@ class _EditInfoState extends State<EditInfo> {
                               children: [
                                 // profile pic
 
-                                SizedBox(
+                                const SizedBox(
                                   height: 30,
                                 ),
                                 Row(
@@ -970,13 +978,15 @@ class _EditInfoState extends State<EditInfo> {
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             1000),
-                                                    image: DecorationImage(
+                                                    image:
+                                                        const DecorationImage(
                                                       image: AssetImage(
                                                           AppImages.profile),
                                                       fit: BoxFit.cover,
                                                     ),
                                                   ),
-                                                  padding: EdgeInsets.all(60),
+                                                  padding:
+                                                      const EdgeInsets.all(60),
                                                   child: SvgPicture.asset(
                                                     AppIcons.editphoto,
                                                     fit: BoxFit.cover,
@@ -985,18 +995,19 @@ class _EditInfoState extends State<EditInfo> {
                                               ),
                                             ),
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             height: 100,
                                           ),
                                           SizedBox(
                                             width: double.infinity,
                                             height: 900,
                                             child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 20),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20),
                                               child: GridView.builder(
                                                 gridDelegate:
-                                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                                    const SliverGridDelegateWithFixedCrossAxisCount(
                                                   crossAxisCount:
                                                       3, // Number of items per row
                                                   crossAxisSpacing:
@@ -1048,7 +1059,7 @@ class _EditInfoState extends State<EditInfo> {
                                                                       index); // Remove photo from the list
                                                             });
                                                           },
-                                                          icon: Icon(
+                                                          icon: const Icon(
                                                             Icons.delete,
                                                             color: Colors.red,
                                                           ),
@@ -1068,7 +1079,7 @@ class _EditInfoState extends State<EditInfo> {
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: EdgeInsets.symmetric(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 20),
                                         child: Column(
                                           crossAxisAlignment:
@@ -1084,12 +1095,12 @@ class _EditInfoState extends State<EditInfo> {
                                                   ),
                                             ),
 
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 10,
                                             ),
                                             // seperator
                                             Container(
-                                              decoration: ShapeDecoration(
+                                              decoration: const ShapeDecoration(
                                                 shape: RoundedRectangleBorder(
                                                   side: BorderSide(
                                                     width: 0.50,
@@ -1100,7 +1111,7 @@ class _EditInfoState extends State<EditInfo> {
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 6,
                                             ),
                                             // text about
@@ -1125,7 +1136,7 @@ class _EditInfoState extends State<EditInfo> {
                                                     ? Expanded(
                                                         child: TextField(
                                                           decoration:
-                                                              InputDecoration(
+                                                              const InputDecoration(
                                                                   border:
                                                                       UnderlineInputBorder(
                                                             borderSide:
@@ -1138,11 +1149,11 @@ class _EditInfoState extends State<EditInfo> {
                                                           autofocus: true,
                                                         ),
                                                       )
-                                                    : Text(_textName,
+                                                    : Text(textName,
                                                         style: AppTextStyles()
                                                             .secondaryStyle),
                                                 IconButton(
-                                                  icon: Icon(
+                                                  icon: const Icon(
                                                     Icons.edit,
                                                     size: 20,
                                                     color: AppColors
@@ -1152,13 +1163,13 @@ class _EditInfoState extends State<EditInfo> {
                                                     setState(() {
                                                       _isEditingName = true;
                                                       _controllerName.text =
-                                                          _textName;
+                                                          textName;
                                                     });
                                                   },
                                                 ),
                                                 if (_isEditingName)
                                                   IconButton(
-                                                    icon: Icon(
+                                                    icon: const Icon(
                                                       Icons.save,
                                                       size: 20,
                                                       color: AppColors
@@ -1166,7 +1177,7 @@ class _EditInfoState extends State<EditInfo> {
                                                     ),
                                                     onPressed: () {
                                                       setState(() {
-                                                        _textName =
+                                                        textName =
                                                             _controllerName
                                                                 .text;
                                                         _isEditingName = false;
@@ -1198,7 +1209,7 @@ class _EditInfoState extends State<EditInfo> {
                                                     ? Expanded(
                                                         child: TextField(
                                                           decoration:
-                                                              InputDecoration(
+                                                              const InputDecoration(
                                                                   border:
                                                                       UnderlineInputBorder(
                                                             borderSide:
@@ -1215,7 +1226,7 @@ class _EditInfoState extends State<EditInfo> {
                                                         style: AppTextStyles()
                                                             .secondaryStyle),
                                                 IconButton(
-                                                  icon: Icon(
+                                                  icon: const Icon(
                                                     Icons.edit,
                                                     size: 20,
                                                     color: AppColors
@@ -1231,7 +1242,7 @@ class _EditInfoState extends State<EditInfo> {
                                                 ),
                                                 if (_isEditingAddress)
                                                   IconButton(
-                                                    icon: Icon(
+                                                    icon: const Icon(
                                                       Icons.save,
                                                       size: 20,
                                                       color: AppColors
@@ -1272,7 +1283,7 @@ class _EditInfoState extends State<EditInfo> {
                                                     ? Expanded(
                                                         child: TextField(
                                                           decoration:
-                                                              InputDecoration(
+                                                              const InputDecoration(
                                                                   border:
                                                                       UnderlineInputBorder(
                                                             borderSide:
@@ -1289,7 +1300,7 @@ class _EditInfoState extends State<EditInfo> {
                                                         style: AppTextStyles()
                                                             .secondaryStyle),
                                                 IconButton(
-                                                  icon: Icon(
+                                                  icon: const Icon(
                                                     Icons.edit,
                                                     size: 20,
                                                     color: AppColors
@@ -1305,7 +1316,7 @@ class _EditInfoState extends State<EditInfo> {
                                                 ),
                                                 if (_isEditingBio)
                                                   IconButton(
-                                                    icon: Icon(
+                                                    icon: const Icon(
                                                       Icons.save,
                                                       size: 20,
                                                       color: AppColors
@@ -1323,7 +1334,7 @@ class _EditInfoState extends State<EditInfo> {
                                             ),
 
                                             // mored details
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 25,
                                             ),
 
@@ -1342,12 +1353,13 @@ class _EditInfoState extends State<EditInfo> {
                                                         ),
                                                   ),
 
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     height: 10,
                                                   ),
                                                   // seperator
                                                   Container(
-                                                    decoration: ShapeDecoration(
+                                                    decoration:
+                                                        const ShapeDecoration(
                                                       shape:
                                                           RoundedRectangleBorder(
                                                         side: BorderSide(
@@ -1360,7 +1372,7 @@ class _EditInfoState extends State<EditInfo> {
                                                       ),
                                                     ),
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     height: 6,
                                                   ),
                                                   // text about
@@ -1386,7 +1398,7 @@ class _EditInfoState extends State<EditInfo> {
                                                           ? Expanded(
                                                               child: TextField(
                                                                 decoration:
-                                                                    InputDecoration(
+                                                                    const InputDecoration(
                                                                         border:
                                                                             UnderlineInputBorder(
                                                                   borderSide:
@@ -1404,7 +1416,7 @@ class _EditInfoState extends State<EditInfo> {
                                                               style: AppTextStyles()
                                                                   .secondaryStyle),
                                                       IconButton(
-                                                        icon: Icon(
+                                                        icon: const Icon(
                                                           Icons.edit,
                                                           size: 20,
                                                           color: AppColors
@@ -1422,7 +1434,7 @@ class _EditInfoState extends State<EditInfo> {
                                                       ),
                                                       if (_isEditingInterests)
                                                         IconButton(
-                                                          icon: Icon(
+                                                          icon: const Icon(
                                                             Icons.save,
                                                             size: 20,
                                                             color: AppColors
@@ -1448,7 +1460,7 @@ class _EditInfoState extends State<EditInfo> {
                                   ],
                                 ),
 // details
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
 
@@ -1468,7 +1480,7 @@ class _EditInfoState extends State<EditInfo> {
       ]),
       bottomSheet: Container(
         height: 70,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.backgroundColor,
         ),
         child: Row(
@@ -1485,7 +1497,7 @@ class _EditInfoState extends State<EditInfo> {
               ),
               child: NeumorphicButton(
                 padding: EdgeInsets.zero,
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 100,
                   child: Center(
@@ -1500,7 +1512,7 @@ class _EditInfoState extends State<EditInfo> {
               ),
             ),
 
-            SizedBox(
+            const SizedBox(
               width: 40,
             ),
 
@@ -1546,10 +1558,10 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
-      child: Container(
+      child: SizedBox(
         height: 50,
         width: 50,
         child: Image.asset(
