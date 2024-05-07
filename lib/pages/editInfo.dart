@@ -1,5 +1,11 @@
-import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/datamodel/user_profile_provider.dart';
 import 'package:dating/pages/myprofile.dart';
+import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
@@ -7,13 +13,13 @@ import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
-import 'package:dating/widgets/textField.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class EditInfo extends StatefulWidget {
@@ -24,36 +30,168 @@ class EditInfo extends StatefulWidget {
 }
 
 class _EditInfoState extends State<EditInfo> {
+  User? user = FirebaseAuth.instance.currentUser;
+
+  String? fileName;
+  PlatformFile? imagefile;
+
   // for name
   final TextEditingController _controllerName = TextEditingController();
-
+  String _textName = 'Your Name';
   bool _isEditingName = false;
 
   // for address
   final TextEditingController _controllerAddress = TextEditingController();
-  String _textAddress = 'Nepal, Kathmandu';
+  String _textAddress = 'Your Address';
   bool _isEditingAddress = false;
 
 // for address
   final TextEditingController _controllerBio = TextEditingController();
-  String _textBio = 'I value honesty,\nkindness, and a good\nsense of humor.';
+  String _textBio = 'Write about yourself';
   bool _isEditingBio = false;
 
 // for address
   final TextEditingController _controllerInterests = TextEditingController();
-  String _textInterests = 'Singing, Dancing, Cooking';
+  String _textInterests = 'list your hobbies';
   bool _isEditingInterests = false;
 
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
 
-  int _selectedPhotoIndex = 0;
+  Uint8List? _imageBytes;
 
-  void _selectPhoto(int index) {
+  @override
+  void initState() {
+    super.initState();
+    // Uint8List imageBytes = base64ToImage(base64String);
+    // Fetch previous data from the provider and initialize text controllers
+    UserProfileProvider userProfileProvider =
+        context.read<UserProfileProvider>();
+    UserProfileModel? currentUserProfile =
+        userProfileProvider.getCurrentUserProfile();
+
+    if (currentUserProfile?.name != null) {
+      _textName = currentUserProfile!.name;
+      _controllerName.text = _textName;
+    }
+
+    if (currentUserProfile?.address != null) {
+      _textAddress = currentUserProfile!.address;
+      _controllerAddress.text = _textAddress;
+    }
+
+    if (currentUserProfile?.bio != null) {
+      _textBio = currentUserProfile!.bio;
+      _controllerBio.text = _textBio;
+    }
+
+    if (currentUserProfile?.interests != null) {
+      _textInterests = currentUserProfile!.interests;
+      _controllerInterests.text = _textInterests;
+    }
+
+    if (currentUserProfile?.image != null) {
+      _imageBytes = base64ToImage(currentUserProfile!.image);
+    } else {
+      _imageBytes = base64ToImage(defaultBase64Avatar);
+    }
+
+    _controllerName.text = _textName;
+    _controllerAddress.text = _textAddress;
+    _controllerBio.text = _textBio;
+    _controllerInterests.text = _textInterests;
+  }
+
+  void _saveChanges() {
+    // Update data in the provider
+    UserProfileProvider userProvider = context.read<UserProfileProvider>();
+
+    _textName = _controllerName.text;
+    _textAddress = _controllerAddress.text;
+    _textBio = _controllerBio.text = _textBio;
+    _textInterests = _controllerInterests.text;
+    userProvider.updateUserProfile(
+      UserProfileModel(
+        name: _textName,
+        address: _textAddress,
+        bio: _textBio,
+        interests: _textInterests,
+        uid: user!.uid,
+        image: '',
+        age: '',
+        gender: '',
+        seeking: {},
+        uploads: [],
+      ),
+    );
+    print(userProvider.currentUser?.name);
+
+    // Exit editing mode
     setState(() {
-      _selectedPhotoIndex = index;
+      _isEditingName = false;
+      _isEditingAddress = false;
+      _isEditingBio = false;
+      _isEditingInterests = false;
     });
+  }
+
+  void _cancelChanges() {
+    // Discard changes and exit editing mode
+    setState(() {
+      _isEditingName = false;
+      _isEditingAddress = false;
+      _isEditingBio = false;
+      _isEditingInterests = false;
+      // Reset text fields to previous values
+      _controllerName.text = _textName;
+      _controllerAddress.text = _textAddress;
+      _controllerBio.text = _textBio;
+      _controllerInterests.text = _textInterests;
+    });
+  }
+
+  void pickImage() async {
+    UserProfileProvider userProvider = context.read<UserProfileProvider>();
+    // Request storage permission if needed
+    final storageStatus = await Permission.storage.request();
+    if (!storageStatus.isGranted) {
+      throw Exception('Storage permission is required to upload the image.');
+    }
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'png', 'jpeg'],
+    );
+
+    // Handle result
+    if (result != null && result.files.isNotEmpty) {
+      File imageFile = File(result.files.single.path!);
+
+      String base64 = convertIntoBase64(imageFile);
+      print(base64);
+      _imageBytes = base64ToImage(base64);
+
+      // Update user profile model with the base64 image
+      userProvider.updateProfileImage(base64, user!.uid);
+    } else {
+      // Handle cases like user canceling the selection or errors
+      print('No image selected.');
+    }
+  }
+
+  String convertIntoBase64(File file) {
+    List<int> imageBytes = file.readAsBytesSync();
+    String base64File = base64Encode(imageBytes);
+    return base64File;
+  }
+
+  String imageToBase64(Uint8List imageBytes) {
+    return base64Encode(imageBytes);
+  }
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
   }
 
   @override
@@ -145,32 +283,38 @@ class _EditInfoState extends State<EditInfo> {
           height: 200,
           width: 200,
           child: Center(
-            child: Neumorphic(
-              style: NeumorphicStyle(
-                boxShape:
-                    NeumorphicBoxShape.roundRect(BorderRadius.circular(1000)),
-                depth: 10,
-                intensity: 0.5,
-              ),
-              child: Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(1000),
-                  image: const DecorationImage(
-                    image: AssetImage(AppImages.profile),
+            child: GestureDetector(
+              onTap: () {
+                pickImage();
+              },
+              child: Neumorphic(
+                style: NeumorphicStyle(
+                  boxShape:
+                      NeumorphicBoxShape.roundRect(BorderRadius.circular(1000)),
+                  depth: 10,
+                  intensity: 0.5,
+                ),
+                child: Container(
+                  height: 200,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(1000),
+                    image: DecorationImage(
+                      image: MemoryImage(_imageBytes!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(60),
+                  child: SvgPicture.asset(
+                    AppIcons.editphoto,
                     fit: BoxFit.cover,
                   ),
-                ),
-                padding: const EdgeInsets.all(60),
-                child: SvgPicture.asset(
-                  AppIcons.editphoto,
-                  fit: BoxFit.cover,
                 ),
               ),
             ),
           ),
         ),
+
 // details
 
         const SizedBox(
@@ -227,44 +371,42 @@ class _EditInfoState extends State<EditInfo> {
                     child: _isEditingName
                         ? TextField(
                             decoration: const InputDecoration(
-                                border: UnderlineInputBorder(
-                              borderSide: BorderSide.none,
-                            )),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
                             style: AppTextStyles().secondaryStyle,
                             controller: _controllerName,
                             autofocus: true,
                           )
-                        : Text(textName,
-                            style: AppTextStyles().secondaryStyle),
+                        : Text(
+                            _textName,
+                            style: AppTextStyles().secondaryStyle,
+                          ),
                   ),
                   IconButton(
-                    icon: const Icon(
-                      Icons.edit,
+                    icon: Icon(
+                      _isEditingName ? Icons.save : Icons.edit,
                       size: 20,
                       color: AppColors.secondaryColor,
                     ),
                     onPressed: () {
                       setState(() {
-                        _isEditingName = true;
-                        _controllerName.text =
-                            context.read<UserProvider>().updateName(_controllerName.text);
+                        if (_isEditingName) {
+                          // Save changes
+                          if (_controllerBio.text != _textName) {
+                            _textName = _controllerName.text;
+                            // context.read<UserProvider>().updateName(textName);
+                          }
+                        }
+                        _isEditingName = !_isEditingName;
+                        if (_isEditingName) {
+                          // Start editing
+                          _controllerName.text = _textName;
+                        }
                       });
                     },
                   ),
-                  if (_isEditingName)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.save,
-                        size: 20,
-                        color: AppColors.secondaryColor,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          textName = _controllerName.text;
-                          _isEditingName = false;
-                        });
-                      },
-                    ),
                 ],
               ),
 
@@ -286,43 +428,42 @@ class _EditInfoState extends State<EditInfo> {
                     child: _isEditingAddress
                         ? TextField(
                             decoration: const InputDecoration(
-                                border: UnderlineInputBorder(
-                              borderSide: BorderSide.none,
-                            )),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
                             style: AppTextStyles().secondaryStyle,
                             controller: _controllerAddress,
                             autofocus: true,
                           )
-                        : Text(_textAddress,
-                            style: AppTextStyles().secondaryStyle),
+                        : Text(
+                            _textAddress,
+                            style: AppTextStyles().secondaryStyle,
+                          ),
                   ),
                   IconButton(
-                    icon: const Icon(
-                      Icons.edit,
+                    icon: Icon(
+                      _isEditingAddress ? Icons.save : Icons.edit,
                       size: 20,
                       color: AppColors.secondaryColor,
                     ),
                     onPressed: () {
                       setState(() {
-                        _isEditingAddress = true;
-                        _controllerAddress.text = _textAddress;
+                        if (_isEditingAddress) {
+                          // Save changes
+                          if (_controllerAddress.text != _textAddress) {
+                            _textAddress = _controllerAddress.text;
+                            // context.read<UserProvider>().updateName(textName);
+                          }
+                        }
+                        _isEditingAddress = !_isEditingAddress;
+                        if (_isEditingAddress) {
+                          // Start editing
+                          _controllerAddress.text = _textAddress;
+                        }
                       });
                     },
                   ),
-                  if (_isEditingAddress)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.save,
-                        size: 20,
-                        color: AppColors.secondaryColor,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _textAddress = _controllerAddress.text;
-                          _isEditingAddress = false;
-                        });
-                      },
-                    ),
                 ],
               ),
 
@@ -344,42 +485,42 @@ class _EditInfoState extends State<EditInfo> {
                     child: _isEditingBio
                         ? TextField(
                             decoration: const InputDecoration(
-                                border: UnderlineInputBorder(
-                              borderSide: BorderSide.none,
-                            )),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
                             style: AppTextStyles().secondaryStyle,
                             controller: _controllerBio,
                             autofocus: true,
                           )
-                        : Text(_textBio, style: AppTextStyles().secondaryStyle),
+                        : Text(
+                            _textBio,
+                            style: AppTextStyles().secondaryStyle,
+                          ),
                   ),
                   IconButton(
-                    icon: const Icon(
-                      Icons.edit,
+                    icon: Icon(
+                      _isEditingBio ? Icons.save : Icons.edit,
                       size: 20,
                       color: AppColors.secondaryColor,
                     ),
                     onPressed: () {
                       setState(() {
-                        _isEditingBio = true;
-                        _controllerBio.text = _textBio;
+                        if (_isEditingBio) {
+                          // Save changes
+                          if (_controllerBio.text != _textBio) {
+                            _textBio = _controllerAddress.text;
+                            // context.read<UserProvider>().updateName(textName);
+                          }
+                        }
+                        _isEditingBio = !_isEditingBio;
+                        if (_isEditingBio) {
+                          // Start editing
+                          _controllerBio.text = _textBio;
+                        }
                       });
                     },
                   ),
-                  if (_isEditingBio)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.save,
-                        size: 20,
-                        color: AppColors.secondaryColor,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _textBio = _controllerBio.text;
-                          _isEditingBio = false;
-                        });
-                      },
-                    ),
                 ],
               ),
             ],
@@ -438,43 +579,42 @@ class _EditInfoState extends State<EditInfo> {
                   child: _isEditingInterests
                       ? TextField(
                           decoration: const InputDecoration(
-                              border: UnderlineInputBorder(
-                            borderSide: BorderSide.none,
-                          )),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
                           style: AppTextStyles().secondaryStyle,
                           controller: _controllerInterests,
                           autofocus: true,
                         )
-                      : Text(_textInterests,
-                          style: AppTextStyles().secondaryStyle),
+                      : Text(
+                          _textInterests,
+                          style: AppTextStyles().secondaryStyle,
+                        ),
                 ),
                 IconButton(
-                  icon: const Icon(
-                    Icons.edit,
+                  icon: Icon(
+                    _isEditingInterests ? Icons.save : Icons.edit,
                     size: 20,
                     color: AppColors.secondaryColor,
                   ),
                   onPressed: () {
                     setState(() {
-                      _isEditingInterests = true;
-                      _controllerInterests.text = _textInterests;
+                      if (_isEditingInterests) {
+                        // Save changes
+                        if (_controllerInterests.text != _textInterests) {
+                          _textInterests = _controllerAddress.text;
+                          // context.read<UserProvider>().updateName(textName);
+                        }
+                      }
+                      _isEditingInterests = !_isEditingInterests;
+                      if (_isEditingInterests) {
+                        // Start editing
+                        _controllerInterests.text = _textInterests;
+                      }
                     });
                   },
                 ),
-                if (_isEditingInterests)
-                  IconButton(
-                    icon: const Icon(
-                      Icons.save,
-                      size: 20,
-                      color: AppColors.secondaryColor,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _textInterests = _controllerInterests.text;
-                        _isEditingInterests = false;
-                      });
-                    },
-                  ),
               ],
             ),
           ]),
@@ -564,6 +704,9 @@ class _EditInfoState extends State<EditInfo> {
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
+                onPressed: () {
+                  _cancelChanges();
+                },
                 padding: EdgeInsets.zero,
                 child: SizedBox(
                   height: 50,
@@ -590,6 +733,9 @@ class _EditInfoState extends State<EditInfo> {
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
+                onPressed: () {
+                  _saveChanges();
+                },
                 padding: EdgeInsets.zero,
                 child: Container(
                   height: 50,
