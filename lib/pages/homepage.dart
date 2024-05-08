@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
@@ -10,21 +11,19 @@ import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
 import 'package:dating/pages/settingpage.dart';
-import 'package:dating/providers/user_provider.dart';
+import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
-// import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
-// import 'package:dating/widgets/textField.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-// import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,15 +34,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
+  User? user = FirebaseAuth.instance.currentUser;
 
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
   final AuthService _authService = AuthService();
+  // late UserProfileModel userProfileModel;
 
   Future<UserProfileModel> fetchData() async {
     String uid = await DbClient().getData(dbKey: 'uid');
-    final url = Uri.parse('$URI/$USER_PROFILE/$uid');
+    print(uid);
+    final url = Uri.parse('$URI/UserProfile/$user.uid');
     var response = await http.get(url);
     if (response.statusCode == 200) {
       var decoded = jsonDecode(response.body);
@@ -102,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                         CupertinoPageRoute(
                             builder: (context) => const MyProfilePage()));
                   },
-                  child: const profileButton()),
+                  child: ProfileButton()),
 
               // search icon
               Row(
@@ -296,7 +298,7 @@ class _HomePageState extends State<HomePage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        context.watch<UserProvider>().userName,
+                                        "Name",
                                         style: AppTextStyles()
                                             .primaryStyle
                                             .copyWith(fontSize: 14),
@@ -784,12 +786,12 @@ class _HomePageState extends State<HomePage> {
                               MaterialPageRoute(
                                   builder: (context) => const MyProfilePage()));
                         },
-                        child: const profileButton()),
+                        child: ProfileButton()),
                     const SizedBox(
                       width: 20,
                     ),
                     Text(
-                      context.watch<UserProvider>().userName,
+                      "Name",
                       style: GoogleFonts.poppins(
                         color: AppColors.black,
                         fontSize: 32,
@@ -1331,25 +1333,42 @@ class _HomePageState extends State<HomePage> {
 }
 
 // profile button
-class profileButton extends StatelessWidget {
-  const profileButton({
-    super.key,
-  });
+// ignore: must_be_immutable
+class ProfileButton extends StatelessWidget {
+  UserProfileModel? userProfileModel;
+  Uint8List? _imageBytes;
+
+  ProfileButton({
+    Key? key,
+  }) : super(key: key);
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
+    userProfileModel = userProfileProvider.currentUserProfile;
+
+    if (userProfileModel?.image != null) {
+      _imageBytes = base64ToImage(userProfileModel!.image);
+    } else {
+      _imageBytes = base64ToImage(defaultBase64Avatar);
+    }
+
     return Neumorphic(
       style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
       child: SizedBox(
-        height: 50,
-        width: 50,
-        child: Image.asset(
-          AppImages.loginimage,
-          fit: BoxFit.cover,
-        ),
-      ),
+          height: 50,
+          width: 50,
+          child: Image.memory(
+            _imageBytes!,
+            fit: BoxFit.cover,
+          )),
     );
   }
 }

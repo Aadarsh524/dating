@@ -1,22 +1,32 @@
 // import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/backend/MongoDB/apis.dart';
+import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/datamodel/user_profile_provider.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
-import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:dating/widgets/textField.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+
+import '../providers/user_profile_provider.dart';
 
 class MyProfilePage extends StatefulWidget {
   const MyProfilePage({super.key});
@@ -28,17 +38,105 @@ class MyProfilePage extends StatefulWidget {
 class _MyProfilePageState extends State<MyProfilePage> {
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
   final AuthService _authService = AuthService();
+  User? user = FirebaseAuth.instance.currentUser;
 
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
 
-  int _selectedPhotoIndex = 0;
+  // int _selectedPhotoIndex = 0;
 
-  void _selectPhoto(int index) {
-    setState(() {
-      _selectedPhotoIndex = index;
-    });
+  // void _selectPhoto(int index) {
+  //   setState(() {
+  //     _selectedPhotoIndex = index;
+  //   });
+  // }
+
+  Uint8List? _imageBytes;
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
+
+  late UserProfileModel userProfileModel;
+  late String username;
+  late String gender;
+  late String address;
+
+  pickImage() async {
+    UserProfileProvider userProvider = context.read<UserProfileProvider>();
+    // Request storage permission if needed
+    final storageStatus = await Permission.storage.request();
+    if (!storageStatus.isGranted) {
+      throw Exception('Storage permission is required to upload the image.');
+    }
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'png', 'jpeg'],
+    );
+
+    // Handle result
+    if (result != null && result.files.isNotEmpty) {
+      File imageFile = File(result.files.single.path!);
+
+      String base64 = convertIntoBase64(imageFile);
+
+      ApiClient().addUserMediaDataMobile(base64, user!.uid).then((value) => {
+            if (value == true)
+              {print("Media Added Successfully")}
+            else
+              {print("Media not Added")}
+          });
+      print(base64);
+      _imageBytes = base64ToImage(base64);
+
+      // Update user profile model with the base64 image
+      userProvider.updateProfileImage(base64, user!.uid);
+    } else {
+      // Handle cases like user canceling the selection or errors
+      print('No image selected.');
+    }
+  }
+
+  String convertIntoBase64(File file) {
+    List<int> imageBytes = file.readAsBytesSync();
+    String base64File = base64Encode(imageBytes);
+    return base64File;
+  }
+
+  String imageToBase64(Uint8List imageBytes) {
+    return base64Encode(imageBytes);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
+
+    UserProfileModel? userProfileModel = userProfileProvider.currentUserProfile;
+    if (userProfileModel?.image != null) {
+      _imageBytes = base64ToImage(userProfileModel!.image);
+    } else {
+      _imageBytes = base64ToImage(defaultBase64Avatar);
+    }
+    if (userProfileModel?.name != null) {
+      username = userProfileModel!.name;
+    } else {
+      username = "Add Name";
+    }
+    if (userProfileModel?.address != null) {
+      address = userProfileModel!.address;
+    } else {
+      address = "Add aaddress";
+    }
+    if (userProfileModel?.image != null) {
+      gender = userProfileModel!.gender;
+    } else {
+      gender = "Select your gender";
+    }
   }
 
   @override
@@ -135,17 +233,17 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       borderRadius: BorderRadius.circular(1000),
                     ),
                     child: Neumorphic(
-                      style: NeumorphicStyle(
-                        boxShape: NeumorphicBoxShape.roundRect(
-                            BorderRadius.circular(1000)),
-                        depth: 10,
-                        intensity: 0.5,
-                      ),
-                      child: Image.asset(
-                        AppImages.profile,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                        style: NeumorphicStyle(
+                          boxShape: NeumorphicBoxShape.roundRect(
+                              BorderRadius.circular(1000)),
+                          depth: 10,
+                          intensity: 0.5,
+                        ),
+                        // ignore: unnecessary_null_comparison
+                        child: Image.memory(
+                          _imageBytes!,
+                          fit: BoxFit.cover,
+                        )),
                   ),
                 ),
               ),
@@ -163,7 +261,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          '${context.watch<UserProvider>().userName}, 25',
+                          username,
                           style: AppTextStyles().primaryStyle,
                         ),
                         const SizedBox(width: 5),
@@ -190,7 +288,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              "Malang, Jawa Timur",
+                              address,
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],
@@ -211,7 +309,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              context.watch<UserProvider>().gender,
+                              gender,
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],
@@ -319,6 +417,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               intensity: 0.75,
                             ),
                             child: NeumorphicButton(
+                              onPressed: () {
+                                pickImage();
+                              },
                               padding: EdgeInsets.zero,
                               child: Container(
                                 height: 70,

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DbClient {
@@ -18,7 +16,8 @@ class DbClient {
     final result = prefs.getString(dbKey);
     return result ?? '';
   }
-   Future<void> clearAllData() async {
+
+  Future<void> clearAllData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all data
     print('All data cleared');

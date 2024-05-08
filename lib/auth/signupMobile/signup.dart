@@ -2,14 +2,12 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
-import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:provider/provider.dart';
 
 class SignUpMobile extends StatefulWidget {
   const SignUpMobile({super.key});
@@ -36,7 +34,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
   }
 
   Future<void> _register() async {
-    String? result = await _auth.registerWithEmailAndPassword(
+    bool? result = await _auth.registerWithEmailAndPassword(
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
       name: _nameController.text.trim(),
@@ -44,8 +42,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
       age: _selectedAge,
     );
 
-    if (result == null) {
-      // Registration successful, show success message
+    if (result == true) {
       saveDataLocally();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -53,14 +50,11 @@ class _SignUpMobileState extends State<SignUpMobile> {
         ),
       );
 
-      // Navigate to home page
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } else {
-      print(result);
-      // Registration failed, show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Registration error: $result'),
@@ -518,14 +512,8 @@ class _SignUpMobileState extends State<SignUpMobile> {
               onPressed: () {
                 bool passwordsMatch =
                     _passwordController.text == _confirmpasswordController.text;
-
                 if (passwordsMatch) {
                   _register();
-                  context.read<UserProvider>().addCurrentUser(
-                      _nameController.text,
-                      _emailController.text,
-                      AuthService().getUid(),
-                      selectedGender!);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -566,7 +554,6 @@ class _SignUpMobileState extends State<SignUpMobile> {
               onPressed: () {
                 _auth.signInWithGoogle().then((user) {
                   if (user != null) {
-                    // Sign-in successful, navigate to home page
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (_) => const HomePage()));
                   } else {

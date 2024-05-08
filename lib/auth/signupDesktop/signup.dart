@@ -2,7 +2,6 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
-import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 // import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -11,7 +10,6 @@ import 'package:dating/widgets/textField.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class SignUpDesktop extends StatefulWidget {
   const SignUpDesktop({super.key});
@@ -647,10 +645,10 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
 
                           if (passwordsMatch) {
                             _register();
-                            context.read<UserProvider>().addCurrentUser(
-                                _nameController.text,
-                                _emailController.text,
-                                AuthService().getUid(),selectedGender!);
+                            // context.read<UserProfileProvider>().setCurrentUserProfile(
+                            //     _nameController.text,
+                            //     _emailController.text,
+                            //     AuthService().getUid(),selectedGender!);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

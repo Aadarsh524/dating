@@ -1,15 +1,9 @@
 // import 'package:dating/auth/signupMobile/signup.dart';
-import 'dart:convert';
-import 'dart:developer';
 
-import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/signupScreen.dart';
-import 'package:dating/backend/MongoDB/apis.dart';
-import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_model.dart';
-import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
-import 'package:dating/providers/user_provider.dart';
+import 'package:dating/pages/homepage.dart';
+import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -17,8 +11,6 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 class LoginMobile extends StatefulWidget {
   const LoginMobile({super.key});
@@ -29,7 +21,7 @@ class LoginMobile extends StatefulWidget {
 
 class _LoginMobileState extends State<LoginMobile> {
   User? user = FirebaseAuth.instance.currentUser;
-  UserProvider userProvider = UserProvider();
+  UserProfileProvider userProfileProvider = UserProfileProvider();
   bool _isChecked = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -43,52 +35,9 @@ class _LoginMobileState extends State<LoginMobile> {
     bool flag = false;
 
     if (result != null) {
-      final response = await http.get(
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        Uri.parse(
-            '$URI/User/$result'), // Replace with your API endpoint to fetch user data
-      );
-
-      if (response.statusCode == 200) {
-        // Parse the response and update the currentUser object
-        final Map<String, dynamic> userData = jsonDecode(response.body);
-
-        final UserModel newUser = UserModel(
-          uid: result,
-          name: '',
-          email: '',
-          gender: '',
-        );
-        newUser.name = userData['name'];
-        newUser.email = userData['email'];
-        newUser.gender = userData['gender'];
-        log("mobile");
-        //save the data locally
-        await DbClient().setData(dbKey: "uid", value: result);
-        await DbClient().setData(dbKey: "userName", value: newUser.name);
-        await DbClient().setData(dbKey: "gender", value: newUser.gender);
-        await DbClient().setData(dbKey: "email", value: newUser.email);
-        String uid = await DbClient().getData(dbKey: "uid");
-        log("UID:$uid");
-        flag = true;
-      } else {
-        // Handle error when user data retrieval fails
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid email or password'),
-          ),
-        );
-
-        print(
-            'Failed to retrieve user data from MongoDB. Error: ${response.statusCode}');
-        flag = false;
-      }
-
-      return flag;
-      // Login successful, navigate to the next screen or perform any other action
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
+      return true;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

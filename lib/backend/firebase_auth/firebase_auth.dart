@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_model.dart';
-import 'package:dating/providers/user_provider.dart';
+import 'package:dating/auth/db_client.dart';
+import 'package:dating/backend/MongoDB/apis.dart';
+import 'package:dating/datamodel/user_profile_provider.dart';
+import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 
 class AuthService {
-  UserProvider userProvider = UserProvider();
+  UserProfileProvider userProfileProvider = UserProfileProvider();
+  ApiClient apiClient = ApiClient();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -27,13 +28,45 @@ class AuthService {
         password: password,
       );
       log("uid:${userCredential.user!.uid}");
+
+      apiClient
+          .getUserProfileDataMobile(userCredential.user!.uid)
+          .then((value) async {
+        if (value != null) {
+          final Map<String, dynamic> userData = jsonDecode(value);
+
+          final UserProfileModel newUser = UserProfileModel(
+            uid: userData['uid'],
+            name: userData['name'],
+            email: userData['email'],
+            gender: userData['gender'],
+            image: userData['image'],
+            address: userData['address'],
+            age: userData['age'],
+            bio: userData['bio'],
+            interests: userData['interests'],
+            uploads: userData['uploads'],
+            seeking: userData['seeking'],
+          );
+
+          print(newUser.email);
+
+          userProfileProvider.setCurrentUserProfile(newUser);
+
+          await DbClient().setData(dbKey: "uid", value: newUser.uid);
+          await DbClient().setData(dbKey: "userName", value: newUser.name);
+          await DbClient().setData(dbKey: "gender", value: newUser.gender);
+          await DbClient().setData(dbKey: "email", value: newUser.email);
+        }
+      });
+
       return userCredential.user?.uid;
     } catch (e) {
       return e.toString(); // Return error message if login fails
     }
   }
 
-  Future<String?> registerWithEmailAndPassword(
+  Future registerWithEmailAndPassword(
       {required String email,
       required String password,
       required String name,
@@ -47,35 +80,34 @@ class AuthService {
         password: password,
       );
 
-      final UserModel newUser = UserModel(
+      final UserProfileModel newUser = UserProfileModel(
         uid: userCredential.user!.uid,
         name: name,
         email: email,
         gender: gender,
+        image: '',
+        age: age,
+        bio: '',
+        address: '',
+        interests: '',
+        seeking: {},
+        uploads: [],
       );
-      log(newUser.toString());
 
-      // Hit API to store user data in MongoDB
-      final response = await http.post(
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        Uri.parse('$URI/User'), // Replace with your API endpoint
-        body: jsonEncode(newUser.toJson()),
-      );
-      log(newUser.toJson().toString());
-      log(response.statusCode.toString());
+      await DbClient().setData(dbKey: "uid", value: newUser.uid);
+      await DbClient().setData(dbKey: "userName", value: newUser.name);
+      await DbClient().setData(dbKey: "gender", value: newUser.gender);
+      await DbClient().setData(dbKey: "email", value: newUser.email);
 
-      if (response.statusCode.toString() == "200") {
-        print('User registered and data stored successfully.');
-      } else {
-        print('Failed to register user. Error: ${response.statusCode}');
-      }
-
-      return null; // Registration successful
+      apiClient.postUserProfileDataMobile(newUser).then(
+            (value) => {
+              if (value == true)
+                {userProfileProvider.setCurrentUserProfile(newUser)}
+            },
+          );
+      return true;
     } catch (e) {
-      return e.toString(); // Return error message if registration fails
+      return false;
     }
   }
 
@@ -102,60 +134,59 @@ class AuthService {
 
         // Check if the user is signing in for the first time
         if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-          final UserModel newUser = UserModel(
+          final UserProfileModel newUser = UserProfileModel(
             uid: userCredential.user!.uid,
             name: userCredential.user!.displayName ?? '',
             email: userCredential.user!.email ?? '',
             gender: '',
+            image: '',
+            address: '',
+            age: '',
+            bio: '',
+            interests: '',
+            seeking: {},
+            uploads: [],
           );
 
-          // Hit API to store user data in MongoDB
-          final response = await http.post(
-            Uri.parse('$URI/user'), // Replace with your API endpoint
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: jsonEncode(newUser.toJson()),
-          );
+          apiClient.postUserProfileDataMobile(newUser).then(
+                (value) => {
+                  if (value == true)
+                    {userProfileProvider.setCurrentUserProfile(newUser)}
+                },
+              );
+        }
 
-          if (response.statusCode == 200) {
-            print('User registered and data stored successfully.');
-            // userProvider.setCurrentUser(newUser);
-          } else {
-            print('Failed to register user. Error: ${response.statusCode}');
+        apiClient
+            .getUserProfileDataMobile(userCredential.user!.uid)
+            .then((value) async {
+          if (value != null) {
+            final Map<String, dynamic> userData = jsonDecode(value);
+
+            final UserProfileModel newUser = UserProfileModel(
+              uid: userData['uid'],
+              name: userData['name'],
+              email: userData['email'],
+              gender: userData['gender'],
+              image: userData['image'],
+              address: userData['address'],
+              age: userData['age'],
+              bio: userData['bio'],
+              interests: userData['interests'],
+              uploads: userData['uploads'],
+              seeking: userData['seeking'],
+            );
+
+            userProfileProvider.setCurrentUserProfile(newUser);
+            await DbClient().setData(dbKey: "uid", value: newUser.uid);
+            await DbClient().setData(dbKey: "userName", value: newUser.name);
+            await DbClient().setData(dbKey: "gender", value: newUser.gender);
+            await DbClient().setData(dbKey: "email", value: newUser.email);
           }
-        }
+        });
 
-        // Hit API to store user data in MongoDB
-        final response = await http.get(
-          Uri.parse(
-              '$URI/user/${userCredential.user!.uid}'), // Replace with your API endpoint to fetch user data
-        );
-
-        if (response.statusCode == 200) {
-          // Parse the response and update the currentUser object
-          final Map<String, dynamic> userData = jsonDecode(response.body);
-
-          final UserModel newUser = UserModel(
-            uid: userCredential.user!.uid,
-            name: '',
-            email: '',
-            gender: '',
-          );
-          newUser.name = userData['name'];
-          newUser.email = userData['email'];
-          newUser.gender = userData['gender'];
-        } else {
-          // Handle error when user data retrieval fails
-          print(
-              'Failed to retrieve user data from MongoDB. Error: ${response.statusCode}');
-        }
-
-        // Return the user object upon successful sign-in
         return userCredential.user;
       }
 
-      // User canceled Google Sign-In
       return null;
     } catch (e) {
       print("Google Sign-In Error: $e");
