@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dating/auth/db_client.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_profile_provider.dart';
 import 'package:dating/pages/myprofile.dart';
@@ -38,7 +39,7 @@ class _EditInfoState extends State<EditInfo> {
 
   // for name
   final TextEditingController _controllerName = TextEditingController();
-  String _textName = 'Your Name';
+  late String _textName;
   bool _isEditingName = false;
 
   // for address
@@ -67,15 +68,27 @@ class _EditInfoState extends State<EditInfo> {
     super.initState();
     // Uint8List imageBytes = base64ToImage(base64String);
     // Fetch previous data from the provider and initialize text controllers
-    UserProfileProvider userProfileProvider =
-        context.read<UserProfileProvider>();
-    UserProfileModel? currentUserProfile =
-        userProfileProvider.getCurrentUserProfile();
+
+    // log(currentUserProfile!.name.toString());
+    initializeUserData();
+  }
+
+  Future<void> initializeUserData() async {
+    UserProfileProvider? userProfileProvider;
+    UserProfileModel? currentUserProfile;
+    userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
+
+    userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
+    currentUserProfile = userProfileProvider.currentUserProfile;
 
     if (currentUserProfile?.name != null) {
       _textName = currentUserProfile!.name;
       _controllerName.text = _textName;
       log(_textName);
+    } else {
+      _textName = 'Enter Name';
     }
 
     if (currentUserProfile?.address != null) {
@@ -103,6 +116,7 @@ class _EditInfoState extends State<EditInfo> {
     _controllerAddress.text = _textAddress;
     _controllerBio.text = _textBio;
     _controllerInterests.text = _textInterests;
+    setState(() {});
   }
 
   void _saveChanges() {
@@ -127,7 +141,7 @@ class _EditInfoState extends State<EditInfo> {
         uploads: [],
       ),
     );
-    print(userProvider.currentUser?.name);
+    print(userProvider.currentUserProfile?.name);
 
     // Exit editing mode
     setState(() {
@@ -223,7 +237,6 @@ class _EditInfoState extends State<EditInfo> {
       AppImages.profile,
       // Small photo 3
     ];
-    String textName = context.watch<UserProvider>().userName;
 
     return Scaffold(
       body: ListView(children: [
@@ -381,10 +394,13 @@ class _EditInfoState extends State<EditInfo> {
                             controller: _controllerName,
                             autofocus: true,
                           )
-                        : Text(
-                            _textName,
-                            style: AppTextStyles().secondaryStyle,
-                          ),
+                        : Consumer<UserProfileProvider>(
+                            builder: (context, userProfileProvider, child) {
+                            return Text(
+                              userProfileProvider.currentUserProfile!.name,
+                              style: AppTextStyles().secondaryStyle,
+                            );
+                          }),
                   ),
                   IconButton(
                     icon: Icon(
@@ -456,6 +472,9 @@ class _EditInfoState extends State<EditInfo> {
                           if (_controllerAddress.text != _textAddress) {
                             _textAddress = _controllerAddress.text;
                             // context.read<UserProvider>().updateName(textName);
+                            DbClient().resetData(dbKey: 'userName');
+                            DbClient().setData(
+                                dbKey: 'userName', value: _controllerName.text);
                           }
                         }
                         _isEditingAddress = !_isEditingAddress;

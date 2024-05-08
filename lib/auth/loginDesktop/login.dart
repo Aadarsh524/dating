@@ -12,6 +12,7 @@ import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -38,18 +39,24 @@ class _LoginDesktopState extends State<LoginDesktop> {
     bool flag = false;
 
     if (result != null) {
-      final response = await http.get(
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        Uri.parse(
-            '$URI/User/$result'), // Replace with your API endpoint to fetch user data
-      );
+      final Dio dio = Dio(BaseOptions(baseUrl: URI_DESKTOP, headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }));
+
+      final response = await dio.get('User/$result');
+      // final response = await http.get(
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Accept': 'application/json'
+      //   },
+      //   Uri.parse(
+      //       '$URI_DESKTOP/User/$result'), // Replace with your API endpoint to fetch user data
+      // );
 
       if (response.statusCode == 200) {
-        // Parse the response and update the currentUser object
-        final Map<String, dynamic> userData = jsonDecode(response.body);
+        log(response.data.toString());
+        final Map<String, dynamic> userData = jsonDecode(response.data);
 
         final UserModel newUser = UserModel(
           uid: result,

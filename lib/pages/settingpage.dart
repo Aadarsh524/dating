@@ -1,3 +1,6 @@
+import 'package:dating/auth/loginDesktop/login.dart';
+import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/pages/profilepage.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
@@ -48,11 +51,11 @@ class _SettingPageState extends State<SettingPage> {
   Widget MobileProfile() {
     return Scaffold(
       body: ListView(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -64,7 +67,7 @@ class _SettingPageState extends State<SettingPage> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back,
                 ),
                 labelText: null,
@@ -77,13 +80,13 @@ class _SettingPageState extends State<SettingPage> {
 
               // view icon
 
-              SizedBox(
+              const SizedBox(
                 width: 30,
               )
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -191,11 +194,11 @@ class _SettingPageState extends State<SettingPage> {
                 _selectedIndex = index;
               });
             },
-            thumb: Text(''),
+            thumb: const Text(''),
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -203,12 +206,14 @@ class _SettingPageState extends State<SettingPage> {
           index: _selectedIndex,
           children: [
             Container(
-                color: Colors.green, child: Center(child: Text('Billing'))),
+                color: Colors.green,
+                child: const Center(child: Text('Billing'))),
             // Profile tab
             profileTab(),
 
             Container(
-                color: Colors.orange, child: Center(child: Text('Email'))),
+                color: Colors.orange,
+                child: const Center(child: Text('Email'))),
           ],
         ),
 
@@ -217,7 +222,7 @@ class _SettingPageState extends State<SettingPage> {
       bottomSheet: Container(
         height: 60,
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.backgroundColor,
         ),
         child: Row(
@@ -234,7 +239,7 @@ class _SettingPageState extends State<SettingPage> {
               ),
               child: NeumorphicButton(
                 padding: EdgeInsets.zero,
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 100,
                   child: Center(
@@ -289,18 +294,18 @@ class _SettingPageState extends State<SettingPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text('Update your profile display options and localization.',
               style: AppTextStyles().secondaryStyle),
         ),
-        SizedBox(
+        const SizedBox(
           height: 25,
         ),
 
         // online options
 
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             'Online Options',
             style: AppTextStyles().primaryStyle.copyWith(
@@ -309,16 +314,16 @@ class _SettingPageState extends State<SettingPage> {
           ),
         ),
 
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
 
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text('Online Status', style: AppTextStyles().secondaryStyle),
         ),
 
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
               SizedBox(
@@ -334,7 +339,7 @@ class _SettingPageState extends State<SettingPage> {
                   },
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Text('Show me as online',
@@ -347,9 +352,9 @@ class _SettingPageState extends State<SettingPage> {
 
         // show busy
 
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
               SizedBox(
@@ -365,7 +370,7 @@ class _SettingPageState extends State<SettingPage> {
                   },
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Text('Show me as busy',
@@ -376,16 +381,16 @@ class _SettingPageState extends State<SettingPage> {
           ),
         ),
 
-        SizedBox(height: 25),
+        const SizedBox(height: 25),
 
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text('Display Profile', style: AppTextStyles().secondaryStyle),
         ),
 
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
               SizedBox(
@@ -401,7 +406,7 @@ class _SettingPageState extends State<SettingPage> {
                   },
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Text('Display my profile to users',
@@ -414,9 +419,9 @@ class _SettingPageState extends State<SettingPage> {
 
         // show busy
 
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
               SizedBox(
@@ -432,7 +437,7 @@ class _SettingPageState extends State<SettingPage> {
                   },
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Text('Hide my profile from users',
@@ -449,11 +454,11 @@ class _SettingPageState extends State<SettingPage> {
   Widget DesktopProfile() {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -465,10 +470,10 @@ class _SettingPageState extends State<SettingPage> {
                         Navigator.push(
                             context,
                             CupertinoPageRoute(
-                                builder: (context) => ProfilePage()));
+                                builder: (context) => const ProfilePage()));
                       },
-                      child: profileButton()),
-                  SizedBox(
+                      child: const profileButton()),
+                  const SizedBox(
                     width: 20,
                   ),
                   Text(
@@ -488,7 +493,7 @@ class _SettingPageState extends State<SettingPage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -501,7 +506,7 @@ class _SettingPageState extends State<SettingPage> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -515,12 +520,12 @@ class _SettingPageState extends State<SettingPage> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -535,9 +540,9 @@ class _SettingPageState extends State<SettingPage> {
                           text: null,
                           labelText: 'Matches',
                           onPressed: () {},
-                          icon: Icon(Icons.people),
+                          icon: const Icon(Icons.people),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // messages
@@ -545,10 +550,10 @@ class _SettingPageState extends State<SettingPage> {
                           text: null,
                           labelText: 'Messages',
                           onPressed: () {},
-                          icon: Icon(Icons.messenger_outline),
+                          icon: const Icon(Icons.messenger_outline),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // popular
@@ -556,9 +561,9 @@ class _SettingPageState extends State<SettingPage> {
                           text: null,
                           labelText: 'Popular',
                           onPressed: () {},
-                          icon: Icon(Icons.star),
+                          icon: const Icon(Icons.star),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // photos
@@ -566,10 +571,10 @@ class _SettingPageState extends State<SettingPage> {
                           text: null,
                           labelText: 'Photos',
                           onPressed: () {},
-                          icon: Icon(Icons.photo_library_sharp),
+                          icon: const Icon(Icons.photo_library_sharp),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // add friemd
@@ -577,10 +582,10 @@ class _SettingPageState extends State<SettingPage> {
                           text: null,
                           labelText: 'Add Friend',
                           onPressed: () {},
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // online
@@ -588,7 +593,7 @@ class _SettingPageState extends State<SettingPage> {
                           text: null,
                           labelText: 'Online',
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.circle_outlined,
                             color: Colors.green,
                           ),
@@ -596,7 +601,7 @@ class _SettingPageState extends State<SettingPage> {
                       ],
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
 
@@ -607,13 +612,14 @@ class _SettingPageState extends State<SettingPage> {
                         // seeking
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: seeking,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 seeking = newValue!;
@@ -637,20 +643,21 @@ class _SettingPageState extends State<SettingPage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // country
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: country,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 country = newValue!;
@@ -674,20 +681,21 @@ class _SettingPageState extends State<SettingPage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // age
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: age,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 age = newValue!;
@@ -723,7 +731,7 @@ class _SettingPageState extends State<SettingPage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -731,10 +739,10 @@ class _SettingPageState extends State<SettingPage> {
           child: Row(
             children: [
 // side bar
-              NavBarDesktop(),
+              const NavBarDesktop(),
 
 // posts
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Expanded(
@@ -866,7 +874,7 @@ class _SettingPageState extends State<SettingPage> {
                                 _selectedIndex = index;
                               });
                             },
-                            thumb: Text(''),
+                            thumb: const Text(''),
                           ),
                         ),
                       ],
@@ -887,21 +895,23 @@ class _SettingPageState extends State<SettingPage> {
                                   children: [
                                     Container(
                                         color: Colors.green,
-                                        child: Center(child: Text('Billing'))),
+                                        child: const Center(
+                                            child: Text('Billing'))),
                                     // Profile tab
                                     profileTab(),
 
                                     Container(
                                         color: Colors.orange,
-                                        child: Center(child: Text('Email'))),
+                                        child:
+                                            const Center(child: Text('Email'))),
                                   ],
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 30,
                                 ),
 
 // details
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
 
@@ -921,7 +931,7 @@ class _SettingPageState extends State<SettingPage> {
       ]),
       bottomSheet: Container(
         height: 70,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.backgroundColor,
         ),
         child: Row(
@@ -938,7 +948,7 @@ class _SettingPageState extends State<SettingPage> {
               ),
               child: NeumorphicButton(
                 padding: EdgeInsets.zero,
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 100,
                   child: Center(
@@ -953,7 +963,7 @@ class _SettingPageState extends State<SettingPage> {
               ),
             ),
 
-            SizedBox(
+            const SizedBox(
               width: 40,
             ),
 
@@ -988,6 +998,39 @@ class _SettingPageState extends State<SettingPage> {
                 ),
               ),
             ),
+            const SizedBox(
+              width: 40,
+            ),
+            //signout
+            Neumorphic(
+              style: NeumorphicStyle(
+                boxShape: NeumorphicBoxShape.roundRect(
+                  BorderRadius.circular(16),
+                ),
+                depth: 5,
+                intensity: 0.75,
+              ),
+              child: NeumorphicButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()));
+                },
+                padding: EdgeInsets.zero,
+                child: Container(
+                  height: 50,
+                  width: 100,
+                  color: Colors.blue,
+                  child: Center(
+                    child: Text(
+                      'Sign out',
+                      style: AppTextStyles().secondaryStyle.copyWith(
+                            color: Colors.white,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1004,10 +1047,10 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
-      child: Container(
+      child: SizedBox(
         height: 50,
         width: 50,
         child: Image.asset(
