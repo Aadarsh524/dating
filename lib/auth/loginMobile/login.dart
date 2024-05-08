@@ -34,19 +34,12 @@ class _LoginMobileState extends State<LoginMobile> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  Future<void> getLocalData() async {
-    String userName = await DbClient().getData(dbKey: "userName");
-    String email = await DbClient().getData(dbKey: "email");
-    String uid = await DbClient().getData(dbKey: "uid");
-    String gender = await DbClient().getData(dbKey: "gender");
-    context.read<UserProvider>().addCurrentUser(userName, email, uid,gender);
-  }
-
   Future<bool> _login() async {
     String? result = await _authService.signInWithEmailAndPassword(
       _emailController.text.trim(),
       _passwordController.text.trim(),
     );
+    bool flag = false;
 
     if (result != null) {
       final response = await http.get(
@@ -79,14 +72,21 @@ class _LoginMobileState extends State<LoginMobile> {
         await DbClient().setData(dbKey: "email", value: newUser.email);
         String uid = await DbClient().getData(dbKey: "uid");
         log("UID:$uid");
+        flag = true;
       } else {
         // Handle error when user data retrieval fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid email or password'),
+          ),
+        );
+
         print(
             'Failed to retrieve user data from MongoDB. Error: ${response.statusCode}');
+        flag = false;
       }
 
-      print('Login Successful');
-      return true;
+      return flag;
       // Login successful, navigate to the next screen or perform any other action
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,7 +94,7 @@ class _LoginMobileState extends State<LoginMobile> {
           content: Text('Error login: $result'),
         ),
       );
-      return false;
+      return flag;
       // Login failed, show error message to the user
     }
   }
@@ -266,7 +266,6 @@ class _LoginMobileState extends State<LoginMobile> {
               onPressed: () {
                 _login().then((value) {
                   if (value) {
-                    getLocalData();
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(

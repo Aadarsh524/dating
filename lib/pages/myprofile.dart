@@ -1,4 +1,5 @@
 // import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
+import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/settingpage.dart';
@@ -102,13 +103,14 @@ class _MyProfilePageState extends State<MyProfilePage> {
               ButtonWithLabel(
                 text: null,
                 onPressed: () {
-                  _authService
-                      .signOut()
-                      .then((value) => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginScreen()),
-                          ));
+                  _authService.signOut().then((value) {
+                    DbClient().clearAllData();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()),
+                    );
+                  });
                 },
                 icon: SvgPicture.asset(AppIcons.threedots),
                 labelText: null,

@@ -18,6 +18,11 @@ class DbClient {
     final result = prefs.getString(dbKey);
     return result ?? '';
   }
+   Future<void> clearAllData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all data
+    print('All data cleared');
+  }
 
   resetData({required String dbKey}) async {
     final prefs = await SharedPreferences.getInstance();
