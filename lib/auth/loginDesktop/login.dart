@@ -35,6 +35,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
       _emailController.text.trim(),
       _passwordController.text.trim(),
     );
+    bool flag = false;
 
     if (result != null) {
       final response = await http.get(
@@ -60,26 +61,28 @@ class _LoginDesktopState extends State<LoginDesktop> {
         newUser.email = userData['email'];
         newUser.gender = userData['gender'];
         log("desktop");
-         await DbClient().setData(dbKey: "uid", value: result);
+        await DbClient().setData(dbKey: "uid", value: result);
         await DbClient().setData(dbKey: "userName", value: newUser.name);
         await DbClient().setData(dbKey: "gender", value: newUser.gender);
         await DbClient().setData(dbKey: "email", value: newUser.email);
         log("userName: ${newUser.name}");
         log("email: ${newUser.email}");
         log("gender: ${newUser.gender}");
+        flag = true;
       } else {
         // Handle error when user data retrieval fails
         print(
             'Failed to retrieve user data from MongoDB. Error: ${response.statusCode}');
+        flag = false;
       }
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const HomePage()));
       print('Login Successful');
-      return true;
+      return flag;
       // Login successful, navigate to the next screen or perform any other action
     } else {
       print('Login Error: $result');
-      return false;
+      return flag;
       // Login failed, show error message to the user
     }
   }

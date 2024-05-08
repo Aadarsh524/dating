@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -74,6 +75,7 @@ class _EditInfoState extends State<EditInfo> {
     if (currentUserProfile?.name != null) {
       _textName = currentUserProfile!.name;
       _controllerName.text = _textName;
+      log(_textName);
     }
 
     if (currentUserProfile?.address != null) {

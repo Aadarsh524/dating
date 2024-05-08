@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/datamodel/user_profile_provider.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
@@ -20,6 +24,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,6 +40,28 @@ class _HomePageState extends State<HomePage> {
   String country = 'COUNTRY';
   String age = 'AGE';
   final AuthService _authService = AuthService();
+
+  Future<UserProfileModel> fetchData() async {
+    String uid = await DbClient().getData(dbKey: 'uid');
+    final url = Uri.parse('$URI/$USER_PROFILE/$uid');
+    var response = await http.get(url);
+    if (response.statusCode == 200) {
+      var decoded = jsonDecode(response.body);
+      log(decoded.toString());
+      UserProfileModel userProfileModel = UserProfileModel.fromJson(decoded);
+      return userProfileModel;
+    } else {
+      log('Failed to fetch data: ${response.statusCode}');
+      throw Exception('Failed to fetch data: ${response.statusCode}');
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +84,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget MobileHome() {
-    
     return Scaffold(
       body: Column(children: [
         const SizedBox(
