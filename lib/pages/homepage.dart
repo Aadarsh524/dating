@@ -789,7 +789,7 @@ class _HomePageState extends State<HomePage> {
                       width: 20,
                     ),
                     Text(
-                      "  currentUser!.name",
+                      context.watch<UserProvider>().userName,
                       style: GoogleFonts.poppins(
                         color: AppColors.black,
                         fontSize: 32,
