@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_model.dart';
+import 'package:dating/datamodel/user_profile_provider.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
@@ -15,7 +15,6 @@ import 'package:dating/widgets/textField.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 
 class LoginDesktop extends StatefulWidget {
   const LoginDesktop({super.key});
@@ -58,11 +57,18 @@ class _LoginDesktopState extends State<LoginDesktop> {
         log(response.data.toString());
         final Map<String, dynamic> userData = jsonDecode(response.data);
 
-        final UserModel newUser = UserModel(
+        final UserProfileModel newUser = UserProfileModel(
           uid: result,
           name: '',
           email: '',
           gender: '',
+          image: '',
+          address: '',
+          age: '',
+          bio: '',
+          seeking: {},
+          uploads: [],
+          interests: '',
         );
         newUser.name = userData['name'];
         newUser.email = userData['email'];

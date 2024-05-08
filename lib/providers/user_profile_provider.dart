@@ -13,10 +13,10 @@ class UserProfileProvider extends ChangeNotifier {
 
   UserProfileModel? _currentUserProfile;
 
-  // void setCurrentUserProfile(UserProfileModel userProfile) {
-  //   _currentUserProfile = userProfile;
-  //   notifyListeners();
-  // }
+  void setCurrentUserProfile(UserProfileModel userProfile) {
+    _currentUserProfile = userProfile;
+    notifyListeners();
+  }
 
   Future<void> fetchData() async {
     try {

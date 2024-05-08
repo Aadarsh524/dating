@@ -2,6 +2,7 @@ class UserProfileModel {
   final String uid;
   String image;
   String name;
+  String email;
   String address;
   String age;
   String gender;
@@ -14,6 +15,7 @@ class UserProfileModel {
     required this.uid,
     required this.image,
     required this.name,
+    required this.email,
     required this.address,
     required this.age,
     required this.gender,
@@ -27,6 +29,7 @@ class UserProfileModel {
     return UserProfileModel(
       uid: json['uid'],
       image: json['image'],
+      email: json['email'],
       name: json['name'],
       address: json['address'],
       age: json['age'],
@@ -47,6 +50,7 @@ class UserProfileModel {
       'uid': uid,
       'image': image,
       'name': name,
+      'email': email,
       'address': address,
       'age': age,
       'gender': gender,

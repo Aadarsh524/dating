@@ -8,7 +8,6 @@ import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_profile_provider.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/providers/user_profile_provider.dart';
-import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
@@ -66,10 +65,7 @@ class _EditInfoState extends State<EditInfo> {
   @override
   void initState() {
     super.initState();
-    // Uint8List imageBytes = base64ToImage(base64String);
-    // Fetch previous data from the provider and initialize text controllers
 
-    // log(currentUserProfile!.name.toString());
     initializeUserData();
   }
 
@@ -139,6 +135,7 @@ class _EditInfoState extends State<EditInfo> {
         gender: '',
         seeking: {},
         uploads: [],
+        email: '',
       ),
     );
     print(userProvider.currentUserProfile?.name);
@@ -397,7 +394,7 @@ class _EditInfoState extends State<EditInfo> {
                         : Consumer<UserProfileProvider>(
                             builder: (context, userProfileProvider, child) {
                             return Text(
-                              userProfileProvider.currentUserProfile!.name,
+                              _textName,
                               style: AppTextStyles().secondaryStyle,
                             );
                           }),
@@ -787,7 +784,6 @@ class _EditInfoState extends State<EditInfo> {
       AppImages.profile,
       // Small photo 3
     ];
-    String textName = context.watch<UserProvider>().userName;
 
     return Scaffold(
       body: Column(children: [
@@ -1316,7 +1312,7 @@ class _EditInfoState extends State<EditInfo> {
                                                           autofocus: true,
                                                         ),
                                                       )
-                                                    : Text(textName,
+                                                    : Text(_textName,
                                                         style: AppTextStyles()
                                                             .secondaryStyle),
                                                 IconButton(
@@ -1330,7 +1326,7 @@ class _EditInfoState extends State<EditInfo> {
                                                     setState(() {
                                                       _isEditingName = true;
                                                       _controllerName.text =
-                                                          textName;
+                                                          _textName;
                                                     });
                                                   },
                                                 ),
@@ -1344,7 +1340,7 @@ class _EditInfoState extends State<EditInfo> {
                                                     ),
                                                     onPressed: () {
                                                       setState(() {
-                                                        textName =
+                                                        _textName =
                                                             _controllerName
                                                                 .text;
                                                         _isEditingName = false;

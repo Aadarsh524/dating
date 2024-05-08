@@ -1,7 +1,6 @@
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/firebase_options.dart';
 import 'package:dating/providers/user_profile_provider.dart';
-import 'package:dating/providers/user_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +12,6 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => UserProvider()),
     ChangeNotifierProvider(create: (_) => UserProfileProvider()),
   ], child: const MyApp()));
 }
