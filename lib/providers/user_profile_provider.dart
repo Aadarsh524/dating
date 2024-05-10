@@ -1,41 +1,64 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'package:dating/auth/db_client.dart';
-import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_profile_provider.dart';
+import 'package:dating/backend/MongoDB/apis.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
 
 class UserProfileProvider extends ChangeNotifier {
-  UserProfileProvider() {
-    fetchData();
-  }
+  ApiClient apiClient = ApiClient();
 
-  UserProfileModel? _currentUserProfile;
+  UserProfileModel? _currentUserProfileProvider;
 
   void setCurrentUserProfile(UserProfileModel userProfile) {
-    _currentUserProfile = userProfile;
+    _currentUserProfileProvider = userProfile;
     notifyListeners();
   }
 
-  Future<void> fetchData() async {
+  Future<UserProfileModel> addNewUser(
+      UserProfileModel userProfile, BuildContext context) async {
     try {
-      String uid = await DbClient().getData(dbKey: 'uid');
-      final url = Uri.parse('$URI/$USER_PROFILE/$uid');
-      var response = await http.get(url);
-      if (response.statusCode == 200) {
-        var decoded = jsonDecode(response.body);
-        log(decoded.toString());
-        UserProfileModel userProfileModel = UserProfileModel.fromJson(decoded);
-        _currentUserProfile = userProfileModel;
-        log("Provider value ${_currentUserProfile!.name}");
+      final UserProfileModel? value =
+          await apiClient.postUserProfileDataMobile(userProfile);
+
+      if (value != null) {
         notifyListeners();
+        return value;
       } else {
-        log('Failed to fetch data: ${response.statusCode}');
-        throw Exception('Failed to fetch data: ${response.statusCode}');
+        throw Exception('Cant upload');
+      }
+    } catch (e) {
+      print("error:$e");
+      rethrow;
+    }
+  }
+
+  UserProfileModel? get currentUserProfile => _currentUserProfileProvider;
+
+  Future<UserProfileModel>? getUserData(String uid) async {
+    try {
+      // Wait for the result of getUserProfileDataMobile using await
+      final UserProfileModel? value =
+          await apiClient.getUserProfileDataMobile(uid);
+
+      // Check if the value is not null
+      if (value != null) {
+        // Set the current user profile
+        setCurrentUserProfile(value);
+
+        // Notify listeners of the change
+        notifyListeners();
+
+        // Return the UserProfileModel
+        return value;
+      } else {
+        // If the value is null, throw an exception
+        throw Exception('User profile data is null');
       }
     } catch (error) {
+      // Print error message if an error occurs
       print('Error fetching data: $error');
+      // Rethrow the error to propagate it to the caller
+      rethrow;
     }
   }
 
@@ -50,7 +73,7 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        _currentUserProfile = updatedProfile;
+        _currentUserProfileProvider = updatedProfile;
         notifyListeners();
       } else {
         throw Exception('Failed to update user profile');
@@ -69,7 +92,7 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        _currentUserProfile!.image = base64image;
+        _currentUserProfileProvider!.image = base64image;
         notifyListeners();
       } else {
         print('Failed to update profile image: ${response.statusCode}');
@@ -78,6 +101,4 @@ class UserProfileProvider extends ChangeNotifier {
       print('Error updating profile image: $error');
     }
   }
-
-  UserProfileModel? get currentUserProfile => _currentUserProfile;
 }

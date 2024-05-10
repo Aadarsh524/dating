@@ -6,7 +6,7 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
-import 'package:dating/datamodel/user_profile_provider.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
@@ -43,9 +43,9 @@ class _HomePageState extends State<HomePage> {
   // late UserProfileModel userProfileModel;
 
   Future<UserProfileModel> fetchData() async {
-    String uid = await DbClient().getData(dbKey: 'uid');
+    String uid = user!.uid;
     print(uid);
-    final url = Uri.parse('$URI/UserProfile/$user.uid');
+    final url = Uri.parse('$URI/UserProfile/$uid');
     var response = await http.get(url);
     if (response.statusCode == 200) {
       var decoded = jsonDecode(response.body);
@@ -58,12 +58,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    fetchData();
-  }
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   fetchData();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -1339,8 +1339,8 @@ class ProfileButton extends StatelessWidget {
   Uint8List? _imageBytes;
 
   ProfileButton({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
@@ -1353,7 +1353,7 @@ class ProfileButton extends StatelessWidget {
     userProfileModel = userProfileProvider.currentUserProfile;
 
     if (userProfileModel?.image != null) {
-      _imageBytes = base64ToImage(userProfileModel!.image);
+      _imageBytes = base64ToImage(userProfileModel!.image?? '');
     } else {
       _imageBytes = base64ToImage(defaultBase64Avatar);
     }

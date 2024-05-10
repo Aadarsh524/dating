@@ -1,64 +1,39 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/backend/MongoDB/apis.dart';
-import 'package:dating/datamodel/user_profile_provider.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
 class AuthService {
-  UserProfileProvider userProfileProvider = UserProfileProvider();
   ApiClient apiClient = ApiClient();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  getUid() {
-    User? users = FirebaseAuth.instance.currentUser;
-    return users!.uid;
-  }
+  User? users = FirebaseAuth.instance.currentUser;
 
   Future<String?> signInWithEmailAndPassword(
-      String email, String password) async {
+      String email, String password, BuildContext context) async {
     try {
       final UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      log("uid:${userCredential.user!.uid}");
 
-      apiClient
-          .getUserProfileDataMobile(userCredential.user!.uid)
-          .then((value) async {
-        if (value != null) {
-          final Map<String, dynamic> userData = jsonDecode(value);
+      UserProfileModel? userProfileModel = await context
+          .read<UserProfileProvider>()
+          .getUserData(userCredential.user!.uid);
 
-          final UserProfileModel newUser = UserProfileModel(
-            uid: userData['uid'],
-            name: userData['name'],
-            email: userData['email'],
-            gender: userData['gender'],
-            image: userData['image'],
-            address: userData['address'],
-            age: userData['age'],
-            bio: userData['bio'],
-            interests: userData['interests'],
-            uploads: userData['uploads'],
-            seeking: userData['seeking'],
-          );
-
-          print(newUser.email);
-
-          userProfileProvider.setCurrentUserProfile(newUser);
-
-          await DbClient().setData(dbKey: "uid", value: newUser.uid);
-          await DbClient().setData(dbKey: "userName", value: newUser.name);
-          await DbClient().setData(dbKey: "gender", value: newUser.gender);
-          await DbClient().setData(dbKey: "email", value: newUser.email);
-        }
-      });
+      await DbClient().setData(dbKey: "uid", value: userProfileModel!.uid ?? '');
+      await DbClient()
+          .setData(dbKey: "userName", value: userProfileModel.name ?? '');
+      await DbClient()
+          .setData(dbKey: "email", value: userProfileModel.email ?? '');
 
       return userCredential.user?.uid;
     } catch (e) {
@@ -66,7 +41,7 @@ class AuthService {
     }
   }
 
-  Future registerWithEmailAndPassword(
+  Future<UserProfileModel> registerWithEmailAndPassword(BuildContext context,
       {required String email,
       required String password,
       required String name,
@@ -79,7 +54,6 @@ class AuthService {
         email: email,
         password: password,
       );
-
       final UserProfileModel newUser = UserProfileModel(
         uid: userCredential.user!.uid,
         name: name,
@@ -90,28 +64,25 @@ class AuthService {
         bio: '',
         address: '',
         interests: '',
-        seeking: {},
+        seeking: Seeking(),
         uploads: [],
       );
 
-      await DbClient().setData(dbKey: "uid", value: newUser.uid);
-      await DbClient().setData(dbKey: "userName", value: newUser.name);
-      await DbClient().setData(dbKey: "gender", value: newUser.gender);
-      await DbClient().setData(dbKey: "email", value: newUser.email);
+      UserProfileModel? userProfileModel = await context
+          .read<UserProfileProvider>()
+          .addNewUser(newUser, context);
 
-      apiClient.postUserProfileDataMobile(newUser).then(
-            (value) => {
-              if (value == true)
-                {userProfileProvider.setCurrentUserProfile(newUser)}
-            },
-          );
-      return true;
+      await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
+      await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
+      await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
+
+      return userProfileModel;
     } catch (e) {
-      return false;
+      rethrow;
     }
   }
 
-  Future<User?> signInWithGoogle() async {
+  Future<User?> signInWithGoogle(BuildContext context) async {
     try {
       // Trigger the Google Sign-In flow
       final GoogleSignInAccount? googleSignInAccount =
@@ -136,51 +107,41 @@ class AuthService {
         if (userCredential.additionalUserInfo?.isNewUser ?? false) {
           final UserProfileModel newUser = UserProfileModel(
             uid: userCredential.user!.uid,
-            name: userCredential.user!.displayName ?? '',
-            email: userCredential.user!.email ?? '',
+            name: userCredential.user!.displayName,
+            email: userCredential.user!.email,
             gender: '',
             image: '',
-            address: '',
             age: '',
             bio: '',
+            address: '',
             interests: '',
-            seeking: {},
+            seeking: Seeking(),
             uploads: [],
           );
 
-          apiClient.postUserProfileDataMobile(newUser).then(
-                (value) => {
-                  if (value == true)
-                    {userProfileProvider.setCurrentUserProfile(newUser)}
-                },
-              );
+          // ignore: use_build_context_synchronously
+          context.read<UserProfileProvider>().addNewUser(newUser, context);
+
+          await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
+          await DbClient()
+              .setData(dbKey: "userName", value: newUser.name ?? '');
+          await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
         }
 
         apiClient
             .getUserProfileDataMobile(userCredential.user!.uid)
             .then((value) async {
           if (value != null) {
-            final Map<String, dynamic> userData = jsonDecode(value);
+            UserProfileModel? userProfileModel =
+                Provider.of<UserProfileProvider>(context, listen: false)
+                    .currentUserProfile;
+            await DbClient()
+                .setData(dbKey: "uid", value: userProfileModel!.uid ?? '');
+            await DbClient()
+                .setData(dbKey: "userName", value: userProfileModel.name ?? '');
 
-            final UserProfileModel newUser = UserProfileModel(
-              uid: userData['uid'],
-              name: userData['name'],
-              email: userData['email'],
-              gender: userData['gender'],
-              image: userData['image'],
-              address: userData['address'],
-              age: userData['age'],
-              bio: userData['bio'],
-              interests: userData['interests'],
-              uploads: userData['uploads'],
-              seeking: userData['seeking'],
-            );
-
-            userProfileProvider.setCurrentUserProfile(newUser);
-            await DbClient().setData(dbKey: "uid", value: newUser.uid);
-            await DbClient().setData(dbKey: "userName", value: newUser.name);
-            await DbClient().setData(dbKey: "gender", value: newUser.gender);
-            await DbClient().setData(dbKey: "email", value: newUser.email);
+            await DbClient()
+                .setData(dbKey: "email", value: userProfileModel.email ?? '');
           }
         });
 

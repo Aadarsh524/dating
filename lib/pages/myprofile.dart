@@ -6,7 +6,7 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_profile_provider.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
@@ -113,27 +113,26 @@ class _MyProfilePageState extends State<MyProfilePage> {
   void initState() {
     super.initState();
 
-    final userProfileProvider =
-        Provider.of<UserProfileProvider>(context, listen: false);
-
-    UserProfileModel? userProfileModel = userProfileProvider.currentUserProfile;
-    if (userProfileModel?.image != null) {
-      _imageBytes = base64ToImage(userProfileModel!.image);
+    UserProfileModel? userProfileModel =
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .currentUserProfile;
+    if (userProfileModel?.image != null&& userProfileModel!.image!.isNotEmpty) {
+      _imageBytes = base64ToImage(userProfileModel.image?? '');
     } else {
       _imageBytes = base64ToImage(defaultBase64Avatar);
     }
     if (userProfileModel?.name != null) {
-      username = userProfileModel!.name;
+      username = userProfileModel!.name ?? '';
     } else {
       username = "Add Name";
     }
     if (userProfileModel?.address != null) {
-      address = userProfileModel!.address;
+      address = userProfileModel!.address ?? '';
     } else {
       address = "Add aaddress";
     }
     if (userProfileModel?.image != null) {
-      gender = userProfileModel!.gender;
+      gender = userProfileModel!.gender ?? '';
     } else {
       gender = "Select your gender";
     }

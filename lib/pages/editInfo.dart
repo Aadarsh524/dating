@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_profile_provider.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -80,7 +80,7 @@ class _EditInfoState extends State<EditInfo> {
     currentUserProfile = userProfileProvider.currentUserProfile;
 
     if (currentUserProfile?.name != null) {
-      _textName = currentUserProfile!.name;
+      _textName = currentUserProfile!.name?? '';
       _controllerName.text = _textName;
       log(_textName);
     } else {
@@ -88,22 +88,22 @@ class _EditInfoState extends State<EditInfo> {
     }
 
     if (currentUserProfile?.address != null) {
-      _textAddress = currentUserProfile!.address;
+      _textAddress = currentUserProfile!.address ?? '';
       _controllerAddress.text = _textAddress;
     }
 
     if (currentUserProfile?.bio != null) {
-      _textBio = currentUserProfile!.bio;
+      _textBio = currentUserProfile!.bio?? ''; 
       _controllerBio.text = _textBio;
     }
 
     if (currentUserProfile?.interests != null) {
-      _textInterests = currentUserProfile!.interests;
+      _textInterests = currentUserProfile!.interests?? '';
       _controllerInterests.text = _textInterests;
     }
 
     if (currentUserProfile?.image != null) {
-      _imageBytes = base64ToImage(currentUserProfile!.image);
+      _imageBytes = base64ToImage(currentUserProfile!.image?? '');
     } else {
       _imageBytes = base64ToImage(defaultBase64Avatar);
     }
@@ -133,7 +133,7 @@ class _EditInfoState extends State<EditInfo> {
         image: '',
         age: '',
         gender: '',
-        seeking: {},
+        seeking: Seeking(),
         uploads: [],
         email: '',
       ),
