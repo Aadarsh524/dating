@@ -36,7 +36,7 @@ class UserProfileProvider extends ChangeNotifier {
         notifyListeners();
         return userProfileModel;
       } else {
-        throw Exception('Cant upload');
+        throw Exception('Cant upload data');
       }
     } catch (e) {
       rethrow;
@@ -64,37 +64,51 @@ class UserProfileProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateUserProfile(UserProfileModel updatedProfile) async {
+  Future<UserProfileModel> updateUserProfile(
+      UserProfileModel updatedProfile) async {
     try {
       final url = Uri.parse(
           'http://10.0.2.2:8001/api/userprofile/${updatedProfile.uid}');
       final response = await http.put(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'access_token': 'accesstokentest'
+        },
         body: jsonEncode(updatedProfile.toJson()),
       );
 
       if (response.statusCode == 200) {
-        _currentUserProfileProvider = updatedProfile;
+        setCurrentUserProfile(updatedProfile);
         notifyListeners();
+        return updatedProfile;
       } else {
         throw Exception('Failed to update user profile');
       }
     } catch (error) {
-      print('Error updating user profile: $error');
+      rethrow;
     }
   }
 
   Future<void> updateProfileImage(String base64image, String uid) async {
     try {
+      print(jsonEncode(base64image));
       var response = await http.put(
-        Uri.parse('http://10.0.2.2:8001/api/userprofile/Image/$uid'),
+        Uri.parse('http://10.0.2.2:8001/api/UserProfile/Image/$uid'),
         body: jsonEncode(base64image),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'access_token': 'accesstokentest'
+        },
       );
 
       if (response.statusCode == 200) {
         _currentUserProfileProvider!.image = base64image;
+        print("correct status code");
+        setCurrentUserProfile(_currentUserProfileProvider!);
+        getUserData(uid);
         notifyListeners();
       } else {
         print('Failed to update profile image: ${response.statusCode}');

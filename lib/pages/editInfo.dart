@@ -64,22 +64,15 @@ class _EditInfoState extends State<EditInfo> {
 
   @override
   void initState() {
-    super.initState();
-
-    initializeUserData();
-  }
-
-  Future<void> initializeUserData() async {
     UserProfileModel? userProfileModel =
         Provider.of<UserProfileProvider>(context, listen: false)
             .currentUserProfile;
 
     if (userProfileModel?.name != null && userProfileModel!.name!.isNotEmpty) {
-      print("name ismpty xa rw?");
       _textName = userProfileModel.name!;
       _controllerName.text = _textName;
     } else {
-      _textName = 'Enter Name';
+      _textName = "Enter Name";
     }
 
     if (userProfileModel?.address != null &&
@@ -87,7 +80,7 @@ class _EditInfoState extends State<EditInfo> {
       _textAddress = userProfileModel.address!;
       _controllerAddress.text = _textAddress;
     } else {
-      _textName = 'Enter Address';
+      _textAddress = 'Enter Address';
     }
 
     if (userProfileModel?.bio != null && userProfileModel!.bio!.isNotEmpty) {
@@ -116,33 +109,37 @@ class _EditInfoState extends State<EditInfo> {
     _controllerAddress.text = _textAddress;
     _controllerBio.text = _textBio;
     _controllerInterests.text = _textInterests;
-    setState(() {});
+
+    super.initState();
   }
 
-  void _saveChanges() {
+  Future<void> _saveChanges() async {
     // Update data in the provider
-    UserProfileProvider userProvider = context.read<UserProfileProvider>();
+    UserProfileModel? userProfileModel =
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .currentUserProfile;
 
     _textName = _controllerName.text;
     _textAddress = _controllerAddress.text;
-    _textBio = _controllerBio.text = _textBio;
+    _textBio = _controllerBio.text;
     _textInterests = _controllerInterests.text;
-    userProvider.updateUserProfile(
-      UserProfileModel(
-        name: _textName,
-        address: _textAddress,
-        bio: _textBio,
-        interests: _textInterests,
-        uid: user!.uid,
-        image: '',
-        age: '',
-        gender: '',
-        seeking: Seeking(age: '', gender: ''),
-        uploads: [],
-        email: '',
-      ),
+
+    final UserProfileModel newUser = UserProfileModel(
+      uid: user!.uid,
+      name: _textName,
+      email: userProfileModel!.email ?? '',
+      gender: userProfileModel.gender ?? '',
+      image: userProfileModel.image ?? '',
+      age: userProfileModel.age ?? '',
+      bio: _textBio,
+      address: _textAddress,
+      interests: _textInterests,
+      seeking: Seeking(age: '', gender: ''),
+      uploads: [],
     );
-    print(userProvider.currentUserProfile?.name);
+
+    await context.read<UserProfileProvider>().updateUserProfile(newUser);
+    await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
 
     // Exit editing mode
     setState(() {
@@ -169,8 +166,6 @@ class _EditInfoState extends State<EditInfo> {
   }
 
   void pickImage() async {
-    UserProfileProvider userProvider = context.read<UserProfileProvider>();
-    // Request storage permission if needed
     final storageStatus = await Permission.storage.request();
     if (!storageStatus.isGranted) {
       throw Exception('Storage permission is required to upload the image.');
@@ -186,11 +181,10 @@ class _EditInfoState extends State<EditInfo> {
       File imageFile = File(result.files.single.path!);
 
       String base64 = convertIntoBase64(imageFile);
-      print(base64);
       _imageBytes = base64ToImage(base64);
-
-      // Update user profile model with the base64 image
-      userProvider.updateProfileImage(base64, user!.uid);
+      await context
+          .read<UserProfileProvider>()
+          .updateProfileImage(base64, user!.uid);
     } else {
       // Handle cases like user canceling the selection or errors
       print('No image selected.');

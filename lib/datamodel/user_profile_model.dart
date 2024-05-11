@@ -90,7 +90,7 @@ class Uploads {
   String? name;
   String? uploadDate;
 
-  Uploads({this.file, this.name, this.uploadDate});
+  Uploads({required this.file, required this.name, required this.uploadDate});
 
   Uploads.fromJson(Map<String, dynamic> json) {
     file = json['file'];
