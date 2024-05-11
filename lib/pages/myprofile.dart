@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
-import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/editInfo.dart';
@@ -53,6 +52,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
   // }
 
   Uint8List? _imageBytes;
+  List<Uploads> allUploads = [];
 
   Uint8List base64ToImage(String? base64String) {
     return base64Decode(base64String!);
@@ -64,7 +64,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
   String? address;
 
   pickImage() async {
-    UserProfileProvider userProvider = context.read<UserProfileProvider>();
+    UserProfileModel? userProfileModel =
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .currentUserProfile;
     // Request storage permission if needed
     final storageStatus = await Permission.storage.request();
     if (!storageStatus.isGranted) {
@@ -82,17 +84,21 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
       String base64 = convertIntoBase64(imageFile);
 
-      ApiClient().addUserMediaDataMobile(base64, user!.uid).then((value) => {
-            if (value == true)
-              {print("Media Added Successfully")}
-            else
-              {print("Media not Added")}
-          });
-      print(base64);
-      _imageBytes = base64ToImage(base64);
+      final UserProfileModel newUser = UserProfileModel(
+        uid: user!.uid,
+        name: userProfileModel!.name ?? '',
+        email: userProfileModel.email ?? '',
+        gender: userProfileModel.gender ?? '',
+        image: userProfileModel.image ?? '',
+        age: userProfileModel.age ?? '',
+        bio: userProfileModel.bio ?? '',
+        address: userProfileModel.address ?? '',
+        interests: userProfileModel.interests ?? '',
+        seeking: Seeking(age: '', gender: ''),
+        uploads: [Uploads(file: base64, name: 'post', uploadDate: 'today')],
+      );
 
-      // Update user profile model with the base64 image
-      userProvider.updateProfileImage(base64, user!.uid);
+      await context.read<UserProfileProvider>().updateUserProfile(newUser);
     } else {
       // Handle cases like user canceling the selection or errors
       print('No image selected.');
@@ -129,7 +135,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
     }
     if (userProfileModel?.address != null &&
         userProfileModel!.address!.isNotEmpty) {
-      print("k ho addres xa k nai");
       address = userProfileModel.address;
     } else {
       address = "Add aaddress";
@@ -140,6 +145,18 @@ class _MyProfilePageState extends State<MyProfilePage> {
     } else {
       gender = "Select your gender";
     }
+    if (userProfileModel?.uploads != null) {
+      for (var upload in userProfileModel!.uploads!) {
+        if (upload.file != null &&
+            upload.name != null &&
+            upload.uploadDate != null) {
+          allUploads.add(Uploads(
+              file: upload.file,
+              name: upload.name,
+              uploadDate: upload.uploadDate));
+        }
+      }
+    } else {}
   }
 
   @override
