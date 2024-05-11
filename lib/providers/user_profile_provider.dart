@@ -3,6 +3,7 @@ import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
+import 'package:dating/backend/MongoDB/constants.dart';
 
 class UserProfileProvider extends ChangeNotifier {
   ApiClient apiClient = ApiClient();
@@ -14,50 +15,51 @@ class UserProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<UserProfileModel> addNewUser(
-      UserProfileModel userProfile, BuildContext context) async {
-    try {
-      final UserProfileModel? value =
-          await apiClient.postUserProfileDataMobile(userProfile);
+  UserProfileModel? get currentUserProfile => _currentUserProfileProvider;
 
-      if (value != null) {
+  Future<UserProfileModel> addNewUser(
+      UserProfileModel userProfileModel, BuildContext context) async {
+    try {
+      setCurrentUserProfile(userProfileModel);
+      final response = await http.post(
+        Uri.parse('$URI/user'), // Replace with your API endpoint
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'access_token': 'accesstokentest'
+        },
+
+        body: jsonEncode(userProfileModel.toJson()),
+      );
+      if (response.statusCode == 200) {
+        setCurrentUserProfile(userProfileModel);
         notifyListeners();
-        return value;
+        return userProfileModel;
       } else {
         throw Exception('Cant upload');
       }
     } catch (e) {
-      print("error:$e");
       rethrow;
     }
   }
 
-  UserProfileModel? get currentUserProfile => _currentUserProfileProvider;
-
-  Future<UserProfileModel>? getUserData(String uid) async {
+  Future<UserProfileModel?> getUserData(String uid) async {
     try {
-      // Wait for the result of getUserProfileDataMobile using await
-      final UserProfileModel? value =
-          await apiClient.getUserProfileDataMobile(uid);
-
-      // Check if the value is not null
-      if (value != null) {
-        // Set the current user profile
-        setCurrentUserProfile(value);
-
-        // Notify listeners of the change
+      final response = await http.get(
+        Uri.parse('$URI/User/$uid'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'access_token': 'accesstokentest'
+        },
+      );
+      if (response.statusCode == 200) {
         notifyListeners();
-
-        // Return the UserProfileModel
-        return value;
+        return UserProfileModel.fromJson(json.decode(response.body));
       } else {
-        // If the value is null, throw an exception
-        throw Exception('User profile data is null');
+        return null;
       }
-    } catch (error) {
-      // Print error message if an error occurs
-      print('Error fetching data: $error');
-      // Rethrow the error to propagate it to the caller
+    } catch (e) {
       rethrow;
     }
   }

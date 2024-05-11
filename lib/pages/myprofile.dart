@@ -54,14 +54,14 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Uint8List? _imageBytes;
 
-  Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
+  Uint8List base64ToImage(String? base64String) {
+    return base64Decode(base64String!);
   }
 
   late UserProfileModel userProfileModel;
-  late String username;
-  late String gender;
-  late String address;
+  String? username;
+  String? gender;
+  String? address;
 
   pickImage() async {
     UserProfileProvider userProvider = context.read<UserProfileProvider>();
@@ -116,23 +116,27 @@ class _MyProfilePageState extends State<MyProfilePage> {
     UserProfileModel? userProfileModel =
         Provider.of<UserProfileProvider>(context, listen: false)
             .currentUserProfile;
-    if (userProfileModel?.image != null&& userProfileModel!.image!.isNotEmpty) {
-      _imageBytes = base64ToImage(userProfileModel.image?? '');
+    if (userProfileModel?.image != null &&
+        userProfileModel!.image!.isNotEmpty) {
+      _imageBytes = base64ToImage(userProfileModel.image);
     } else {
       _imageBytes = base64ToImage(defaultBase64Avatar);
     }
-    if (userProfileModel?.name != null) {
-      username = userProfileModel!.name ?? '';
+    if (userProfileModel?.name != null && userProfileModel!.name!.isNotEmpty) {
+      username = userProfileModel.name;
     } else {
       username = "Add Name";
     }
-    if (userProfileModel?.address != null) {
-      address = userProfileModel!.address ?? '';
+    if (userProfileModel?.address != null &&
+        userProfileModel!.address!.isNotEmpty) {
+      print("k ho addres xa k nai");
+      address = userProfileModel.address;
     } else {
       address = "Add aaddress";
     }
-    if (userProfileModel?.image != null) {
-      gender = userProfileModel!.gender ?? '';
+    if (userProfileModel?.image != null &&
+        userProfileModel!.gender!.isNotEmpty) {
+      gender = userProfileModel.gender;
     } else {
       gender = "Select your gender";
     }
@@ -260,7 +264,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          username,
+                          username!,
                           style: AppTextStyles().primaryStyle,
                         ),
                         const SizedBox(width: 5),
@@ -287,7 +291,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              address,
+                              address!,
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],
@@ -308,7 +312,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              gender,
+                              gender!,
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],

@@ -32,10 +32,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
 
   Future<bool> _login(BuildContext context) async {
     String? result = await _authService.signInWithEmailAndPassword(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-      context
-    );
+        _emailController.text.trim(), _passwordController.text.trim(), context);
     bool flag = false;
 
     if (result != null) {
@@ -67,7 +64,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
           address: '',
           age: '',
           bio: '',
-          seeking: Seeking(),
+          seeking: Seeking(age: '', gender: ''),
           uploads: [],
           interests: '',
         );

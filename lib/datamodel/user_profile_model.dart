@@ -1,5 +1,4 @@
 class UserProfileModel {
-  String? id;
   String? uid;
   String? name;
   String? email;
@@ -13,8 +12,7 @@ class UserProfileModel {
   List<Uploads>? uploads;
 
   UserProfileModel(
-      {this.id,
-      this.uid,
+      {this.uid,
       this.name,
       this.email,
       this.gender,
@@ -27,7 +25,6 @@ class UserProfileModel {
       this.uploads});
 
   UserProfileModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
     uid = json['uid'];
     name = json['name'];
     email = json['email'];
@@ -37,8 +34,9 @@ class UserProfileModel {
     age = json['age'];
     bio = json['bio'];
     interests = json['interests'];
-    seeking =
-        json['seeking'] != null ? Seeking.fromJson(json['seeking']) : null;
+    seeking = json['seeking'] != null
+        ? Seeking.fromJson(json['seeking'])
+        : Seeking(age: '', gender: '');
     if (json['uploads'] != null) {
       uploads = <Uploads>[];
       json['uploads'].forEach((v) {
@@ -49,7 +47,6 @@ class UserProfileModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
     data['uid'] = uid;
     data['name'] = name;
     data['email'] = email;
@@ -73,7 +70,7 @@ class Seeking {
   String? age;
   String? gender;
 
-  Seeking({this.age, this.gender});
+  Seeking({required this.age, required this.gender});
 
   Seeking.fromJson(Map<String, dynamic> json) {
     age = json['age'];
@@ -89,15 +86,13 @@ class Seeking {
 }
 
 class Uploads {
-  String? id;
   String? file;
   String? name;
   String? uploadDate;
 
-  Uploads({this.id, this.file, this.name, this.uploadDate});
+  Uploads({this.file, this.name, this.uploadDate});
 
   Uploads.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
     file = json['file'];
     name = json['name'];
     uploadDate = json['uploadDate'];
@@ -105,7 +100,6 @@ class Uploads {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
     data['file'] = file;
     data['name'] = name;
     data['uploadDate'] = uploadDate;

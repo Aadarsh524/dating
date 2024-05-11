@@ -1,12 +1,10 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
-import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
@@ -22,7 +20,6 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -40,30 +37,36 @@ class _HomePageState extends State<HomePage> {
   String country = 'COUNTRY';
   String age = 'AGE';
   final AuthService _authService = AuthService();
-  // late UserProfileModel userProfileModel;
 
-  Future<UserProfileModel> fetchData() async {
-    String uid = user!.uid;
-    print(uid);
-    final url = Uri.parse('$URI/UserProfile/$uid');
-    var response = await http.get(url);
-    if (response.statusCode == 200) {
-      var decoded = jsonDecode(response.body);
-      log(decoded.toString());
-      UserProfileModel userProfileModel = UserProfileModel.fromJson(decoded);
-      return userProfileModel;
-    } else {
-      log('Failed to fetch data: ${response.statusCode}');
-      throw Exception('Failed to fetch data: ${response.statusCode}');
-    }
+  Uint8List? _imageBytes;
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
   }
 
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   fetchData();
-  // }
+  @override
+  void initState() {
+    context
+        .read<UserProfileProvider>()
+        .getUserData(user!.uid)
+        .then((value) async {
+      if (value != null) {
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .setCurrentUserProfile(value);
+        if (value.image != null && value.image!.isNotEmpty) {
+          _imageBytes = base64ToImage(value.image ?? '');
+        } else {
+          _imageBytes = base64ToImage(defaultBase64Avatar);
+        }
+        await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
+        await DbClient().setData(dbKey: "userName", value: value.name ?? '');
+
+        await DbClient().setData(dbKey: "email", value: value.email ?? '');
+      }
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -780,13 +783,16 @@ class _HomePageState extends State<HomePage> {
                 Row(
                   children: [
                     GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const MyProfilePage()));
-                        },
-                        child: ProfileButton()),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MyProfilePage()));
+                      },
+                      child: ProfileButton(
+                        imageBytes: _imageBytes, // Pass your image bytes here
+                      ),
+                    ),
                     const SizedBox(
                       width: 20,
                     ),
@@ -1335,12 +1341,12 @@ class _HomePageState extends State<HomePage> {
 // profile button
 // ignore: must_be_immutable
 class ProfileButton extends StatelessWidget {
-  UserProfileModel? userProfileModel;
-  Uint8List? _imageBytes;
+  final Uint8List? imageBytes;
 
-  ProfileButton({
-    super.key,
-  });
+  const ProfileButton({
+    Key? key,
+    this.imageBytes,
+  }) : super(key: key);
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
@@ -1348,16 +1354,6 @@ class ProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userProfileProvider =
-        Provider.of<UserProfileProvider>(context, listen: false);
-    userProfileModel = userProfileProvider.currentUserProfile;
-
-    if (userProfileModel?.image != null) {
-      _imageBytes = base64ToImage(userProfileModel!.image?? '');
-    } else {
-      _imageBytes = base64ToImage(defaultBase64Avatar);
-    }
-
     return Neumorphic(
       style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
@@ -1365,10 +1361,17 @@ class ProfileButton extends StatelessWidget {
       child: SizedBox(
           height: 50,
           width: 50,
-          child: Image.memory(
-            _imageBytes!,
-            fit: BoxFit.cover,
-          )),
+          child: imageBytes != null
+              ? Image.memory(
+                  imageBytes!,
+                  fit: BoxFit.cover,
+                )
+              : Image.memory(
+                  base64ToImage(defaultBase64Avatar),
+                  fit: BoxFit.cover,
+                )
+          // Placeholder for when imageBytes is null
+          ),
     );
   }
 }
