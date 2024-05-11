@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
@@ -107,7 +108,7 @@ class ApiClient {
     );
     if (response.statusCode == 200) {
       return userProfileModel;
-    } 
+    }
     return userProfileModel;
   }
 
@@ -142,6 +143,23 @@ class ApiClient {
       return true;
     } else {
       return false;
+    }
+  }
+
+  Future<DashboardResponseModel> dashboard(String uid, int page) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$URI/Dashboard/$uid&page=$page'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'access_token': 'accesstokentest'
+        },
+      );
+      return DashboardResponseModel.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      print(e.toString());
+      rethrow;
     }
   }
 }
