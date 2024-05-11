@@ -1,5 +1,7 @@
 // import 'package:dating/auth/signupMobile/signup.dart';
 
+
+
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/pages/homepage.dart';
@@ -27,10 +29,11 @@ class _LoginMobileState extends State<LoginMobile> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  Future<bool> _login() async {
+  Future<bool> _login(BuildContext context) async {
     String? result = await _authService.signInWithEmailAndPassword(
       _emailController.text.trim(),
       _passwordController.text.trim(),
+      context
     );
     bool flag = false;
 
@@ -214,7 +217,7 @@ class _LoginMobileState extends State<LoginMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _login().then((value) {
+                _login(context).then((value) {
                   if (value) {
                     Navigator.pushReplacement(
                         context,
@@ -255,7 +258,7 @@ class _LoginMobileState extends State<LoginMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _authService.signInWithGoogle().then((user) {
+                _authService.signInWithGoogle(context).then((user) {
                   if (user != null) {
                     // Sign-in successful, navigate to home page
                     Navigator.pushReplacement(context,

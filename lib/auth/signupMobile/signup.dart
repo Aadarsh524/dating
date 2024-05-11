@@ -1,5 +1,6 @@
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
@@ -33,8 +34,9 @@ class _SignUpMobileState extends State<SignUpMobile> {
     await dbClient.setData(dbKey: "age", value: _selectedAge);
   }
 
-  Future<void> _register() async {
-    bool? result = await _auth.registerWithEmailAndPassword(
+  Future<void> _register(BuildContext context) async {
+    UserProfileModel? result = await _auth.registerWithEmailAndPassword(
+      context,
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
       name: _nameController.text.trim(),
@@ -42,7 +44,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
       age: _selectedAge,
     );
 
-    if (result == true) {
+    if (result != null) {
       saveDataLocally();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -513,7 +515,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                 bool passwordsMatch =
                     _passwordController.text == _confirmpasswordController.text;
                 if (passwordsMatch) {
-                  _register();
+                  _register(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -552,7 +554,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
             height: 55,
             child: Button(
               onPressed: () {
-                _auth.signInWithGoogle().then((user) {
+                _auth.signInWithGoogle(context).then((user) {
                   if (user != null) {
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (_) => const HomePage()));

@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_profile_provider.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
@@ -30,10 +30,11 @@ class _LoginDesktopState extends State<LoginDesktop> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  Future<bool> _login() async {
+  Future<bool> _login(BuildContext context) async {
     String? result = await _authService.signInWithEmailAndPassword(
       _emailController.text.trim(),
       _passwordController.text.trim(),
+      context
     );
     bool flag = false;
 
@@ -66,7 +67,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
           address: '',
           age: '',
           bio: '',
-          seeking: {},
+          seeking: Seeking(),
           uploads: [],
           interests: '',
         );
@@ -75,9 +76,9 @@ class _LoginDesktopState extends State<LoginDesktop> {
         newUser.gender = userData['gender'];
         log("desktop");
         await DbClient().setData(dbKey: "uid", value: result);
-        await DbClient().setData(dbKey: "userName", value: newUser.name);
-        await DbClient().setData(dbKey: "gender", value: newUser.gender);
-        await DbClient().setData(dbKey: "email", value: newUser.email);
+        await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
+        await DbClient().setData(dbKey: "gender", value: newUser.gender ?? '');
+        await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
         log("userName: ${newUser.name}");
         log("email: ${newUser.email}");
         log("gender: ${newUser.gender}");
@@ -341,7 +342,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
                       height: 55,
                       child: Button(
                         onPressed: () {
-                          _login();
+                          _login(context);
                         },
                         text: 'Login',
                       ),
@@ -372,7 +373,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
                       height: 55,
                       child: Button(
                         onPressed: () {
-                          _authService.signInWithGoogle().then((user) {
+                          _authService.signInWithGoogle(context).then((user) {
                             if (user != null) {
                               // Sign-in successful, navigate to home page
                               Navigator.pushReplacement(

@@ -1,5 +1,6 @@
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
@@ -37,8 +38,9 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
     await dbClient.setData(dbKey: "age", value: _selectedAge);
   }
 
-  Future<void> _register() async {
-    String? result = await _auth.registerWithEmailAndPassword(
+  Future<void> _register(BuildContext context) async {
+    UserProfileModel? result = await _auth.registerWithEmailAndPassword(
+      context,
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
       name: _nameController.text.trim(),
@@ -46,28 +48,12 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
       age: _selectedAge,
     );
 
-    if (result == null) {
-      // Registration successful, show success message
-      saveDataLocally();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration successful!'),
-        ),
-      );
-
-      // Navigate to home page
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    } else {
-      // Registration failed, show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Registration error: $result'),
-        ),
-      );
-    }
+    // Registration failed, show error message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Registration error: $result'),
+      ),
+    );
   }
 
   @override
@@ -644,7 +630,7 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
                               _confirmpasswordController.text;
 
                           if (passwordsMatch) {
-                            _register();
+                            _register(context);
                             // context.read<UserProfileProvider>().setCurrentUserProfile(
                             //     _nameController.text,
                             //     _emailController.text,
@@ -686,7 +672,7 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
                       height: 55,
                       child: Button(
                         onPressed: () {
-                          _auth.signInWithGoogle().then((user) {
+                          _auth.signInWithGoogle(context).then((user) {
                             if (user != null) {
                               // Sign-in successful, navigate to home page
                               Navigator.pushReplacement(

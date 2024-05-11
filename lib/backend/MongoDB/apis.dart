@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_profile_provider.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
@@ -93,33 +93,35 @@ class ApiClient {
     }
   }
 
-  Future postUserProfileDataMobile(UserProfileModel userProfileModel) async {
+  Future<UserProfileModel>? postUserProfileDataMobile(
+      UserProfileModel userProfileModel) async {
     final response = await http.post(
+      Uri.parse('$URI/user'), // Replace with your API endpoint
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'access_token': 'accesstokentest'
       },
-      Uri.parse('$URI/UserProfile'), // Replace with your API endpoint
+
       body: jsonEncode(userProfileModel.toJson()),
     );
-    if (response.statusCode.toString() == "200") {
-      return true;
-    } else {
-      return false;
-    }
+    if (response.statusCode == 200) {
+      return userProfileModel;
+    } 
+    return userProfileModel;
   }
 
-  Future<String?> getUserProfileDataMobile(String uid) async {
+  Future<UserProfileModel?> getUserProfileDataMobile(String uid) async {
     final response = await http.get(
+      Uri.parse('$URI/User/$uid'),
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'access_token': 'accesstokentest'
       },
-      Uri.parse('$URI/UserProfile/$uid'), // Replace with your API endpoint
     );
     if (response.statusCode == 200) {
-      print(response.body);
-      return response.body;
+      return UserProfileModel.fromJson(json.decode(response.body));
     } else {
       return null;
     }
@@ -129,7 +131,8 @@ class ApiClient {
     final response = await http.post(
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'access_token': 'accesstokentest'
       },
       Uri.parse(
           '$URI/UserProfile/Image/$user.uid'), // Replace with your API endpoint
