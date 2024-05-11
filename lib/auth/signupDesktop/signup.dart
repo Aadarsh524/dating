@@ -1,6 +1,5 @@
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
-import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
@@ -38,8 +37,8 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
     await dbClient.setData(dbKey: "age", value: _selectedAge);
   }
 
-  Future<void> _register(BuildContext context) async {
-    UserProfileModel? result = await _auth.registerWithEmailAndPassword(
+  Future<bool> _register(BuildContext context) async {
+    bool result = await _auth.registerWithEmailAndPassword(
       context,
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
@@ -48,12 +47,7 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
       age: _selectedAge,
     );
 
-    // Registration failed, show error message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Registration error: $result'),
-      ),
-    );
+    return result;
   }
 
   @override

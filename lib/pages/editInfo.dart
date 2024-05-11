@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -38,7 +38,7 @@ class _EditInfoState extends State<EditInfo> {
 
   // for name
   final TextEditingController _controllerName = TextEditingController();
-  late String _textName;
+  String _textName = 'Enter Name';
   bool _isEditingName = false;
 
   // for address
@@ -70,40 +70,44 @@ class _EditInfoState extends State<EditInfo> {
   }
 
   Future<void> initializeUserData() async {
-    UserProfileProvider? userProfileProvider;
-    UserProfileModel? currentUserProfile;
-    userProfileProvider =
-        Provider.of<UserProfileProvider>(context, listen: false);
+    UserProfileModel? userProfileModel =
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .currentUserProfile;
 
-    userProfileProvider =
-        Provider.of<UserProfileProvider>(context, listen: false);
-    currentUserProfile = userProfileProvider.currentUserProfile;
-
-    if (currentUserProfile?.name != null) {
-      _textName = currentUserProfile!.name?? '';
+    if (userProfileModel?.name != null && userProfileModel!.name!.isNotEmpty) {
+      print("name ismpty xa rw?");
+      _textName = userProfileModel.name!;
       _controllerName.text = _textName;
-      log(_textName);
     } else {
       _textName = 'Enter Name';
     }
 
-    if (currentUserProfile?.address != null) {
-      _textAddress = currentUserProfile!.address ?? '';
+    if (userProfileModel?.address != null &&
+        userProfileModel!.address!.isNotEmpty) {
+      _textAddress = userProfileModel.address!;
       _controllerAddress.text = _textAddress;
+    } else {
+      _textName = 'Enter Address';
     }
 
-    if (currentUserProfile?.bio != null) {
-      _textBio = currentUserProfile!.bio?? ''; 
+    if (userProfileModel?.bio != null && userProfileModel!.bio!.isNotEmpty) {
+      _textBio = userProfileModel.bio!;
       _controllerBio.text = _textBio;
+    } else {
+      _textBio = 'Enter Bio';
     }
 
-    if (currentUserProfile?.interests != null) {
-      _textInterests = currentUserProfile!.interests?? '';
+    if (userProfileModel?.interests != null &&
+        userProfileModel!.interests!.isNotEmpty) {
+      _textInterests = userProfileModel.interests!;
       _controllerInterests.text = _textInterests;
+    } else {
+      _textInterests = 'Enter Interests';
     }
 
-    if (currentUserProfile?.image != null) {
-      _imageBytes = base64ToImage(currentUserProfile!.image?? '');
+    if (userProfileModel?.image != null &&
+        userProfileModel!.image!.isNotEmpty) {
+      _imageBytes = base64ToImage(userProfileModel.image);
     } else {
       _imageBytes = base64ToImage(defaultBase64Avatar);
     }
@@ -133,7 +137,7 @@ class _EditInfoState extends State<EditInfo> {
         image: '',
         age: '',
         gender: '',
-        seeking: Seeking(),
+        seeking: Seeking(age: '', gender: ''),
         uploads: [],
         email: '',
       ),
@@ -203,8 +207,8 @@ class _EditInfoState extends State<EditInfo> {
     return base64Encode(imageBytes);
   }
 
-  Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
+  Uint8List base64ToImage(String? base64String) {
+    return base64Decode(base64String!);
   }
 
   @override

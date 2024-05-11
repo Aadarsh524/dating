@@ -1,6 +1,4 @@
-import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
-import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/utils/colors.dart';
@@ -27,15 +25,14 @@ class _SignUpMobileState extends State<SignUpMobile> {
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
 
-  Future<void> saveDataLocally() async {
-    DbClient dbClient = DbClient();
-    await dbClient.setData(dbKey: "userName", value: _nameController.text);
-    await dbClient.setData(dbKey: "gender", value: selectedGender!);
-    await dbClient.setData(dbKey: "age", value: _selectedAge);
-  }
-
-  Future<void> _register(BuildContext context) async {
-    UserProfileModel? result = await _auth.registerWithEmailAndPassword(
+  Future<bool> _register(BuildContext context) async {
+    // String? seekingGender;
+    // if (selectedGender == "Male") {
+    //   seekingGender = "Female";
+    // }else{
+    //   seekingGender = "Male";
+    // }
+    bool result = await _auth.registerWithEmailAndPassword(
       context,
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
@@ -44,8 +41,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
       age: _selectedAge,
     );
 
-    if (result != null) {
-      saveDataLocally();
+    if (result) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration successful!'),
@@ -63,6 +59,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
         ),
       );
     }
+    return false;
   }
 
   @override
@@ -153,7 +150,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedGender = 'male';
+                            selectedGender = 'Male';
                           });
                         },
                         child: Container(
@@ -162,7 +159,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: selectedGender == 'male'
+                              color: selectedGender == 'Male'
                                   ? Colors.blue // Border color when selected
                                   : Colors
                                       .transparent, // Border color when not selected
@@ -180,7 +177,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                             child: Center(
                               child: Icon(
                                 Icons.male,
-                                color: selectedGender == 'male'
+                                color: selectedGender == 'Male'
                                     ? Colors.blue
                                     : Colors.grey,
                               ),
@@ -196,7 +193,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedGender = 'female';
+                            selectedGender = 'Female';
                           });
                         },
                         child: Container(
@@ -205,7 +202,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: selectedGender == 'female'
+                              color: selectedGender == 'Female'
                                   ? Colors.blue // Border color when selected
                                   : Colors
                                       .transparent, // Border color when not selected
@@ -223,7 +220,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                             child: Center(
                               child: Icon(
                                 Icons.female,
-                                color: selectedGender == 'female'
+                                color: selectedGender == 'Female'
                                     ? Colors.blue
                                     : Colors.grey,
                               ),
@@ -266,7 +263,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedGender = 'female';
+                            selectedGender = 'Female';
                           });
                         },
                         child: Container(
@@ -275,7 +272,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: selectedGender == 'female'
+                              color: selectedGender == 'Female'
                                   ? Colors.blue // Border color when selected
                                   : Colors
                                       .transparent, // Border color when not selected
@@ -293,7 +290,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                             child: Center(
                               child: Icon(
                                 Icons.male,
-                                color: selectedGender == 'female'
+                                color: selectedGender == 'Female'
                                     ? Colors.blue
                                     : Colors.grey,
                               ),
@@ -309,7 +306,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedGender = 'male';
+                            selectedGender = 'Male';
                           });
                         },
                         child: Container(
@@ -318,7 +315,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: selectedGender == 'male'
+                              color: selectedGender == 'Male'
                                   ? Colors.blue // Border color when selected
                                   : Colors
                                       .transparent, // Border color when not selected
@@ -336,7 +333,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                             child: Center(
                               child: Icon(
                                 Icons.female,
-                                color: selectedGender == 'male'
+                                color: selectedGender == 'Male'
                                     ? Colors.blue
                                     : Colors.grey,
                               ),
