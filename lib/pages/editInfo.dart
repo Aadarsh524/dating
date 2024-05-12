@@ -98,9 +98,9 @@ class _EditInfoState extends State<EditInfo> {
       _textInterests = 'Enter Interests';
     }
 
-    if (userProfileModel?.image != null &&
-        userProfileModel!.image!.isNotEmpty) {
-      _imageBytes = base64ToImage(userProfileModel.image);
+    if (userProfileModel?.profile_image != null &&
+        userProfileModel!.profile_image!.isNotEmpty) {
+      _imageBytes = base64ToImage(userProfileModel.profile_image);
     } else {
       _imageBytes = base64ToImage(defaultBase64Avatar);
     }
@@ -129,7 +129,7 @@ class _EditInfoState extends State<EditInfo> {
       name: _textName,
       email: userProfileModel!.email ?? '',
       gender: userProfileModel.gender ?? '',
-      image: userProfileModel.image ?? '',
+      profile_image: userProfileModel.profile_image ?? '',
       age: userProfileModel.age ?? '',
       bio: _textBio,
       address: _textAddress,

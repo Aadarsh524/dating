@@ -1,4 +1,3 @@
-// import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -17,7 +16,6 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:dating/widgets/textField.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -89,13 +87,15 @@ class _MyProfilePageState extends State<MyProfilePage> {
         name: userProfileModel!.name ?? '',
         email: userProfileModel.email ?? '',
         gender: userProfileModel.gender ?? '',
-        image: userProfileModel.image ?? '',
+        profile_image: userProfileModel.profile_image ?? '',
         age: userProfileModel.age ?? '',
         bio: userProfileModel.bio ?? '',
         address: userProfileModel.address ?? '',
         interests: userProfileModel.interests ?? '',
         seeking: Seeking(age: '', gender: ''),
-        uploads: [Uploads(file: base64, name: 'post', uploadDate: 'today')],
+        uploads: [
+          Uploads(file: base64, name: 'imageFile.', uploadDate: 'today')
+        ],
       );
 
       await context.read<UserProfileProvider>().updateUserProfile(newUser);
@@ -122,9 +122,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
     UserProfileModel? userProfileModel =
         Provider.of<UserProfileProvider>(context, listen: false)
             .currentUserProfile;
-    if (userProfileModel?.image != null &&
-        userProfileModel!.image!.isNotEmpty) {
-      _imageBytes = base64ToImage(userProfileModel.image);
+    if (userProfileModel?.profile_image != null &&
+        userProfileModel!.profile_image!.isNotEmpty) {
+      _imageBytes = base64ToImage(userProfileModel.profile_image);
     } else {
       _imageBytes = base64ToImage(defaultBase64Avatar);
     }
@@ -139,7 +139,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
     } else {
       address = "Add aaddress";
     }
-    if (userProfileModel?.image != null &&
+    if (userProfileModel?.profile_image != null &&
         userProfileModel!.gender!.isNotEmpty) {
       gender = userProfileModel.gender;
     } else {
@@ -154,6 +154,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
               file: upload.file,
               name: upload.name,
               uploadDate: upload.uploadDate));
+          print(allUploads);
         }
       }
     } else {}
@@ -179,14 +180,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
   }
 
   Widget MobileProfile() {
-    List<String> photoAssetPaths = [
-      AppImages.profile, // Main photo
-      AppImages.loginimage,
-      AppImages.profile,
-      AppImages.profile,
-      // Small photo 3
-    ];
-
     return Scaffold(
       body: Column(children: [
         const SizedBox(
@@ -534,38 +527,50 @@ class _MyProfilePageState extends State<MyProfilePage> {
               //
 
               // images
-
               SizedBox(
                 width: double.infinity,
                 height: 300,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Number of items per row
-                      crossAxisSpacing: 15, // Horizontal spacing between items
-                      mainAxisSpacing: 15, // Vertical spacing between rows
-                    ),
-                    itemCount: photoAssetPaths.length,
-                    itemBuilder: (context, index) {
-                      return Neumorphic(
-                        style: NeumorphicStyle(
-                          boxShape: NeumorphicBoxShape.roundRect(
-                              BorderRadius.circular(16)),
-                          depth: 5,
-                          intensity: 0.75,
+                  child: Consumer<UserProfileProvider>(
+                    builder: (context, userProfileProvider, _) {
+                      UserProfileModel? userProfileModel =
+                          Provider.of<UserProfileProvider>(context,
+                                  listen: false)
+                              .currentUserProfile;
+                      final alluploads = userProfileModel!.uploads;
+                      return GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2, // Number of items per row
+                          crossAxisSpacing:
+                              15, // Horizontal spacing between items
+                          mainAxisSpacing: 15, // Vertical spacing between rows
                         ),
-                        child: Container(
-                          height: 500,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            image: DecorationImage(
-                              image: AssetImage(photoAssetPaths[index]),
-                              fit: BoxFit.cover,
+                        itemCount: alluploads!.length,
+                        itemBuilder: (context, index) {
+                          final upload = alluploads[index];
+                          return Neumorphic(
+                            style: NeumorphicStyle(
+                              boxShape: NeumorphicBoxShape.roundRect(
+                                BorderRadius.circular(16),
+                              ),
+                              depth: 5,
+                              intensity: 0.75,
                             ),
-                          ),
-                        ),
+                            child: Container(
+                              height: 500,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                image: DecorationImage(
+                                  image: MemoryImage(base64ToImage(upload
+                                      .file)), // Using NetworkImage for network images
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
