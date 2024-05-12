@@ -91,6 +91,31 @@ class UserProfileProvider extends ChangeNotifier {
     }
   }
 
+  Future<Uploads> uploadPost(Uploads newUpload, String uid) async {
+    try {
+      final url = Uri.parse('http://10.0.2.2:8001/api/file');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'access_token': 'accesstokentest'
+        },
+        body: jsonEncode(newUpload.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        getUserData(uid);
+        notifyListeners();
+        return newUpload;
+      } else {
+        throw Exception('Failed to update user profile');
+      }
+    } catch (error) {
+      rethrow;
+    }
+  }
+
   Future<void> updateProfileImage(String base64image, String uid) async {
     try {
       var response = await http.put(

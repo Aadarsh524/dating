@@ -60,7 +60,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
           name: '',
           email: '',
           gender: '',
-          profile_image: '',
+          image: '',
           address: '',
           age: '',
           bio: '',
