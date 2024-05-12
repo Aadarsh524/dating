@@ -93,7 +93,7 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<Uploads> uploadPost(Uploads newUpload, String uid) async {
     try {
-      final url = Uri.parse('http://10.0.2.2:8001/api/file');
+      final url = Uri.parse('http://10.0.2.2:8001/api/file?UserID=$uid');
       final response = await http.post(
         url,
         headers: {
@@ -105,7 +105,13 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        getUserData(uid);
+        getUserData(uid).then(
+          (value) {
+            if (value != null) {
+              setCurrentUserProfile(value);
+            }
+          },
+        );
         notifyListeners();
         return newUpload;
       } else {
