@@ -93,10 +93,9 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<void> updateProfileImage(String base64image, String uid) async {
     try {
-      print(jsonEncode(base64image));
       var response = await http.put(
         Uri.parse('http://10.0.2.2:8001/api/UserProfile/Image/$uid'),
-        body: jsonEncode(base64image),
+        body: jsonEncode(base64image.toString()),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -105,14 +104,15 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        _currentUserProfileProvider!.image = base64image;
-        print("correct status code");
-        setCurrentUserProfile(_currentUserProfileProvider!);
-        getUserData(uid);
+        getUserData(uid).then(
+          (value) {
+            if (value != null) {
+              setCurrentUserProfile(value);
+            }
+          },
+        );
         notifyListeners();
-      } else {
-        print('Failed to update profile image: ${response.statusCode}');
-      }
+      } else {}
     } catch (error) {
       print('Error updating profile image: $error');
     }

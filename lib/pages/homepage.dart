@@ -53,8 +53,8 @@ class _HomePageState extends State<HomePage> {
       if (value != null) {
         Provider.of<UserProfileProvider>(context, listen: false)
             .setCurrentUserProfile(value);
-        if (value.image != null && value.image!.isNotEmpty) {
-          _imageBytes = base64ToImage(value.image ?? '');
+        if (value.profile_image != null && value.profile_image!.isNotEmpty) {
+          _imageBytes = base64ToImage(value.profile_image ?? '');
         } else {
           _imageBytes = base64ToImage(defaultBase64Avatar);
         }

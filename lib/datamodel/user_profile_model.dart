@@ -3,7 +3,7 @@ class UserProfileModel {
   String? name;
   String? email;
   String? gender;
-  String? image;
+  String? profile_image;
   String? address;
   String? age;
   String? bio;
@@ -16,7 +16,7 @@ class UserProfileModel {
       this.name,
       this.email,
       this.gender,
-      this.image,
+      this.profile_image,
       this.address,
       this.age,
       this.bio,
@@ -29,7 +29,7 @@ class UserProfileModel {
     name = json['name'];
     email = json['email'];
     gender = json['gender'];
-    image = json['image'];
+    profile_image = json['profile_image'];
     address = json['address'];
     age = json['age'];
     bio = json['bio'];
@@ -51,7 +51,7 @@ class UserProfileModel {
     data['name'] = name;
     data['email'] = email;
     data['gender'] = gender;
-    data['image'] = image;
+    data['image'] = profile_image;
     data['address'] = address;
     data['age'] = age;
     data['bio'] = bio;
