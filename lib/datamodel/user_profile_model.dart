@@ -3,7 +3,7 @@ class UserProfileModel {
   String? name;
   String? email;
   String? gender;
-  String? profile_image;
+  String? image;
   String? address;
   String? age;
   String? bio;
@@ -16,7 +16,7 @@ class UserProfileModel {
       this.name,
       this.email,
       this.gender,
-      this.profile_image,
+      this.image,
       this.address,
       this.age,
       this.bio,
@@ -29,7 +29,7 @@ class UserProfileModel {
     name = json['name'];
     email = json['email'];
     gender = json['gender'];
-    profile_image = json['profile_image'];
+    image = json['profile_image'];
     address = json['address'];
     age = json['age'];
     bio = json['bio'];
@@ -51,7 +51,7 @@ class UserProfileModel {
     data['name'] = name;
     data['email'] = email;
     data['gender'] = gender;
-    data['image'] = profile_image;
+    data['image'] = image;
     data['address'] = address;
     data['age'] = age;
     data['bio'] = bio;
@@ -86,13 +86,19 @@ class Seeking {
 }
 
 class Uploads {
+  String? userId;
   String? file;
   String? name;
   String? uploadDate;
 
-  Uploads({required this.file, required this.name, required this.uploadDate});
+  Uploads(
+      {required this.userId,
+      required this.file,
+      required this.name,
+      required this.uploadDate});
 
   Uploads.fromJson(Map<String, dynamic> json) {
+    userId = json['userId'];
     file = json['file'];
     name = json['name'];
     uploadDate = json['uploadDate'];
@@ -100,6 +106,7 @@ class Uploads {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    data['userId'] = userId;
     data['file'] = file;
     data['name'] = name;
     data['uploadDate'] = uploadDate;

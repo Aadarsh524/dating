@@ -62,9 +62,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
   String? address;
 
   pickImage() async {
-    UserProfileModel? userProfileModel =
-        Provider.of<UserProfileProvider>(context, listen: false)
-            .currentUserProfile;
+    DateTime today = DateTime.now();
+    DateTime currentDate = DateTime(today.year, today.month, today.day);
     // Request storage permission if needed
     final storageStatus = await Permission.storage.request();
     if (!storageStatus.isGranted) {
@@ -82,23 +81,15 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
       String base64 = convertIntoBase64(imageFile);
 
-      final UserProfileModel newUser = UserProfileModel(
-        uid: user!.uid,
-        name: userProfileModel!.name ?? '',
-        email: userProfileModel.email ?? '',
-        gender: userProfileModel.gender ?? '',
-        profile_image: userProfileModel.profile_image ?? '',
-        age: userProfileModel.age ?? '',
-        bio: userProfileModel.bio ?? '',
-        address: userProfileModel.address ?? '',
-        interests: userProfileModel.interests ?? '',
-        seeking: Seeking(age: '', gender: ''),
-        uploads: [
-          Uploads(file: base64, name: 'imageFile.', uploadDate: 'today')
-        ],
-      );
+      final newUpload = Uploads(
+          userId: user!.uid.toString(),
+          file: base64.toString(),
+          name: 'Post',
+          uploadDate: currentDate.toString());
 
-      await context.read<UserProfileProvider>().updateUserProfile(newUser);
+      await context
+          .read<UserProfileProvider>()
+          .uploadPost(newUpload, user!.uid);
     } else {
       // Handle cases like user canceling the selection or errors
       print('No image selected.');
@@ -122,9 +113,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
     UserProfileModel? userProfileModel =
         Provider.of<UserProfileProvider>(context, listen: false)
             .currentUserProfile;
-    if (userProfileModel?.profile_image != null &&
-        userProfileModel!.profile_image!.isNotEmpty) {
-      _imageBytes = base64ToImage(userProfileModel.profile_image);
+    if (userProfileModel?.image != null &&
+        userProfileModel!.image!.isNotEmpty) {
+      _imageBytes = base64ToImage(userProfileModel.image);
     } else {
       _imageBytes = base64ToImage(defaultBase64Avatar);
     }
@@ -139,7 +130,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
     } else {
       address = "Add aaddress";
     }
-    if (userProfileModel?.profile_image != null &&
+    if (userProfileModel?.image != null &&
         userProfileModel!.gender!.isNotEmpty) {
       gender = userProfileModel.gender;
     } else {
@@ -151,6 +142,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
             upload.name != null &&
             upload.uploadDate != null) {
           allUploads.add(Uploads(
+              userId: user!.uid,
               file: upload.file,
               name: upload.name,
               uploadDate: upload.uploadDate));
