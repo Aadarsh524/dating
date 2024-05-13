@@ -16,13 +16,11 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/user_profile_provider.dart';
 
 class MyProfilePage extends StatefulWidget {
@@ -49,17 +47,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
   //   });
   // }
 
-  Uint8List? _imageBytes;
   List<Uploads> allUploads = [];
 
   Uint8List base64ToImage(String? base64String) {
     return base64Decode(base64String!);
   }
-
-  late UserProfileModel userProfileModel;
-  String? username;
-  String? gender;
-  String? address;
 
   pickImage() async {
     DateTime today = DateTime.now();
@@ -104,52 +96,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   String imageToBase64(Uint8List imageBytes) {
     return base64Encode(imageBytes);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    UserProfileModel? userProfileModel =
-        Provider.of<UserProfileProvider>(context, listen: false)
-            .currentUserProfile;
-    if (userProfileModel?.image != null &&
-        userProfileModel!.image!.isNotEmpty) {
-      _imageBytes = base64ToImage(userProfileModel.image);
-    } else {
-      _imageBytes = base64ToImage(defaultBase64Avatar);
-    }
-    if (userProfileModel?.name != null && userProfileModel!.name!.isNotEmpty) {
-      username = userProfileModel.name;
-    } else {
-      username = "Add Name";
-    }
-    if (userProfileModel?.address != null &&
-        userProfileModel!.address!.isNotEmpty) {
-      address = userProfileModel.address;
-    } else {
-      address = "Add aaddress";
-    }
-    if (userProfileModel?.image != null &&
-        userProfileModel!.gender!.isNotEmpty) {
-      gender = userProfileModel.gender;
-    } else {
-      gender = "Select your gender";
-    }
-    if (userProfileModel?.uploads != null) {
-      for (var upload in userProfileModel!.uploads!) {
-        if (upload.file != null &&
-            upload.name != null &&
-            upload.uploadDate != null) {
-          allUploads.add(Uploads(
-              userId: user!.uid,
-              file: upload.file,
-              name: upload.name,
-              uploadDate: upload.uploadDate));
-          print(allUploads);
-        }
-      }
-    } else {}
   }
 
   @override
@@ -237,18 +183,35 @@ class _MyProfilePageState extends State<MyProfilePage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(1000),
                     ),
-                    child: Neumorphic(
-                        style: NeumorphicStyle(
-                          boxShape: NeumorphicBoxShape.roundRect(
-                              BorderRadius.circular(1000)),
-                          depth: 10,
-                          intensity: 0.5,
-                        ),
-                        // ignore: unnecessary_null_comparison
-                        child: Image.memory(
-                          _imageBytes!,
-                          fit: BoxFit.cover,
-                        )),
+                    child: Consumer<UserProfileProvider>(
+                      builder: (context, imageProvider, _) {
+                        UserProfileModel? userProfileModel =
+                            Provider.of<UserProfileProvider>(context,
+                                    listen: false)
+                                .currentUserProfile;
+                        return Neumorphic(
+                          style: NeumorphicStyle(
+                            boxShape: NeumorphicBoxShape.roundRect(
+                              BorderRadius.circular(1000),
+                            ),
+                            depth: 10,
+                            intensity: 0.5,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(1000),
+                            child: userProfileModel!.image != null
+                                ? Image.memory(
+                                    base64ToImage(userProfileModel.image),
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.memory(
+                                    base64ToImage(defaultBase64Avatar),
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -258,91 +221,99 @@ class _MyProfilePageState extends State<MyProfilePage> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // name
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                child: Consumer<UserProfileProvider>(
+                  builder: (context, userDataProvider, _) {
+                    UserProfileModel? userProfileModel =
+                        Provider.of<UserProfileProvider>(context, listen: false)
+                            .currentUserProfile;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          username!,
-                          style: AppTextStyles().primaryStyle,
-                        ),
-                        const SizedBox(width: 5),
-                        const Icon(Icons.female)
-                      ],
-                    ),
-
-                    // location and other details
-                    const SizedBox(
-                      height: 10,
-                    ),
-
-                    Column(
-                      children: [
-                        // location
+                        // name
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.location_on_outlined,
-                              color: AppColors.secondaryColor,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
                             Text(
-                              address!,
-                              style: AppTextStyles().secondaryStyle,
-                            )
+                              userProfileModel!.name ?? 'Add your Name',
+                              style: AppTextStyles().primaryStyle,
+                            ),
+                            const SizedBox(width: 5),
+                            const Icon(Icons.female)
                           ],
                         ),
+
+                        // location and other details
                         const SizedBox(
-                          height: 5,
-                        ),
-                        // relationship status
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.female,
-                              color: AppColors.secondaryColor,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              gender!,
-                              style: AppTextStyles().secondaryStyle,
-                            )
-                          ],
+                          height: 10,
                         ),
 
-                        // seeking
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Column(
                           children: [
-                            const Icon(
-                              Icons.search,
-                              color: AppColors.secondaryColor,
+                            // location
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.location_on_outlined,
+                                  color: AppColors.secondaryColor,
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  userProfileModel.address ?? 'Add you Address',
+                                  style: AppTextStyles().secondaryStyle,
+                                )
+                              ],
                             ),
                             const SizedBox(
-                              width: 5,
+                              height: 5,
                             ),
-                            Text(
-                              "Seeking Male 21-39",
-                              style: AppTextStyles().secondaryStyle,
-                            )
+                            // relationship status
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.female,
+                                  color: AppColors.secondaryColor,
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  userProfileModel.gender ??
+                                      'Specify Your Gender',
+                                  style: AppTextStyles().secondaryStyle,
+                                )
+                              ],
+                            ),
+
+                            // seeking
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.search,
+                                  color: AppColors.secondaryColor,
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  "Seeking Female 21-39",
+                                  style: AppTextStyles().secondaryStyle,
+                                )
+                              ],
+                            ),
                           ],
-                        ),
+                        )
                       ],
-                    )
-                  ],
+                    );
+                  },
                 ),
               ),
 
@@ -531,39 +502,46 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                   listen: false)
                               .currentUserProfile;
                       final alluploads = userProfileModel!.uploads;
-                      return GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2, // Number of items per row
-                          crossAxisSpacing:
-                              15, // Horizontal spacing between items
-                          mainAxisSpacing: 15, // Vertical spacing between rows
-                        ),
-                        itemCount: alluploads!.length,
-                        itemBuilder: (context, index) {
-                          final upload = alluploads[index];
-                          return Neumorphic(
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.roundRect(
-                                BorderRadius.circular(16),
+                      if (alluploads != null) {
+                        List<Uploads> reversedUploads =
+                            alluploads.reversed.toList();
+                        return GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2, // Number of items per row
+                            crossAxisSpacing:
+                                15, // Horizontal spacing between items
+                            mainAxisSpacing:
+                                15, // Vertical spacing between rows
+                          ),
+                          itemCount: alluploads.length,
+                          itemBuilder: (context, index) {
+                            final upload = reversedUploads[index];
+                            return Neumorphic(
+                              style: NeumorphicStyle(
+                                boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(16),
+                                ),
+                                depth: 5,
+                                intensity: 0.75,
                               ),
-                              depth: 5,
-                              intensity: 0.75,
-                            ),
-                            child: Container(
-                              height: 500,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                image: DecorationImage(
-                                  image: MemoryImage(base64ToImage(upload
-                                      .file)), // Using NetworkImage for network images
-                                  fit: BoxFit.cover,
+                              child: Container(
+                                height: 500,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  image: DecorationImage(
+                                    image: MemoryImage(base64ToImage(upload
+                                        .file)), // Using NetworkImage for network images
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      );
+                            );
+                          },
+                        );
+                      } else {
+                        return Container();
+                      }
                     },
                   ),
                 ),

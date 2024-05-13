@@ -5,6 +5,7 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
@@ -38,8 +39,6 @@ class _HomePageState extends State<HomePage> {
   String age = 'AGE';
   final AuthService _authService = AuthService();
 
-  Uint8List? _imageBytes;
-
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
   }
@@ -53,11 +52,6 @@ class _HomePageState extends State<HomePage> {
       if (value != null) {
         Provider.of<UserProfileProvider>(context, listen: false)
             .setCurrentUserProfile(value);
-        if (value.image != null && value.image!.isNotEmpty) {
-          _imageBytes = base64ToImage(value.image ?? '');
-        } else {
-          _imageBytes = base64ToImage(defaultBase64Avatar);
-        }
         await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
         await DbClient().setData(dbKey: "userName", value: value.name ?? '');
 
@@ -107,7 +101,7 @@ class _HomePageState extends State<HomePage> {
                         CupertinoPageRoute(
                             builder: (context) => const MyProfilePage()));
                   },
-                  child: ProfileButton()),
+                  child: const ProfileButton()),
 
               // search icon
               Row(
@@ -789,9 +783,7 @@ class _HomePageState extends State<HomePage> {
                             MaterialPageRoute(
                                 builder: (context) => const MyProfilePage()));
                       },
-                      child: ProfileButton(
-                        imageBytes: _imageBytes, // Pass your image bytes here
-                      ),
+                      child: const ProfileButton(),
                     ),
                     const SizedBox(
                       width: 20,
@@ -1341,11 +1333,8 @@ class _HomePageState extends State<HomePage> {
 // profile button
 // ignore: must_be_immutable
 class ProfileButton extends StatelessWidget {
-  final Uint8List? imageBytes;
-
   const ProfileButton({
     Key? key,
-    this.imageBytes,
   }) : super(key: key);
 
   Uint8List base64ToImage(String base64String) {
@@ -1354,24 +1343,30 @@ class ProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Neumorphic(
-      style: const NeumorphicStyle(
-        boxShape: NeumorphicBoxShape.circle(),
-      ),
-      child: SizedBox(
-          height: 50,
-          width: 50,
-          child: imageBytes != null
-              ? Image.memory(
-                  imageBytes!,
-                  fit: BoxFit.cover,
-                )
-              : Image.memory(
-                  base64ToImage(defaultBase64Avatar),
-                  fit: BoxFit.cover,
-                )
-          // Placeholder for when imageBytes is null
+    return Consumer<UserProfileProvider>(
+      builder: (context, imageProvider, _) {
+        UserProfileModel? userProfileModel =
+            Provider.of<UserProfileProvider>(context, listen: false)
+                .currentUserProfile;
+        return Neumorphic(
+          style: const NeumorphicStyle(
+            boxShape: NeumorphicBoxShape.circle(),
           ),
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: userProfileModel!.image != null
+                ? Image.memory(
+                    base64ToImage(userProfileModel.image!),
+                    fit: BoxFit.cover,
+                  )
+                : Image.memory(
+                    base64ToImage(defaultBase64Avatar),
+                    fit: BoxFit.cover,
+                  ), // Placeholder for when imageBytes is null
+          ),
+        );
+      },
     );
   }
 }

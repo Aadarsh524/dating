@@ -67,6 +67,7 @@ class UserProfileProvider extends ChangeNotifier {
   Future<UserProfileModel> updateUserProfile(
       UserProfileModel updatedProfile) async {
     try {
+      String? uid = updatedProfile.uid;
       final url = Uri.parse(
           'http://10.0.2.2:8001/api/userprofile/${updatedProfile.uid}');
       final response = await http.put(
@@ -80,8 +81,15 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        setCurrentUserProfile(updatedProfile);
-        notifyListeners();
+        getUserData(uid!).then(
+          (value) {
+            if (value != null) {
+              setCurrentUserProfile(value);
+              notifyListeners();
+            }
+          },
+        );
+
         return updatedProfile;
       } else {
         throw Exception('Failed to update user profile');
@@ -109,10 +117,10 @@ class UserProfileProvider extends ChangeNotifier {
           (value) {
             if (value != null) {
               setCurrentUserProfile(value);
+              notifyListeners();
             }
           },
         );
-        notifyListeners();
         return newUpload;
       } else {
         throw Exception('Failed to update user profile');
@@ -139,10 +147,10 @@ class UserProfileProvider extends ChangeNotifier {
           (value) {
             if (value != null) {
               setCurrentUserProfile(value);
+              notifyListeners();
             }
           },
         );
-        notifyListeners();
       } else {}
     } catch (error) {
       print('Error updating profile image: $error');

@@ -29,7 +29,7 @@ class UserProfileModel {
     name = json['name'];
     email = json['email'];
     gender = json['gender'];
-    image = json['profile_image'];
+    image = json['image'];
     address = json['address'];
     age = json['age'];
     bio = json['bio'];

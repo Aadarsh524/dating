@@ -61,6 +61,7 @@ class _EditInfoState extends State<EditInfo> {
   String age = 'AGE';
 
   Uint8List? _imageBytes;
+  List<Uploads> allUploads = [];
 
   @override
   void initState() {
@@ -225,14 +226,6 @@ class _EditInfoState extends State<EditInfo> {
   }
 
   Widget MobileProfile() {
-    List<String> photoAssetPaths = [
-      AppImages.profile, // Main photo
-      AppImages.loginimage,
-      AppImages.profile,
-      AppImages.profile,
-      // Small photo 3
-    ];
-
     return Scaffold(
       body: ListView(children: [
         const SizedBox(
@@ -645,52 +638,50 @@ class _EditInfoState extends State<EditInfo> {
           height: 400,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of items per row
-                crossAxisSpacing: 15, // Horizontal spacing between items
-                mainAxisSpacing: 15, // Vertical spacing between rows
-              ),
-              itemCount: photoAssetPaths.length,
-              itemBuilder: (context, index) {
-                return Stack(
-                  children: [
-                    Neumorphic(
-                      style: NeumorphicStyle(
-                        boxShape: NeumorphicBoxShape.roundRect(
-                            BorderRadius.circular(16)),
-                        depth: 5,
-                        intensity: 0.75,
-                      ),
-                      child: Container(
-                        height: 500,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          image: DecorationImage(
-                            image: AssetImage(photoAssetPaths[index]),
-                            fit: BoxFit.cover,
+            child: Consumer<UserProfileProvider>(
+              builder: (context, photoProvider, _) {
+                UserProfileModel? userProfileModel =
+                    Provider.of<UserProfileProvider>(context, listen: false)
+                        .currentUserProfile;
+                final alluploads = userProfileModel!.uploads;
+
+                if (alluploads != null) {
+                  List<Uploads> reversedUploads = alluploads.reversed.toList();
+                  return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // Number of items per row
+                      crossAxisSpacing: 15, // Horizontal spacing between items
+                      mainAxisSpacing: 15, // Vertical spacing between rows
+                    ),
+                    itemCount: alluploads.length,
+                    itemBuilder: (context, index) {
+                      final upload = reversedUploads[index];
+                      return Neumorphic(
+                        style: NeumorphicStyle(
+                          boxShape: NeumorphicBoxShape.roundRect(
+                            BorderRadius.circular(16),
+                          ),
+                          depth: 5,
+                          intensity: 0.75,
+                        ),
+                        child: Container(
+                          height: 500,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            image: DecorationImage(
+                              image: MemoryImage(base64ToImage(upload
+                                  .file)), // Using NetworkImage for network images
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            photoAssetPaths
-                                .removeAt(index); // Remove photo from the list
-                          });
-                        },
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
+                      );
+                    },
+                  );
+                } else {
+                  return Container();
+                }
               },
             ),
           ),
