@@ -1,5 +1,6 @@
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/firebase_options.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/uploads_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -14,6 +15,7 @@ void main() async {
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+    ChangeNotifierProvider(create: (_) => LoadingProvider()),
     ChangeNotifierProvider(create: (_) => UploadsProvider()),
   ], child: const MyApp()));
 }

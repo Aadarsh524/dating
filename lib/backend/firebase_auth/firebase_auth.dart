@@ -1,6 +1,7 @@
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -49,6 +50,8 @@ class AuthService {
       required String name,
       required String gender,
       required String age}) async {
+    context.read<LoadingProvider>().setLoading(true);
+
     try {
       // Create user with email and password
       UserCredential userCredential =
@@ -78,6 +81,8 @@ class AuthService {
       return true;
     } catch (e) {
       return false;
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
     }
   }
 

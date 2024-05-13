@@ -50,8 +50,7 @@ class _HomePageState extends State<HomePage> {
         .getUserData(user!.uid)
         .then((value) async {
       if (value != null) {
-        Provider.of<UserProfileProvider>(context, listen: false)
-            .setCurrentUserProfile(value);
+        context.read<UserProfileProvider>().setCurrentUserProfile(value);
         await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
         await DbClient().setData(dbKey: "userName", value: value.name ?? '');
 
@@ -1355,15 +1354,16 @@ class ProfileButton extends StatelessWidget {
           child: SizedBox(
             height: 50,
             width: 50,
-            child: userProfileModel!.image != null
-                ? Image.memory(
-                    base64ToImage(userProfileModel.image!),
-                    fit: BoxFit.cover,
-                  )
-                : Image.memory(
-                    base64ToImage(defaultBase64Avatar),
-                    fit: BoxFit.cover,
-                  ), // Placeholder for when imageBytes is null
+            child:
+                userProfileModel!.image != null && userProfileModel.image != ''
+                    ? Image.memory(
+                        base64ToImage(userProfileModel.image!),
+                        fit: BoxFit.cover,
+                      )
+                    : Image.memory(
+                        base64ToImage(defaultBase64Avatar),
+                        fit: BoxFit.cover,
+                      ), // Placeholder for when imageBytes is null
           ),
         );
       },

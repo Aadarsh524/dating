@@ -189,6 +189,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                             Provider.of<UserProfileProvider>(context,
                                     listen: false)
                                 .currentUserProfile;
+
                         return Neumorphic(
                           style: NeumorphicStyle(
                             boxShape: NeumorphicBoxShape.roundRect(
@@ -199,7 +200,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(1000),
-                            child: userProfileModel!.image != null
+                            child: userProfileModel!.image != null &&
+                                    userProfileModel.image != ''
                                 ? Image.memory(
                                     base64ToImage(userProfileModel.image),
                                     fit: BoxFit.cover,
@@ -226,6 +228,13 @@ class _MyProfilePageState extends State<MyProfilePage> {
                     UserProfileModel? userProfileModel =
                         Provider.of<UserProfileProvider>(context, listen: false)
                             .currentUserProfile;
+                    String address = '';
+                    if (userProfileModel!.address != null &&
+                        userProfileModel.address != '') {
+                      address = userProfileModel.address!;
+                    } else {
+                      address = 'Add your address';
+                    }
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -234,7 +243,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              userProfileModel!.name ?? 'Add your Name',
+                              userProfileModel.name ?? 'Add your Name',
                               style: AppTextStyles().primaryStyle,
                             ),
                             const SizedBox(width: 5),
@@ -261,7 +270,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                   width: 5,
                                 ),
                                 Text(
-                                  userProfileModel.address ?? 'Add you Address',
+                                  address,
                                   style: AppTextStyles().secondaryStyle,
                                 )
                               ],

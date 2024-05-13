@@ -657,25 +657,40 @@ class _EditInfoState extends State<EditInfo> {
                     itemCount: alluploads.length,
                     itemBuilder: (context, index) {
                       final upload = reversedUploads[index];
-                      return Neumorphic(
-                        style: NeumorphicStyle(
-                          boxShape: NeumorphicBoxShape.roundRect(
-                            BorderRadius.circular(16),
-                          ),
-                          depth: 5,
-                          intensity: 0.75,
-                        ),
-                        child: Container(
-                          height: 500,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            image: DecorationImage(
-                              image: MemoryImage(base64ToImage(upload
-                                  .file)), // Using NetworkImage for network images
-                              fit: BoxFit.cover,
+                      return Stack(
+                        children: [
+                          Neumorphic(
+                            style: NeumorphicStyle(
+                              boxShape: NeumorphicBoxShape.roundRect(
+                                BorderRadius.circular(16),
+                              ),
+                              depth: 5,
+                              intensity: 0.75,
+                            ),
+                            child: Container(
+                              height: 500,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                image: DecorationImage(
+                                  image: MemoryImage(base64ToImage(upload
+                                      .file)), // Using NetworkImage for network images
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
+                            ),
+                          )
+                        ],
                       );
                     },
                   );
