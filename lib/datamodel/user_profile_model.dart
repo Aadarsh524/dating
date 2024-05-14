@@ -86,13 +86,19 @@ class Seeking {
 }
 
 class Uploads {
+  String? userId;
   String? file;
   String? name;
   String? uploadDate;
 
-  Uploads({this.file, this.name, this.uploadDate});
+  Uploads(
+      {required this.userId,
+      required this.file,
+      required this.name,
+      required this.uploadDate});
 
   Uploads.fromJson(Map<String, dynamic> json) {
+    userId = json['userId'];
     file = json['file'];
     name = json['name'];
     uploadDate = json['uploadDate'];
@@ -100,6 +106,7 @@ class Uploads {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    data['userId'] = userId;
     data['file'] = file;
     data['name'] = name;
     data['uploadDate'] = uploadDate;
