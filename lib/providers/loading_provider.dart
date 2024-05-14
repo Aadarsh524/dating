@@ -5,7 +5,7 @@ class LoadingProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  void setLoading(bool value) {
+  Future<void> setLoading(bool value) async {
     _isLoading = value;
     notifyListeners();
   }

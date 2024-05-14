@@ -1,8 +1,11 @@
 import 'package:dating/auth/loginDesktop/login.dart';
 import 'package:dating/auth/loginMobile/login.dart';
 import 'package:dating/pages/homepage.dart';
+import 'package:dating/providers/loading_provider.dart';
+import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,20 +24,33 @@ class _LoginScreenState extends State<LoginScreen> {
     checkLoginStatus();
   }
 
-  // Function to check login status
-  void checkLoginStatus() {
-    User? user = FirebaseAuth.instance.currentUser;
+  void checkLoginStatus() async {
+    try {
+      context.read<LoadingProvider>().setLoading(true);
 
-    if (user != null) {
-      // User is logged in
-      setState(() {
-        _isLoggedIn = true;
-      });
-    } else {
-      // User is not logged in
-      setState(() {
-        _isLoggedIn = false;
-      });
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        var value =
+            await context.read<UserProfileProvider>().getUserData(user.uid);
+
+        if (value != null) {
+          Provider.of<UserProfileProvider>(context, listen: false)
+              .setCurrentUserProfile(value);
+          setState(() {
+            _isLoggedIn = true;
+          });
+        }
+      } else {
+        // User is not logged in
+        setState(() {
+          _isLoggedIn = false;
+        });
+      }
+    } catch (e) {
+      // Handle errors
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
