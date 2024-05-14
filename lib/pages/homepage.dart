@@ -3,8 +3,10 @@ import 'dart:typed_data';
 
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
@@ -43,6 +45,8 @@ class _HomePageState extends State<HomePage> {
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
   }
+
+  ApiClient apiClient = ApiClient();
 
   @override
   void initState() {
@@ -107,7 +111,7 @@ class _HomePageState extends State<HomePage> {
                         CupertinoPageRoute(
                             builder: (context) => const MyProfilePage()));
                   },
-                  child: ProfileButton()),
+                  child: const ProfileButton()),
 
               // search icon
               Row(
@@ -247,520 +251,192 @@ class _HomePageState extends State<HomePage> {
         ),
 
         Expanded(
-          child: ListView(
-            children: [
-              Container(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // profile pic
-                            GestureDetector(
-                              onTap: () {
-                                _authService.signOut().then((value) =>
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const LoginScreen())
-                                        // Navigator.push(
-                                        //     context,
-                                        //     MaterialPageRoute(
-                                        //         builder: (context) => ProfilePage()));
-                                        ));
-                              },
-                              child: Row(
-                                children: [
-                                  Neumorphic(
-                                    style: NeumorphicStyle(
-                                      boxShape: NeumorphicBoxShape.roundRect(
-                                        BorderRadius.circular(1000),
-                                      ),
-                                    ),
-                                    child: Container(
-                                        height: 50,
-                                        width: 50,
-                                        decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                              image:
-                                                  AssetImage(AppImages.profile),
-                                              fit: BoxFit.cover,
-                                            ))),
-                                  ),
-
-                                  // profile name and address
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+          child: FutureBuilder(
+              future: apiClient.dashboard(user!.uid, 1),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  // Display a loading indicator while waiting for the data
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  // Display an error message if an error occurs
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData) {
+                  // Display a message if no data is available
+                  return const Center(child: Text('No data available'));
+                } else {
+                  return ListView.builder(
+                      itemCount: 1,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        "Name",
-                                        style: AppTextStyles()
-                                            .primaryStyle
-                                            .copyWith(fontSize: 14),
+                                      // profile pic
+                                      GestureDetector(
+                                        onTap: () {},
+                                        child: Row(
+                                          children: [
+                                            Neumorphic(
+                                              style: NeumorphicStyle(
+                                                boxShape: NeumorphicBoxShape
+                                                    .roundRect(
+                                                  BorderRadius.circular(1000),
+                                                ),
+                                              ),
+                                              child: Container(
+                                                  height: 50,
+                                                  width: 50,
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          image:
+                                                              DecorationImage(
+                                                            image: AssetImage(
+                                                                AppImages
+                                                                    .profile),
+                                                            fit: BoxFit.cover,
+                                                          ))),
+                                            ),
+
+                                            // profile name and address
+                                            const SizedBox(
+                                              width: 20,
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                 snapshot.data!.data[index].name,
+                                                  style: AppTextStyles()
+                                                      .primaryStyle
+                                                      .copyWith(fontSize: 14),
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.circle,
+                                                      size: 8,
+                                                      color: AppColors
+                                                          .secondaryColor,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      'Rehan Ritviz, 25',
+                                                      style: AppTextStyles()
+                                                          .secondaryStyle
+                                                          .copyWith(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w300,
+                                                              color: AppColors
+                                                                  .secondaryColor),
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            )
+                                          ],
+                                        ),
                                       ),
+
                                       Row(
                                         children: [
                                           const Icon(
                                             Icons.circle,
                                             size: 8,
-                                            color: AppColors.secondaryColor,
+                                            color: Colors.green,
                                           ),
                                           const SizedBox(
-                                            width: 10,
+                                            width: 5,
                                           ),
                                           Text(
-                                            'Rehan Ritviz, 25',
+                                            'online',
                                             style: AppTextStyles()
                                                 .secondaryStyle
                                                 .copyWith(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w300,
-                                                    color: AppColors
-                                                        .secondaryColor),
+                                                    color: AppColors.black),
                                           ),
                                         ],
                                       )
-                                    ],
-                                  )
-                                ],
+                                    ]),
                               ),
-                            ),
 
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.circle,
-                                  size: 8,
-                                  color: Colors.green,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  'online',
-                                  style: AppTextStyles()
-                                      .secondaryStyle
-                                      .copyWith(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w300,
-                                          color: AppColors.black),
-                                ),
-                              ],
-                            )
-                          ]),
-                    ),
-
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    // image
-                    Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.25),
-                              // spreadRadius: 5,
-                              blurRadius: 20,
-                              offset: const Offset(
-                                  0, 25), // horizontal and vertical offset
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Image.asset(AppImages.loginimage),
-                            // like comment
-
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.thumb_up_off_alt,
-                                          size: 30,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Icon(
-                                          Icons.mode_comment_outlined,
-                                          size: 30,
-                                        ),
-
-                                        // share icon
-                                      ],
-                                    ),
-                                    Icon(Icons.ios_share_outlined),
-                                  ]),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                          ],
-                        )),
-                  ],
-                ),
-              ),
-
-              //  another post
-
-              const SizedBox(
-                height: 50,
-              ),
-
-              Container(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // profile pic
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ProfilePage()));
-                              },
-                              child: Row(
-                                children: [
-                                  Neumorphic(
-                                    style: NeumorphicStyle(
-                                      boxShape: NeumorphicBoxShape.roundRect(
-                                        BorderRadius.circular(1000),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              // image
+                              Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.backgroundColor,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.25),
+                                        // spreadRadius: 5,
+                                        blurRadius: 20,
+                                        offset: const Offset(0,
+                                            25), // horizontal and vertical offset
                                       ),
-                                    ),
-                                    child: Container(
-                                        height: 50,
-                                        width: 50,
-                                        decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                              image:
-                                                  AssetImage(AppImages.profile),
-                                              fit: BoxFit.cover,
-                                            ))),
+                                    ],
                                   ),
-
-                                  // profile name and address
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                  child: Column(
                                     children: [
-                                      Text(
-                                        "Rehan Ritviz",
-                                        style: AppTextStyles()
-                                            .primaryStyle
-                                            .copyWith(fontSize: 14),
+                                      Image.asset(AppImages.loginimage),
+                                      // like comment
+
+                                      const SizedBox(
+                                        height: 10,
                                       ),
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.circle,
-                                            size: 8,
-                                            color: AppColors.secondaryColor,
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                            'Rehan Ritviz, 25',
-                                            style: AppTextStyles()
-                                                .secondaryStyle
-                                                .copyWith(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w300,
-                                                    color: AppColors
-                                                        .secondaryColor),
-                                          ),
-                                        ],
-                                      )
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.thumb_up_off_alt,
+                                                    size: 30,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Icon(
+                                                    Icons.mode_comment_outlined,
+                                                    size: 30,
+                                                  ),
+
+                                                  // share icon
+                                                ],
+                                              ),
+                                              Icon(Icons.ios_share_outlined),
+                                            ]),
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
                                     ],
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.circle,
-                                  size: 8,
-                                  color: Colors.green,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  'online',
-                                  style: AppTextStyles()
-                                      .secondaryStyle
-                                      .copyWith(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w300,
-                                          color: AppColors.black),
-                                ),
-                              ],
-                            )
-                          ]),
-                    ),
-
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    // image
-                    Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.25),
-                              // spreadRadius: 5,
-                              blurRadius: 20,
-                              offset: const Offset(
-                                  0, 25), // horizontal and vertical offset
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Image.asset(AppImages.loginimage),
-                            // like comment
-
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.thumb_up_off_alt,
-                                          size: 30,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Icon(
-                                          Icons.mode_comment_outlined,
-                                          size: 30,
-                                        ),
-
-                                        // share icon
-                                      ],
-                                    ),
-                                    Icon(Icons.ios_share_outlined),
-                                  ]),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                          ],
-                        )),
-
-                    //  another post
-                  ],
-                ),
-              ),
-
-              //  another post
-
-              const SizedBox(
-                height: 50,
-              ),
-
-              Container(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // profile pic
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ProfilePage()));
-                              },
-                              child: Row(
-                                children: [
-                                  Neumorphic(
-                                    style: NeumorphicStyle(
-                                      boxShape: NeumorphicBoxShape.roundRect(
-                                        BorderRadius.circular(1000),
-                                      ),
-                                    ),
-                                    child: Container(
-                                        height: 50,
-                                        width: 50,
-                                        decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                              image:
-                                                  AssetImage(AppImages.profile),
-                                              fit: BoxFit.cover,
-                                            ))),
-                                  ),
-
-                                  // profile name and address
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Rehan Ritviz',
-                                        style: AppTextStyles()
-                                            .primaryStyle
-                                            .copyWith(fontSize: 14),
-                                      ),
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.circle,
-                                            size: 8,
-                                            color: AppColors.secondaryColor,
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                            'Rehan Ritviz, 25',
-                                            style: AppTextStyles()
-                                                .secondaryStyle
-                                                .copyWith(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w300,
-                                                    color: AppColors
-                                                        .secondaryColor),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.circle,
-                                  size: 8,
-                                  color: Colors.green,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  'online',
-                                  style: AppTextStyles()
-                                      .secondaryStyle
-                                      .copyWith(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w300,
-                                          color: AppColors.black),
-                                ),
-                              ],
-                            )
-                          ]),
-                    ),
-
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    // image
-                    Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.25),
-                              // spreadRadius: 5,
-                              blurRadius: 20,
-                              offset: const Offset(
-                                  0, 25), // horizontal and vertical offset
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Image.asset(AppImages.loginimage),
-                            // like comment
-
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.thumb_up_off_alt,
-                                          size: 30,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Icon(
-                                          Icons.mode_comment_outlined,
-                                          size: 30,
-                                        ),
-
-                                        // share icon
-                                      ],
-                                    ),
-                                    Icon(Icons.ios_share_outlined),
-                                  ]),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                          ],
-                        )),
-
-                    //  another post
-                  ],
-                ),
-              )
-            ],
-          ),
+                                  )),
+                            ],
+                          ),
+                        );
+                      });
+                }
+              }),
         )
       ]),
       bottomSheet: const NavBar(),
@@ -1344,9 +1020,9 @@ class ProfileButton extends StatelessWidget {
   final Uint8List? imageBytes;
 
   const ProfileButton({
-    Key? key,
+    super.key,
     this.imageBytes,
-  }) : super(key: key);
+  });
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
