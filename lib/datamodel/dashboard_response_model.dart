@@ -28,6 +28,10 @@ class DashboardResponseModel {
       data: List<Data>.from((map['data'] as List<int>).map<Data>((x) => Data.fromMap(x as Map<String,dynamic>),),),
     );
   }
+   factory DashboardResponseModel.fromList(List<dynamic> list) {
+    List<Data> dataList = list.map((item) => Data.fromMap(item)).toList();
+    return DashboardResponseModel(data: dataList);
+  }
 
   String toJson() => json.encode(toMap());
 

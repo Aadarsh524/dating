@@ -258,7 +258,8 @@ class _HomePageState extends State<HomePage> {
                   return const Center(child: Text('No data available'));
                 } else {
                   return ListView.builder(
-                      itemCount: 1,
+                      shrinkWrap: true,
+                      itemCount: 2,
                       itemBuilder: (context, index) {
                         return Container(
                           child: Column(
@@ -307,7 +308,8 @@ class _HomePageState extends State<HomePage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                 snapshot.data!.data[index].name,
+                                                  snapshot
+                                                      .data!.data[index].name,
                                                   style: AppTextStyles()
                                                       .primaryStyle
                                                       .copyWith(fontSize: 14),
@@ -1009,9 +1011,8 @@ class _HomePageState extends State<HomePage> {
 // ignore: must_be_immutable
 class ProfileButton extends StatelessWidget {
   const ProfileButton({
-    Key? key,
-    this.imageBytes,
-  }) : super(key: key);
+    super.key,
+  });
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);

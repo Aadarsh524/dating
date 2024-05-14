@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
@@ -147,6 +148,7 @@ class ApiClient {
   }
 
   Future<DashboardResponseModel> dashboard(String uid, int page) async {
+    log('$URI/Dashboard/$uid&page=$page');
     try {
       final response = await http.get(
         Uri.parse('$URI/Dashboard/$uid&page=$page'),
@@ -156,7 +158,20 @@ class ApiClient {
           'access_token': 'accesstokentest'
         },
       );
-      return DashboardResponseModel.fromJson(jsonDecode(response.body));
+
+      log(response.body);
+
+      // Parse the JSON response as a list
+      List<dynamic> jsonList = json.decode(response.body);
+
+      // Handle the case where the list is empty
+      if (jsonList.isEmpty) {
+        // Return an empty DashboardResponseModel
+        return DashboardResponseModel(data: []);
+      } else {
+        // Convert the list to DashboardResponseModel
+        return DashboardResponseModel.fromList(jsonList);
+      }
     } catch (e) {
       print(e.toString());
       rethrow;
