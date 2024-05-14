@@ -7,6 +7,7 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/myprofile.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
@@ -62,6 +63,19 @@ class _EditInfoState extends State<EditInfo> {
 
   Uint8List? _imageBytes;
   List<Uploads> allUploads = [];
+
+  void deletePost(String? postId) async {
+    print(postId);
+    await context.read<LoadingProvider>().setLoading(true);
+
+    try {
+      await context.read<UserProfileProvider>().deletePost(postId!);
+    } catch (e) {
+      return;
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
+    }
+  }
 
   @override
   void initState() {
@@ -139,7 +153,9 @@ class _EditInfoState extends State<EditInfo> {
       uploads: [],
     );
 
-    await context.read<UserProfileProvider>().updateUserProfile(newUser);
+    await context
+        .read<UserProfileProvider>()
+        .updateUserProfile(context, newUser);
     await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
 
     // Exit editing mode
@@ -185,7 +201,7 @@ class _EditInfoState extends State<EditInfo> {
       _imageBytes = base64ToImage(base64);
       await context
           .read<UserProfileProvider>()
-          .updateProfileImage(base64, user!.uid);
+          .updateProfileImage(context, base64, user!.uid);
     } else {
       // Handle cases like user canceling the selection or errors
       print('No image selected.');
@@ -227,486 +243,516 @@ class _EditInfoState extends State<EditInfo> {
 
   Widget MobileProfile() {
     return Scaffold(
-      body: ListView(children: [
-        const SizedBox(
-          height: 10,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // profile
-
-              // search icon
-              ButtonWithLabel(
-                text: null,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.arrow_back,
-                ),
-                labelText: null,
-              ),
-
-              Text(
-                'Edit Profile',
-                style: AppTextStyles().primaryStyle,
-              ),
-
-              // view icon
-
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    CupertinoPageRoute(
-                      builder: (context) => const MyProfilePage(),
-                    ),
-                  );
-                },
-                child: Text(
-                  'View',
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFF707070),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    height: 0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(
-          height: 30,
-        ),
-        SizedBox(
-          height: 200,
-          width: 200,
-          child: Center(
-            child: GestureDetector(
-              onTap: () {
-                pickImage();
-              },
-              child: Neumorphic(
-                style: NeumorphicStyle(
-                  boxShape:
-                      NeumorphicBoxShape.roundRect(BorderRadius.circular(1000)),
-                  depth: 10,
-                  intensity: 0.5,
-                ),
-                child: Container(
-                  height: 200,
-                  width: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(1000),
-                    image: DecorationImage(
-                      image: MemoryImage(_imageBytes!),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(60),
-                  child: SvgPicture.asset(
-                    AppIcons.editphoto,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-
-// details
-
-        const SizedBox(
-          height: 25,
-        ),
-
-        // details edit
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Your Basics',
-                style: AppTextStyles().primaryStyle.copyWith(
-                      color: AppColors.black.withOpacity(0.75),
-                    ),
-              ),
-
-              const SizedBox(
-                height: 10,
-              ),
-              // seperator
-              Container(
-                decoration: const ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      width: 0.50,
-                      strokeAlign: BorderSide.strokeAlignCenter,
-                      color: Color(0xFFAAAAAA),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 6,
-              ),
-              // text about
-
-              Text(
-                'Your Name',
-                style: AppTextStyles().secondaryStyle.copyWith(
-                      color: AppColors.black,
-                    ),
-              ),
-
-              // edit name
-
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: _isEditingName
-                        ? TextField(
-                            decoration: const InputDecoration(
-                              border: UnderlineInputBorder(
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            style: AppTextStyles().secondaryStyle,
-                            controller: _controllerName,
-                            autofocus: true,
-                          )
-                        : Consumer<UserProfileProvider>(
-                            builder: (context, userProfileProvider, child) {
-                            return Text(
-                              _textName,
-                              style: AppTextStyles().secondaryStyle,
-                            );
-                          }),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      _isEditingName ? Icons.save : Icons.edit,
-                      size: 20,
-                      color: AppColors.secondaryColor,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (_isEditingName) {
-                          // Save changes
-                          if (_controllerBio.text != _textName) {
-                            _textName = _controllerName.text;
-                            // context.read<UserProvider>().updateName(textName);
-                          }
-                        }
-                        _isEditingName = !_isEditingName;
-                        if (_isEditingName) {
-                          // Start editing
-                          _controllerName.text = _textName;
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
-
-// location
-
-              Text(
-                'Your Address',
-                style: AppTextStyles().secondaryStyle.copyWith(
-                      color: AppColors.black,
-                    ),
-              ),
-
-              // edit name
-
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: _isEditingAddress
-                        ? TextField(
-                            decoration: const InputDecoration(
-                              border: UnderlineInputBorder(
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            style: AppTextStyles().secondaryStyle,
-                            controller: _controllerAddress,
-                            autofocus: true,
-                          )
-                        : Text(
-                            _textAddress,
-                            style: AppTextStyles().secondaryStyle,
-                          ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      _isEditingAddress ? Icons.save : Icons.edit,
-                      size: 20,
-                      color: AppColors.secondaryColor,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (_isEditingAddress) {
-                          // Save changes
-                          if (_controllerAddress.text != _textAddress) {
-                            _textAddress = _controllerAddress.text;
-                            // context.read<UserProvider>().updateName(textName);
-                            DbClient().resetData(dbKey: 'userName');
-                            DbClient().setData(
-                                dbKey: 'userName', value: _controllerName.text);
-                          }
-                        }
-                        _isEditingAddress = !_isEditingAddress;
-                        if (_isEditingAddress) {
-                          // Start editing
-                          _controllerAddress.text = _textAddress;
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
-
-// bio
-
-              Text(
-                'Bio',
-                style: AppTextStyles().secondaryStyle.copyWith(
-                      color: AppColors.black,
-                    ),
-              ),
-
-              // edit name
-
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: _isEditingBio
-                        ? TextField(
-                            decoration: const InputDecoration(
-                              border: UnderlineInputBorder(
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            style: AppTextStyles().secondaryStyle,
-                            controller: _controllerBio,
-                            autofocus: true,
-                          )
-                        : Text(
-                            _textBio,
-                            style: AppTextStyles().secondaryStyle,
-                          ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      _isEditingBio ? Icons.save : Icons.edit,
-                      size: 20,
-                      color: AppColors.secondaryColor,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (_isEditingBio) {
-                          // Save changes
-                          if (_controllerBio.text != _textBio) {
-                            _textBio = _controllerAddress.text;
-                            // context.read<UserProvider>().updateName(textName);
-                          }
-                        }
-                        _isEditingBio = !_isEditingBio;
-                        if (_isEditingBio) {
-                          // Start editing
-                          _controllerBio.text = _textBio;
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        // mored details
-        const SizedBox(
-          height: 25,
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(
-              'More',
-              style: AppTextStyles().primaryStyle.copyWith(
-                    color: AppColors.black.withOpacity(0.75),
-                  ),
-            ),
-
+      body: Stack(
+        children: [
+          ListView(children: [
             const SizedBox(
               height: 10,
             ),
-            // seperator
-            Container(
-              decoration: const ShapeDecoration(
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                    width: 0.50,
-                    strokeAlign: BorderSide.strokeAlignCenter,
-                    color: Color(0xFFAAAAAA),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // profile
+
+                  // search icon
+                  ButtonWithLabel(
+                    text: null,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back,
+                    ),
+                    labelText: null,
+                  ),
+
+                  Text(
+                    'Edit Profile',
+                    style: AppTextStyles().primaryStyle,
+                  ),
+
+                  // view icon
+
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                          builder: (context) => const MyProfilePage(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'View',
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF707070),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        height: 0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            SizedBox(
+              height: 200,
+              width: 200,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () {
+                    pickImage();
+                  },
+                  child: Neumorphic(
+                    style: NeumorphicStyle(
+                      boxShape: NeumorphicBoxShape.roundRect(
+                          BorderRadius.circular(1000)),
+                      depth: 10,
+                      intensity: 0.5,
+                    ),
+                    child: Container(
+                      height: 200,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(1000),
+                        image: DecorationImage(
+                          image: MemoryImage(_imageBytes!),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(60),
+                      child: SvgPicture.asset(
+                        AppIcons.editphoto,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
+
+            // details
+
             const SizedBox(
-              height: 6,
-            ),
-            // text about
-
-            Text(
-              'Intersets',
-              style: AppTextStyles().secondaryStyle.copyWith(
-                    color: AppColors.black,
-                  ),
+              height: 25,
             ),
 
-            // edit name
+            // details edit
 
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: _isEditingInterests
-                      ? TextField(
-                          decoration: const InputDecoration(
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          style: AppTextStyles().secondaryStyle,
-                          controller: _controllerInterests,
-                          autofocus: true,
-                        )
-                      : Text(
-                          _textInterests,
-                          style: AppTextStyles().secondaryStyle,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Your Basics',
+                    style: AppTextStyles().primaryStyle.copyWith(
+                          color: AppColors.black.withOpacity(0.75),
                         ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    _isEditingInterests ? Icons.save : Icons.edit,
-                    size: 20,
-                    color: AppColors.secondaryColor,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      if (_isEditingInterests) {
-                        // Save changes
-                        if (_controllerInterests.text != _textInterests) {
-                          _textInterests = _controllerAddress.text;
-                          // context.read<UserProvider>().updateName(textName);
-                        }
-                      }
-                      _isEditingInterests = !_isEditingInterests;
-                      if (_isEditingInterests) {
-                        // Start editing
-                        _controllerInterests.text = _textInterests;
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
-          ]),
-        ),
-        const SizedBox(
-          height: 50,
-        ),
-        // images
 
-        SizedBox(
-          width: double.infinity,
-          height: 400,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Consumer<UserProfileProvider>(
-              builder: (context, photoProvider, _) {
-                UserProfileModel? userProfileModel =
-                    Provider.of<UserProfileProvider>(context, listen: false)
-                        .currentUserProfile;
-                final alluploads = userProfileModel!.uploads;
-
-                if (alluploads != null) {
-                  List<Uploads> reversedUploads = alluploads.reversed.toList();
-                  return GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Number of items per row
-                      crossAxisSpacing: 15, // Horizontal spacing between items
-                      mainAxisSpacing: 15, // Vertical spacing between rows
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  // seperator
+                  Container(
+                    decoration: const ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          width: 0.50,
+                          strokeAlign: BorderSide.strokeAlignCenter,
+                          color: Color(0xFFAAAAAA),
+                        ),
+                      ),
                     ),
-                    itemCount: alluploads.length,
-                    itemBuilder: (context, index) {
-                      final upload = reversedUploads[index];
-                      return Stack(
-                        children: [
-                          Neumorphic(
-                            style: NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.roundRect(
-                                BorderRadius.circular(16),
+                  ),
+                  const SizedBox(
+                    height: 6,
+                  ),
+                  // text about
+
+                  Text(
+                    'Your Name',
+                    style: AppTextStyles().secondaryStyle.copyWith(
+                          color: AppColors.black,
+                        ),
+                  ),
+
+                  // edit name
+
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: _isEditingName
+                            ? TextField(
+                                decoration: const InputDecoration(
+                                  border: UnderlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                style: AppTextStyles().secondaryStyle,
+                                controller: _controllerName,
+                                autofocus: true,
+                              )
+                            : Consumer<UserProfileProvider>(
+                                builder: (context, userProfileProvider, child) {
+                                return Text(
+                                  _textName,
+                                  style: AppTextStyles().secondaryStyle,
+                                );
+                              }),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _isEditingName ? Icons.save : Icons.edit,
+                          size: 20,
+                          color: AppColors.secondaryColor,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (_isEditingName) {
+                              // Save changes
+                              if (_controllerBio.text != _textName) {
+                                _textName = _controllerName.text;
+                                // context.read<UserProvider>().updateName(textName);
+                              }
+                            }
+                            _isEditingName = !_isEditingName;
+                            if (_isEditingName) {
+                              // Start editing
+                              _controllerName.text = _textName;
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // location
+
+                  Text(
+                    'Your Address',
+                    style: AppTextStyles().secondaryStyle.copyWith(
+                          color: AppColors.black,
+                        ),
+                  ),
+
+                  // edit name
+
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: _isEditingAddress
+                            ? TextField(
+                                decoration: const InputDecoration(
+                                  border: UnderlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                style: AppTextStyles().secondaryStyle,
+                                controller: _controllerAddress,
+                                autofocus: true,
+                              )
+                            : Text(
+                                _textAddress,
+                                style: AppTextStyles().secondaryStyle,
                               ),
-                              depth: 5,
-                              intensity: 0.75,
-                            ),
-                            child: Container(
-                              height: 500,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                image: DecorationImage(
-                                  image: MemoryImage(base64ToImage(upload
-                                      .file)), // Using NetworkImage for network images
-                                  fit: BoxFit.cover,
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _isEditingAddress ? Icons.save : Icons.edit,
+                          size: 20,
+                          color: AppColors.secondaryColor,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (_isEditingAddress) {
+                              // Save changes
+                              if (_controllerAddress.text != _textAddress) {
+                                _textAddress = _controllerAddress.text;
+                                // context.read<UserProvider>().updateName(textName);
+                                DbClient().resetData(dbKey: 'userName');
+                                DbClient().setData(
+                                    dbKey: 'userName',
+                                    value: _controllerName.text);
+                              }
+                            }
+                            _isEditingAddress = !_isEditingAddress;
+                            if (_isEditingAddress) {
+                              // Start editing
+                              _controllerAddress.text = _textAddress;
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // bio
+
+                  Text(
+                    'Bio',
+                    style: AppTextStyles().secondaryStyle.copyWith(
+                          color: AppColors.black,
+                        ),
+                  ),
+
+                  // edit name
+
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: _isEditingBio
+                            ? TextField(
+                                decoration: const InputDecoration(
+                                  border: UnderlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                style: AppTextStyles().secondaryStyle,
+                                controller: _controllerBio,
+                                autofocus: true,
+                              )
+                            : Text(
+                                _textBio,
+                                style: AppTextStyles().secondaryStyle,
+                              ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _isEditingBio ? Icons.save : Icons.edit,
+                          size: 20,
+                          color: AppColors.secondaryColor,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (_isEditingBio) {
+                              // Save changes
+                              if (_controllerBio.text != _textBio) {
+                                _textBio = _controllerAddress.text;
+                                // context.read<UserProvider>().updateName(textName);
+                              }
+                            }
+                            _isEditingBio = !_isEditingBio;
+                            if (_isEditingBio) {
+                              // Start editing
+                              _controllerBio.text = _textBio;
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // mored details
+            const SizedBox(
+              height: 25,
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'More',
+                      style: AppTextStyles().primaryStyle.copyWith(
+                            color: AppColors.black.withOpacity(0.75),
+                          ),
+                    ),
+
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    // seperator
+                    Container(
+                      decoration: const ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            width: 0.50,
+                            strokeAlign: BorderSide.strokeAlignCenter,
+                            color: Color(0xFFAAAAAA),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 6,
+                    ),
+                    // text about
+
+                    Text(
+                      'Intersets',
+                      style: AppTextStyles().secondaryStyle.copyWith(
+                            color: AppColors.black,
+                          ),
+                    ),
+
+                    // edit name
+
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Expanded(
+                          child: _isEditingInterests
+                              ? TextField(
+                                  decoration: const InputDecoration(
+                                    border: UnderlineInputBorder(
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  style: AppTextStyles().secondaryStyle,
+                                  controller: _controllerInterests,
+                                  autofocus: true,
+                                )
+                              : Text(
+                                  _textInterests,
+                                  style: AppTextStyles().secondaryStyle,
+                                ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _isEditingInterests ? Icons.save : Icons.edit,
+                            size: 20,
+                            color: AppColors.secondaryColor,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (_isEditingInterests) {
+                                // Save changes
+                                if (_controllerInterests.text !=
+                                    _textInterests) {
+                                  _textInterests = _controllerAddress.text;
+                                  // context.read<UserProvider>().updateName(textName);
+                                }
+                              }
+                              _isEditingInterests = !_isEditingInterests;
+                              if (_isEditingInterests) {
+                                // Start editing
+                                _controllerInterests.text = _textInterests;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ]),
+            ),
+            const SizedBox(
+              height: 50,
+            ),
+            // images
+
+            SizedBox(
+              width: double.infinity,
+              height: 400,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Consumer<UserProfileProvider>(
+                  builder: (context, photoProvider, _) {
+                    UserProfileModel? userProfileModel =
+                        Provider.of<UserProfileProvider>(context, listen: false)
+                            .currentUserProfile;
+                    final alluploads = userProfileModel!.uploads;
+
+                    if (alluploads != null) {
+                      List<Uploads> reversedUploads =
+                          alluploads.reversed.toList();
+                      return GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2, // Number of items per row
+                          crossAxisSpacing:
+                              15, // Horizontal spacing between items
+                          mainAxisSpacing: 15, // Vertical spacing between rows
+                        ),
+                        itemCount: alluploads.length,
+                        itemBuilder: (context, index) {
+                          final upload = reversedUploads[index];
+                          print(upload.file);
+                          print(upload.name);
+                          print(upload.id);
+                          print(upload.uploadDate);
+
+                          return Stack(
+                            children: [
+                              Neumorphic(
+                                style: NeumorphicStyle(
+                                  boxShape: NeumorphicBoxShape.roundRect(
+                                    BorderRadius.circular(16),
+                                  ),
+                                  depth: 5,
+                                  intensity: 0.75,
+                                ),
+                                child: Container(
+                                  height: 500,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    image: DecorationImage(
+                                      image: MemoryImage(base64ToImage(upload
+                                          .file)), // Using NetworkImage for network images
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 10,
-                            right: 10,
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                              ),
-                            ),
-                          )
-                        ],
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: IconButton(
+                                  onPressed: () {
+                                    print(upload.id);
+                                    deletePost(upload.id);
+                                  },
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              )
+                            ],
+                          );
+                        },
                       );
-                    },
-                  );
-                } else {
-                  return Container();
-                }
-              },
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+              ),
             ),
-          ),
-        ),
 
-        // about
-        const SizedBox(
-          height: 25,
-        ),
-      ]),
+            // about
+            const SizedBox(
+              height: 25,
+            ),
+          ]),
+          Consumer<LoadingProvider>(
+            builder: (context, loadingProvider, _) {
+              return loadingProvider.isLoading
+                  ? Container(
+                      color: Colors.black.withOpacity(
+                          0.5), // Add background color with opacity
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : Container();
+            },
+          ),
+        ],
+      ),
       bottomSheet: Container(
         height: 60,
         width: double.infinity,

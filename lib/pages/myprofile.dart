@@ -8,6 +8,7 @@ import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
@@ -54,37 +55,44 @@ class _MyProfilePageState extends State<MyProfilePage> {
   }
 
   pickImage() async {
-    DateTime today = DateTime.now();
-    DateTime currentDate = DateTime(today.year, today.month, today.day);
-    // Request storage permission if needed
-    final storageStatus = await Permission.storage.request();
-    if (!storageStatus.isGranted) {
-      throw Exception('Storage permission is required to upload the image.');
-    }
+    context.read<LoadingProvider>().setLoading(true);
+    try {
+      DateTime today = DateTime.now();
+      DateTime currentDate = DateTime(today.year, today.month, today.day);
+      // Request storage permission if needed
+      final storageStatus = await Permission.storage.request();
+      if (!storageStatus.isGranted) {
+        throw Exception('Storage permission is required to upload the image.');
+      }
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'png', 'jpeg'],
-    );
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png', 'jpeg'],
+      );
 
-    // Handle result
-    if (result != null && result.files.isNotEmpty) {
-      File imageFile = File(result.files.single.path!);
+      // Handle result
+      if (result != null && result.files.isNotEmpty) {
+        File imageFile = File(result.files.single.path!);
 
-      String base64 = convertIntoBase64(imageFile);
+        String base64 = convertIntoBase64(imageFile);
 
-      final newUpload = Uploads(
-          userId: user!.uid.toString(),
-          file: base64.toString(),
-          name: 'Post',
-          uploadDate: currentDate.toString());
+        final newUpload = Uploads(
+            id: '',
+            file: base64.toString(),
+            name: 'Post',
+            uploadDate: currentDate.toString());
 
-      await context
-          .read<UserProfileProvider>()
-          .uploadPost(newUpload, user!.uid);
-    } else {
-      // Handle cases like user canceling the selection or errors
-      print('No image selected.');
+        await context
+            .read<UserProfileProvider>()
+            .uploadPost(context, newUpload, user!.uid);
+      } else {
+        // Handle cases like user canceling the selection or errors
+        print('No image selected.');
+      }
+    } catch (e) {
+      return;
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
@@ -119,451 +127,469 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Widget MobileProfile() {
     return Scaffold(
-      body: Column(children: [
-        const SizedBox(
-          height: 10,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // profile
+      body: Stack(
+        children: [
+          Column(children: [
+            const SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // profile
 
-              // search icon
-              ButtonWithLabel(
-                text: null,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.arrow_back,
-                ),
-                labelText: null,
+                  // search icon
+                  ButtonWithLabel(
+                    text: null,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back,
+                    ),
+                    labelText: null,
+                  ),
+
+                  Text(
+                    'My Profile',
+                    style: AppTextStyles().primaryStyle,
+                  ),
+
+                  // settings icon
+
+                  ButtonWithLabel(
+                    text: null,
+                    onPressed: () {
+                      _authService.signOut().then((value) {
+                        DbClient().clearAllData();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginScreen()),
+                        );
+                      });
+                    },
+                    icon: SvgPicture.asset(AppIcons.threedots),
+                    labelText: null,
+                  ),
+                ],
               ),
-
-              Text(
-                'My Profile',
-                style: AppTextStyles().primaryStyle,
-              ),
-
-              // settings icon
-
-              ButtonWithLabel(
-                text: null,
-                onPressed: () {
-                  _authService.signOut().then((value) {
-                    DbClient().clearAllData();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginScreen()),
-                    );
-                  });
-                },
-                icon: SvgPicture.asset(AppIcons.threedots),
-                labelText: null,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(
-          height: 30,
-        ),
-        Expanded(
-          child: ListView(
-            children: [
-              SizedBox(
-                height: 200,
-                width: 200,
-                child: Center(
-                  child: Container(
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            Expanded(
+              child: ListView(
+                children: [
+                  SizedBox(
                     height: 200,
                     width: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(1000),
+                    child: Center(
+                      child: Container(
+                        height: 200,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(1000),
+                        ),
+                        child: Consumer<UserProfileProvider>(
+                          builder: (context, imageProvider, _) {
+                            UserProfileModel? userProfileModel =
+                                Provider.of<UserProfileProvider>(context,
+                                        listen: false)
+                                    .currentUserProfile;
+
+                            return Neumorphic(
+                              style: NeumorphicStyle(
+                                boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(1000),
+                                ),
+                                depth: 10,
+                                intensity: 0.5,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(1000),
+                                child: userProfileModel!.image != null &&
+                                        userProfileModel.image != ''
+                                    ? Image.memory(
+                                        base64ToImage(userProfileModel.image),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.memory(
+                                        base64ToImage(defaultBase64Avatar),
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
+                  ),
+                  // details
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Consumer<UserProfileProvider>(
-                      builder: (context, imageProvider, _) {
+                      builder: (context, userDataProvider, _) {
                         UserProfileModel? userProfileModel =
                             Provider.of<UserProfileProvider>(context,
                                     listen: false)
                                 .currentUserProfile;
-
-                        return Neumorphic(
-                          style: NeumorphicStyle(
-                            boxShape: NeumorphicBoxShape.roundRect(
-                              BorderRadius.circular(1000),
+                        String address = '';
+                        if (userProfileModel!.address != null &&
+                            userProfileModel.address != '') {
+                          address = userProfileModel.address!;
+                        } else {
+                          address = 'Add your address';
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // name
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  userProfileModel.name ?? 'Add your Name',
+                                  style: AppTextStyles().primaryStyle,
+                                ),
+                                const SizedBox(width: 5),
+                                const Icon(Icons.female)
+                              ],
                             ),
-                            depth: 10,
-                            intensity: 0.5,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(1000),
-                            child: userProfileModel!.image != null &&
-                                    userProfileModel.image != ''
-                                ? Image.memory(
-                                    base64ToImage(userProfileModel.image),
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.memory(
-                                    base64ToImage(defaultBase64Avatar),
-                                    fit: BoxFit.cover,
-                                  ),
-                          ),
+
+                            // location and other details
+                            const SizedBox(
+                              height: 10,
+                            ),
+
+                            Column(
+                              children: [
+                                // location
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on_outlined,
+                                      color: AppColors.secondaryColor,
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      address,
+                                      style: AppTextStyles().secondaryStyle,
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                // relationship status
+
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.female,
+                                      color: AppColors.secondaryColor,
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      userProfileModel.gender ??
+                                          'Specify Your Gender',
+                                      style: AppTextStyles().secondaryStyle,
+                                    )
+                                  ],
+                                ),
+
+                                // seeking
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.search,
+                                      color: AppColors.secondaryColor,
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      "Seeking Female 21-39",
+                                      style: AppTextStyles().secondaryStyle,
+                                    )
+                                  ],
+                                ),
+                              ],
+                            )
+                          ],
                         );
                       },
                     ),
                   ),
-                ),
-              ),
-              // details
-              const SizedBox(
-                height: 15,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Consumer<UserProfileProvider>(
-                  builder: (context, userDataProvider, _) {
-                    UserProfileModel? userProfileModel =
-                        Provider.of<UserProfileProvider>(context, listen: false)
-                            .currentUserProfile;
-                    String address = '';
-                    if (userProfileModel!.address != null &&
-                        userProfileModel.address != '') {
-                      address = userProfileModel.address!;
-                    } else {
-                      address = 'Add your address';
-                    }
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // name
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              userProfileModel.name ?? 'Add your Name',
-                              style: AppTextStyles().primaryStyle,
-                            ),
-                            const SizedBox(width: 5),
-                            const Icon(Icons.female)
-                          ],
-                        ),
 
-                        // location and other details
-                        const SizedBox(
-                          height: 10,
-                        ),
+                  // edit
 
-                        Column(
-                          children: [
-                            // location
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.location_on_outlined,
-                                  color: AppColors.secondaryColor,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  address,
-                                  style: AppTextStyles().secondaryStyle,
-                                )
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            // relationship status
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.female,
-                                  color: AppColors.secondaryColor,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  userProfileModel.gender ??
-                                      'Specify Your Gender',
-                                  style: AppTextStyles().secondaryStyle,
-                                )
-                              ],
-                            ),
-
-                            // seeking
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.search,
-                                  color: AppColors.secondaryColor,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  "Seeking Female 21-39",
-                                  style: AppTextStyles().secondaryStyle,
-                                )
-                              ],
-                            ),
-                          ],
-                        )
-                      ],
-                    );
-                  },
-                ),
-              ),
-
-              // edit
-
-              const SizedBox(
-                height: 25,
-              ),
-
-              Container(
-                height: 150,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppColors.backgroundColor,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // heart
-                      Column(
-                        children: [
-                          Neumorphic(
-                            style: const NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.circle(),
-                              depth: 5,
-                              intensity: 0.75,
-                            ),
-                            child: NeumorphicButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const SettingPage()));
-                              },
-                              padding: EdgeInsets.zero,
-                              child: SizedBox(
-                                height: 60,
-                                width: 60,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15),
-                                  child: SvgPicture.asset(
-                                    AppIcons.setting,
-                                    height: 20,
-                                    width: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Text(
-                            'SETTINGS',
-                            style: GoogleFonts.poppins(
-                              color: AppColors.secondaryColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // chat
-                      Column(
-                        children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Neumorphic(
-                            style: const NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.circle(),
-                              depth: 5,
-                              intensity: 0.75,
-                            ),
-                            child: NeumorphicButton(
-                              onPressed: () {
-                                pickImage();
-                              },
-                              padding: EdgeInsets.zero,
-                              child: Container(
-                                height: 70,
-                                width: 70,
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Color.fromARGB(255, 33, 39, 93),
-                                      Color.fromARGB(255, 255, 0, 123),
-                                    ], // Adjust gradient colors as needed
-                                    begin: Alignment
-                                        .topLeft, // Adjust the gradient begin alignment as needed
-                                    end: Alignment
-                                        .bottomRight, // Adjust the gradient end alignment as needed
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15),
-                                  child: SvgPicture.asset(
-                                    AppIcons.camera,
-                                    height: 20,
-                                    width: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Text(
-                            'ADD MEDIA',
-                            style: GoogleFonts.poppins(
-                              color: AppColors.secondaryColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // star
-                      Column(
-                        children: [
-                          Neumorphic(
-                            style: const NeumorphicStyle(
-                              boxShape: NeumorphicBoxShape.circle(),
-                              depth: 5,
-                              intensity: 0.75,
-                            ),
-                            child: NeumorphicButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const EditInfo()));
-                              },
-                              padding: EdgeInsets.zero,
-                              child: SizedBox(
-                                height: 60,
-                                width: 60,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15),
-                                  child: SvgPicture.asset(
-                                    AppIcons.edit,
-                                    height: 20,
-                                    width: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Text(
-                            'EDIT INFO',
-                            style: GoogleFonts.poppins(
-                              color: AppColors.secondaryColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                  const SizedBox(
+                    height: 25,
                   ),
-                ),
-              ),
 
-              //
-
-              // images
-              SizedBox(
-                width: double.infinity,
-                height: 300,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Consumer<UserProfileProvider>(
-                    builder: (context, userProfileProvider, _) {
-                      UserProfileModel? userProfileModel =
-                          Provider.of<UserProfileProvider>(context,
-                                  listen: false)
-                              .currentUserProfile;
-                      final alluploads = userProfileModel!.uploads;
-                      if (alluploads != null) {
-                        List<Uploads> reversedUploads =
-                            alluploads.reversed.toList();
-                        return GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2, // Number of items per row
-                            crossAxisSpacing:
-                                15, // Horizontal spacing between items
-                            mainAxisSpacing:
-                                15, // Vertical spacing between rows
-                          ),
-                          itemCount: alluploads.length,
-                          itemBuilder: (context, index) {
-                            final upload = reversedUploads[index];
-                            return Neumorphic(
-                              style: NeumorphicStyle(
-                                boxShape: NeumorphicBoxShape.roundRect(
-                                  BorderRadius.circular(16),
+                  Container(
+                    height: 150,
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: AppColors.backgroundColor,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          // heart
+                          Column(
+                            children: [
+                              Neumorphic(
+                                style: const NeumorphicStyle(
+                                  boxShape: NeumorphicBoxShape.circle(),
+                                  depth: 5,
+                                  intensity: 0.75,
                                 ),
-                                depth: 5,
-                                intensity: 0.75,
-                              ),
-                              child: Container(
-                                height: 500,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  image: DecorationImage(
-                                    image: MemoryImage(base64ToImage(upload
-                                        .file)), // Using NetworkImage for network images
-                                    fit: BoxFit.cover,
+                                child: NeumorphicButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const SettingPage()));
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  child: SizedBox(
+                                    height: 60,
+                                    width: 60,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: SvgPicture.asset(
+                                        AppIcons.setting,
+                                        height: 20,
+                                        width: 20,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                'SETTINGS',
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.secondaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // chat
+                          Column(
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Neumorphic(
+                                style: const NeumorphicStyle(
+                                  boxShape: NeumorphicBoxShape.circle(),
+                                  depth: 5,
+                                  intensity: 0.75,
+                                ),
+                                child: NeumorphicButton(
+                                  onPressed: () {
+                                    pickImage();
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  child: Container(
+                                    height: 70,
+                                    width: 70,
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Color.fromARGB(255, 33, 39, 93),
+                                          Color.fromARGB(255, 255, 0, 123),
+                                        ], // Adjust gradient colors as needed
+                                        begin: Alignment
+                                            .topLeft, // Adjust the gradient begin alignment as needed
+                                        end: Alignment
+                                            .bottomRight, // Adjust the gradient end alignment as needed
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: SvgPicture.asset(
+                                        AppIcons.camera,
+                                        height: 20,
+                                        width: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                'ADD MEDIA',
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.secondaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // star
+                          Column(
+                            children: [
+                              Neumorphic(
+                                style: const NeumorphicStyle(
+                                  boxShape: NeumorphicBoxShape.circle(),
+                                  depth: 5,
+                                  intensity: 0.75,
+                                ),
+                                child: NeumorphicButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const EditInfo()));
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  child: SizedBox(
+                                    height: 60,
+                                    width: 60,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: SvgPicture.asset(
+                                        AppIcons.edit,
+                                        height: 20,
+                                        width: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                'EDIT INFO',
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.secondaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  //
+
+                  // images
+                  SizedBox(
+                    width: double.infinity,
+                    height: 300,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Consumer<UserProfileProvider>(
+                        builder: (context, userProfileProvider, _) {
+                          UserProfileModel? userProfileModel =
+                              Provider.of<UserProfileProvider>(context,
+                                      listen: false)
+                                  .currentUserProfile;
+                          final alluploads = userProfileModel!.uploads;
+                          if (alluploads != null) {
+                            List<Uploads> reversedUploads =
+                                alluploads.reversed.toList();
+                            return GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2, // Number of items per row
+                                crossAxisSpacing:
+                                    15, // Horizontal spacing between items
+                                mainAxisSpacing:
+                                    15, // Vertical spacing between rows
+                              ),
+                              itemCount: alluploads.length,
+                              itemBuilder: (context, index) {
+                                final upload = reversedUploads[index];
+                                return Neumorphic(
+                                  style: NeumorphicStyle(
+                                    boxShape: NeumorphicBoxShape.roundRect(
+                                      BorderRadius.circular(16),
+                                    ),
+                                    depth: 5,
+                                    intensity: 0.75,
+                                  ),
+                                  child: Container(
+                                    height: 500,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      image: DecorationImage(
+                                        image: MemoryImage(base64ToImage(upload
+                                            .file)), // Using NetworkImage for network images
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             );
-                          },
-                        );
-                      } else {
-                        return Container();
-                      }
-                    },
+                          } else {
+                            return Container();
+                          }
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              ),
 
-              // about
-              const SizedBox(
-                height: 25,
+                  // about
+                  const SizedBox(
+                    height: 25,
+                  ),
+                ],
               ),
-            ],
+            ),
+          ]),
+          Consumer<LoadingProvider>(
+            builder: (context, loadingProvider, _) {
+              return loadingProvider.isLoading
+                  ? Container(
+                      color: Colors.black.withOpacity(
+                          0.5), // Add background color with opacity
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : Container();
+            },
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 

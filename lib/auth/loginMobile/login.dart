@@ -1,10 +1,9 @@
 // import 'package:dating/auth/signupMobile/signup.dart';
 
-
-
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/pages/homepage.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
@@ -13,6 +12,7 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:provider/provider.dart';
 
 class LoginMobile extends StatefulWidget {
   const LoginMobile({super.key});
@@ -31,10 +31,7 @@ class _LoginMobileState extends State<LoginMobile> {
 
   Future<bool> _login(BuildContext context) async {
     String? result = await _authService.signInWithEmailAndPassword(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-      context
-    );
+        _emailController.text.trim(), _passwordController.text.trim(), context);
     bool flag = false;
 
     if (result != null) {
@@ -54,258 +51,274 @@ class _LoginMobileState extends State<LoginMobile> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        // space above
-        const SizedBox(
-          height: 20,
-        ),
-        Image.asset(
-          AppImages.login,
-          height: 200,
-        ),
-
-        // login text
-        const SizedBox(
-          height: 25,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Text(
-                'Find your match',
-                style: AppTextStyles().authMainStyle,
+    return Consumer<LoadingProvider>(builder: (context, loadingProvider, _) {
+      print(loadingProvider.isLoading);
+      return loadingProvider.isLoading
+          ? Container(
+              color: Colors.white, // Add background color with opacity
+              child: const Center(
+                child: CircularProgressIndicator(),
               ),
-            ],
-          ),
-        ),
-        // space betn find your match and text field
-        const SizedBox(height: 15),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
-          child: Row(
-            children: [
-              Text(
-                'Email Address',
-                style: AppTextStyles().authLabelStyle,
-              )
-            ],
-          ),
-        ),
-
-        const SizedBox(
-          height: 6,
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: AppTextField(
-            inputcontroller: _emailController,
-            hintText: 'Enter Email',
-            keyboardType: TextInputType.emailAddress,
-          ),
-        ),
-
-// password
-
-        const SizedBox(height: 15),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
-          child: Row(
-            children: [
-              Text(
-                'Password',
-                style: AppTextStyles().authLabelStyle,
-              )
-            ],
-          ),
-        ),
-
-        const SizedBox(
-          height: 6,
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: AppTextField(
-            inputcontroller: _passwordController,
-            hintText: 'Enter Your Password',
-            keyboardType: TextInputType.visiblePassword,
-            obscureText: true,
-          ),
-        ),
-
-        const SizedBox(
-          height: 10,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                'Forgot Password ?',
-                style: AppTextStyles().secondaryStyle.copyWith(
-                      fontSize: 14,
-                    ),
-              ),
-            ],
-          ),
-        ),
-
-// spacer
-        const SizedBox(height: 35),
-
-// checkbox
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 35,
-                child: NeumorphicSwitch(
+            )
+          : ListView(
+              children: [
+                // space above
+                const SizedBox(
                   height: 20,
-                  value: _isChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      _isChecked = value;
-                      // Do something when the switch is toggled
-                    });
-                  },
                 ),
-              ),
-              const SizedBox(width: 20),
-              // space
-              Expanded(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                Image.asset(
+                  AppImages.login,
+                  height: 200,
+                ),
+
+                // login text
+                const SizedBox(
+                  height: 25,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Keep me logged in',
-                            style: AppTextStyles().authLabelStyle.copyWith(
-                                  fontSize: 14,
-                                ),
-                          ),
-                        ],
-                      ),
                       Text(
-                        "Don't check this box if you're at a public or shared computer",
-                        style: AppTextStyles().authLabelStyle.copyWith(
+                        'Find your match',
+                        style: AppTextStyles().authMainStyle,
+                      ),
+                    ],
+                  ),
+                ),
+                // space betn find your match and text field
+                const SizedBox(height: 15),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Email Address',
+                        style: AppTextStyles().authLabelStyle,
+                      )
+                    ],
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 6,
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: AppTextField(
+                    inputcontroller: _emailController,
+                    hintText: 'Enter Email',
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ),
+
+                // password
+
+                const SizedBox(height: 15),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Password',
+                        style: AppTextStyles().authLabelStyle,
+                      )
+                    ],
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 6,
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: AppTextField(
+                    inputcontroller: _passwordController,
+                    hintText: 'Enter Your Password',
+                    keyboardType: TextInputType.visiblePassword,
+                    obscureText: true,
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Forgot Password ?',
+                        style: AppTextStyles().secondaryStyle.copyWith(
                               fontSize: 14,
-                              color: AppColors.secondaryColor,
                             ),
                       ),
-                    ]),
-              )
-            ],
-          ),
-        ),
+                    ],
+                  ),
+                ),
 
-// button
-        const SizedBox(
-          height: 25,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SizedBox(
-            height: 55,
-            child: Button(
-              onPressed: () {
-                _login(context).then((value) {
-                  if (value) {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomePage()));
-                  }
-                });
-              },
-              text: 'Login',
-            ),
-          ),
-        ),
+                // spacer
+                const SizedBox(height: 35),
 
-        const SizedBox(
-          height: 10,
-        ),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Or',
-              style: AppTextStyles()
-                  .authLabelStyle
-                  .copyWith(color: AppColors.secondaryColor),
-            )
-          ],
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-
-// sign in with
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SizedBox(
-            height: 55,
-            child: Button(
-              onPressed: () {
-                _authService.signInWithGoogle(context).then((user) {
-                  if (user != null) {
-                    // Sign-in successful, navigate to home page
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (_) => const HomePage()));
-                  } else {
-                    // Sign-in canceled or failed, show error message (optional)
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Google Sign-In canceled or failed.'),
+                // checkbox
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 35,
+                        child: NeumorphicSwitch(
+                          height: 20,
+                          value: _isChecked,
+                          onChanged: (value) {
+                            setState(() {
+                              _isChecked = value;
+                              // Do something when the switch is toggled
+                            });
+                          },
+                        ),
                       ),
-                    );
-                  }
-                });
-              },
-              text: 'Login With',
-              imagePath: 'assets/images/google.png',
-            ),
-          ),
-        ),
+                      const SizedBox(width: 20),
+                      // space
+                      Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'Keep me logged in',
+                                    style:
+                                        AppTextStyles().authLabelStyle.copyWith(
+                                              fontSize: 14,
+                                            ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                "Don't check this box if you're at a public or shared computer",
+                                style: AppTextStyles().authLabelStyle.copyWith(
+                                      fontSize: 14,
+                                      color: AppColors.secondaryColor,
+                                    ),
+                              ),
+                            ]),
+                      )
+                    ],
+                  ),
+                ),
 
-// dont have an account
-        const SizedBox(
-          height: 25,
-        ),
+                // button
+                const SizedBox(
+                  height: 25,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: SizedBox(
+                    height: 55,
+                    child: Button(
+                      onPressed: () {
+                        _login(context).then((value) {
+                          if (value) {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const HomePage()));
+                          }
+                        });
+                      },
+                      text: 'Login',
+                    ),
+                  ),
+                ),
 
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(
-            "Don't have an account?",
-            style: AppTextStyles().secondaryStyle.copyWith(fontSize: 14),
-          ),
-          const SizedBox(
-            width: 5,
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SignUpScreen()));
-            },
-            child: Text(
-              'Register',
-              style: AppTextStyles().primaryStyle.copyWith(fontSize: 14),
-            ),
-          ),
-        ])
-      ],
-    );
+                const SizedBox(
+                  height: 10,
+                ),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Or',
+                      style: AppTextStyles()
+                          .authLabelStyle
+                          .copyWith(color: AppColors.secondaryColor),
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+
+                // sign in with
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: SizedBox(
+                    height: 55,
+                    child: Button(
+                      onPressed: () {
+                        _authService.signInWithGoogle(context).then((user) {
+                          if (user != null) {
+                            // Sign-in successful, navigate to home page
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const HomePage()));
+                          } else {
+                            // Sign-in canceled or failed, show error message (optional)
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Google Sign-In canceled or failed.'),
+                              ),
+                            );
+                          }
+                        });
+                      },
+                      text: 'Login With',
+                      imagePath: 'assets/images/google.png',
+                    ),
+                  ),
+                ),
+
+                // dont have an account
+                const SizedBox(
+                  height: 25,
+                ),
+
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Text(
+                    "Don't have an account?",
+                    style:
+                        AppTextStyles().secondaryStyle.copyWith(fontSize: 14),
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignUpScreen()));
+                    },
+                    child: Text(
+                      'Register',
+                      style:
+                          AppTextStyles().primaryStyle.copyWith(fontSize: 14),
+                    ),
+                  ),
+                ])
+              ],
+            );
+    });
   }
 }
