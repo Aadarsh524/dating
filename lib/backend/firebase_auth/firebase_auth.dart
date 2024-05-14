@@ -1,5 +1,4 @@
 import 'package:dating/auth/db_client.dart';
-import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
@@ -9,7 +8,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
 class AuthService {
-  ApiClient apiClient = ApiClient();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -17,6 +15,7 @@ class AuthService {
 
   Future<String?> signInWithEmailAndPassword(
       String email, String password, BuildContext context) async {
+    context.read<LoadingProvider>().setLoading(true);
     try {
       final UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -40,7 +39,9 @@ class AuthService {
 
       return userCredential.user?.uid;
     } catch (e) {
-      return e.toString(); // Return error message if login fails
+      return e.toString();
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
@@ -87,6 +88,7 @@ class AuthService {
   }
 
   Future<User?> signInWithGoogle(BuildContext context) async {
+    context.read<LoadingProvider>().setLoading(true);
     try {
       // Trigger the Google Sign-In flow
       final GoogleSignInAccount? googleSignInAccount =
@@ -154,6 +156,8 @@ class AuthService {
     } catch (e) {
       print("Google Sign-In Error: $e");
       return null; // Return null if sign-in fails
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
     }
   }
 

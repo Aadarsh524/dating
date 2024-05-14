@@ -43,7 +43,7 @@ class UserProfileProvider extends ChangeNotifier {
     }
   }
 
-  Future<UserProfileModel?> getUserData(String uid) async {
+  Future<UserProfileModel?> getUserData(uid) async {
     try {
       final response = await http.get(
         Uri.parse('$URI/User/$uid'),
@@ -65,7 +65,7 @@ class UserProfileProvider extends ChangeNotifier {
   }
 
   Future<UserProfileModel> updateUserProfile(
-      UserProfileModel updatedProfile) async {
+      BuildContext context, UserProfileModel updatedProfile) async {
     try {
       String? uid = updatedProfile.uid;
       final url = Uri.parse(
@@ -99,7 +99,8 @@ class UserProfileProvider extends ChangeNotifier {
     }
   }
 
-  Future<Uploads> uploadPost(Uploads newUpload, String uid) async {
+  Future<Uploads> uploadPost(
+      BuildContext context, newUpload, String uid) async {
     try {
       final url = Uri.parse('http://10.0.2.2:8001/api/file?UserID=$uid');
       final response = await http.post(
@@ -113,7 +114,7 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        getUserData(uid).then(
+        await getUserData(uid).then(
           (value) {
             if (value != null) {
               setCurrentUserProfile(value);
@@ -130,7 +131,38 @@ class UserProfileProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateProfileImage(String base64image, String uid) async {
+  Future<bool> deletePost(String uid) async {
+    try {
+      final url = Uri.parse('http://10.0.2.2:8001/api/file/$uid');
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'access_token': 'accesstokentest'
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await getUserData(uid).then(
+          (value) {
+            if (value != null) {
+              setCurrentUserProfile(value);
+              notifyListeners();
+            }
+          },
+        );
+        return true;
+      } else {
+        throw Exception('Failed to delete post');
+      }
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateProfileImage(
+      BuildContext context, base64image, String uid) async {
     try {
       var response = await http.put(
         Uri.parse('http://10.0.2.2:8001/api/UserProfile/Image/$uid'),
