@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/utils/platform.dart';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
@@ -148,10 +149,12 @@ class ApiClient {
   }
 
   Future<DashboardResponseModel> dashboard(String uid, int page) async {
-    log('$URI/Dashboard/$uid&page=$page');
+    String api = getApiEndpoint();
+    print(api);
+
     try {
       final response = await http.get(
-        Uri.parse('$URI/Dashboard/$uid&page=$page'),
+        Uri.parse('$api/Dashboard/$uid&page=$page'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

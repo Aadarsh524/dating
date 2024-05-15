@@ -1,28 +1,27 @@
 import 'dart:convert';
-import 'package:dating/backend/MongoDB/apis.dart';
+
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/utils/platform.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
-import 'package:dating/backend/MongoDB/constants.dart';
 
 class UserProfileProvider extends ChangeNotifier {
-  ApiClient apiClient = ApiClient();
-
-  UserProfileModel? _currentUserProfileProvider;
+  UserProfileModel? currentUserProfileModel;
 
   void setCurrentUserProfile(UserProfileModel userProfile) {
-    _currentUserProfileProvider = userProfile;
+    currentUserProfileModel = userProfile;
     notifyListeners();
   }
 
-  UserProfileModel? get currentUserProfile => _currentUserProfileProvider;
+  UserProfileModel? get currentUserProfile => currentUserProfileModel;
 
   Future<UserProfileModel> addNewUser(
       UserProfileModel userProfileModel, BuildContext context) async {
     try {
+      String api = getApiEndpoint();
       setCurrentUserProfile(userProfileModel);
       final response = await http.post(
-        Uri.parse('$URI/user'), // Replace with your API endpoint
+        Uri.parse('$api/user'), // Replace with your API endpoint
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -45,8 +44,9 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<UserProfileModel?> getUserData(uid) async {
     try {
+      String api = getApiEndpoint();
       final response = await http.get(
-        Uri.parse('$URI/User/$uid'),
+        Uri.parse('$api/User/$uid'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -67,9 +67,9 @@ class UserProfileProvider extends ChangeNotifier {
   Future<UserProfileModel> updateUserProfile(
       BuildContext context, UserProfileModel updatedProfile) async {
     try {
+      String api = getApiEndpoint();
       String? uid = updatedProfile.uid;
-      final url = Uri.parse(
-          'http://10.0.2.2:8001/api/userprofile/${updatedProfile.uid}');
+      final url = Uri.parse('$api/userprofile/${updatedProfile.uid}');
       final response = await http.put(
         url,
         headers: {
@@ -102,7 +102,9 @@ class UserProfileProvider extends ChangeNotifier {
   Future<Uploads> uploadPost(
       BuildContext context, newUpload, String uid) async {
     try {
-      final url = Uri.parse('http://10.0.2.2:8001/api/file?UserID=$uid');
+      String api = getApiEndpoint();
+
+      final url = Uri.parse('$api/file?UserID=$uid');
       final response = await http.post(
         url,
         headers: {
@@ -133,7 +135,9 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<bool> deletePost(String uid) async {
     try {
-      final url = Uri.parse('http://10.0.2.2:8001/api/file/$uid');
+      String api = getApiEndpoint();
+
+      final url = Uri.parse('$api/file/$uid');
       final response = await http.delete(
         url,
         headers: {
@@ -164,8 +168,10 @@ class UserProfileProvider extends ChangeNotifier {
   Future<void> updateProfileImage(
       BuildContext context, base64image, String uid) async {
     try {
+      String api = getApiEndpoint();
+
       var response = await http.put(
-        Uri.parse('http://10.0.2.2:8001/api/UserProfile/Image/$uid'),
+        Uri.parse('$api/UserProfile/Image/$uid'),
         body: jsonEncode(base64image.toString()),
         headers: {
           'Content-Type': 'application/json',
