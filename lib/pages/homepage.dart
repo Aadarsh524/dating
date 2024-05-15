@@ -2,16 +2,24 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dating/auth/db_client.dart';
+
+
 import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/datamodel/dashboard_response_model.dart' as d;
+
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
 import 'package:dating/pages/settingpage.dart';
+import 'package:dating/providers/dashboard_provider.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
+import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
@@ -57,6 +65,7 @@ class _HomePageState extends State<HomePage> {
         await DbClient().setData(dbKey: "email", value: value.email ?? '');
       }
     });
+    context.read<DashboardProvider>().dashboard(1, context);
 
     super.initState();
   }
@@ -239,196 +248,244 @@ class _HomePageState extends State<HomePage> {
           height: 30,
         ),
 
-        Expanded(
-          child: FutureBuilder(
-              future: apiClient.dashboard(user!.uid, 1),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  // Display a loading indicator while waiting for the data
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  // Display an error message if an error occurs
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData) {
-                  // Display a message if no data is available
-                  return const Center(child: Text('No data available'));
-                } else {
-                  return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: 2,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // profile pic
-                                      GestureDetector(
-                                        onTap: () {},
-                                        child: Row(
-                                          children: [
-                                            Neumorphic(
-                                              style: NeumorphicStyle(
-                                                boxShape: NeumorphicBoxShape
-                                                    .roundRect(
-                                                  BorderRadius.circular(1000),
-                                                ),
-                                              ),
-                                              child: Container(
-                                                  height: 50,
-                                                  width: 50,
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          image:
-                                                              DecorationImage(
-                                                            image: AssetImage(
-                                                                AppImages
-                                                                    .profile),
-                                                            fit: BoxFit.cover,
-                                                          ))),
-                                            ),
+        Consumer<LoadingProvider>(builder: (context, loading, _) {
+          return loading.isLoading
+              ? const ShimmerSkeleton(count: 2, height: 300)
+              : Expanded(
+                  child: Consumer<DashboardProvider>(
+                      builder: (context, snapshot, _) {
+                    List<d.DashboardResponseModel>? data =
+                        Provider.of<DashboardProvider>(context, listen: false)
+                            .dashboardList;
 
-                                            // profile name and address
-                                            const SizedBox(
-                                              width: 20,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                    return ListView.builder(
+                        itemCount: data!.length,
+                        itemBuilder: (context, index) {
+                          final alluploads = data[index].uploads;
+                          if (alluploads!.isNotEmpty) {
+                            return Container(
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          // profile pic
+                                          GestureDetector(
+                                            onTap: () {},
+                                            child: Row(
                                               children: [
-                                                Text(
-                                                  snapshot
-                                                      .data!.data[index].name,
-                                                  style: AppTextStyles()
-                                                      .primaryStyle
-                                                      .copyWith(fontSize: 14),
+                                                Neumorphic(
+                                                  style: NeumorphicStyle(
+                                                    boxShape: NeumorphicBoxShape
+                                                        .roundRect(
+                                                      BorderRadius.circular(
+                                                          1000),
+                                                    ),
+                                                  ),
+                                                  child: Container(
+                                                    height: 50,
+                                                    width: 50,
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: data[index].image !=
+                                                            ''
+                                                        ? Image.memory(
+                                                            base64ToImage(
+                                                                data[index]
+                                                                    .image!),
+                                                            fit: BoxFit.cover)
+                                                        : Image.memory(
+                                                            base64ToImage(
+                                                                defaultBase64Avatar),
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                  ),
                                                 ),
-                                                Row(
+
+                                                // profile name and address
+                                                const SizedBox(
+                                                  width: 20,
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
-                                                    const Icon(
-                                                      Icons.circle,
-                                                      size: 8,
-                                                      color: AppColors
-                                                          .secondaryColor,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 10,
-                                                    ),
                                                     Text(
-                                                      'Rehan Ritviz, 25',
+                                                      data[index].name!,
                                                       style: AppTextStyles()
-                                                          .secondaryStyle
+                                                          .primaryStyle
                                                           .copyWith(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                              color: AppColors
-                                                                  .secondaryColor),
+                                                              fontSize: 14),
                                                     ),
+                                                    Row(
+                                                      children: [
+                                                        const Icon(
+                                                          Icons.circle,
+                                                          size: 8,
+                                                          color: AppColors
+                                                              .secondaryColor,
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 10,
+                                                        ),
+                                                        Text(
+                                                          '${data[index].name}, ${data[index].age}',
+                                                          style: AppTextStyles()
+                                                              .secondaryStyle
+                                                              .copyWith(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w300,
+                                                                  color: AppColors
+                                                                      .secondaryColor),
+                                                        ),
+                                                      ],
+                                                    )
                                                   ],
                                                 )
                                               ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
+                                            ),
+                                          ),
 
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.circle,
-                                            size: 8,
-                                            color: Colors.green,
-                                          ),
-                                          const SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text(
-                                            'online',
-                                            style: AppTextStyles()
-                                                .secondaryStyle
-                                                .copyWith(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w300,
-                                                    color: AppColors.black),
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.circle,
+                                                size: 8,
+                                                color: Colors.green,
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                'online',
+                                                style: AppTextStyles()
+                                                    .secondaryStyle
+                                                    .copyWith(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w300,
+                                                        color: AppColors.black),
+                                              ),
+                                            ],
+                                          )
+                                        ]),
+                                  ),
+
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  // image
+                                  Container(
+                                      decoration: BoxDecoration(
+                                        color: AppColors.backgroundColor,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.grey.withOpacity(0.25),
+                                            // spreadRadius: 5,
+                                            blurRadius: 20,
+                                            offset: const Offset(0,
+                                                25), // horizontal and vertical offset
                                           ),
                                         ],
-                                      )
-                                    ]),
-                              ),
-
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              // image
-                              Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.backgroundColor,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.25),
-                                        // spreadRadius: 5,
-                                        blurRadius: 20,
-                                        offset: const Offset(0,
-                                            25), // horizontal and vertical offset
                                       ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Image.asset(AppImages.loginimage),
-                                      // like comment
+                                      child: Column(
+                                        children: [
+                                          SizedBox(
+                                            width: double.infinity,
+                                            height: 300,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20),
+                                              child:
+                                                  Consumer<DashboardProvider>(
+                                                builder:
+                                                    (context, dashboard, _) {
+                                                  final alluploads =
+                                                      data[index].uploads;
+                                                  if (alluploads != null &&
+                                                      alluploads.isNotEmpty) {
+                                                    List<d.Uploads>
+                                                        reversedUploads =
+                                                        alluploads.reversed
+                                                            .toList();
 
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 20),
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.thumb_up_off_alt,
-                                                    size: 30,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Icon(
-                                                    Icons.mode_comment_outlined,
-                                                    size: 30,
-                                                  ),
+                                                    final upload =
+                                                        reversedUploads[0];
 
-                                                  // share icon
-                                                ],
+                                                    return Container(
+                                                      child: Image.memory(
+                                                        base64ToImage(
+                                                            upload.file!),
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    return Container();
+                                                  }
+                                                },
                                               ),
-                                              Icon(Icons.ios_share_outlined),
-                                            ]),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                    ],
-                                  )),
-                            ],
-                          ),
-                        );
-                      });
-                }
-              }),
-        )
+                                            ),
+                                          ),
+                                          // like comment
+
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 20),
+                                            child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.thumb_up_off_alt,
+                                                        size: 30,
+                                                      ),
+                                                      SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Icon(
+                                                        Icons
+                                                            .mode_comment_outlined,
+                                                        size: 30,
+                                                      ),
+
+                                                      // share icon
+                                                    ],
+                                                  ),
+                                                  Icon(
+                                                      Icons.ios_share_outlined),
+                                                ]),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                        ],
+                                      )),
+                                ],
+                              ),
+                            );
+                          } else {
+                            return Container();
+                          }
+                        });
+                  }),
+                );
+        })
       ]),
       bottomSheet: const NavBar(),
     );
@@ -1007,8 +1064,10 @@ class _HomePageState extends State<HomePage> {
 // ignore: must_be_immutable
 class ProfileButton extends StatelessWidget {
   const ProfileButton({
+
     Key? key,
   }) : super(key: key);
+
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);

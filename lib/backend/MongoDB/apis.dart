@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:developer';
+
 
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/dashboard_response_model.dart';
+
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/utils/platform.dart';
 import 'package:dio/dio.dart';
@@ -148,36 +148,5 @@ class ApiClient {
     }
   }
 
-  Future<DashboardResponseModel> dashboard(String uid, int page) async {
-    String api = getApiEndpoint();
-    print(api);
 
-    try {
-      final response = await http.get(
-        Uri.parse('$api/Dashboard/$uid&page=$page'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'access_token': 'accesstokentest'
-        },
-      );
-
-      log(response.body);
-
-      // Parse the JSON response as a list
-      List<dynamic> jsonList = json.decode(response.body);
-
-      // Handle the case where the list is empty
-      if (jsonList.isEmpty) {
-        // Return an empty DashboardResponseModel
-        return DashboardResponseModel(data: []);
-      } else {
-        // Convert the list to DashboardResponseModel
-        return DashboardResponseModel.fromList(jsonList);
-      }
-    } catch (e) {
-      print(e.toString());
-      rethrow;
-    }
-  }
 }
