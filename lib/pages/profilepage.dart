@@ -54,11 +54,11 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget MobileProfile() {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -70,7 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back,
                 ),
                 labelText: null,
@@ -94,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
         Expanded(
@@ -103,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Container(
                 height: 250,
                 width: double.infinity,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
@@ -117,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -128,7 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               borderRadius: BorderRadius.circular(1000),
                               color: Colors.black.withOpacity(0.75),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.report_gmailerrorred,
                               size: 20,
                               color: Colors.white,
@@ -136,12 +136,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.circle,
                                 size: 10,
                                 color: Colors.white,
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 4,
                               ),
                               Icon(
@@ -149,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 size: 10,
                                 color: Colors.white.withOpacity(0.5),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 4,
                               ),
                               Icon(
@@ -157,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 size: 10,
                                 color: Colors.white.withOpacity(0.5),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 4,
                               ),
                               Icon(
@@ -174,7 +174,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               borderRadius: BorderRadius.circular(1000),
                               color: Colors.black.withOpacity(0.75),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.fullscreen,
                               size: 20,
                               color: Colors.white,
@@ -183,7 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                   ],
@@ -191,11 +191,11 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
 
               // details
-              SizedBox(
+              const SizedBox(
                 height: 15,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
                     // name
@@ -208,8 +208,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               'Sekar Lia, 25',
                               style: AppTextStyles().primaryStyle,
                             ),
-                            SizedBox(width: 5),
-                            Icon(Icons.female)
+                            const SizedBox(width: 5),
+                            const Icon(Icons.female)
                           ],
                         ),
 
@@ -217,12 +217,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.circle,
                               color: Colors.green,
                               size: 10,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 4,
                             ),
                             Text(
@@ -235,7 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
 
                     // location and other details
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
 
@@ -244,11 +244,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         // location
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.location_on_outlined,
                               color: AppColors.secondaryColor,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             Text(
@@ -258,18 +258,18 @@ class _ProfilePageState extends State<ProfilePage> {
                             )
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
                         // relationship status
 
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.female,
                               color: AppColors.secondaryColor,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             Text(
@@ -280,16 +280,16 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
 
                         // seeking
-                        SizedBox(
+                        const SizedBox(
                           height: 5,
                         ),
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.search,
                               color: AppColors.secondaryColor,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             Text(
@@ -305,7 +305,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
 
               // about
-              SizedBox(
+              const SizedBox(
                 height: 25,
               ),
 
@@ -323,7 +323,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     // seperator
                     Container(
-                      decoration: ShapeDecoration(
+                      decoration: const ShapeDecoration(
                         shape: RoundedRectangleBorder(
                           side: BorderSide(
                             width: 0.50,
@@ -341,7 +341,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: AppTextStyles().secondaryStyle,
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
 
@@ -354,7 +354,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     // seperator
                     Container(
-                      decoration: ShapeDecoration(
+                      decoration: const ShapeDecoration(
                         shape: RoundedRectangleBorder(
                           side: BorderSide(
                             width: 0.50,
@@ -375,7 +375,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
 
-              SizedBox(
+              const SizedBox(
                 height: 200,
               ),
             ],
@@ -385,7 +385,7 @@ class _ProfilePageState extends State<ProfilePage> {
       bottomSheet: Container(
         height: 100,
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.backgroundColor,
         ),
         child: Row(
@@ -393,13 +393,13 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             // heart
             Neumorphic(
-              style: NeumorphicStyle(
+              style: const NeumorphicStyle(
                 boxShape: NeumorphicBoxShape.circle(),
                 depth: 5,
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 50,
                   child: Padding(
@@ -416,13 +416,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
             // chat
             Neumorphic(
-              style: NeumorphicStyle(
+              style: const NeumorphicStyle(
                 boxShape: NeumorphicBoxShape.circle(),
                 depth: 5,
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
-                child: Container(
+                child: SizedBox(
                   height: 65,
                   width: 65,
                   child: Padding(
@@ -439,13 +439,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
             // star
             Neumorphic(
-              style: NeumorphicStyle(
+              style: const NeumorphicStyle(
                 boxShape: NeumorphicBoxShape.circle(),
                 depth: 5,
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 50,
                   child: Padding(
@@ -476,19 +476,19 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // profile
               Row(
                 children: [
-                  profileButton(),
-                  SizedBox(
+                  const profileButton(),
+                  const SizedBox(
                     width: 20,
                   ),
                   Text(
@@ -508,7 +508,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -522,9 +522,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                           context,
                           CupertinoPageRoute(
-                              builder: (context) => SettingPage()));
+                              builder: (context) => const SettingPage()));
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.settings,
                     ),
                     labelText: null,
@@ -535,7 +535,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -549,12 +549,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -569,9 +569,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           text: null,
                           labelText: 'Matches',
                           onPressed: () {},
-                          icon: Icon(Icons.people),
+                          icon: const Icon(Icons.people),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // messages
@@ -579,10 +579,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           text: null,
                           labelText: 'Messages',
                           onPressed: () {},
-                          icon: Icon(Icons.messenger_outline),
+                          icon: const Icon(Icons.messenger_outline),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // popular
@@ -590,9 +590,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           text: null,
                           labelText: 'Popular',
                           onPressed: () {},
-                          icon: Icon(Icons.star),
+                          icon: const Icon(Icons.star),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // photos
@@ -600,10 +600,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           text: null,
                           labelText: 'Photos',
                           onPressed: () {},
-                          icon: Icon(Icons.photo_library_sharp),
+                          icon: const Icon(Icons.photo_library_sharp),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // add friemd
@@ -611,10 +611,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           text: null,
                           labelText: 'Add Friend',
                           onPressed: () {},
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // online
@@ -622,7 +622,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           text: null,
                           labelText: 'Online',
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.circle_outlined,
                             color: Colors.green,
                           ),
@@ -630,7 +630,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
 
@@ -641,13 +641,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         // seeking
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: seeking,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 seeking = newValue!;
@@ -671,20 +672,21 @@ class _ProfilePageState extends State<ProfilePage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // country
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: country,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 country = newValue!;
@@ -708,20 +710,21 @@ class _ProfilePageState extends State<ProfilePage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // age
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: age,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 age = newValue!;
@@ -757,7 +760,7 @@ class _ProfilePageState extends State<ProfilePage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -765,10 +768,10 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Row(
             children: [
 // side bar
-              NavBarDesktop(),
+              const NavBarDesktop(),
 
 // posts
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Expanded(
@@ -788,7 +791,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         )
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 30,
                     ),
                     Expanded(
@@ -818,7 +821,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ),
 
-                                SizedBox(
+                                const SizedBox(
                                   height: 20,
                                 ),
                                 //
@@ -830,7 +833,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     width: 200,
                                     child: GridView.builder(
                                       gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: 3,
                                         crossAxisSpacing: 20.0,
                                         mainAxisSpacing: 8.0,
@@ -875,7 +878,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
 
               // chats
-              SizedBox(
+              const SizedBox(
                 width: 40,
               ),
 
@@ -895,13 +898,13 @@ class _ProfilePageState extends State<ProfilePage> {
                             children: [
                               // heart
                               Neumorphic(
-                                style: NeumorphicStyle(
+                                style: const NeumorphicStyle(
                                   boxShape: NeumorphicBoxShape.circle(),
                                   depth: 5,
                                   intensity: 0.75,
                                 ),
                                 child: NeumorphicButton(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: 40,
                                     width: 40,
                                     child: Padding(
@@ -918,13 +921,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
                               // chat
                               Neumorphic(
-                                style: NeumorphicStyle(
+                                style: const NeumorphicStyle(
                                   boxShape: NeumorphicBoxShape.circle(),
                                   depth: 5,
                                   intensity: 0.75,
                                 ),
                                 child: NeumorphicButton(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: 55,
                                     width: 55,
                                     child: Padding(
@@ -941,13 +944,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
                               // star
                               Neumorphic(
-                                style: NeumorphicStyle(
+                                style: const NeumorphicStyle(
                                   boxShape: NeumorphicBoxShape.circle(),
                                   depth: 5,
                                   intensity: 0.75,
                                 ),
                                 child: NeumorphicButton(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: 40,
                                     width: 40,
                                     child: Padding(
@@ -973,7 +976,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               borderRadius: BorderRadius.circular(1000),
                               color: Colors.black.withOpacity(0.75),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.report_gmailerrorred,
                               size: 20,
                               color: Colors.white,
@@ -983,11 +986,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       height: 25,
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         children: [
                           // name
@@ -1000,8 +1003,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     'Sekar Lia, 25',
                                     style: AppTextStyles().primaryStyle,
                                   ),
-                                  SizedBox(width: 5),
-                                  Icon(Icons.female)
+                                  const SizedBox(width: 5),
+                                  const Icon(Icons.female)
                                 ],
                               ),
 
@@ -1009,12 +1012,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
                               Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.circle,
                                     color: Colors.green,
                                     size: 10,
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 4,
                                   ),
                                   Text(
@@ -1027,7 +1030,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
 
 // location and other details
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
 
@@ -1036,11 +1039,11 @@ class _ProfilePageState extends State<ProfilePage> {
                               // location
                               Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.location_on_outlined,
                                     color: AppColors.secondaryColor,
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 5,
                                   ),
                                   Text(
@@ -1049,18 +1052,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                   )
                                 ],
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 5,
                               ),
 // relationship status
 
                               Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.female,
                                     color: AppColors.secondaryColor,
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 5,
                                   ),
                                   Text(
@@ -1071,16 +1074,16 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
 
 // seeking
-                              SizedBox(
+                              const SizedBox(
                                 height: 5,
                               ),
                               Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.search,
                                     color: AppColors.secondaryColor,
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 5,
                                   ),
                                   Text(
@@ -1096,7 +1099,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
 
                     // about
-                    SizedBox(
+                    const SizedBox(
                       height: 25,
                     ),
 
@@ -1114,7 +1117,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                           // seperator
                           Container(
-                            decoration: ShapeDecoration(
+                            decoration: const ShapeDecoration(
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(
                                   width: 0.50,
@@ -1132,7 +1135,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: AppTextStyles().secondaryStyle,
                           ),
 
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
 
@@ -1145,7 +1148,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                           // seperator
                           Container(
-                            decoration: ShapeDecoration(
+                            decoration: const ShapeDecoration(
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(
                                   width: 0.50,
@@ -1190,10 +1193,10 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
-      child: Container(
+      child: SizedBox(
         height: 50,
         width: 50,
         child: Image.asset(

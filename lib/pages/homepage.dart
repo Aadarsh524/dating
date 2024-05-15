@@ -2,11 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dating/auth/db_client.dart';
-import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/backend/firebase_auth/firebase_auth.dart';
-import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
@@ -39,7 +36,6 @@ class _HomePageState extends State<HomePage> {
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
-  final AuthService _authService = AuthService();
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
@@ -1011,10 +1007,8 @@ class _HomePageState extends State<HomePage> {
 // ignore: must_be_immutable
 class ProfileButton extends StatelessWidget {
   const ProfileButton({
-
     Key? key,
   }) : super(key: key);
-
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);

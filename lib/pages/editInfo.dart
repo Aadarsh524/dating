@@ -305,9 +305,6 @@ class _EditInfoState extends State<EditInfo> {
               width: 200,
               child: Center(
                 child: GestureDetector(
-                  onTap: () {
-                    pickImage();
-                  },
                   child: Neumorphic(
                     style: NeumorphicStyle(
                       boxShape: NeumorphicBoxShape.roundRect(
@@ -827,870 +824,845 @@ class _EditInfoState extends State<EditInfo> {
   }
 
   Widget DesktopProfile() {
-    List<String> photoAssetPaths = [
-      AppImages.profile, // Main photo
-      AppImages.loginimage,
-      AppImages.profile,
-      AppImages.profile,
-      // Small photo 3
-    ];
-
     return Scaffold(
-      body: Column(children: [
-        const SizedBox(
-          height: 10,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // profile
-              Row(
+      body: Stack(
+        children: [
+          Column(children: [
+            const SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const profileButton(),
+                  // profile
+                  Row(
+                    children: [
+                      const profileButton(),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Text(
+                        'Dating App',
+                        style: GoogleFonts.poppins(
+                          color: AppColors.black,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // search icon
+                  Row(
+                    children: [
+                      ButtonWithLabel(
+                        text: null,
+                        onPressed: () {},
+                        icon: const Icon(
+                          Icons.search,
+                        ),
+                        labelText: null,
+                      ),
+
+                      // settings icon
+
+                      ButtonWithLabel(
+                        text: null,
+                        onPressed: () {},
+                        icon: const Icon(
+                          Icons.settings,
+                        ),
+                        labelText: null,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(
+              height: 40,
+            ),
+
+            // icons
+            Container(
+              height: 90,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.25),
+                    // spreadRadius: 5,
+                    blurRadius: 20,
+                    offset:
+                        const Offset(0, 25), // horizontal and vertical offset
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ListView(
+                  // physics: NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    // matches
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            ButtonWithLabel(
+                              text: null,
+                              labelText: 'Matches',
+                              onPressed: () {},
+                              icon: const Icon(Icons.people),
+                            ),
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            // messages
+                            ButtonWithLabel(
+                              text: null,
+                              labelText: 'Messages',
+                              onPressed: () {},
+                              icon: const Icon(Icons.messenger_outline),
+                            ),
+
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            // popular
+                            ButtonWithLabel(
+                              text: null,
+                              labelText: 'Popular',
+                              onPressed: () {},
+                              icon: const Icon(Icons.star),
+                            ),
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            // photos
+                            ButtonWithLabel(
+                              text: null,
+                              labelText: 'Photos',
+                              onPressed: () {},
+                              icon: const Icon(Icons.photo_library_sharp),
+                            ),
+
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            // add friemd
+                            ButtonWithLabel(
+                              text: null,
+                              labelText: 'Add Friend',
+                              onPressed: () {},
+                              icon: const Icon(Icons.add),
+                            ),
+
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            // online
+                            ButtonWithLabel(
+                              text: null,
+                              labelText: 'Online',
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.circle_outlined,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(
+                          width: 100,
+                        ),
+
+                        // age seeking
+
+                        Row(
+                          children: [
+                            // seeking
+
+                            Neumorphic(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 2),
+                              child: DropdownButton<String>(
+                                underline: Container(),
+                                style: AppTextStyles().secondaryStyle,
+                                value: seeking,
+                                icon: const Icon(
+                                    Icons.arrow_drop_down), // Dropdown icon
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    seeking = newValue!;
+                                  });
+                                },
+                                items: <String>[
+                                  'SEEKING',
+                                  'English',
+                                  'Spanish',
+                                  'French',
+                                  'German'
+                                ] // Language options
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value,
+                                      style: AppTextStyles().secondaryStyle,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 50,
+                            ),
+
+                            // country
+
+                            Neumorphic(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 2),
+                              child: DropdownButton<String>(
+                                underline: Container(),
+                                style: AppTextStyles().secondaryStyle,
+                                value: country,
+                                icon: const Icon(
+                                    Icons.arrow_drop_down), // Dropdown icon
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    country = newValue!;
+                                  });
+                                },
+                                items: <String>[
+                                  'COUNTRY',
+                                  'English',
+                                  'Spanish',
+                                  'French',
+                                  'German'
+                                ] // Language options
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value,
+                                      style: AppTextStyles().secondaryStyle,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 50,
+                            ),
+
+                            // age
+
+                            Neumorphic(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 2),
+                              child: DropdownButton<String>(
+                                underline: Container(),
+                                style: AppTextStyles().secondaryStyle,
+                                value: age,
+                                icon: const Icon(
+                                    Icons.arrow_drop_down), // Dropdown icon
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    age = newValue!;
+                                  });
+                                },
+                                items: <String>[
+                                  'AGE',
+                                  'English',
+                                  'Spanish',
+                                  'French',
+                                  'German'
+                                ] // Language options
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value,
+                                      style: AppTextStyles().secondaryStyle,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            //
+
+            // post
+            const SizedBox(
+              height: 30,
+            ),
+
+            Expanded(
+              child: Row(
+                children: [
+                  // side bar
+                  const NavBarDesktop(),
+
+                  // posts
                   const SizedBox(
                     width: 20,
                   ),
-                  Text(
-                    'Dating App',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.black,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-
-              // search icon
-              Row(
-                children: [
-                  ButtonWithLabel(
-                    text: null,
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.search,
-                    ),
-                    labelText: null,
-                  ),
-
-                  // settings icon
-
-                  ButtonWithLabel(
-                    text: null,
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.settings,
-                    ),
-                    labelText: null,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(
-          height: 40,
-        ),
-
-        // icons
-        Container(
-          height: 90,
-          decoration: BoxDecoration(
-            color: AppColors.backgroundColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.25),
-                // spreadRadius: 5,
-                blurRadius: 20,
-                offset: const Offset(0, 25), // horizontal and vertical offset
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: ListView(
-              // physics: NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              children: [
-                // matches
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+                  Expanded(
+                    child: Column(
+                      verticalDirection: VerticalDirection.down,
                       children: [
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Matches',
-                          onPressed: () {},
-                          icon: const Icon(Icons.people),
+                        Row(
+                          children: [
+                            Text(
+                              'Edit Profile',
+                              style: GoogleFonts.poppins(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                height: 0,
+                              ),
+                            )
+                          ],
                         ),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        // messages
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Messages',
-                          onPressed: () {},
-                          icon: const Icon(Icons.messenger_outline),
-                        ),
-
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        // popular
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Popular',
-                          onPressed: () {},
-                          icon: const Icon(Icons.star),
-                        ),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        // photos
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Photos',
-                          onPressed: () {},
-                          icon: const Icon(Icons.photo_library_sharp),
-                        ),
-
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        // add friemd
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Add Friend',
-                          onPressed: () {},
-                          icon: const Icon(Icons.add),
-                        ),
-
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        // online
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Online',
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.circle_outlined,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(
-                      width: 100,
-                    ),
-
-                    // age seeking
-
-                    Row(
-                      children: [
-                        // seeking
-
-                        Neumorphic(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 2),
-                          child: DropdownButton<String>(
-                            underline: Container(),
-                            style: AppTextStyles().secondaryStyle,
-                            value: seeking,
-                            icon: const Icon(
-                                Icons.arrow_drop_down), // Dropdown icon
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                seeking = newValue!;
-                              });
-                            },
-                            items: <String>[
-                              'SEEKING',
-                              'English',
-                              'Spanish',
-                              'French',
-                              'German'
-                            ] // Language options
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: AppTextStyles().secondaryStyle,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 50,
-                        ),
-
-                        // country
-
-                        Neumorphic(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 2),
-                          child: DropdownButton<String>(
-                            underline: Container(),
-                            style: AppTextStyles().secondaryStyle,
-                            value: country,
-                            icon: const Icon(
-                                Icons.arrow_drop_down), // Dropdown icon
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                country = newValue!;
-                              });
-                            },
-                            items: <String>[
-                              'COUNTRY',
-                              'English',
-                              'Spanish',
-                              'French',
-                              'German'
-                            ] // Language options
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: AppTextStyles().secondaryStyle,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 50,
-                        ),
-
-                        // age
-
-                        Neumorphic(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 2),
-                          child: DropdownButton<String>(
-                            underline: Container(),
-                            style: AppTextStyles().secondaryStyle,
-                            value: age,
-                            icon: const Icon(
-                                Icons.arrow_drop_down), // Dropdown icon
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                age = newValue!;
-                              });
-                            },
-                            items: <String>[
-                              'AGE',
-                              'English',
-                              'Spanish',
-                              'French',
-                              'German'
-                            ] // Language options
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: AppTextStyles().secondaryStyle,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        //
-
-        // post
-        const SizedBox(
-          height: 30,
-        ),
-
-        Expanded(
-          child: Row(
-            children: [
-// side bar
-              const NavBarDesktop(),
-
-// posts
-              const SizedBox(
-                width: 20,
-              ),
-              Expanded(
-                child: Column(
-                  verticalDirection: VerticalDirection.down,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Edit Profile',
-                          style: GoogleFonts.poppins(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            height: 0,
-                          ),
-                        )
-                      ],
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        verticalDirection: VerticalDirection.down,
-                        children: [
-                          Expanded(
-                            child: ListView(
-                              scrollDirection: Axis.vertical,
-                              children: [
-                                // profile pic
-
-                                const SizedBox(
-                                  height: 30,
-                                ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            verticalDirection: VerticalDirection.down,
+                            children: [
+                              Expanded(
+                                child: ListView(
+                                  scrollDirection: Axis.vertical,
                                   children: [
                                     // profile pic
-                                    Expanded(
-                                      flex: 1,
-                                      child: Column(
-                                        children: [
-                                          SizedBox(
-                                            height: 200,
-                                            width: 200,
-                                            child: Center(
-                                              child: Neumorphic(
-                                                style: NeumorphicStyle(
-                                                  boxShape: NeumorphicBoxShape
-                                                      .roundRect(
-                                                          BorderRadius.circular(
-                                                              1000)),
-                                                  depth: 10,
-                                                  intensity: 0.5,
-                                                ),
-                                                child: Container(
-                                                  height: 200,
-                                                  width: 200,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            1000),
-                                                    image:
-                                                        const DecorationImage(
-                                                      image: AssetImage(
-                                                          AppImages.profile),
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.all(60),
-                                                  child: SvgPicture.asset(
-                                                    AppIcons.editphoto,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 100,
-                                          ),
-                                          SizedBox(
-                                            width: double.infinity,
-                                            height: 900,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 20),
-                                              child: GridView.builder(
-                                                gridDelegate:
-                                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                                  crossAxisCount:
-                                                      3, // Number of items per row
-                                                  crossAxisSpacing:
-                                                      15, // Horizontal spacing between items
-                                                  mainAxisSpacing:
-                                                      15, // Vertical spacing between rows
-                                                ),
-                                                itemCount:
-                                                    photoAssetPaths.length,
-                                                itemBuilder: (context, index) {
-                                                  return Stack(
-                                                    children: [
-                                                      Neumorphic(
-                                                        style: NeumorphicStyle(
-                                                          boxShape: NeumorphicBoxShape
-                                                              .roundRect(
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          16)),
-                                                          depth: 5,
-                                                          intensity: 0.75,
-                                                        ),
-                                                        child: Container(
-                                                          height: 500,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            borderRadius:
+
+                                    const SizedBox(
+                                      height: 30,
+                                    ),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        // profile pic
+                                        Expanded(
+                                          flex: 1,
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 200,
+                                                width: 200,
+                                                child: Center(
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      pickImage();
+                                                    },
+                                                    child: Neumorphic(
+                                                      style: NeumorphicStyle(
+                                                        boxShape: NeumorphicBoxShape
+                                                            .roundRect(
                                                                 BorderRadius
                                                                     .circular(
-                                                                        16),
-                                                            image:
-                                                                DecorationImage(
-                                                              image: AssetImage(
-                                                                  photoAssetPaths[
-                                                                      index]),
-                                                              fit: BoxFit.cover,
-                                                            ),
+                                                                        1000)),
+                                                        depth: 10,
+                                                        intensity: 0.5,
+                                                      ),
+                                                      child: Container(
+                                                        height: 200,
+                                                        width: 200,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      1000),
+                                                          image:
+                                                              DecorationImage(
+                                                            image: MemoryImage(
+                                                                _imageBytes!),
+                                                            fit: BoxFit.cover,
                                                           ),
                                                         ),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(60),
+                                                        child: SvgPicture.asset(
+                                                          AppIcons.editphoto,
+                                                          fit: BoxFit.cover,
+                                                        ),
                                                       ),
-                                                      Positioned(
-                                                        top: 10,
-                                                        right: 10,
-                                                        child: IconButton(
-                                                          onPressed: () {
-                                                            setState(() {
-                                                              photoAssetPaths
-                                                                  .removeAt(
-                                                                      index); // Remove photo from the list
-                                                            });
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 100,
+                                              ),
+                                              SizedBox(
+                                                width: double.infinity,
+                                                height: 900,
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 20),
+                                                  child: Consumer<
+                                                      UserProfileProvider>(
+                                                    builder: (context,
+                                                        photoProvider, _) {
+                                                      UserProfileModel?
+                                                          userProfileModel =
+                                                          Provider.of<UserProfileProvider>(
+                                                                  context,
+                                                                  listen: false)
+                                                              .currentUserProfile;
+                                                      final alluploads =
+                                                          userProfileModel!
+                                                              .uploads;
+
+                                                      if (alluploads != null) {
+                                                        List<Uploads>
+                                                            reversedUploads =
+                                                            alluploads.reversed
+                                                                .toList();
+                                                        return GridView.builder(
+                                                          gridDelegate:
+                                                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                                            crossAxisCount:
+                                                                4, // Number of items per row
+                                                            crossAxisSpacing:
+                                                                15, // Horizontal spacing between items
+                                                            mainAxisSpacing:
+                                                                15, // Vertical spacing between rows
+                                                          ),
+                                                          itemCount:
+                                                              alluploads.length,
+                                                          itemBuilder:
+                                                              (context, index) {
+                                                            final upload =
+                                                                reversedUploads[
+                                                                    index];
+                                                            print(upload.file);
+                                                            print(upload.name);
+                                                            print(upload.id);
+                                                            print(upload
+                                                                .uploadDate);
+
+                                                            return Stack(
+                                                              children: [
+                                                                Neumorphic(
+                                                                  style:
+                                                                      NeumorphicStyle(
+                                                                    boxShape:
+                                                                        NeumorphicBoxShape
+                                                                            .roundRect(
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              16),
+                                                                    ),
+                                                                    depth: 5,
+                                                                    intensity:
+                                                                        0.75,
+                                                                  ),
+                                                                  child:
+                                                                      Container(
+                                                                    height: 500,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              16),
+                                                                      image:
+                                                                          DecorationImage(
+                                                                        image: MemoryImage(
+                                                                            base64ToImage(upload.file)), // Using NetworkImage for network images
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Positioned(
+                                                                  top: 10,
+                                                                  right: 10,
+                                                                  child:
+                                                                      IconButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      print(upload
+                                                                          .id);
+                                                                      deletePost(
+                                                                          upload
+                                                                              .id);
+                                                                    },
+                                                                    icon:
+                                                                        const Icon(
+                                                                      Icons
+                                                                          .delete,
+                                                                      color: Colors
+                                                                          .red,
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            );
                                                           },
-                                                          icon: const Icon(
-                                                            Icons.delete,
-                                                            color: Colors.red,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
+                                                        );
+                                                      } else {
+                                                        return Container();
+                                                      }
+                                                    },
+                                                  ),
+                                                ),
                                               ),
-                                            ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                    ),
+                                        ),
 
-// details
-                                    Expanded(
-                                      flex: 1,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Your Basics',
-                                              style: AppTextStyles()
-                                                  .primaryStyle
-                                                  .copyWith(
-                                                    color: AppColors.black
-                                                        .withOpacity(0.75),
-                                                  ),
-                                            ),
-
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            // seperator
-                                            Container(
-                                              decoration: const ShapeDecoration(
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                    width: 0.50,
-                                                    strokeAlign: BorderSide
-                                                        .strokeAlignCenter,
-                                                    color: Color(0xFFAAAAAA),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 6,
-                                            ),
-                                            // text about
-
-                                            Text(
-                                              'Your Name',
-                                              style: AppTextStyles()
-                                                  .secondaryStyle
-                                                  .copyWith(
-                                                    color: AppColors.black,
-                                                  ),
-                                            ),
-
-                                            // edit name
-
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                        // details
+                                        Expanded(
+                                          flex: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 20),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
-                                                _isEditingName
-                                                    ? Expanded(
-                                                        child: TextField(
-                                                          decoration:
-                                                              const InputDecoration(
-                                                                  border:
-                                                                      UnderlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide.none,
-                                                          )),
-                                                          style: AppTextStyles()
-                                                              .secondaryStyle,
-                                                          controller:
-                                                              _controllerName,
-                                                          autofocus: true,
-                                                        ),
-                                                      )
-                                                    : Text(_textName,
-                                                        style: AppTextStyles()
-                                                            .secondaryStyle),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.edit,
-                                                    size: 20,
-                                                    color: AppColors
-                                                        .secondaryColor,
-                                                  ),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      _isEditingName = true;
-                                                      _controllerName.text =
-                                                          _textName;
-                                                    });
-                                                  },
+                                                Text(
+                                                  'Your Basics',
+                                                  style: AppTextStyles()
+                                                      .primaryStyle
+                                                      .copyWith(
+                                                        color: AppColors.black
+                                                            .withOpacity(0.75),
+                                                      ),
                                                 ),
-                                                if (_isEditingName)
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.save,
-                                                      size: 20,
-                                                      color: AppColors
-                                                          .secondaryColor,
-                                                    ),
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        _textName =
-                                                            _controllerName
-                                                                .text;
-                                                        _isEditingName = false;
-                                                      });
-                                                    },
-                                                  ),
-                                              ],
-                                            ),
 
-                                            // location
-
-                                            Text(
-                                              'Your Address',
-                                              style: AppTextStyles()
-                                                  .secondaryStyle
-                                                  .copyWith(
-                                                    color: AppColors.black,
-                                                  ),
-                                            ),
-
-                                            // edit name
-
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                _isEditingAddress
-                                                    ? Expanded(
-                                                        child: TextField(
-                                                          decoration:
-                                                              const InputDecoration(
-                                                                  border:
-                                                                      UnderlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide.none,
-                                                          )),
-                                                          style: AppTextStyles()
-                                                              .secondaryStyle,
-                                                          controller:
-                                                              _controllerAddress,
-                                                          autofocus: true,
-                                                        ),
-                                                      )
-                                                    : Text(_textAddress,
-                                                        style: AppTextStyles()
-                                                            .secondaryStyle),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.edit,
-                                                    size: 20,
-                                                    color: AppColors
-                                                        .secondaryColor,
-                                                  ),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      _isEditingAddress = true;
-                                                      _controllerAddress.text =
-                                                          _textAddress;
-                                                    });
-                                                  },
+                                                const SizedBox(
+                                                  height: 10,
                                                 ),
-                                                if (_isEditingAddress)
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.save,
-                                                      size: 20,
-                                                      color: AppColors
-                                                          .secondaryColor,
-                                                    ),
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        _textAddress =
-                                                            _controllerAddress
-                                                                .text;
-                                                        _isEditingAddress =
-                                                            false;
-                                                      });
-                                                    },
-                                                  ),
-                                              ],
-                                            ),
-
-                                            // bio
-
-                                            Text(
-                                              'Bio',
-                                              style: AppTextStyles()
-                                                  .secondaryStyle
-                                                  .copyWith(
-                                                    color: AppColors.black,
-                                                  ),
-                                            ),
-
-                                            // edit name
-
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                _isEditingBio
-                                                    ? Expanded(
-                                                        child: TextField(
-                                                          decoration:
-                                                              const InputDecoration(
-                                                                  border:
-                                                                      UnderlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide.none,
-                                                          )),
-                                                          style: AppTextStyles()
-                                                              .secondaryStyle,
-                                                          controller:
-                                                              _controllerBio,
-                                                          autofocus: true,
-                                                        ),
-                                                      )
-                                                    : Text(_textBio,
-                                                        style: AppTextStyles()
-                                                            .secondaryStyle),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.edit,
-                                                    size: 20,
-                                                    color: AppColors
-                                                        .secondaryColor,
-                                                  ),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      _isEditingBio = true;
-                                                      _controllerBio.text =
-                                                          _textBio;
-                                                    });
-                                                  },
-                                                ),
-                                                if (_isEditingBio)
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.save,
-                                                      size: 20,
-                                                      color: AppColors
-                                                          .secondaryColor,
-                                                    ),
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        _textBio =
-                                                            _controllerBio.text;
-                                                        _isEditingBio = false;
-                                                      });
-                                                    },
-                                                  ),
-                                              ],
-                                            ),
-
-                                            // mored details
-                                            const SizedBox(
-                                              height: 25,
-                                            ),
-
-                                            Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'More',
-                                                    style: AppTextStyles()
-                                                        .primaryStyle
-                                                        .copyWith(
-                                                          color: AppColors.black
-                                                              .withOpacity(
-                                                                  0.75),
-                                                        ),
-                                                  ),
-
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  // seperator
-                                                  Container(
-                                                    decoration:
-                                                        const ShapeDecoration(
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        side: BorderSide(
-                                                          width: 0.50,
-                                                          strokeAlign: BorderSide
-                                                              .strokeAlignCenter,
-                                                          color:
-                                                              Color(0xFFAAAAAA),
-                                                        ),
+                                                // seperator
+                                                Container(
+                                                  decoration:
+                                                      const ShapeDecoration(
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      side: BorderSide(
+                                                        width: 0.50,
+                                                        strokeAlign: BorderSide
+                                                            .strokeAlignCenter,
+                                                        color:
+                                                            Color(0xFFAAAAAA),
                                                       ),
                                                     ),
                                                   ),
-                                                  const SizedBox(
-                                                    height: 6,
-                                                  ),
-                                                  // text about
+                                                ),
+                                                const SizedBox(
+                                                  height: 6,
+                                                ),
+                                                // text about
 
-                                                  Text(
-                                                    'Intersets',
-                                                    style: AppTextStyles()
-                                                        .secondaryStyle
-                                                        .copyWith(
-                                                          color:
-                                                              AppColors.black,
-                                                        ),
-                                                  ),
+                                                Text(
+                                                  'Your Name',
+                                                  style: AppTextStyles()
+                                                      .secondaryStyle
+                                                      .copyWith(
+                                                        color: AppColors.black,
+                                                      ),
+                                                ),
 
-                                                  // edit name
+                                                // edit name
 
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      _isEditingInterests
-                                                          ? Expanded(
-                                                              child: TextField(
-                                                                decoration:
-                                                                    const InputDecoration(
-                                                                        border:
-                                                                            UnderlineInputBorder(
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Expanded(
+                                                      child: _isEditingName
+                                                          ? TextField(
+                                                              decoration:
+                                                                  const InputDecoration(
+                                                                border:
+                                                                    UnderlineInputBorder(
                                                                   borderSide:
                                                                       BorderSide
                                                                           .none,
-                                                                )),
+                                                                ),
+                                                              ),
+                                                              style: AppTextStyles()
+                                                                  .secondaryStyle,
+                                                              controller:
+                                                                  _controllerName,
+                                                              autofocus: true,
+                                                            )
+                                                          : Consumer<
+                                                                  UserProfileProvider>(
+                                                              builder: (context,
+                                                                  userProfileProvider,
+                                                                  child) {
+                                                              return Text(
+                                                                _textName,
                                                                 style: AppTextStyles()
                                                                     .secondaryStyle,
-                                                                controller:
-                                                                    _controllerInterests,
-                                                                autofocus: true,
-                                                              ),
-                                                            )
-                                                          : Text(_textInterests,
-                                                              style: AppTextStyles()
-                                                                  .secondaryStyle),
-                                                      IconButton(
-                                                        icon: const Icon(
-                                                          Icons.edit,
-                                                          size: 20,
-                                                          color: AppColors
-                                                              .secondaryColor,
-                                                        ),
-                                                        onPressed: () {
-                                                          setState(() {
-                                                            _isEditingInterests =
-                                                                true;
-                                                            _controllerInterests
-                                                                    .text =
-                                                                _textInterests;
-                                                          });
-                                                        },
+                                                              );
+                                                            }),
+                                                    ),
+                                                    IconButton(
+                                                      icon: Icon(
+                                                        _isEditingName
+                                                            ? Icons.save
+                                                            : Icons.edit,
+                                                        size: 20,
+                                                        color: AppColors
+                                                            .secondaryColor,
                                                       ),
-                                                      if (_isEditingInterests)
-                                                        IconButton(
-                                                          icon: const Icon(
-                                                            Icons.save,
-                                                            size: 20,
-                                                            color: AppColors
-                                                                .secondaryColor,
-                                                          ),
-                                                          onPressed: () {
-                                                            setState(() {
-                                                              _textInterests =
-                                                                  _controllerInterests
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          if (_isEditingName) {
+                                                            // Save changes
+                                                            if (_controllerBio
+                                                                    .text !=
+                                                                _textName) {
+                                                              _textName =
+                                                                  _controllerName
                                                                       .text;
-                                                              _isEditingInterests =
-                                                                  false;
-                                                            });
-                                                          },
-                                                        ),
-                                                    ],
-                                                  ),
-                                                ]),
-                                          ],
+                                                              // context.read<UserProvider>().updateName(textName);
+                                                            }
+                                                          }
+                                                          _isEditingName =
+                                                              !_isEditingName;
+                                                          if (_isEditingName) {
+                                                            // Start editing
+                                                            _controllerName
+                                                                    .text =
+                                                                _textName;
+                                                          }
+                                                        });
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                // location
+
+                                                Text(
+                                                  'Your Address',
+                                                  style: AppTextStyles()
+                                                      .secondaryStyle
+                                                      .copyWith(
+                                                        color: AppColors.black,
+                                                      ),
+                                                ),
+
+                                                // edit name
+
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Expanded(
+                                                      child: _isEditingAddress
+                                                          ? TextField(
+                                                              decoration:
+                                                                  const InputDecoration(
+                                                                border:
+                                                                    UnderlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide
+                                                                          .none,
+                                                                ),
+                                                              ),
+                                                              style: AppTextStyles()
+                                                                  .secondaryStyle,
+                                                              controller:
+                                                                  _controllerAddress,
+                                                              autofocus: true,
+                                                            )
+                                                          : Text(
+                                                              _textAddress,
+                                                              style: AppTextStyles()
+                                                                  .secondaryStyle,
+                                                            ),
+                                                    ),
+                                                    IconButton(
+                                                      icon: Icon(
+                                                        _isEditingAddress
+                                                            ? Icons.save
+                                                            : Icons.edit,
+                                                        size: 20,
+                                                        color: AppColors
+                                                            .secondaryColor,
+                                                      ),
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          if (_isEditingAddress) {
+                                                            // Save changes
+                                                            if (_controllerAddress
+                                                                    .text !=
+                                                                _textAddress) {
+                                                              _textAddress =
+                                                                  _controllerAddress
+                                                                      .text;
+                                                              // context.read<UserProvider>().updateName(textName);
+                                                              DbClient().resetData(
+                                                                  dbKey:
+                                                                      'userName');
+                                                              DbClient().setData(
+                                                                  dbKey:
+                                                                      'userName',
+                                                                  value:
+                                                                      _controllerName
+                                                                          .text);
+                                                            }
+                                                          }
+                                                          _isEditingAddress =
+                                                              !_isEditingAddress;
+                                                          if (_isEditingAddress) {
+                                                            // Start editing
+                                                            _controllerAddress
+                                                                    .text =
+                                                                _textAddress;
+                                                          }
+                                                        });
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                // bio
+
+                                                Text(
+                                                  'Bio',
+                                                  style: AppTextStyles()
+                                                      .secondaryStyle
+                                                      .copyWith(
+                                                        color: AppColors.black,
+                                                      ),
+                                                ),
+
+                                                // edit name
+
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Expanded(
+                                                      child: _isEditingBio
+                                                          ? TextField(
+                                                              decoration:
+                                                                  const InputDecoration(
+                                                                border:
+                                                                    UnderlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide
+                                                                          .none,
+                                                                ),
+                                                              ),
+                                                              style: AppTextStyles()
+                                                                  .secondaryStyle,
+                                                              controller:
+                                                                  _controllerBio,
+                                                              autofocus: true,
+                                                            )
+                                                          : Text(
+                                                              _textBio,
+                                                              style: AppTextStyles()
+                                                                  .secondaryStyle,
+                                                            ),
+                                                    ),
+                                                    IconButton(
+                                                      icon: Icon(
+                                                        _isEditingBio
+                                                            ? Icons.save
+                                                            : Icons.edit,
+                                                        size: 20,
+                                                        color: AppColors
+                                                            .secondaryColor,
+                                                      ),
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          if (_isEditingBio) {
+                                                            // Save changes
+                                                            if (_controllerBio
+                                                                    .text !=
+                                                                _textBio) {
+                                                              _textBio =
+                                                                  _controllerAddress
+                                                                      .text;
+                                                              // context.read<UserProvider>().updateName(textName);
+                                                            }
+                                                          }
+                                                          _isEditingBio =
+                                                              !_isEditingBio;
+                                                          if (_isEditingBio) {
+                                                            // Start editing
+                                                            _controllerBio
+                                                                    .text =
+                                                                _textBio;
+                                                          }
+                                                        });
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
+                                    // details
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+
+                                    // edit
                                   ],
                                 ),
-// details
-                                const SizedBox(
-                                  height: 15,
-                                ),
-
-// edit
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            )
+          ]),
+          Consumer<LoadingProvider>(
+            builder: (context, loadingProvider, _) {
+              return loadingProvider.isLoading
+                  ? Container(
+                      color: Colors.black.withOpacity(
+                          0.5), // Add background color with opacity
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : Container();
+            },
           ),
-        )
-      ]),
+        ],
+      ),
       bottomSheet: Container(
         height: 70,
         decoration: const BoxDecoration(
@@ -1709,6 +1681,9 @@ class _EditInfoState extends State<EditInfo> {
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
+                onPressed: () {
+                  _cancelChanges();
+                },
                 padding: EdgeInsets.zero,
                 child: SizedBox(
                   height: 50,
@@ -1739,6 +1714,9 @@ class _EditInfoState extends State<EditInfo> {
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
+                onPressed: () {
+                  _saveChanges();
+                },
                 padding: EdgeInsets.zero,
                 child: Container(
                   height: 50,
