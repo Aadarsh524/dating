@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/providers/loading_provider.dart';
+import 'package:dating/utils/platform.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -23,10 +24,11 @@ class DashboardProvider extends ChangeNotifier {
       int page, BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
     String uid = user!.uid;
+    String api = getApiEndpoint();
     context.read<LoadingProvider>().setLoading(true);
     try {
       final response = await http.get(
-        Uri.parse('$URI/Dashboard/$uid&page=$page'),
+        Uri.parse('$api/Dashboard/$uid&page=$page'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -51,7 +53,7 @@ class DashboardProvider extends ChangeNotifier {
     } catch (e) {
       print(e.toString());
       rethrow;
-    }finally{
+    } finally {
       context.read<LoadingProvider>().setLoading(false);
     }
   }

@@ -456,10 +456,10 @@ class _ViewPageState extends State<ViewPage> {
                 children: [
                   GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => ProfilePage()));
+                        // Navigator.push(
+                        //     context,
+                        //     CupertinoPageRoute(
+                        //         builder: (context) => ProfilePage()));
                       },
                       child: profileButton()),
                   SizedBox(
