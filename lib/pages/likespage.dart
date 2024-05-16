@@ -484,10 +484,10 @@ class _LikePageState extends State<LikePage> {
                 children: [
                   GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => ProfilePage()));
+                        // Navigator.push(
+                        //     context,
+                        //     CupertinoPageRoute(
+                        //         builder: (context) => ProfilePage()));
                       },
                       child: profileButton()),
                   SizedBox(

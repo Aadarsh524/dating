@@ -32,7 +32,8 @@ class _LoginDesktopState extends State<LoginDesktop> {
     if (result != null) {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const HomePage()));
-      return true;
+      flag = true;
+      return flag;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

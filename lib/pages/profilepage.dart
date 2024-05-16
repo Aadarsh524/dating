@@ -1,3 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:typed_data';
+
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
@@ -6,18 +12,24 @@ import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  DashboardResponseModel dashboardresponsemodel;
+  ProfilePage({super.key, required this.dashboardresponsemodel});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
+
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
 
   String seeking = 'SEEKING';
@@ -52,6 +64,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget MobileProfile() {
+    final alluploads = widget.dashboardresponsemodel.uploads;
+
+    List<Uploads> reversedUploads = alluploads!.reversed.toList();
+
     return Scaffold(
       body: Column(children: [
         const SizedBox(
@@ -108,83 +124,107 @@ class _ProfilePageState extends State<ProfilePage> {
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
-                  image: DecorationImage(
-                    image: AssetImage(AppImages.loginimage),
-                    fit: BoxFit.cover,
-                  ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Stack(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            height: 30,
-                            width: 30,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(1000),
-                              color: Colors.black.withOpacity(0.75),
-                            ),
-                            child: const Icon(
-                              Icons.report_gmailerrorred,
-                              size: 20,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Row(
+                    CarouselSlider(
+                      options: CarouselOptions(
+                        enableInfiniteScroll: false,
+                        height: 250,
+                        viewportFraction: 1.0,
+                        autoPlay: false,
+                        autoPlayInterval: const Duration(seconds: 3),
+                      ),
+                      items: reversedUploads.map((imagePath) {
+                        return Builder(
+                          builder: (BuildContext context) {
+                            return Container(
+                              width: MediaQuery.of(context).size.width,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: MemoryImage(
+                                    base64ToImage(imagePath.file!),
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  topRight: Radius.circular(20),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Icon(
-                                Icons.circle,
-                                size: 10,
-                                color: Colors.white,
+                              Container(
+                                height: 30,
+                                width: 30,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(1000),
+                                  color: Colors.black.withOpacity(0.75),
+                                ),
+                                child: const Icon(
+                                  Icons.report_gmailerrorred,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
                               ),
-                              const SizedBox(
-                                width: 4,
+                              Positioned(
+                                left: 100,
+                                child: Expanded(
+                                  child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: reversedUploads.length,
+                                      itemBuilder: (context, index) {
+                                        log(reversedUploads.length.toString());
+                                        return const Center(
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.circle,
+                                                size: 10,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(
+                                                width: 4,
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }),
+                                ),
                               ),
-                              Icon(
-                                Icons.circle,
-                                size: 10,
-                                color: Colors.white.withOpacity(0.5),
+                              Container(
+                                height: 30,
+                                width: 30,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(1000),
+                                  color: Colors.black.withOpacity(0.75),
+                                ),
+                                child: const Icon(
+                                  Icons.fullscreen,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
                               ),
-                              const SizedBox(
-                                width: 4,
-                              ),
-                              Icon(
-                                Icons.circle,
-                                size: 10,
-                                color: Colors.white.withOpacity(0.5),
-                              ),
-                              const SizedBox(
-                                width: 4,
-                              ),
-                              Icon(
-                                Icons.circle,
-                                size: 10,
-                                color: Colors.white.withOpacity(0.5),
-                              )
                             ],
                           ),
-                          Container(
-                            height: 30,
-                            width: 30,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(1000),
-                              color: Colors.black.withOpacity(0.75),
-                            ),
-                            child: const Icon(
-                              Icons.fullscreen,
-                              size: 20,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -205,7 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Row(
                           children: [
                             Text(
-                              'Sekar Lia, 25',
+                              "${widget.dashboardresponsemodel.name}, ${widget.dashboardresponsemodel.age}",
                               style: AppTextStyles().primaryStyle,
                             ),
                             const SizedBox(width: 5),
@@ -273,7 +313,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              "Female / Single",
+                              "${widget.dashboardresponsemodel.gender}",
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],
@@ -337,7 +377,7 @@ class _ProfilePageState extends State<ProfilePage> {
 // text about
 
                     Text(
-                      'Caring and hard working',
+                      "${widget.dashboardresponsemodel.bio}",
                       style: AppTextStyles().secondaryStyle,
                     ),
 
@@ -368,7 +408,7 @@ class _ProfilePageState extends State<ProfilePage> {
 // text about
 
                     Text(
-                      'Caring and hard working',
+                      '${widget.dashboardresponsemodel.bio}',
                       style: AppTextStyles().secondaryStyle,
                     ),
                   ],
