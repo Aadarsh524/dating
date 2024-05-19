@@ -52,7 +52,6 @@ class _LoginMobileState extends State<LoginMobile> {
   @override
   Widget build(BuildContext context) {
     return Consumer<LoadingProvider>(builder: (context, loadingProvider, _) {
-      print(loadingProvider.isLoading);
       return loadingProvider.isLoading
           ? Container(
               color: Colors.white, // Add background color with opacity
