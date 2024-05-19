@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/utils/platform.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -19,13 +20,18 @@ class UserProfileProvider extends ChangeNotifier {
       UserProfileModel userProfileModel, BuildContext context) async {
     try {
       String api = getApiEndpoint();
+
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
       setCurrentUserProfile(userProfileModel);
       final response = await http.post(
         Uri.parse('$api/user'), // Replace with your API endpoint
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'access_token': 'accesstokentest'
+          'Authorization': 'Bearer $token',
         },
 
         body: jsonEncode(userProfileModel.toJson()),
@@ -43,6 +49,10 @@ class UserProfileProvider extends ChangeNotifier {
   }
 
   Future<UserProfileModel?> getUserData(uid) async {
+    final token = await TokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
     try {
       String api = getApiEndpoint();
       final response = await http.get(
@@ -50,7 +60,7 @@ class UserProfileProvider extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'access_token': 'accesstokentest'
+          'Authorization': 'Bearer $token',
         },
       );
       if (response.statusCode == 200) {
@@ -66,6 +76,10 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<UserProfileModel> updateUserProfile(
       BuildContext context, UserProfileModel updatedProfile) async {
+    final token = await TokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
     try {
       String api = getApiEndpoint();
       String? uid = updatedProfile.uid;
@@ -75,7 +89,7 @@ class UserProfileProvider extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'access_token': 'accesstokentest'
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode(updatedProfile.toJson()),
       );
@@ -101,6 +115,10 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<Uploads> uploadPost(
       BuildContext context, newUpload, String uid) async {
+    final token = await TokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
     try {
       String api = getApiEndpoint();
 
@@ -110,7 +128,7 @@ class UserProfileProvider extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'access_token': 'accesstokentest'
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode(newUpload.toJson()),
       );
@@ -134,6 +152,10 @@ class UserProfileProvider extends ChangeNotifier {
   }
 
   Future<bool> deletePost(String uid) async {
+    final token = await TokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
     try {
       String api = getApiEndpoint();
 
@@ -143,7 +165,7 @@ class UserProfileProvider extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'access_token': 'accesstokentest'
+          'Authorization': 'Bearer $token',
         },
       );
 
@@ -167,6 +189,10 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<void> updateProfileImage(
       BuildContext context, base64image, String uid) async {
+    final token = await TokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
     try {
       String api = getApiEndpoint();
 
@@ -176,7 +202,7 @@ class UserProfileProvider extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'access_token': 'accesstokentest'
+          'Authorization': 'Bearer $token',
         },
       );
 

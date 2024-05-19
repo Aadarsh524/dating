@@ -1,4 +1,6 @@
 import 'package:dating/auth/db_client.dart';
+import 'package:dating/backend/MongoDB/apis.dart';
+import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
@@ -23,19 +25,24 @@ class AuthService {
         password: password,
       );
 
-      // await context
-      //     .read<UserProfileProvider>()
-      //     .getUserData(userCredential.user!.uid)
-      //     .then((value) async {
-      //   if (value != null) {
-      //     Provider.of<UserProfileProvider>(context, listen: false)
-      //         .setCurrentUserProfile(value);
-      //     await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
-      //     await DbClient().setData(dbKey: "userName", value: value.name ?? '');
+      await ApiClient().validateToken().then((value) async {
+        await TokenManager.saveToken(value);
 
-      //     await DbClient().setData(dbKey: "email", value: value.email ?? '');
-      //   }
-      // });
+        await context
+            .read<UserProfileProvider>()
+            .getUserData(userCredential.user!.uid)
+            .then((value) async {
+          if (value != null) {
+            Provider.of<UserProfileProvider>(context, listen: false)
+                .setCurrentUserProfile(value);
+            await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
+            await DbClient()
+                .setData(dbKey: "userName", value: value.name ?? '');
+
+            await DbClient().setData(dbKey: "email", value: value.email ?? '');
+          }
+        });
+      });
 
       return userCredential.user?.uid;
     } catch (e) {
@@ -60,24 +67,29 @@ class AuthService {
         email: email,
         password: password,
       );
-      final UserProfileModel newUser = UserProfileModel(
-        uid: userCredential.user!.uid,
-        name: name,
-        email: email,
-        gender: gender,
-        image: '',
-        age: age,
-        bio: '',
-        address: '',
-        interests: '',
-        seeking: Seeking(age: '', gender: ''),
-        uploads: [],
-      );
-      await context.read<UserProfileProvider>().addNewUser(newUser, context);
 
-      await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
-      await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
-      await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
+      await ApiClient().validateToken().then((value) async {
+        await TokenManager.saveToken(value);
+
+        final UserProfileModel newUser = UserProfileModel(
+          uid: userCredential.user!.uid,
+          name: name,
+          email: email,
+          gender: gender,
+          image: '',
+          age: age,
+          bio: '',
+          address: '',
+          interests: '',
+          seeking: Seeking(age: '', gender: ''),
+          uploads: [],
+        );
+        await context.read<UserProfileProvider>().addNewUser(newUser, context);
+
+        await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
+        await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
+        await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
+      });
 
       return true;
     } catch (e) {
@@ -111,42 +123,52 @@ class AuthService {
 
         // Check if the user is signing in for the first time
         if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-          final UserProfileModel newUser = UserProfileModel(
-            uid: userCredential.user!.uid,
-            name: '',
-            email: '',
-            gender: '',
-            image: '',
-            age: '',
-            bio: '',
-            address: '',
-            interests: '',
-            seeking: Seeking(age: '', gender: ''),
-            uploads: [],
-          );
-          await context
-              .read<UserProfileProvider>()
-              .addNewUser(newUser, context);
+          await ApiClient().validateToken().then((value) async {
+            await TokenManager.saveToken(value);
 
-          await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
-          await DbClient()
-              .setData(dbKey: "userName", value: newUser.name ?? '');
-          await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
+            final UserProfileModel newUser = UserProfileModel(
+              uid: userCredential.user!.uid,
+              name: '',
+              email: '',
+              gender: '',
+              image: '',
+              age: '',
+              bio: '',
+              address: '',
+              interests: '',
+              seeking: Seeking(age: '', gender: ''),
+              uploads: [],
+            );
+            await context
+                .read<UserProfileProvider>()
+                .addNewUser(newUser, context);
+
+            await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
+            await DbClient()
+                .setData(dbKey: "userName", value: newUser.name ?? '');
+            await DbClient()
+                .setData(dbKey: "email", value: newUser.email ?? '');
+          });
         }
 
-        await context
-            .read<UserProfileProvider>()
-            .getUserData(userCredential.user!.uid)
-            .then((value) async {
-          if (value != null) {
-            Provider.of<UserProfileProvider>(context, listen: false)
-                .setCurrentUserProfile(value);
-            await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
-            await DbClient()
-                .setData(dbKey: "userName", value: value.name ?? '');
+        await ApiClient().validateToken().then((value) async {
+          await TokenManager.saveToken(value);
 
-            await DbClient().setData(dbKey: "email", value: value.email ?? '');
-          }
+          await context
+              .read<UserProfileProvider>()
+              .getUserData(userCredential.user!.uid)
+              .then((value) async {
+            if (value != null) {
+              Provider.of<UserProfileProvider>(context, listen: false)
+                  .setCurrentUserProfile(value);
+              await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
+              await DbClient()
+                  .setData(dbKey: "userName", value: value.name ?? '');
+
+              await DbClient()
+                  .setData(dbKey: "email", value: value.email ?? '');
+            }
+          });
         });
 
         return userCredential.user;
