@@ -1,5 +1,4 @@
 import 'package:dating/auth/loginScreen.dart';
-import 'package:dating/pages/profilepage.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';

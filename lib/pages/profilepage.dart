@@ -17,6 +17,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// ignore: must_be_immutable
 class ProfilePage extends StatefulWidget {
   DashboardResponseModel dashboardresponsemodel;
   ProfilePage({super.key, required this.dashboardresponsemodel});

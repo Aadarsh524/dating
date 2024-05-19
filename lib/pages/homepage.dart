@@ -17,7 +17,6 @@ import 'package:dating/providers/dashboard_provider.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
-import 'package:dating/utils/images.dart';
 import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
@@ -267,7 +266,10 @@ class _HomePageState extends State<HomePage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (_) =>  ProfilePage(dashboardresponsemodel:data[index] ,)));
+                                        builder: (_) => ProfilePage(
+                                              dashboardresponsemodel:
+                                                  data[index],
+                                            )));
                               },
                               child: Container(
                                 child: Column(
@@ -1133,10 +1135,8 @@ class _HomePageState extends State<HomePage> {
 // ignore: must_be_immutable
 class ProfileButton extends StatelessWidget {
   const ProfileButton({
-
     Key? key,
   }) : super(key: key);
-
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);

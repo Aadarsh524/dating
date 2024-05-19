@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/utils/platform.dart';
@@ -23,15 +24,19 @@ class DashboardProvider extends ChangeNotifier {
     User? user = FirebaseAuth.instance.currentUser;
     String uid = user!.uid;
     String api = getApiEndpoint();
+
+    final token = await TokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
     context.read<LoadingProvider>().setLoading(true);
-    String api = getApiEndpoint();
     try {
       final response = await http.get(
         Uri.parse('$api/Dashboard/$uid&page=$page'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'access_token': 'accesstokentest'
+          'Authorization': 'Bearer $token',
         },
       );
       log(response.body);
