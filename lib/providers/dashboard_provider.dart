@@ -22,6 +22,7 @@ class DashboardProvider extends ChangeNotifier {
       int page, BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
     String uid = user!.uid;
+    String api = getApiEndpoint();
     context.read<LoadingProvider>().setLoading(true);
     String api = getApiEndpoint();
     try {

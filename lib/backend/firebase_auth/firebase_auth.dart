@@ -23,19 +23,19 @@ class AuthService {
         password: password,
       );
 
-      await context
-          .read<UserProfileProvider>()
-          .getUserData(userCredential.user!.uid)
-          .then((value) async {
-        if (value != null) {
-          Provider.of<UserProfileProvider>(context, listen: false)
-              .setCurrentUserProfile(value);
-          await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
-          await DbClient().setData(dbKey: "userName", value: value.name ?? '');
+      // await context
+      //     .read<UserProfileProvider>()
+      //     .getUserData(userCredential.user!.uid)
+      //     .then((value) async {
+      //   if (value != null) {
+      //     Provider.of<UserProfileProvider>(context, listen: false)
+      //         .setCurrentUserProfile(value);
+      //     await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
+      //     await DbClient().setData(dbKey: "userName", value: value.name ?? '');
 
-          await DbClient().setData(dbKey: "email", value: value.email ?? '');
-        }
-      });
+      //     await DbClient().setData(dbKey: "email", value: value.email ?? '');
+      //   }
+      // });
 
       return userCredential.user?.uid;
     } catch (e) {

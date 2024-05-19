@@ -463,10 +463,10 @@ class _SettingPageState extends State<SettingPage> {
                 children: [
                   GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => const ProfilePage()));
+                        //   Navigator.push(
+                        //       context,
+                        //       CupertinoPageRoute(
+                        //           builder: (context) => const ProfilePage()));
                       },
                       child: const profileButton()),
                   const SizedBox(

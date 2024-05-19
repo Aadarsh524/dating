@@ -484,10 +484,10 @@ class _FavouritePageState extends State<FavouritePage> {
                 children: [
                   GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => ProfilePage()));
+                        // Navigator.push(
+                        //     context,
+                        //     CupertinoPageRoute(
+                        //         builder: (context) => ProfilePage()));
                       },
                       child: profileButton()),
                   SizedBox(
