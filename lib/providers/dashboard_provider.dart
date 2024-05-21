@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/providers/loading_provider.dart';
-import 'package:dating/utils/platform.dart';
+import '../../platform/platform.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;

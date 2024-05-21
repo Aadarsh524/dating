@@ -1,9 +1,13 @@
-import 'package:dating/utils/platform.dart';
+import 'dart:developer';
+
 import 'package:http/http.dart' as http;
 
+import '../../platform/platform.dart';
+
 class ApiClient {
-  Future<String> validateToken() async {
+  Future<String?> validateToken() async {
     String api = getApiEndpoint();
+    log(api);
 
     try {
       final response = await http.post(

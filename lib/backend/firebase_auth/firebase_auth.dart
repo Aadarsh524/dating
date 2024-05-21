@@ -24,25 +24,23 @@ class AuthService {
         email: email,
         password: password,
       );
+      final String? token = await ApiClient().validateToken();
+      if (token != null) {
+        await TokenManager.saveToken(token);
 
-      await ApiClient().validateToken().then((value) async {
-        await TokenManager.saveToken(value);
+        final userProfileProvider = context.read<UserProfileProvider>();
+        final userProfile =
+            await userProfileProvider.getUserData(userCredential.user!.uid);
 
-        await context
-            .read<UserProfileProvider>()
-            .getUserData(userCredential.user!.uid)
-            .then((value) async {
-          if (value != null) {
-            Provider.of<UserProfileProvider>(context, listen: false)
-                .setCurrentUserProfile(value);
-            await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
-            await DbClient()
-                .setData(dbKey: "userName", value: value.name ?? '');
-
-            await DbClient().setData(dbKey: "email", value: value.email ?? '');
-          }
-        });
-      });
+        if (userProfile != null) {
+          userProfileProvider.setCurrentUserProfile(userProfile);
+          await DbClient().setData(dbKey: "uid", value: userProfile.uid ?? '');
+          await DbClient()
+              .setData(dbKey: "userName", value: userProfile.name ?? '');
+          await DbClient()
+              .setData(dbKey: "email", value: userProfile.email ?? '');
+        }
+      }
 
       return userCredential.user?.uid;
     } catch (e) {
@@ -69,7 +67,7 @@ class AuthService {
       );
 
       await ApiClient().validateToken().then((value) async {
-        await TokenManager.saveToken(value);
+        await TokenManager.saveToken(value!);
 
         final UserProfileModel newUser = UserProfileModel(
           uid: userCredential.user!.uid,
@@ -124,7 +122,7 @@ class AuthService {
         // Check if the user is signing in for the first time
         if (userCredential.additionalUserInfo?.isNewUser ?? false) {
           await ApiClient().validateToken().then((value) async {
-            await TokenManager.saveToken(value);
+            await TokenManager.saveToken(value!);
 
             final UserProfileModel newUser = UserProfileModel(
               uid: userCredential.user!.uid,
@@ -152,7 +150,7 @@ class AuthService {
         }
 
         await ApiClient().validateToken().then((value) async {
-          await TokenManager.saveToken(value);
+          await TokenManager.saveToken(value!);
 
           await context
               .read<UserProfileProvider>()

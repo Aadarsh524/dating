@@ -66,7 +66,7 @@ class _EditInfoState extends State<EditInfo> {
 
   void deletePost(String? postId) async {
     print(postId);
-    await context.read<LoadingProvider>().setLoading(true);
+    context.read<LoadingProvider>().setLoading(true);
 
     try {
       await context.read<UserProfileProvider>().deletePost(postId!);

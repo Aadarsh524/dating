@@ -1437,35 +1437,39 @@ class profileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProfileProvider>(
-      builder: (context, imageProvider, _) {
-        UserProfileModel? userProfileModel =
-            Provider.of<UserProfileProvider>(context, listen: false)
-                .currentUserProfile;
+    return SizedBox(
+      height: 40,
+      width: 40,
+      child: Consumer<UserProfileProvider>(
+        builder: (context, imageProvider, _) {
+          UserProfileModel? userProfileModel =
+              Provider.of<UserProfileProvider>(context, listen: false)
+                  .currentUserProfile;
 
-        return Neumorphic(
-          style: NeumorphicStyle(
-            boxShape: NeumorphicBoxShape.roundRect(
-              BorderRadius.circular(1000),
+          return Neumorphic(
+            style: NeumorphicStyle(
+              boxShape: NeumorphicBoxShape.roundRect(
+                BorderRadius.circular(1000),
+              ),
+              depth: 10,
+              intensity: 0.5,
             ),
-            depth: 10,
-            intensity: 0.5,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(1000),
-            child:
-                userProfileModel!.image != null && userProfileModel.image != ''
-                    ? Image.memory(
-                        base64ToImage(userProfileModel.image),
-                        fit: BoxFit.cover,
-                      )
-                    : Image.memory(
-                        base64ToImage(defaultBase64Avatar),
-                        fit: BoxFit.cover,
-                      ),
-          ),
-        );
-      },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(1000),
+              child: userProfileModel!.image != null &&
+                      userProfileModel.image != ''
+                  ? Image.memory(
+                      base64ToImage(userProfileModel.image),
+                      fit: BoxFit.cover,
+                    )
+                  : Image.memory(
+                      base64ToImage(defaultBase64Avatar),
+                      fit: BoxFit.cover,
+                    ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

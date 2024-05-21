@@ -13,11 +13,11 @@ class ShimmerSkeleton extends StatelessWidget {
       children: [
         for (int a = 1; a <= count; a++)
           Shimmer.fromColors(
-            baseColor: Colors.grey.shade200,
-            highlightColor: Colors.grey.shade100,
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade200,
             child: Container(
               margin:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
               width: double.infinity,
               height: height,
               decoration: BoxDecoration(
