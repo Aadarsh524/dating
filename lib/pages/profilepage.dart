@@ -31,8 +31,6 @@ class _ProfilePageState extends State<ProfilePage> {
     return base64Decode(base64String);
   }
 
-  bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
-
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';

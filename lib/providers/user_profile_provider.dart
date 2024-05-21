@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
-import 'package:dating/utils/platform.dart';
+import '../../platform/platform.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
 
