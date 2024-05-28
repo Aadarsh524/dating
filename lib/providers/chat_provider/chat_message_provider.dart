@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:dating/datamodel/chat/chat_send_model.dart';
+import 'package:dating/datamodel/chat/chat_message_model.dart';
 import 'package:dating/platform/platform.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +9,7 @@ import 'dart:convert';
 import '../../backend/MongoDB/token_manager.dart';
 
 class ChatProvider extends ChangeNotifier {
-  Future<void> sendChat(ChatSendModel chatSendModel) async {
+  Future<void> sendChat(ChatMessageModel chatSendModel) async {
     try {
       //get api endpoint
       String api = getApiEndpoint();
@@ -22,7 +22,6 @@ class ChatProvider extends ChangeNotifier {
         'SenderId': chatSendModel.senderId,
         'MessageContent': chatSendModel.messageContent,
         'ReceiverId': chatSendModel.receiverId,
-        'TimeStamp': chatSendModel.timeStamp,
         'Type': chatSendModel.type
       };
       //set params in uri
@@ -44,6 +43,7 @@ class ChatProvider extends ChangeNotifier {
 
       //return response
       if (request.statusCode == 200) {
+        notifyListeners();
         final responseJson = json.decode(request.body);
         log(responseJson.toString());
       } else {
@@ -51,6 +51,29 @@ class ChatProvider extends ChangeNotifier {
       }
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  Future<ChatMessageModel?> getMessage(String uid) async {
+    String api = getApiEndpoint();
+    try {
+      final uri = Uri.parse("$api/communication/id=$uid");
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ',
+        },
+      );
+      if (response.statusCode == 200) {
+        notifyListeners();
+        return ChatMessageModel.fromJson(json.decode(response.body));
+      } else {
+        return null;
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 }
