@@ -1,14 +1,23 @@
+import 'dart:convert';
+
+import 'package:dating/datamodel/chat/chat_message_model.dart';
+import 'package:dating/datamodel/dashboard_response_model.dart';
+import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:provider/provider.dart';
 
 class ChatScreemMobile extends StatefulWidget {
-  const ChatScreemMobile({super.key});
+  DashboardResponseModel dashboardResponseModel;
+  ChatScreemMobile({super.key, required this.dashboardResponseModel});
 
   @override
   State<ChatScreemMobile> createState() => _ChatScreemMobileState();
@@ -16,6 +25,11 @@ class ChatScreemMobile extends StatefulWidget {
 
 class _ChatScreemMobileState extends State<ChatScreemMobile> {
   final TextEditingController _message = TextEditingController();
+  User? users = FirebaseAuth.instance.currentUser;
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -48,10 +62,11 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                     Container(
                       height: 50,
                       width: 50,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: AssetImage(AppImages.profile),
+                          image: MemoryImage(base64ToImage(
+                              widget.dashboardResponseModel.image!)),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -63,7 +78,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Rehan Ritviz',
+                          widget.dashboardResponseModel.name!,
                           style: AppTextStyles()
                               .primaryStyle
                               .copyWith(fontSize: 14),
@@ -79,7 +94,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                               width: 6,
                             ),
                             Text(
-                              'Malang, J..',
+                              widget.dashboardResponseModel.address!,
                               style: AppTextStyles().secondaryStyle.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w300,
@@ -256,7 +271,14 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                 ButtonWithLabel(
                   text: null,
                   labelText: null,
-                  onPressed: () {},
+                  onPressed: () {
+                    Provider.of<ChatProvider>(context, listen: false).sendChat(
+                        ChatMessageModel(
+                            senderId: users!.uid,
+                            receiverId: widget.dashboardResponseModel.uid,
+                            messageContent: _message.text,
+                            type: "Text"));
+                  },
                   icon: const Icon(Icons.send),
                 ),
               ],
