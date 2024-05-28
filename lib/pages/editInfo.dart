@@ -183,28 +183,35 @@ class _EditInfoState extends State<EditInfo> {
   }
 
   void pickImage() async {
-    final storageStatus = await Permission.storage.request();
-    if (!storageStatus.isGranted) {
-      throw Exception('Storage permission is required to upload the image.');
-    }
+    try {
+      final storageStatus = await Permission.storage.request();
+      if (!storageStatus.isGranted) {
+        throw Exception('Storage permission is required to upload the image.');
+      }
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'png', 'jpeg'],
-    );
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png', 'jpeg'],
+      );
 
-    // Handle result
-    if (result != null && result.files.isNotEmpty) {
-      File imageFile = File(result.files.single.path!);
+      // Handle result
+      if (result != null && result.files.isNotEmpty) {
+        context.read<LoadingProvider>().setLoading(true);
+        File imageFile = File(result.files.single.path!);
 
-      String base64 = convertIntoBase64(imageFile);
-      _imageBytes = base64ToImage(base64);
-      await context
-          .read<UserProfileProvider>()
-          .updateProfileImage(context, base64, user!.uid);
-    } else {
-      // Handle cases like user canceling the selection or errors
-      print('No image selected.');
+        String base64 = convertIntoBase64(imageFile);
+        _imageBytes = base64ToImage(base64);
+        await context
+            .read<UserProfileProvider>()
+            .updateProfileImage(context, base64, user!.uid);
+      } else {
+        // Handle cases like user canceling the selection or errors
+        print('No image selected.');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
@@ -305,6 +312,9 @@ class _EditInfoState extends State<EditInfo> {
               width: 200,
               child: Center(
                 child: GestureDetector(
+                  onTap: () {
+                    pickImage();
+                  },
                   child: Neumorphic(
                     style: NeumorphicStyle(
                       boxShape: NeumorphicBoxShape.roundRect(
