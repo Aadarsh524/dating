@@ -535,7 +535,7 @@ class _HomePageState extends State<HomePage> {
                       width: 20,
                     ),
                     Text(
-                      "Name",
+                      "Dating app",
                       style: GoogleFonts.poppins(
                         color: AppColors.black,
                         fontSize: 32,
