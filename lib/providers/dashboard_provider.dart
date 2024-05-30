@@ -39,7 +39,7 @@ class DashboardProvider extends ChangeNotifier {
           'Authorization': 'Bearer $token',
         },
       );
-      log(response.body);
+      
 
       if (response.statusCode == 200) {
         List<DashboardResponseModel> dashboardList = [];
