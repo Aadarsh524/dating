@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_message_model.dart';
-import 'package:dating/datamodel/dashboard_response_model.dart';
+import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
@@ -15,9 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class ChatScreemMobile extends StatefulWidget {
-  DashboardResponseModel dashboardResponseModel;
-  ChatScreemMobile({super.key, required this.dashboardResponseModel});
+  ChatRoomModel chatRoomModel;
+  ChatScreemMobile({super.key, required this.chatRoomModel});
 
   @override
   State<ChatScreemMobile> createState() => _ChatScreemMobileState();
@@ -65,8 +67,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: MemoryImage(base64ToImage(
-                              widget.dashboardResponseModel.image!)),
+                          image:
+                              MemoryImage(base64ToImage(defaultBase64Avatar)),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -78,7 +80,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.dashboardResponseModel.name!,
+                          "",
                           style: AppTextStyles()
                               .primaryStyle
                               .copyWith(fontSize: 14),
@@ -94,7 +96,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                               width: 6,
                             ),
                             Text(
-                              widget.dashboardResponseModel.address!,
+                              "",
                               style: AppTextStyles().secondaryStyle.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w300,
@@ -275,7 +277,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                     Provider.of<ChatProvider>(context, listen: false).sendChat(
                         ChatMessageModel(
                             senderId: users!.uid,
-                            receiverId: widget.dashboardResponseModel.uid,
+                            receiverId: "",
                             messageContent: _message.text,
                             type: "Text"));
                   },

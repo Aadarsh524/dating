@@ -1,25 +1,22 @@
 import 'dart:convert';
+import 'dart:developer';
 
-import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
+import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/pages/settingpage.dart';
-import 'package:dating/providers/chat_provider/chat_message_provider.dart';
-import 'package:dating/providers/dashboard_provider.dart';
-import 'package:dating/providers/user_profile_provider.dart';
+import 'package:dating/providers/chat_provider/chat_room_provider.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
+import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:dating/widgets/textField.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-
-import '../datamodel/dashboard_response_model.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -30,13 +27,21 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
+  User? user = FirebaseAuth.instance.currentUser;
 
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
-  TextEditingController _message = TextEditingController();
+  final TextEditingController _message = TextEditingController();
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<ChatRoomProvider>().getchatRoom(user!.uid);
   }
 
   @override
@@ -61,16 +66,16 @@ class _ChatPageState extends State<ChatPage> {
   Widget MobileHome() {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // profile
-              profileButton(),
+              const profileButton(),
 
               // search icon
               Row(
@@ -78,7 +83,7 @@ class _ChatPageState extends State<ChatPage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -92,9 +97,9 @@ class _ChatPageState extends State<ChatPage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => SettingPage()));
+                              builder: (context) => const SettingPage()));
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.settings,
                     ),
                     labelText: null,
@@ -105,7 +110,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -119,12 +124,12 @@ class _ChatPageState extends State<ChatPage> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -134,9 +139,9 @@ class _ChatPageState extends State<ChatPage> {
                   text: null,
                   labelText: 'Matches',
                   onPressed: () {},
-                  icon: Icon(Icons.people),
+                  icon: const Icon(Icons.people),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 15,
                 ),
 
@@ -144,10 +149,10 @@ class _ChatPageState extends State<ChatPage> {
                   text: null,
                   labelText: 'Add Friend',
                   onPressed: () {},
-                  icon: Icon(Icons.add),
+                  icon: const Icon(Icons.add),
                 ),
 
-                SizedBox(
+                const SizedBox(
                   width: 15,
                 ),
                 // online
@@ -155,7 +160,7 @@ class _ChatPageState extends State<ChatPage> {
                   text: null,
                   labelText: 'Online',
                   onPressed: () {},
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.circle_outlined,
                     color: Colors.green,
                   ),
@@ -168,7 +173,7 @@ class _ChatPageState extends State<ChatPage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -177,148 +182,171 @@ class _ChatPageState extends State<ChatPage> {
             children: [
               Neumorphic(
                 child: Container(
-                  padding: EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.only(top: 20),
                   child: Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               // profile pic
-                              Expanded(
-                                child: Consumer<DashboardProvider>(
-                                    builder: (context, snapshot, _) {
-                                  List<DashboardResponseModel>? data =
-                                      Provider.of<DashboardProvider>(context,
-                                              listen: false)
-                                          .dashboardList;
+                              Expanded(child: Consumer<LoadingProvider>(
+                                builder: (context, loading, _) {
+                                  return loading.isLoading
+                                      ? const ShimmerSkeleton(
+                                          count: 2, height: 100)
+                                      : Consumer<ChatRoomProvider>(builder:
+                                          (context, chatRoomProvider, _) {
+                                          ChatRoomModel? chatRoomModel =
+                                              Provider.of<ChatRoomProvider>(
+                                                      context,
+                                                      listen: false)
+                                                  .getUserChatRoom;
+                                          var conversations =
+                                              chatRoomModel!.conversations;
 
-                                  return ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: data!.length,
-                                    itemBuilder: (context, index) {
-                                      final alluploads = data[index].uploads;
-                                      if (alluploads!.isNotEmpty) {
-                                        return GestureDetector(
-                                          onTap: () {
-                                            // Provider.of<ChatProvider>(context)
-                                            //     .getMessage(data[index].uid!);
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ChatScreemMobile(
-                                                          dashboardResponseModel:
-                                                              data[index],
-                                                        )));
-                                          },
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Neumorphic(
-                                                    style: NeumorphicStyle(
-                                                      boxShape:
-                                                          NeumorphicBoxShape
-                                                              .roundRect(
-                                                        BorderRadius.circular(
-                                                            1000),
-                                                      ),
-                                                    ),
-                                                    child: Container(
-                                                        height: 50,
-                                                        width: 50,
-                                                        decoration:
-                                                            BoxDecoration(
+                                          log(conversations.toString());
+
+                                          return ListView.builder(
+                                            itemCount: conversations!.length,
+                                            itemBuilder: (context, index) {
+                                              var conversation =
+                                                  conversations[index];
+                                              var endUserDetails =
+                                                  conversation.endUserDetails;
+
+                                              if (endUserDetails != null) {
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    // Navigator.push(
+                                                    //   context,
+                                                    //   MaterialPageRoute(
+                                                    //     builder: (context) => ChatScreemMobile(
+                                                    //       chatRoomModel: conversation,
+                                                    //     ),
+                                                    //   ),
+                                                    // );
+                                                  },
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Neumorphic(
+                                                            style:
+                                                                NeumorphicStyle(
+                                                              boxShape:
+                                                                  NeumorphicBoxShape
+                                                                      .roundRect(
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        1000),
+                                                              ),
+                                                            ),
+                                                            child: Container(
+                                                              height: 50,
+                                                              width: 50,
+                                                              decoration:
+                                                                  BoxDecoration(
                                                                 shape: BoxShape
                                                                     .circle,
                                                                 image:
                                                                     DecorationImage(
-                                                                  image: MemoryImage(
-                                                                      base64ToImage(
-                                                                          data[index]
-                                                                              .image!)),
+                                                                  image:
+                                                                      NetworkImage(
+                                                                    endUserDetails
+                                                                        .profileImage!,
+                                                                  ),
                                                                   fit: BoxFit
                                                                       .cover,
-                                                                ))),
-                                                  ),
-
-                                                  // profile name and address
-                                                  SizedBox(
-                                                    width: 20,
-                                                  ),
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        data[index].name!,
-                                                        style: AppTextStyles()
-                                                            .primaryStyle
-                                                            .copyWith(
-                                                                fontSize: 14),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 20),
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                endUserDetails
+                                                                    .name!,
+                                                                style: AppTextStyles()
+                                                                    .primaryStyle
+                                                                    .copyWith(
+                                                                        fontSize:
+                                                                            14),
+                                                              ),
+                                                              const SizedBox(
+                                                                  height: 5),
+                                                              Text(
+                                                                endUserDetails
+                                                                        .message!
+                                                                    as String,
+                                                                style: AppTextStyles()
+                                                                    .secondaryStyle
+                                                                    .copyWith(
+                                                                      fontSize:
+                                                                          14,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w300,
+                                                                      color: AppColors
+                                                                          .secondaryColor,
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          const Spacer(),
+                                                          Row(
+                                                            children: [
+                                                              const Icon(
+                                                                  Icons.circle,
+                                                                  size: 8,
+                                                                  color: Colors
+                                                                      .green),
+                                                              const SizedBox(
+                                                                  width: 5),
+                                                              Text(
+                                                                conversation
+                                                                        .seen!
+                                                                    ? 'online'
+                                                                    : 'offline',
+                                                                style: AppTextStyles()
+                                                                    .secondaryStyle
+                                                                    .copyWith(
+                                                                      fontSize:
+                                                                          14,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w300,
+                                                                      color: AppColors
+                                                                          .black,
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
                                                       ),
-                                                      SizedBox(
-                                                        height: 5,
-                                                      ),
-                                                      Text(
-                                                        'Hi how are you',
-                                                        style: AppTextStyles()
-                                                            .secondaryStyle
-                                                            .copyWith(
-                                                                fontSize: 14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w300,
-                                                                color: AppColors
-                                                                    .secondaryColor),
-                                                      )
+                                                      const SizedBox(
+                                                          height: 20),
                                                     ],
                                                   ),
-                                                  Spacer(),
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.circle,
-                                                        size: 8,
-                                                        color: Colors.green,
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                        'online',
-                                                        style: AppTextStyles()
-                                                            .secondaryStyle
-                                                            .copyWith(
-                                                                fontSize: 14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w300,
-                                                                color: AppColors
-                                                                    .black),
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                              SizedBox(
-                                                height: 20,
-                                              )
-                                            ],
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  );
-                                }),
-                              ),
+                                                );
+                                              } else {
+                                                return SizedBox.shrink();
+                                              }
+                                            },
+                                          );
+                                        });
+                                },
+                              )),
                             ]),
                       ),
 
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       // image
@@ -326,14 +354,14 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 50,
               ),
             ],
           ),
         )
       ]),
-      bottomSheet: NavBar(),
+      bottomSheet: const NavBar(),
     );
   }
 

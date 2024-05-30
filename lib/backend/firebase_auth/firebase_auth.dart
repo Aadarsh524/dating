@@ -4,6 +4,7 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
+
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -38,6 +39,7 @@ class AuthService {
 
         if (userProfile != null) {
           userProfileProvider.setCurrentUserProfile(userProfile);
+
           await DbClient().setData(dbKey: "uid", value: userProfile.uid ?? '');
           await DbClient()
               .setData(dbKey: "userName", value: userProfile.name ?? '');
