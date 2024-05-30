@@ -1,9 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
-
-import 'chat_message_model.dart';
+import 'dart:io';
 
 class ChatRoomModel {
   String? uid;
@@ -16,17 +11,16 @@ class ChatRoomModel {
     if (json['conversations'] != null) {
       conversations = <Conversations>[];
       json['conversations'].forEach((v) {
-        conversations!.add(new Conversations.fromJson(v));
+        conversations!.add(Conversations.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['uid'] = this.uid;
-    if (this.conversations != null) {
-      data['conversations'] =
-          this.conversations!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['uid'] = uid;
+    if (conversations != null) {
+      data['conversations'] = conversations!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -34,37 +28,37 @@ class ChatRoomModel {
 
 class Conversations {
   String? chatId;
+  String? messageId;
   String? endUserId;
-  String? timeStamp;
   EndUserDetails? endUserDetails;
   bool? seen;
 
   Conversations(
       {this.chatId,
+      this.messageId,
       this.endUserId,
-      this.timeStamp,
       this.endUserDetails,
       this.seen});
 
   Conversations.fromJson(Map<String, dynamic> json) {
     chatId = json['chatId'];
+    messageId = json['messageId'];
     endUserId = json['endUserId'];
-    timeStamp = json['timeStamp'];
     endUserDetails = json['endUserDetails'] != null
-        ? new EndUserDetails.fromJson(json['endUserDetails'])
+        ? EndUserDetails.fromJson(json['endUserDetails'])
         : null;
     seen = json['seen'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['chatId'] = this.chatId;
-    data['endUserId'] = this.endUserId;
-    data['timeStamp'] = this.timeStamp;
-    if (this.endUserDetails != null) {
-      data['endUserDetails'] = this.endUserDetails!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['chatId'] = chatId;
+    data['messageId'] = messageId;
+    data['endUserId'] = endUserId;
+    if (endUserDetails != null) {
+      data['endUserDetails'] = endUserDetails!.toJson();
     }
-    data['seen'] = this.seen;
+    data['seen'] = seen;
     return data;
   }
 }
@@ -72,65 +66,101 @@ class Conversations {
 class EndUserDetails {
   String? profileImage;
   String? name;
+  Message? message;
 
-  List<ChatMessageModel>? message;
-  EndUserDetails({
-    this.profileImage,
-    this.name,
-    this.message,
-  });
+  EndUserDetails({this.profileImage, this.name, this.message});
 
-  
-
-  EndUserDetails copyWith({
-    String? profileImage,
-    String? name,
-    List<ChatMessageModel>? message,
-  }) {
-    return EndUserDetails(
-      profileImage: profileImage ?? this.profileImage,
-      name: name ?? this.name,
-      message: message ?? this.message,
-    );
+  EndUserDetails.fromJson(Map<String, dynamic> json) {
+    profileImage = json['profileImage'];
+    name = json['name'];
+    message =
+        json['message'] != null ? Message.fromJson(json['message']) : null;
   }
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'profileImage': profileImage,
-      'name': name,
-      'message': message!.map((x) => x.toMap()).toList(),
-    };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['profileImage'] = profileImage;
+    data['name'] = name;
+    if (message != null) {
+      data['message'] = message!.toJson();
+    }
+    return data;
   }
-
-  factory EndUserDetails.fromMap(Map<String, dynamic> map) {
-    return EndUserDetails(
-      profileImage: map['profileImage'] != null ? map['profileImage'] as String : null,
-      name: map['name'] != null ? map['name'] as String : null,
-      message: map['message'] != null ? List<ChatMessageModel>.from((map['message'] as List<int>).map<ChatMessageModel?>((x) => ChatMessageModel.fromMap(x as Map<String,dynamic>),),) : null,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory EndUserDetails.fromJson(String source) => EndUserDetails.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  @override
-  String toString() => 'EndUserDetails(profileImage: $profileImage, name: $name, message: $message)';
-
-  @override
-  bool operator ==(covariant EndUserDetails other) {
-    if (identical(this, other)) return true;
-  
-    return 
-      other.profileImage == profileImage &&
-      other.name == name &&
-      listEquals(other.message, message);
-  }
-
-  @override
-  int get hashCode => profileImage.hashCode ^ name.hashCode ^ message.hashCode;
 }
 
+class Message {
+  String? id;
+  String? chatId;
+  List<String>? participants;
+  List<Messages>? messages;
 
+  Message({this.id, this.chatId, this.participants, this.messages});
 
+  Message.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    chatId = json['chatId'];
+    participants = json['participants'].cast<String>();
+    if (json['messages'] != null) {
+      messages = <Messages>[];
+      json['messages'].forEach((v) {
+        messages!.add(Messages.fromJson(v));
+      });
+    }
+  }
 
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['chatId'] = chatId;
+    data['participants'] = participants;
+    if (messages != null) {
+      data['messages'] = messages!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Messages {
+  String? messageId;
+  String? senderId;
+  String? messageContent;
+  String? recieverId;
+  List<String>? fileName;
+  File? file;
+  String? timeStamp;
+  String? type;
+
+  Messages(
+      {this.messageId,
+      this.senderId,
+      this.messageContent,
+      this.recieverId,
+      this.fileName,
+      this.file,
+      this.timeStamp,
+      this.type});
+
+  Messages.fromJson(Map<String, dynamic> json) {
+    messageId = json['messageId'];
+    senderId = json['senderId'];
+    messageContent = json['messageContent'];
+    recieverId = json['recieverId'];
+    fileName = json['fileName'].cast<String>();
+    file = json['file'];
+    timeStamp = json['timeStamp'];
+    type = json['type'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['messageId'] = messageId;
+    data['senderId'] = senderId;
+    data['messageContent'] = messageContent;
+    data['recieverId'] = recieverId;
+    data['fileName'] = fileName;
+    data['file'] = file;
+    data['timeStamp'] = timeStamp;
+    data['type'] = type;
+    return data;
+  }
+}
