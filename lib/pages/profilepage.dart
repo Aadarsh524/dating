@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:insta_image_viewer/insta_image_viewer.dart';
 
 // ignore: must_be_immutable
 class ProfilePage extends StatefulWidget {
@@ -137,18 +138,20 @@ class _ProfilePageState extends State<ProfilePage> {
                       items: reversedUploads.map((imagePath) {
                         return Builder(
                           builder: (BuildContext context) {
-                            return Container(
-                              width: MediaQuery.of(context).size.width,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: MemoryImage(
-                                    base64ToImage(imagePath.file!),
+                            return InstaImageViewer(
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: MemoryImage(
+                                      base64ToImage(imagePath.file!),
+                                    ),
+                                    fit: BoxFit.cover,
                                   ),
-                                  fit: BoxFit.cover,
-                                ),
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(20),
-                                  topRight: Radius.circular(20),
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20),
+                                  ),
                                 ),
                               ),
                             );
@@ -177,6 +180,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   color: Colors.white,
                                 ),
                               ),
+                              // SizedBox(
+                              //   width: MediaQuery.sizeOf(context).width * .40,
+                              // ),
                               Positioned(
                                 left: 100,
                                 child: Expanded(
@@ -185,21 +191,21 @@ class _ProfilePageState extends State<ProfilePage> {
                                       itemCount: reversedUploads.length,
                                       itemBuilder: (context, index) {
                                         log(reversedUploads.length.toString());
-                                        return const Center(
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.circle,
-                                                size: 10,
-                                                color: Colors.white,
-                                              ),
-                                              SizedBox(
-                                                width: 4,
-                                              ),
-                                            ],
-                                          ),
+                                        return Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.circle,
+                                              size: 10,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(
+                                              width: 4,
+                                            ),
+                                          ],
                                         );
                                       }),
                                 ),
@@ -291,7 +297,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              "Malang, Jawa Timur,",
+                              "${widget.dashboardresponsemodel.address}",
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles().secondaryStyle,
                             )
@@ -312,7 +318,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              "${widget.dashboardresponsemodel.gender}",
+                              "${widget.dashboardresponsemodel.gender}"
+                                  .toUpperCase(),
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],
@@ -332,7 +339,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              "Seeking Male 21-39",
+                              "Seeking ${widget.dashboardresponsemodel.seeking?.gender} ${widget.dashboardresponsemodel.seeking?.age} ",
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],
