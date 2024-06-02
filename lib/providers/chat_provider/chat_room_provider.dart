@@ -2,27 +2,31 @@ import 'dart:convert';
 
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/platform/platform.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '../../backend/MongoDB/token_manager.dart';
 
 class ChatRoomProvider extends ChangeNotifier {
-  ChatRoomModel? userChatRoomModel;
+  ChatRoomModel? _userChatRoomModel;
 
-  void setUsersChatRoom(ChatRoomModel chatRoomModel) {
-    userChatRoomModel = chatRoomModel;
+  void setChatRoomProvider(ChatRoomModel chatRoomModel) {
+    _userChatRoomModel = chatRoomModel;
     notifyListeners();
   }
 
-  ChatRoomModel? get getUserChatRoom => userChatRoomModel;
+  ChatRoomModel? get userChatRoomModel => _userChatRoomModel;
 
-  Future<ChatRoomModel?> getchatRoom(uid) async {
-    final token = await TokenManager.getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
+  Future<void> fetchChatRoom(BuildContext context, uid) async {
+    context.read<LoadingProvider>().setLoading(true);
     try {
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
       String api = getApiEndpoint();
       final response = await http.get(
         Uri.parse('$api/Communication/$uid'),
@@ -32,15 +36,21 @@ class ChatRoomProvider extends ChangeNotifier {
           'Authorization': 'Bearer $token',
         },
       );
-      print(Uri.parse('$api/Communication/$uid'));
+
       if (response.statusCode == 200) {
-        setUsersChatRoom(ChatRoomModel.fromJson(json.decode(response.body)));
+        final jsonData = json.decode(response.body);
+
+        final chatRoomModel = ChatRoomModel.fromJson(jsonData);
+
+        setChatRoomProvider(chatRoomModel);
         notifyListeners();
-        return ChatRoomModel.fromJson(json.decode(response.body));
+      } else {
+        throw Exception('Failed to fetch chat room: ${response.statusCode}');
       }
     } catch (e) {
-      rethrow;
+      rethrow; // Rethrow the exception to handle it in the caller
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
     }
-    return null;
   }
 }

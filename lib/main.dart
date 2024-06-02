@@ -19,7 +19,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => UserProfileProvider()),
     ChangeNotifierProvider(create: (_) => LoadingProvider()),
     ChangeNotifierProvider(create: (_) => DashboardProvider()),
-    ChangeNotifierProvider(create: (_) => ChatProvider()),
+    ChangeNotifierProvider(create: (_) => ChatMessageProvider()),
     ChangeNotifierProvider(create: (_) => ChatRoomProvider()),
   ], child: const MyApp()));
 }

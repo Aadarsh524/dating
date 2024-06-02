@@ -73,8 +73,14 @@ class EndUserDetails {
   EndUserDetails.fromJson(Map<String, dynamic> json) {
     profileImage = json['profileImage'];
     name = json['name'];
-    message =
-        json['message'] != null ? Message.fromJson(json['message']) : null;
+    // Check if 'message' exists and is not null
+    if (json['message'] != null) {
+      // Parse 'message' using Message.fromJson
+      message = Message.fromJson(json['message']);
+    } else {
+      // Handle case where 'message' is null
+      message = null;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -99,7 +105,7 @@ class Message {
   Message.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     chatId = json['chatId'];
-    participants = json['participants'].cast<String>();
+    participants = (json['participants'] as List<dynamic>?)?.cast<String>();
     if (json['messages'] != null) {
       messages = <Messages>[];
       json['messages'].forEach((v) {
@@ -145,7 +151,8 @@ class Messages {
     senderId = json['senderId'];
     messageContent = json['messageContent'];
     recieverId = json['recieverId'];
-    fileName = json['fileName'].cast<String>();
+    fileName =
+        json['fileName'] != null ? List<String>.from(json['fileName']) : null;
     file = json['file'];
     timeStamp = json['timeStamp'];
     type = json['type'];
