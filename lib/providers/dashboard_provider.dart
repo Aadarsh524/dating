@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
@@ -39,7 +38,6 @@ class DashboardProvider extends ChangeNotifier {
           'Authorization': 'Bearer $token',
         },
       );
-      
 
       if (response.statusCode == 200) {
         List<DashboardResponseModel> dashboardList = [];

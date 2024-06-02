@@ -8,7 +8,16 @@ import 'dart:convert';
 
 import '../../backend/MongoDB/token_manager.dart';
 
-class ChatProvider extends ChangeNotifier {
+class ChatMessageProvider extends ChangeNotifier {
+  ChatMessageModel? chatMessageModel;
+
+  void setChatMessageProvider(ChatMessageModel chatRoomModel) {
+    chatMessageModel = chatRoomModel;
+    notifyListeners();
+  }
+
+  ChatMessageModel? get userChatMessageModel => chatMessageModel;
+
   Future<void> sendChat(ChatMessageModel chatSendModel) async {
     try {
       //get api endpoint
@@ -19,10 +28,9 @@ class ChatProvider extends ChangeNotifier {
 
       //set params for request
       final queryParams = {
-        'SenderId': chatSendModel.senderId,
-        'MessageContent': chatSendModel.messageContent,
-        'ReceiverId': chatSendModel.receiverId,
-        'Type': chatSendModel.type
+        'SenderId': chatSendModel.participants!.first,
+        'MessageContent': chatSendModel.messages,
+        'ReceiverId': chatSendModel.participants!.last,
       };
       //set params in uri
       final uri =
@@ -54,10 +62,10 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<ChatMessageModel?> getMessage(String uid) async {
+  Future<ChatMessageModel?> getMessage(String chatID) async {
     String api = getApiEndpoint();
     try {
-      final uri = Uri.parse("$api/communication/id=$uid");
+      final uri = Uri.parse("$api/communication/id=$chatID/page=1");
       final response = await http.get(
         uri,
         headers: {
@@ -67,6 +75,10 @@ class ChatProvider extends ChangeNotifier {
         },
       );
       if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final chatRoomModel = ChatMessageModel.fromJson(jsonData);
+
+        setChatMessageProvider(chatRoomModel);
         notifyListeners();
         return ChatMessageModel.fromJson(json.decode(response.body));
       } else {

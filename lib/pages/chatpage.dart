@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/loading_provider.dart';
@@ -33,15 +33,17 @@ class _ChatPageState extends State<ChatPage> {
   String country = 'COUNTRY';
   String age = 'AGE';
   final TextEditingController _message = TextEditingController();
-  Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
+
+  Uint8List base64ToImage(String? base64String) {
+    return base64Decode(base64String!);
   }
 
   @override
   void initState() {
     super.initState();
 
-    context.read<ChatRoomProvider>().getchatRoom(user!.uid);
+    final chatRoomProvider = context.read<ChatRoomProvider>();
+    chatRoomProvider.fetchChatRoom(context, user!.uid);
   }
 
   @override
@@ -51,10 +53,8 @@ class _ChatPageState extends State<ChatPage> {
         body: LayoutBuilder(
           builder: (context, constraints) {
             if (constraints.maxWidth < 600) {
-              // For smaller screen sizes (e.g., mobile)
               return MobileHome();
             } else {
-              // For larger screen sizes (e.g., tablet or desktop)
               return DesktopHome();
             }
           },
@@ -65,17 +65,260 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget MobileHome() {
     return Scaffold(
+      body: Column(
+        children: [
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const profileButton(),
+                Row(
+                  children: [
+                    ButtonWithLabel(
+                      text: null,
+                      onPressed: () {},
+                      icon: const Icon(Icons.search),
+                      labelText: null,
+                    ),
+                    ButtonWithLabel(
+                      text: null,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingPage(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.settings),
+                      labelText: null,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+          Container(
+            height: 90,
+            decoration: BoxDecoration(
+              color: AppColors.backgroundColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.25),
+                  blurRadius: 20,
+                  offset: const Offset(0, 25),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  ButtonWithLabel(
+                    text: null,
+                    labelText: 'Matches',
+                    onPressed: () {},
+                    icon: const Icon(Icons.people),
+                  ),
+                  const SizedBox(width: 15),
+                  ButtonWithLabel(
+                    text: null,
+                    labelText: 'Add Friend',
+                    onPressed: () {},
+                    icon: const Icon(Icons.add),
+                  ),
+                  const SizedBox(width: 15),
+                  ButtonWithLabel(
+                    text: null,
+                    labelText: 'Online',
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.circle_outlined,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
+          Expanded(
+            child: Neumorphic(
+              child: Container(
+                padding: const EdgeInsets.only(top: 20),
+                child: Consumer<LoadingProvider>(
+                  builder: (context, loading, _) {
+                    return loading.isLoading
+                        ? const ShimmerSkeleton(count: 2, height: 100)
+                        : Consumer<ChatRoomProvider>(
+                            builder: (context, chatRoomProvider, _) {
+                              ChatRoomModel? chatRoomModel =
+                                  Provider.of<ChatRoomProvider>(
+                                context,
+                                listen: false,
+                              ).userChatRoomModel;
+
+                              if (chatRoomModel == null) {
+                                return const Center(
+                                  child: Text("No chats"),
+                                );
+                              }
+
+                              var conversations = chatRoomModel.conversations;
+
+                              return ListView.builder(
+                                itemCount: conversations!.length,
+                                itemBuilder: (context, index) {
+                                  var conversation = conversations[index];
+                                  var endUserDetails =
+                                      conversation.endUserDetails;
+
+                                  if (endUserDetails != null) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        log("hsnhasdkaskasdkl");
+                                        Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    ChatScreemMobile(
+                                                      chatID:
+                                                          conversation.chatId!,
+                                                    )));
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Neumorphic(
+                                                style: NeumorphicStyle(
+                                                  boxShape: NeumorphicBoxShape
+                                                      .roundRect(
+                                                    BorderRadius.circular(1000),
+                                                  ),
+                                                ),
+                                                child: Container(
+                                                  height: 50,
+                                                  width: 50,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                      image: MemoryImage(
+                                                          base64ToImage(
+                                                              endUserDetails
+                                                                  .profileImage)),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 20),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    endUserDetails.name!,
+                                                    style: AppTextStyles()
+                                                        .primaryStyle
+                                                        .copyWith(fontSize: 14),
+                                                  ),
+                                                  const SizedBox(height: 5),
+                                                  Text(
+                                                    "lastMessage",
+                                                    style: AppTextStyles()
+                                                        .secondaryStyle
+                                                        .copyWith(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w300,
+                                                          color: AppColors
+                                                              .secondaryColor,
+                                                        ),
+                                                  )
+                                                ],
+                                              ),
+                                              const Spacer(),
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.circle,
+                                                    size: 8,
+                                                    color: Colors.green,
+                                                  ),
+                                                  const SizedBox(width: 5),
+                                                  Text(
+                                                    conversation.seen!
+                                                        ? 'online'
+                                                        : 'offline',
+                                                    style: AppTextStyles()
+                                                        .secondaryStyle
+                                                        .copyWith(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w300,
+                                                          color:
+                                                              AppColors.black,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 20),
+                                        ],
+                                      ),
+                                    );
+                                  } else {
+                                    return const SizedBox.shrink();
+                                  }
+                                },
+                              );
+                            },
+                          );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomSheet: const NavBar(),
+    );
+  }
+
+  Widget DesktopHome() {
+    return Scaffold(
       body: Column(children: [
         const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // profile
-              const profileButton(),
+              Row(
+                children: [
+                  const profileButton(),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  Text(
+                    'Dating App',
+                    style: GoogleFonts.poppins(
+                      color: AppColors.black,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
 
               // search icon
               Row(
@@ -93,12 +336,7 @@ class _ChatPageState extends State<ChatPage> {
 
                   ButtonWithLabel(
                     text: null,
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SettingPage()));
-                    },
+                    onPressed: () {},
                     icon: const Icon(
                       Icons.settings,
                     ),
@@ -135,318 +373,6 @@ class _ChatPageState extends State<ChatPage> {
               scrollDirection: Axis.horizontal,
               children: [
                 // matches
-                ButtonWithLabel(
-                  text: null,
-                  labelText: 'Matches',
-                  onPressed: () {},
-                  icon: const Icon(Icons.people),
-                ),
-                const SizedBox(
-                  width: 15,
-                ),
-
-                ButtonWithLabel(
-                  text: null,
-                  labelText: 'Add Friend',
-                  onPressed: () {},
-                  icon: const Icon(Icons.add),
-                ),
-
-                const SizedBox(
-                  width: 15,
-                ),
-                // online
-                ButtonWithLabel(
-                  text: null,
-                  labelText: 'Online',
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.circle_outlined,
-                    color: Colors.green,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        //
-
-        // post
-        const SizedBox(
-          height: 30,
-        ),
-
-        Expanded(
-          child: ListView(
-            children: [
-              Neumorphic(
-                child: Container(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // profile pic
-                              Expanded(child: Consumer<LoadingProvider>(
-                                builder: (context, loading, _) {
-                                  return loading.isLoading
-                                      ? const ShimmerSkeleton(
-                                          count: 2, height: 100)
-                                      : Consumer<ChatRoomProvider>(builder:
-                                          (context, chatRoomProvider, _) {
-                                          ChatRoomModel? chatRoomModel =
-                                              Provider.of<ChatRoomProvider>(
-                                                      context,
-                                                      listen: false)
-                                                  .getUserChatRoom;
-                                          var conversations =
-                                              chatRoomModel!.conversations;
-
-                                          log(conversations.toString());
-
-                                          return ListView.builder(
-                                            itemCount: conversations!.length,
-                                            itemBuilder: (context, index) {
-                                              var conversation =
-                                                  conversations[index];
-                                              var endUserDetails =
-                                                  conversation.endUserDetails;
-
-                                              if (endUserDetails != null) {
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    // Navigator.push(
-                                                    //   context,
-                                                    //   MaterialPageRoute(
-                                                    //     builder: (context) => ChatScreemMobile(
-                                                    //       chatRoomModel: conversation,
-                                                    //     ),
-                                                    //   ),
-                                                    // );
-                                                  },
-                                                  child: Column(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Neumorphic(
-                                                            style:
-                                                                NeumorphicStyle(
-                                                              boxShape:
-                                                                  NeumorphicBoxShape
-                                                                      .roundRect(
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        1000),
-                                                              ),
-                                                            ),
-                                                            child: Container(
-                                                              height: 50,
-                                                              width: 50,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                shape: BoxShape
-                                                                    .circle,
-                                                                image:
-                                                                    DecorationImage(
-                                                                  image:
-                                                                      NetworkImage(
-                                                                    endUserDetails
-                                                                        .profileImage!,
-                                                                  ),
-                                                                  fit: BoxFit
-                                                                      .cover,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 20),
-                                                          Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Text(
-                                                                endUserDetails
-                                                                    .name!,
-                                                                style: AppTextStyles()
-                                                                    .primaryStyle
-                                                                    .copyWith(
-                                                                        fontSize:
-                                                                            14),
-                                                              ),
-                                                              const SizedBox(
-                                                                  height: 5),
-                                                              Text(
-                                                                endUserDetails
-                                                                        .message!
-                                                                    as String,
-                                                                style: AppTextStyles()
-                                                                    .secondaryStyle
-                                                                    .copyWith(
-                                                                      fontSize:
-                                                                          14,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w300,
-                                                                      color: AppColors
-                                                                          .secondaryColor,
-                                                                    ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          const Spacer(),
-                                                          Row(
-                                                            children: [
-                                                              const Icon(
-                                                                  Icons.circle,
-                                                                  size: 8,
-                                                                  color: Colors
-                                                                      .green),
-                                                              const SizedBox(
-                                                                  width: 5),
-                                                              Text(
-                                                                conversation
-                                                                        .seen!
-                                                                    ? 'online'
-                                                                    : 'offline',
-                                                                style: AppTextStyles()
-                                                                    .secondaryStyle
-                                                                    .copyWith(
-                                                                      fontSize:
-                                                                          14,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w300,
-                                                                      color: AppColors
-                                                                          .black,
-                                                                    ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 20),
-                                                    ],
-                                                  ),
-                                                );
-                                              } else {
-                                                return SizedBox.shrink();
-                                              }
-                                            },
-                                          );
-                                        });
-                                },
-                              )),
-                            ]),
-                      ),
-
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      // image
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 50,
-              ),
-            ],
-          ),
-        )
-      ]),
-      bottomSheet: const NavBar(),
-    );
-  }
-
-  Widget DesktopHome() {
-    return Scaffold(
-      body: Column(children: [
-        SizedBox(
-          height: 10,
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // profile
-              Row(
-                children: [
-                  profileButton(),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  Text(
-                    'Dating App',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.black,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-
-              // search icon
-              Row(
-                children: [
-                  ButtonWithLabel(
-                    text: null,
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.search,
-                    ),
-                    labelText: null,
-                  ),
-
-                  // settings icon
-
-                  ButtonWithLabel(
-                    text: null,
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.settings,
-                    ),
-                    labelText: null,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        SizedBox(
-          height: 40,
-        ),
-
-        // icons
-        Container(
-          height: 90,
-          decoration: BoxDecoration(
-            color: AppColors.backgroundColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.25),
-                // spreadRadius: 5,
-                blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: ListView(
-              // physics: NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              children: [
-                // matches
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -456,9 +382,9 @@ class _ChatPageState extends State<ChatPage> {
                           text: null,
                           labelText: 'Matches',
                           onPressed: () {},
-                          icon: Icon(Icons.people),
+                          icon: const Icon(Icons.people),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // messages
@@ -466,10 +392,10 @@ class _ChatPageState extends State<ChatPage> {
                           text: null,
                           labelText: 'Messages',
                           onPressed: () {},
-                          icon: Icon(Icons.messenger_outline),
+                          icon: const Icon(Icons.messenger_outline),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // popular
@@ -477,9 +403,9 @@ class _ChatPageState extends State<ChatPage> {
                           text: null,
                           labelText: 'Popular',
                           onPressed: () {},
-                          icon: Icon(Icons.star),
+                          icon: const Icon(Icons.star),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // photos
@@ -487,10 +413,10 @@ class _ChatPageState extends State<ChatPage> {
                           text: null,
                           labelText: 'Photos',
                           onPressed: () {},
-                          icon: Icon(Icons.photo_library_sharp),
+                          icon: const Icon(Icons.photo_library_sharp),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // add friemd
@@ -498,10 +424,10 @@ class _ChatPageState extends State<ChatPage> {
                           text: null,
                           labelText: 'Add Friend',
                           onPressed: () {},
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // online
@@ -509,7 +435,7 @@ class _ChatPageState extends State<ChatPage> {
                           text: null,
                           labelText: 'Online',
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.circle_outlined,
                             color: Colors.green,
                           ),
@@ -517,7 +443,7 @@ class _ChatPageState extends State<ChatPage> {
                       ],
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
 
@@ -528,13 +454,14 @@ class _ChatPageState extends State<ChatPage> {
                         // seeking
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: seeking,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 seeking = newValue!;
@@ -558,20 +485,21 @@ class _ChatPageState extends State<ChatPage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // country
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: country,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 country = newValue!;
@@ -595,20 +523,21 @@ class _ChatPageState extends State<ChatPage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // age
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: age,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 age = newValue!;
@@ -644,7 +573,7 @@ class _ChatPageState extends State<ChatPage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -652,10 +581,10 @@ class _ChatPageState extends State<ChatPage> {
           child: Row(
             children: [
 // side bar
-              NavBarDesktop(),
+              const NavBarDesktop(),
 
 // posts
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Expanded(
@@ -675,7 +604,7 @@ class _ChatPageState extends State<ChatPage> {
                         )
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 30,
                     ),
                     Expanded(
@@ -687,11 +616,11 @@ class _ChatPageState extends State<ChatPage> {
                               children: [
                                 Neumorphic(
                                   child: Container(
-                                    padding: EdgeInsets.only(top: 20),
+                                    padding: const EdgeInsets.only(top: 20),
                                     child: Column(
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               horizontal: 20),
                                           child: Row(
                                               mainAxisAlignment:
@@ -714,7 +643,7 @@ class _ChatPageState extends State<ChatPage> {
                                                           height: 50,
                                                           width: 50,
                                                           decoration:
-                                                              BoxDecoration(
+                                                              const BoxDecoration(
                                                                   shape: BoxShape
                                                                       .circle,
                                                                   image:
@@ -728,7 +657,7 @@ class _ChatPageState extends State<ChatPage> {
                                                     ),
 
                                                     // profile name and address
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 20,
                                                     ),
                                                     Column(
@@ -743,7 +672,7 @@ class _ChatPageState extends State<ChatPage> {
                                                               .copyWith(
                                                                   fontSize: 14),
                                                         ),
-                                                        SizedBox(
+                                                        const SizedBox(
                                                           height: 5,
                                                         ),
                                                         Text(
@@ -765,12 +694,12 @@ class _ChatPageState extends State<ChatPage> {
 
                                                 Row(
                                                   children: [
-                                                    Icon(
+                                                    const Icon(
                                                       Icons.circle,
                                                       size: 8,
                                                       color: Colors.green,
                                                     ),
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 5,
                                                     ),
                                                     Text(
@@ -790,7 +719,7 @@ class _ChatPageState extends State<ChatPage> {
                                               ]),
                                         ),
 
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 20,
                                         ),
                                         // image
@@ -803,11 +732,11 @@ class _ChatPageState extends State<ChatPage> {
 
                                 Neumorphic(
                                   child: Container(
-                                    padding: EdgeInsets.only(top: 20),
+                                    padding: const EdgeInsets.only(top: 20),
                                     child: Column(
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               horizontal: 20),
                                           child: Row(
                                               mainAxisAlignment:
@@ -830,7 +759,7 @@ class _ChatPageState extends State<ChatPage> {
                                                           height: 50,
                                                           width: 50,
                                                           decoration:
-                                                              BoxDecoration(
+                                                              const BoxDecoration(
                                                                   shape: BoxShape
                                                                       .circle,
                                                                   image:
@@ -844,7 +773,7 @@ class _ChatPageState extends State<ChatPage> {
                                                     ),
 
                                                     // profile name and address
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 20,
                                                     ),
                                                     Column(
@@ -859,7 +788,7 @@ class _ChatPageState extends State<ChatPage> {
                                                               .copyWith(
                                                                   fontSize: 14),
                                                         ),
-                                                        SizedBox(
+                                                        const SizedBox(
                                                           height: 5,
                                                         ),
                                                         Text(
@@ -881,12 +810,12 @@ class _ChatPageState extends State<ChatPage> {
 
                                                 Row(
                                                   children: [
-                                                    Icon(
+                                                    const Icon(
                                                       Icons.circle,
                                                       size: 8,
                                                       color: Colors.green,
                                                     ),
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 5,
                                                     ),
                                                     Text(
@@ -906,7 +835,7 @@ class _ChatPageState extends State<ChatPage> {
                                               ]),
                                         ),
 
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 20,
                                         ),
                                         // image
@@ -918,11 +847,11 @@ class _ChatPageState extends State<ChatPage> {
                                 // chat
                                 Neumorphic(
                                   child: Container(
-                                    padding: EdgeInsets.only(top: 20),
+                                    padding: const EdgeInsets.only(top: 20),
                                     child: Column(
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               horizontal: 20),
                                           child: Row(
                                               mainAxisAlignment:
@@ -945,7 +874,7 @@ class _ChatPageState extends State<ChatPage> {
                                                           height: 50,
                                                           width: 50,
                                                           decoration:
-                                                              BoxDecoration(
+                                                              const BoxDecoration(
                                                                   shape: BoxShape
                                                                       .circle,
                                                                   image:
@@ -959,7 +888,7 @@ class _ChatPageState extends State<ChatPage> {
                                                     ),
 
                                                     // profile name and address
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 20,
                                                     ),
                                                     Column(
@@ -974,7 +903,7 @@ class _ChatPageState extends State<ChatPage> {
                                                               .copyWith(
                                                                   fontSize: 14),
                                                         ),
-                                                        SizedBox(
+                                                        const SizedBox(
                                                           height: 5,
                                                         ),
                                                         Text(
@@ -996,12 +925,12 @@ class _ChatPageState extends State<ChatPage> {
 
                                                 Row(
                                                   children: [
-                                                    Icon(
+                                                    const Icon(
                                                       Icons.circle,
                                                       size: 8,
                                                       color: Colors.green,
                                                     ),
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 5,
                                                     ),
                                                     Text(
@@ -1021,7 +950,7 @@ class _ChatPageState extends State<ChatPage> {
                                               ]),
                                         ),
 
-                                        SizedBox(
+                                        const SizedBox(
                                           height: 20,
                                         ),
                                         // image
@@ -1040,7 +969,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
 
               // chats
-              SizedBox(
+              const SizedBox(
                 width: 40,
               ),
 
@@ -1050,19 +979,19 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsets.only(right: 20),
+                        padding: const EdgeInsets.only(right: 20),
                         child: Neumorphic(
                           child: ListView(
                             scrollDirection: Axis.vertical,
                             children: [
                               Container(
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 20),
                                   child: Neumorphic(
                                     child: Container(
                                       child: Padding(
-                                        padding: EdgeInsets.symmetric(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 20, vertical: 10),
                                         child: Row(
                                           mainAxisAlignment:
@@ -1074,7 +1003,8 @@ class _ChatPageState extends State<ChatPage> {
                                                 Container(
                                                   height: 50,
                                                   width: 50,
-                                                  decoration: BoxDecoration(
+                                                  decoration:
+                                                      const BoxDecoration(
                                                     shape: BoxShape.circle,
                                                     image: DecorationImage(
                                                       image: AssetImage(
@@ -1083,7 +1013,7 @@ class _ChatPageState extends State<ChatPage> {
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(
+                                                const SizedBox(
                                                   width: 8,
                                                 ),
                                                 Column(
@@ -1099,14 +1029,14 @@ class _ChatPageState extends State<ChatPage> {
                                                     ),
                                                     Row(
                                                       children: [
-                                                        Icon(
+                                                        const Icon(
                                                           Icons
                                                               .location_on_outlined,
                                                           size: 12,
                                                           color: AppColors
                                                               .secondaryColor,
                                                         ),
-                                                        SizedBox(
+                                                        const SizedBox(
                                                           width: 6,
                                                         ),
                                                         Text(
@@ -1130,7 +1060,7 @@ class _ChatPageState extends State<ChatPage> {
 
                                             // VIDEO AND AUDIO Cll
 
-                                            Row(
+                                            const Row(
                                               children: [
                                                 Icon(
                                                   Icons.circle,
@@ -1157,13 +1087,14 @@ class _ChatPageState extends State<ChatPage> {
                                 //
                               ),
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Neumorphic(
                                         child: Padding(
-                                      padding: EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                           horizontal: 15, vertical: 10),
                                       child: Text(
                                         'Hello',
@@ -1175,19 +1106,20 @@ class _ChatPageState extends State<ChatPage> {
                                   ],
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 25,
                               ),
                               // receievd
 
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Neumorphic(
                                         child: Padding(
-                                      padding: EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                           horizontal: 15, vertical: 10),
                                       child: Text(
                                         'Hello, how are you',
@@ -1200,19 +1132,20 @@ class _ChatPageState extends State<ChatPage> {
                                 ),
                               ),
 
-                              SizedBox(
+                              const SizedBox(
                                 height: 25,
                               ),
                               // receievd
 
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Neumorphic(
                                         child: Padding(
-                                      padding: EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                           horizontal: 15, vertical: 10),
                                       child: Text(
                                         'Thank you and sure. I love rock\nmusic too! What’s your\nfavorite band?',
@@ -1229,11 +1162,11 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 10, right: 10),
+                      padding: const EdgeInsets.only(left: 10, right: 10),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1242,7 +1175,7 @@ class _ChatPageState extends State<ChatPage> {
                             text: null,
                             labelText: null,
                             onPressed: () {},
-                            icon: Icon(Icons.add),
+                            icon: const Icon(Icons.add),
                           ),
                           Expanded(
                               child: AppTextField(
@@ -1253,7 +1186,7 @@ class _ChatPageState extends State<ChatPage> {
                             text: null,
                             labelText: null,
                             onPressed: () {},
-                            icon: Icon(Icons.mic),
+                            icon: const Icon(Icons.mic),
                           ),
 // send
 
@@ -1261,12 +1194,12 @@ class _ChatPageState extends State<ChatPage> {
                             text: null,
                             labelText: null,
                             onPressed: () {},
-                            icon: Icon(Icons.send),
+                            icon: const Icon(Icons.send),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 25,
                     ),
                   ],
@@ -1289,7 +1222,7 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
       child: Container(
