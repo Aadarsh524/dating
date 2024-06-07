@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_message_model.dart';
+import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
@@ -13,18 +14,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
 
-// ignore: must_be_immutable
 class ChatScreemMobile extends StatefulWidget {
-  String chatID;
-  ChatScreemMobile({super.key, required this.chatID});
+  final String chatID;
+
+  ChatScreemMobile({Key? key, required this.chatID}) : super(key: key);
 
   @override
   State<ChatScreemMobile> createState() => _ChatScreemMobileState();
 }
 
 class _ChatScreemMobileState extends State<ChatScreemMobile> {
-  final TextEditingController _message = TextEditingController();
-  User? users = FirebaseAuth.instance.currentUser;
+  final TextEditingController _messageController = TextEditingController();
+  User? user = FirebaseAuth.instance.currentUser;
+  String receiverID = '';
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
@@ -33,8 +35,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
   @override
   void initState() {
     super.initState();
-    final chatRoomProvider = context.read<ChatMessageProvider>();
-    chatRoomProvider.getMessage(widget.chatID);
+    final chatMessageProvider = context.read<ChatMessageProvider>();
+    chatMessageProvider.getMessage(widget.chatID, user!.uid);
   }
 
   @override
@@ -141,7 +143,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                     itemCount: chatRoomModel.messages!.length,
                     itemBuilder: (context, index) {
                       var message = chatRoomModel.messages![index];
-                      bool isCurrentUser = message.senderId == users!.uid;
+                      bool isCurrentUser = message.senderId == user!.uid;
+                      receiverID = message.receiverId!;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -157,10 +160,11 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                                     horizontal: 15, vertical: 10),
                                 child: Text(
                                   message.messageContent!,
-                                  style: AppTextStyles()
-                                      .secondaryStyle
-                                      .copyWith(
-                                          color: Colors.black, fontSize: 14),
+                                  style:
+                                      AppTextStyles().secondaryStyle.copyWith(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                          ),
                                 ),
                               ),
                             ),
@@ -187,7 +191,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                   Expanded(
                     child: AppTextField(
                       hintText: 'Type your message',
-                      inputcontroller: _message,
+                      inputcontroller: _messageController,
                     ),
                   ),
                   ButtonWithLabel(
@@ -199,18 +203,21 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                   ButtonWithLabel(
                     text: null,
                     labelText: null,
-                    onPressed: () {
-                      if (_message.text.isNotEmpty) {
-                        // Provider.of<ChatMessageProvider>(context, listen: false)
-                        // .sendChat(
-                        //   ChatMessageModel(
-                        //     senderId: users!.uid,
-                        //     receiverId: widget.chatID, // Adjust as necessary
-                        //     messageContent: _message.text,
-                        //     type: "Text",
-                        //   ),
-                        // );
-                        // _message.clear();
+                    onPressed: () async {
+                      if (_messageController.text.isNotEmpty) {
+                        final chatProvider =
+                            context.read<ChatMessageProvider>();
+                        await chatProvider.sendChat(
+                          SendMessageModel(
+                            senderId: user!.uid,
+                            messageContent: _messageController.text,
+                            type: "Text",
+                            receiverId: receiverID,
+                          ),
+                          widget.chatID,
+                          user!.uid,
+                        );
+                        _messageController.clear();
                       }
                     },
                     icon: const Icon(Icons.send),
@@ -226,9 +233,9 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
   }
 }
 
-// profile button
-class profileButton extends StatelessWidget {
-  const profileButton({super.key});
+// Profile button widget
+class ProfileButton extends StatelessWidget {
+  const ProfileButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -1,11 +1,10 @@
-import 'dart:developer';
-
 import 'package:dating/datamodel/chat/chat_message_model.dart';
+import 'package:dating/datamodel/chat/send_message_model.dart';
+
 import 'package:dating/platform/platform.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import '../../backend/MongoDB/token_manager.dart';
 
 class ChatMessageProvider extends ChangeNotifier {
@@ -18,74 +17,73 @@ class ChatMessageProvider extends ChangeNotifier {
 
   ChatMessageModel? get userChatMessageModel => chatMessageModel;
 
-  Future<void> sendChat(ChatMessageModel chatSendModel) async {
+  Future<void> sendChat(
+      SendMessageModel sendMessageModel, String chatID, String uid) async {
     try {
-      //get api endpoint
+      // Get API endpoint
       String api = getApiEndpoint();
 
-      //get bearer token
+      // Get bearer token
       final token = await TokenManager.getToken();
-
-      //set params for request
-      final queryParams = {
-        'SenderId': chatSendModel.participants!.first,
-        'MessageContent': chatSendModel.messages,
-        'ReceiverId': chatSendModel.participants!.last,
-      };
-      //set params in uri
-      final uri =
-          Uri.parse("$api/communication").replace(queryParameters: queryParams);
 
       if (token == null) {
         throw Exception('No token found');
       }
 
-      //send post request
-      final request = await http.post(uri,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-          body: json.encode(chatSendModel.toJson()));
+      // Set params in uri
+      final uri = Uri.parse("$api/communication");
 
-      //return response
-      if (request.statusCode == 200) {
-        notifyListeners();
-        final responseJson = json.decode(request.body);
-        log(responseJson.toString());
+      // Create a multipart request
+      var request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $token'
+        ..headers['Accept'] = 'application/json';
+
+      // Add text fields
+      request.fields['SenderId'] = sendMessageModel.senderId.toString();
+      request.fields['MessageContent'] =
+          sendMessageModel.messageContent.toString();
+      request.fields['ReceiverId'] = sendMessageModel.receiverId.toString();
+
+      var response = await request.send();
+
+      // Handle the response
+      if (response.statusCode == 200) {
+        await getMessage(chatID, uid);
       } else {
-        throw Exception('Failed to send chat: ${request.statusCode}');
+        throw Exception('Failed to send chat: ${response.statusCode}');
       }
     } catch (e) {
       print(e.toString());
     }
   }
 
-  Future<ChatMessageModel?> getMessage(String chatID) async {
+  Future<ChatMessageModel?> getMessage(String chatID, String uid) async {
     String api = getApiEndpoint();
+
     try {
-      final uri = Uri.parse("$api/communication/id=$chatID/page=1");
-      final response = await http.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ',
-        },
-      );
+      var headers = {'Content-Type': 'application/json'};
+      var requestUrl = Uri.parse('$api/Communication/$chatID/page=1');
+
+      var request = http.Request('GET', requestUrl)
+        ..headers.addAll(headers)
+        ..body = json.encode(uid).toString();
+
+      http.StreamedResponse streamedResponse = await request.send();
+      http.Response response = await http.Response.fromStream(streamedResponse);
+
+      print(response.statusCode);
+
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final chatRoomModel = ChatMessageModel.fromJson(jsonData);
 
         setChatMessageProvider(chatRoomModel);
-        notifyListeners();
-        return ChatMessageModel.fromJson(json.decode(response.body));
+        return chatRoomModel;
       } else {
         return null;
       }
     } catch (e) {
-      rethrow;
+      return null;
     }
   }
 }
