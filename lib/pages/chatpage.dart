@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
@@ -33,6 +32,7 @@ class _ChatPageState extends State<ChatPage> {
   String country = 'COUNTRY';
   String age = 'AGE';
   final TextEditingController _message = TextEditingController();
+  List<Messages> lastMessage = [];
 
   Uint8List base64ToImage(String? base64String) {
     return base64Decode(base64String!);
@@ -171,16 +171,17 @@ class _ChatPageState extends State<ChatPage> {
                               var conversations = chatRoomModel.conversations;
 
                               return ListView.builder(
-                                itemCount: conversations!.length,
-                                itemBuilder: (context, index) {
-                                  var conversation = conversations[index];
-                                  var endUserDetails =
-                                      conversation.endUserDetails;
+                                  itemCount: conversations!.length,
+                                  itemBuilder: (context, index) {
+                                    var conversation = conversations[index];
+                                    var endUserDetails =
+                                        conversation.endUserDetails;
 
-                                  if (endUserDetails != null) {
+                                    lastMessage =
+                                        endUserDetails!.message!.messages!;
+
                                     return GestureDetector(
                                       onTap: () {
-                                        log("hsnhasdkaskasdkl");
                                         Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
@@ -229,7 +230,8 @@ class _ChatPageState extends State<ChatPage> {
                                                   ),
                                                   const SizedBox(height: 5),
                                                   Text(
-                                                    "lastMessage",
+                                                    lastMessage.first
+                                                        .toString(),
                                                     style: AppTextStyles()
                                                         .secondaryStyle
                                                         .copyWith(
@@ -273,11 +275,7 @@ class _ChatPageState extends State<ChatPage> {
                                         ],
                                       ),
                                     );
-                                  } else {
-                                    return const SizedBox.shrink();
-                                  }
-                                },
-                              );
+                                  });
                             },
                           );
                   },

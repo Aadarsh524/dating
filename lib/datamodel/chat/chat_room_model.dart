@@ -44,9 +44,8 @@ class Conversations {
     chatId = json['chatId'];
     messageId = json['messageId'];
     endUserId = json['endUserId'];
-    endUserDetails = json['endUserDetails'] != null
-        ? EndUserDetails.fromJson(json['endUserDetails'])
-        : null;
+    endUserDetails = EndUserDetails.fromJson(json['endUserDetails']);
+
     seen = json['seen'];
   }
 
