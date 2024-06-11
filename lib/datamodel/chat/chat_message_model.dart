@@ -38,7 +38,7 @@ class Messages {
   String? messageId;
   String? senderId;
   String? messageContent;
-  String? receiverId;
+  String? recieverId;
   List<String>? fileName;
   String? file;
   String? timeStamp;
@@ -48,7 +48,7 @@ class Messages {
     this.messageId,
     this.senderId,
     this.messageContent,
-    this.receiverId,
+    this.recieverId,
     this.fileName,
     this.file,
     this.timeStamp,
@@ -59,7 +59,7 @@ class Messages {
     messageId = json['messageId'];
     senderId = json['senderId'];
     messageContent = json['messageContent'];
-    receiverId = json['receiverId'];
+    recieverId = json['recieverId'];
     fileName =
         json['fileName'] != null ? List<String>.from(json['fileName']) : null;
     file = json['file'];
@@ -72,7 +72,7 @@ class Messages {
     data['messageId'] = messageId;
     data['senderId'] = senderId;
     data['messageContent'] = messageContent;
-    data['receiverId'] = receiverId;
+    data['recieverId'] = recieverId;
     data['fileName'] = fileName;
     data['file'] = file;
     data['timeStamp'] = timeStamp;

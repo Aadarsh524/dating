@@ -42,10 +42,9 @@ class ChatMessageProvider extends ChangeNotifier {
       request.fields['SenderId'] = sendMessageModel.senderId.toString();
       request.fields['MessageContent'] =
           sendMessageModel.messageContent.toString();
-      request.fields['ReceiverId'] = sendMessageModel.receiverId.toString();
+      request.fields['RecieverId'] = sendMessageModel.receiverId.toString();
 
       var response = await request.send();
-
       // Handle the response
       if (response.statusCode == 200) {
         await getMessage(chatID, uid);
