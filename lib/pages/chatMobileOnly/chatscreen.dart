@@ -1,17 +1,21 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_message_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
+import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/utils/colors.dart';
-import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class ChatScreemMobile extends StatefulWidget {
@@ -25,8 +29,9 @@ class ChatScreemMobile extends StatefulWidget {
 
 class _ChatScreemMobileState extends State<ChatScreemMobile> {
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   User? user = FirebaseAuth.instance.currentUser;
-  String receiverID = '';
+  String recieverId = '';
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
@@ -37,6 +42,64 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
     super.initState();
     final chatMessageProvider = context.read<ChatMessageProvider>();
     chatMessageProvider.getMessage(widget.chatID, user!.uid);
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  void pickImage() async {
+    try {
+      final storageStatus = await Permission.storage.request();
+      if (!storageStatus.isGranted) {
+        throw Exception('Storage permission is required to upload the image.');
+      }
+
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png', 'jpeg'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        File imageFile = File(result.files.single.path!);
+
+        String base64Image = convertIntoBase64(imageFile);
+        final chatProvider = context.read<ChatMessageProvider>();
+
+        await chatProvider.sendChat(
+          SendMessageModel(
+            senderId: user!.uid,
+            messageContent: base64Image,
+            type: "Image",
+            receiverId: recieverId,
+          ),
+          widget.chatID,
+          user!.uid,
+        );
+      } else {
+        print('No image selected.');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
+    }
+  }
+
+  String convertIntoBase64(File file) {
+    List<int> imageBytes = file.readAsBytesSync();
+    String base64File = base64Encode(imageBytes);
+    return base64File;
+  }
+
+  String imageToBase64(Uint8List imageBytes) {
+    return base64Encode(imageBytes);
   }
 
   @override
@@ -140,11 +203,15 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                   }
 
                   return ListView.builder(
+                    controller: _scrollController,
                     itemCount: chatRoomModel.messages!.length,
                     itemBuilder: (context, index) {
-                      var message = chatRoomModel.messages![index];
+                      var reversedMessages =
+                          chatRoomModel.messages!.reversed.toList();
+                      var message = reversedMessages[index];
                       bool isCurrentUser = message.senderId == user!.uid;
-                      receiverID = message.receiverId!;
+                      recieverId = chatRoomModel.participants![1];
+                      log(recieverId.toString());
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -154,17 +221,35 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                               ? MainAxisAlignment.end
                               : MainAxisAlignment.start,
                           children: [
-                            Neumorphic(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15, vertical: 10),
-                                child: Text(
-                                  message.messageContent!,
-                                  style:
-                                      AppTextStyles().secondaryStyle.copyWith(
-                                            color: Colors.black,
-                                            fontSize: 14,
-                                          ),
+                            Flexible(
+                              child: Neumorphic(
+                                style: NeumorphicStyle(
+                                  color: isCurrentUser
+                                      ? Colors.blue
+                                      : Colors.white,
+                                  depth: 2,
+                                  intensity: 0.8,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 10),
+                                  child: message.type == "Image"
+                                      ? Image.memory(
+                                          base64ToImage(
+                                              message.messageContent!),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Text(
+                                          message.messageContent!,
+                                          style: AppTextStyles()
+                                              .secondaryStyle
+                                              .copyWith(
+                                                color: isCurrentUser
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                                fontSize: 14,
+                                              ),
+                                        ),
                                 ),
                               ),
                             ),
@@ -178,28 +263,33 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
             ),
             const SizedBox(height: 10),
             Padding(
-              padding: const EdgeInsets.only(left: 5, right: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   ButtonWithLabel(
                     text: null,
                     labelText: null,
-                    onPressed: () {},
-                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      pickImage();
+                    },
+                    icon: const Icon(Icons.image),
                   ),
+                  const SizedBox(width: 5),
                   Expanded(
                     child: AppTextField(
                       hintText: 'Type your message',
                       inputcontroller: _messageController,
                     ),
                   ),
+                  const SizedBox(width: 5),
                   ButtonWithLabel(
                     text: null,
                     labelText: null,
                     onPressed: () {},
                     icon: const Icon(Icons.mic),
                   ),
+                  const SizedBox(width: 5),
                   ButtonWithLabel(
                     text: null,
                     labelText: null,
@@ -207,17 +297,19 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                       if (_messageController.text.isNotEmpty) {
                         final chatProvider =
                             context.read<ChatMessageProvider>();
+
                         await chatProvider.sendChat(
                           SendMessageModel(
                             senderId: user!.uid,
                             messageContent: _messageController.text,
                             type: "Text",
-                            receiverId: receiverID,
+                            receiverId: recieverId,
                           ),
                           widget.chatID,
                           user!.uid,
                         );
                         _messageController.clear();
+                        _scrollToBottom();
                       }
                     },
                     icon: const Icon(Icons.send),
@@ -227,28 +319,6 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
             ),
             const SizedBox(height: 25),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// Profile button widget
-class ProfileButton extends StatelessWidget {
-  const ProfileButton({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Neumorphic(
-      style: const NeumorphicStyle(
-        boxShape: NeumorphicBoxShape.circle(),
-      ),
-      child: SizedBox(
-        height: 50,
-        width: 50,
-        child: Image.asset(
-          AppImages.loginimage,
-          fit: BoxFit.cover,
         ),
       ),
     );
