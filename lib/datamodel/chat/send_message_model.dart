@@ -1,9 +1,11 @@
+import 'dart:io';
+
 class SendMessageModel {
   String? senderId;
   String? messageContent;
   String? receiverId;
   List<String>? fileName;
-  String? file;
+  File? file;
   String? type;
 
   SendMessageModel({

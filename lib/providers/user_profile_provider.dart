@@ -56,7 +56,7 @@ class UserProfileProvider extends ChangeNotifier {
     try {
       String api = getApiEndpoint();
       final response = await http.get(
-        Uri.parse('$api/User/$uid'),
+        Uri.parse('$api/UserProfile/$uid'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

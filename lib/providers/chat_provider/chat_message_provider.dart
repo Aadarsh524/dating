@@ -36,14 +36,28 @@ class ChatMessageProvider extends ChangeNotifier {
       // Create a multipart request
       var request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
-        ..headers['Accept'] = 'application/json';
+        ..headers['Accept'] = 'application/json'
+        ..headers['Content-Type'] = 'multipart/form-data';
 
       // Add text fields
+      if (sendMessageModel.messageContent != null &&
+          sendMessageModel.messageContent!.isNotEmpty) {
+        request.fields['MessageContent'] = sendMessageModel.messageContent!;
+      }
+
       request.fields['SenderId'] = sendMessageModel.senderId.toString();
-      request.fields['MessageContent'] =
-          sendMessageModel.messageContent.toString();
       request.fields['RecieverId'] = sendMessageModel.receiverId.toString();
 
+      // Add the file if it exists and is not null
+      if (sendMessageModel.file != null &&
+          sendMessageModel.file!.path.isNotEmpty) {
+        final file = await http.MultipartFile.fromPath(
+          'File', // Treating the file as an array with 'File[]'
+          sendMessageModel.file!.path,
+        );
+        request.files.add(file);
+        request.fields['Type'] = "Image";
+      }
       var response = await request.send();
       // Handle the response
       if (response.statusCode == 200) {

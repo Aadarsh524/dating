@@ -3,6 +3,7 @@ import 'package:dating/firebase_options.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/dashboard_provider.dart';
+import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -21,6 +22,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => DashboardProvider()),
     ChangeNotifierProvider(create: (_) => ChatMessageProvider()),
     ChangeNotifierProvider(create: (_) => ChatRoomProvider()),
+    ChangeNotifierProvider(create: (_) => UserInteractionProvider()),
   ], child: const MyApp()));
 }
 

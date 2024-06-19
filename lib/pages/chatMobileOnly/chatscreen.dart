@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:developer';
+
 import 'dart:io';
 
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_message_model.dart';
+import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/loading_provider.dart';
@@ -20,8 +21,11 @@ import 'package:provider/provider.dart';
 
 class ChatScreemMobile extends StatefulWidget {
   final String chatID;
+  final EndUserDetails chatRoomModel;
 
-  ChatScreemMobile({Key? key, required this.chatID}) : super(key: key);
+  ChatScreemMobile(
+      {Key? key, required this.chatID, required this.chatRoomModel})
+      : super(key: key);
 
   @override
   State<ChatScreemMobile> createState() => _ChatScreemMobileState();
@@ -69,14 +73,13 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
       if (result != null && result.files.isNotEmpty) {
         File imageFile = File(result.files.single.path!);
 
-        String base64Image = convertIntoBase64(imageFile);
+        // String base64Image = convertIntoBase64(imageFile);
         final chatProvider = context.read<ChatMessageProvider>();
 
         await chatProvider.sendChat(
           SendMessageModel(
+            file: imageFile,
             senderId: user!.uid,
-            messageContent: base64Image,
-            type: "Image",
             receiverId: recieverId,
           ),
           widget.chatID,
@@ -133,8 +136,11 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
-                            image:
-                                MemoryImage(base64ToImage(defaultBase64Avatar)),
+                            image: widget.chatRoomModel.profileImage != null
+                                ? MemoryImage(base64ToImage(
+                                    widget.chatRoomModel.profileImage!))
+                                : MemoryImage(
+                                    base64ToImage(defaultBase64Avatar)),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -144,29 +150,11 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "",
+                            widget.chatRoomModel.name!,
                             style: AppTextStyles()
                                 .primaryStyle
                                 .copyWith(fontSize: 14),
                           ),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_outlined,
-                                size: 12,
-                                color: AppColors.secondaryColor,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                "",
-                                style: AppTextStyles().secondaryStyle.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w300,
-                                      color: AppColors.secondaryColor,
-                                    ),
-                              ),
-                            ],
-                          )
                         ],
                       )
                     ],
@@ -192,75 +180,55 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                 ),
               ),
             ),
-            Expanded(
-              child: Consumer<ChatMessageProvider>(
-                builder: (context, chatMessageProvider, child) {
-                  ChatMessageModel? chatRoomModel =
-                      chatMessageProvider.userChatMessageModel;
+            Expanded(child: Consumer<ChatMessageProvider>(
+              builder: (context, chatMessageProvider, child) {
+                ChatMessageModel? chatRoomModel =
+                    chatMessageProvider.userChatMessageModel;
 
-                  if (chatRoomModel == null) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                if (chatRoomModel == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: chatRoomModel.messages!.length,
-                    itemBuilder: (context, index) {
-                      var reversedMessages =
-                          chatRoomModel.messages!.reversed.toList();
-                      var message = reversedMessages[index];
-                      bool isCurrentUser = message.senderId == user!.uid;
-                      recieverId = chatRoomModel.participants![1];
-                      log(recieverId.toString());
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: chatRoomModel.messages!.length,
+                  itemBuilder: (context, index) {
+                    var reversedMessages =
+                        chatRoomModel.messages!.reversed.toList();
+                    var message = reversedMessages[index];
+                    bool isCurrentUser = message.senderId == user!.uid;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
-                        child: Row(
-                          mainAxisAlignment: isCurrentUser
-                              ? MainAxisAlignment.end
-                              : MainAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              child: Neumorphic(
-                                style: NeumorphicStyle(
-                                  color: isCurrentUser
-                                      ? Colors.blue
-                                      : Colors.white,
-                                  depth: 2,
-                                  intensity: 0.8,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 10),
-                                  child: message.type == "Image"
-                                      ? Image.memory(
-                                          base64ToImage(
-                                              message.messageContent!),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : Text(
-                                          message.messageContent!,
-                                          style: AppTextStyles()
-                                              .secondaryStyle
-                                              .copyWith(
-                                                color: isCurrentUser
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                                fontSize: 14,
-                                              ),
-                                        ),
-                                ),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: isCurrentUser
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: Neumorphic(
+                              style: NeumorphicStyle(
+                                color:
+                                    isCurrentUser ? Colors.blue : Colors.white,
+                                depth: 2,
+                                intensity: 0.8,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 15, vertical: 10),
+                                child: _buildMessageContent(
+                                    message, isCurrentUser),
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            )),
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -323,4 +291,54 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
       ),
     );
   }
+}
+
+Widget _buildMessageContent(Messages message, bool isCurrentUser) {
+  switch (message.type) {
+    case 'Text':
+      return Text(
+        message.messageContent!,
+        style: AppTextStyles().secondaryStyle.copyWith(
+              color: isCurrentUser ? Colors.white : Colors.black,
+              fontSize: 14,
+            ),
+      );
+    case 'Image':
+      return _buildImageContent(message.fileName!, isCurrentUser);
+    // case 'Audio':
+    //   return AudioPlayerWidget(audioUrl: message.audioUrl!);
+    // case 'Call':
+    //   return CallInfoWidget(callInfo: message.callInfo!);
+    default:
+      return Container();
+  }
+}
+
+Widget _buildImageContent(List<File> imageFiles, bool isCurrentUser) {
+  return SizedBox(
+    height: 50,
+    width: 50,
+    child: ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: imageFiles.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isCurrentUser ? Colors.blue : Colors.grey,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Image.file(
+              imageFiles[index],
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }
