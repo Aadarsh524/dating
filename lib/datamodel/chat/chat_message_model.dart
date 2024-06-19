@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class ChatMessageModel {
   String? id;
   String? chatId;
@@ -9,9 +11,7 @@ class ChatMessageModel {
   ChatMessageModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     chatId = json['chatId'];
-    if (json['participants'] != null) {
-      participants = List<String>.from(json['participants']);
-    }
+    participants = json['participants'].cast<String>();
     if (json['messages'] != null) {
       messages = <Messages>[];
       json['messages'].forEach((v) {
@@ -21,12 +21,10 @@ class ChatMessageModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = id;
     data['chatId'] = chatId;
-    if (participants != null) {
-      data['participants'] = participants;
-    }
+    data['participants'] = participants;
     if (messages != null) {
       data['messages'] = messages!.map((v) => v.toJson()).toList();
     }
@@ -39,8 +37,7 @@ class Messages {
   String? senderId;
   String? messageContent;
   String? recieverId;
-  List<String>? fileName;
-  String? file;
+  List<File>? fileName;
   String? timeStamp;
   String? type;
 
@@ -50,7 +47,6 @@ class Messages {
     this.messageContent,
     this.recieverId,
     this.fileName,
-    this.file,
     this.timeStamp,
     this.type,
   });
@@ -60,21 +56,18 @@ class Messages {
     senderId = json['senderId'];
     messageContent = json['messageContent'];
     recieverId = json['recieverId'];
-    fileName =
-        json['fileName'] != null ? List<String>.from(json['fileName']) : null;
-    file = json['file'];
+    fileName = json['fileName'];
     timeStamp = json['timeStamp'];
     type = json['type'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['messageId'] = messageId;
     data['senderId'] = senderId;
     data['messageContent'] = messageContent;
     data['recieverId'] = recieverId;
     data['fileName'] = fileName;
-    data['file'] = file;
     data['timeStamp'] = timeStamp;
     data['type'] = type;
     return data;

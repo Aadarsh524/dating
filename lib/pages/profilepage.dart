@@ -10,9 +10,10 @@ import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
+import 'package:dating/widgets/like_button.dart';
 import 'package:dating/widgets/navbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,6 +29,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  User? user = FirebaseAuth.instance.currentUser;
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
   }
@@ -35,6 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
+  bool isProfileLiked = false;
 
   int _selectedPhotoIndex = 0;
 
@@ -43,6 +46,21 @@ class _ProfilePageState extends State<ProfilePage> {
       _selectedPhotoIndex = index;
     });
   }
+
+  // void toggleLike() async {
+  //   if (isProfileLiked) {
+  //     // Call unlike API
+  //     await unlikeUser(userId);
+  //   } else {
+  //     // Call like API
+  //     await likeUser(userId);
+  //   }
+
+  //   // Toggle the state
+  //   setState(() {
+  //     isProfileLiked = !isProfileLiked;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       itemCount: reversedUploads.length,
                                       itemBuilder: (context, index) {
                                         log(reversedUploads.length.toString());
-                                        return Row(
+                                        return const Row(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           mainAxisAlignment:
@@ -438,26 +456,9 @@ class _ProfilePageState extends State<ProfilePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // heart
-            Neumorphic(
-              style: const NeumorphicStyle(
-                boxShape: NeumorphicBoxShape.circle(),
-                depth: 5,
-                intensity: 0.75,
-              ),
-              child: NeumorphicButton(
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: SvgPicture.asset(
-                      AppIcons.heartfilled,
-                      height: 20,
-                      width: 20,
-                    ),
-                  ),
-                ),
-              ),
+            LikeButton(
+              currentUserId: user!.uid,
+              likedUserId: widget.dashboardresponsemodel.uid!,
             ),
 
             // chat
@@ -1208,7 +1209,7 @@ class _ProfilePageState extends State<ProfilePage> {
 // text about
 
                           Text(
-                            'Hi there!  i’m Ghina. Just ordinary girl. Looking for a time traveler so i can meet you in the future inshaAllah ^^   Not interested in short term, so lets know each other well first, dont be hurry.   Be polite pls :)',
+                            'Hi there!  i’m Ghina. Just ordinary girl. Looking for a time traveler so i can meet you in the future inshaAllah ^^ Not interested in short term, so lets know each other well first, dont be hurry.  Be polite pls :)',
                             style: AppTextStyles().secondaryStyle,
                           ),
                         ],
