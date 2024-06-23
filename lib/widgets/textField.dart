@@ -58,7 +58,7 @@ class _AppTextFieldState extends State<AppTextField> {
               controller: widget.inputcontroller,
               keyboardType: widget.keyboardType,
               obscureText: widget.obscureText ? _obscureText : false,
-              maxLines: null, // Allows the text field to expand vertically
+              // maxLines: null, // Allows the text field to expand vertically
               decoration: InputDecoration(
                 prefixIcon: widget.prefixIcon != null
                     ? Icon(widget.prefixIcon) // Display prefix icon if provided

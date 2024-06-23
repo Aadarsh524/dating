@@ -11,4 +11,16 @@ class AppIcons {
   static const heart = "assets/icons/heart.svg";
   static const heartoutline = "assets/icons/heartoutline.svg";
   static const chatoutline = "assets/icons/chatoutline.svg";
+  static const searchicon = "assets/icons/searchicon.svg";
+  static const notification = "assets/icons/Notification.svg";
+  static const chevron = "assets/icons/chevron.svg";
+  static const chevronoutline = "assets/icons/chevronoutline.svg";
+  static const calendar = "assets/icons/calendar.svg";
+  static const filter = "assets/icons/filter.svg";
+  static const swap = "assets/icons/swap.svg";
+  static const verified = "assets/icons/verified.svg";
+  static const unverified = "assets/icons/unverified.svg";
+  static const dots = "assets/icons/dots.svg";
+  static const send = "assets/icons/send.svg";
+  static const check = "assets/icons/check.svg";
 }
