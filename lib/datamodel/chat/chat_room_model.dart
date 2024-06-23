@@ -97,7 +97,7 @@ class Message {
   String? id;
   String? chatId;
   List<String>? participants;
-  List<Messages>? messages;
+  List<AllMessages>? messages;
 
   Message({this.id, this.chatId, this.participants, this.messages});
 
@@ -106,9 +106,9 @@ class Message {
     chatId = json['chatId'];
     participants = (json['participants'] as List<dynamic>?)?.cast<String>();
     if (json['messages'] != null) {
-      messages = <Messages>[];
+      messages = <AllMessages>[];
       json['messages'].forEach((v) {
-        messages!.add(Messages.fromJson(v));
+        messages!.add(AllMessages.fromJson(v));
       });
     }
   }
@@ -125,7 +125,7 @@ class Message {
   }
 }
 
-class Messages {
+class AllMessages {
   String? messageId;
   String? senderId;
   String? messageContent;
@@ -135,7 +135,7 @@ class Messages {
   String? timeStamp;
   String? type;
 
-  Messages(
+  AllMessages(
       {this.messageId,
       this.senderId,
       this.messageContent,
@@ -145,7 +145,7 @@ class Messages {
       this.timeStamp,
       this.type});
 
-  Messages.fromJson(Map<String, dynamic> json) {
+  AllMessages.fromJson(Map<String, dynamic> json) {
     messageId = json['messageId'];
     senderId = json['senderId'];
     messageContent = json['messageContent'];

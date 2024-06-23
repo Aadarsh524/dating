@@ -32,7 +32,7 @@ class _ChatPageState extends State<ChatPage> {
   String country = 'COUNTRY';
   String age = 'AGE';
   final TextEditingController _message = TextEditingController();
-  List<Messages> lastMessage = [];
+  List<AllMessages> lastMessage = [];
 
   Uint8List base64ToImage(String? base64String) {
     return base64Decode(base64String!);
@@ -176,105 +176,134 @@ class _ChatPageState extends State<ChatPage> {
                                     var conversation = conversations[index];
                                     var endUserDetails =
                                         conversation.endUserDetails;
+                                    if (endUserDetails?.message?.messages !=
+                                            null &&
+                                        endUserDetails!
+                                            .message!.messages!.isNotEmpty) {
+                                      // Reverse the messages list to get the latest message first
 
-                                    lastMessage =
-                                        endUserDetails!.message!.messages!;
+                                      var lastMessageContent = '';
 
-                                    return GestureDetector(
-                                      onTap: () {
-                                        Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (_) =>
-                                                    ChatScreemMobile(
-                                                      chatID:
-                                                          conversation.chatId!,
-                                                    )));
-                                      },
-                                      child: Column(
-                                        children: [
-                                          Row(
+                                      for (var message in endUserDetails
+                                          .message!.messages!) {
+                                        if (message.senderId != user!.uid &&
+                                            message.type == "Text" &&
+                                            message.messageContent != null) {
+                                          lastMessageContent =
+                                              message.messageContent!;
+                                          break;
+                                        }
+                                      }
+
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20.0),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        ChatScreemMobile(
+                                                          chatRoomModel:
+                                                              endUserDetails,
+                                                          chatID: conversation
+                                                              .chatId!,
+                                                        )));
+                                          },
+                                          child: Column(
                                             children: [
-                                              Neumorphic(
-                                                style: NeumorphicStyle(
-                                                  boxShape: NeumorphicBoxShape
-                                                      .roundRect(
-                                                    BorderRadius.circular(1000),
-                                                  ),
-                                                ),
-                                                child: Container(
-                                                  height: 50,
-                                                  width: 50,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    image: DecorationImage(
-                                                      image: MemoryImage(
-                                                          base64ToImage(
-                                                              endUserDetails
-                                                                  .profileImage)),
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 20),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    endUserDetails.name!,
-                                                    style: AppTextStyles()
-                                                        .primaryStyle
-                                                        .copyWith(fontSize: 14),
-                                                  ),
-                                                  const SizedBox(height: 5),
-                                                  Text(
-                                                    lastMessage.first
-                                                        .toString(),
-                                                    style: AppTextStyles()
-                                                        .secondaryStyle
-                                                        .copyWith(
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w300,
-                                                          color: AppColors
-                                                              .secondaryColor,
-                                                        ),
-                                                  )
-                                                ],
-                                              ),
-                                              const Spacer(),
                                               Row(
                                                 children: [
-                                                  const Icon(
-                                                    Icons.circle,
-                                                    size: 8,
-                                                    color: Colors.green,
-                                                  ),
-                                                  const SizedBox(width: 5),
-                                                  Text(
-                                                    conversation.seen!
-                                                        ? 'online'
-                                                        : 'offline',
-                                                    style: AppTextStyles()
-                                                        .secondaryStyle
-                                                        .copyWith(
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w300,
-                                                          color:
-                                                              AppColors.black,
+                                                  Neumorphic(
+                                                    style: NeumorphicStyle(
+                                                      boxShape:
+                                                          NeumorphicBoxShape
+                                                              .roundRect(
+                                                        BorderRadius.circular(
+                                                            1000),
+                                                      ),
+                                                    ),
+                                                    child: Container(
+                                                      height: 50,
+                                                      width: 50,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        image: DecorationImage(
+                                                          image: MemoryImage(
+                                                              base64ToImage(
+                                                                  endUserDetails
+                                                                      .profileImage)),
+                                                          fit: BoxFit.cover,
                                                         ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 20),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        endUserDetails.name!,
+                                                        style: AppTextStyles()
+                                                            .primaryStyle
+                                                            .copyWith(
+                                                                fontSize: 14),
+                                                      ),
+                                                      const SizedBox(height: 5),
+                                                      Text(
+                                                        lastMessageContent
+                                                            .toString(),
+                                                        style: AppTextStyles()
+                                                            .secondaryStyle
+                                                            .copyWith(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w300,
+                                                              color: AppColors
+                                                                  .secondaryColor,
+                                                            ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                  const Spacer(),
+                                                  Row(
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.circle,
+                                                        size: 8,
+                                                        color: Colors.green,
+                                                      ),
+                                                      const SizedBox(width: 5),
+                                                      Text(
+                                                        conversation.seen!
+                                                            ? 'online'
+                                                            : 'offline',
+                                                        style: AppTextStyles()
+                                                            .secondaryStyle
+                                                            .copyWith(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w300,
+                                                              color: AppColors
+                                                                  .black,
+                                                            ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ],
                                               ),
+                                              const SizedBox(height: 20),
                                             ],
                                           ),
-                                          const SizedBox(height: 20),
-                                        ],
-                                      ),
-                                    );
+                                        ),
+                                      );
+                                    }
+                                    return null;
                                   });
                             },
                           );

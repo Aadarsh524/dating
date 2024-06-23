@@ -1,12 +1,9 @@
 import 'dart:convert';
 
 import 'package:dating/platform/platform.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 // import 'package:flutter_background/flutter_background.dart';
 // import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:http/http.dart' as http;
 
@@ -77,7 +74,7 @@ class Signaling {
 
   // Base URL of your API server
 
-  final String baseUrl = getApiEndpoint();  
+  final String baseUrl = getApiEndpoint();
 
   Future<String> createRoom(
       RTCVideoRenderer remoteRenderer, String roomIdd) async {
