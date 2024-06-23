@@ -1,10 +1,13 @@
 import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/pages/subscriptionPage.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -194,22 +197,26 @@ class _SettingPageState extends State<SettingPage> {
         ),
 
         const SizedBox(
-          height: 30,
+          height: 10,
         ),
 
-        IndexedStack(
-          index: _selectedIndex,
-          children: [
-            Container(
-                color: Colors.green,
-                child: const Center(child: Text('Billing'))),
-            // Profile tab
-            profileTab(),
+        Container(
+          height: MediaQuery.sizeOf(context).height * 1,
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: [
+              SubscriptionPage(),
+              // Container(
+              //     color: Colors.green,
+              //     child: const Center(child: Text('Billing'))),
+              // Profile tab
+              profileTab(),
 
-            Container(
-                color: Colors.orange,
-                child: const Center(child: Text('Email'))),
-          ],
+              Container(
+                  color: Colors.orange,
+                  child: const Center(child: Text('Email'))),
+            ],
+          ),
         ),
 
         // details edit
@@ -733,10 +740,10 @@ class _SettingPageState extends State<SettingPage> {
         Expanded(
           child: Row(
             children: [
-// side bar
+              // side bar
               const NavBarDesktop(),
 
-// posts
+              // posts
               const SizedBox(
                 width: 20,
               ),
@@ -757,7 +764,7 @@ class _SettingPageState extends State<SettingPage> {
                           ),
                         ),
 
-// tab bar
+                        // tab bar
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: NeumorphicToggle(
@@ -885,32 +892,39 @@ class _SettingPageState extends State<SettingPage> {
                               children: [
                                 // profile pic
 
-                                IndexedStack(
-                                  index: _selectedIndex,
-                                  children: [
-                                    Container(
-                                        color: Colors.green,
-                                        child: const Center(
-                                            child: Text('Billing'))),
-                                    // Profile tab
-                                    profileTab(),
+                                Container(
+                                  height:
+                                      MediaQuery.sizeOf(context).height * 1.01,
+                                  child: IndexedStack(
+                                    index: _selectedIndex,
+                                    children: [
+                                      //for billing
+                                      SubscriptionPage(),
 
-                                    Container(
-                                        color: Colors.orange,
-                                        child:
-                                            const Center(child: Text('Email'))),
-                                  ],
+                                      // Container(
+                                      //     color: Colors.green,
+                                      //     child: const Center(
+                                      //         child: Text('Billing'))),
+                                      // Profile tab
+                                      profileTab(),
+
+                                      Container(
+                                          color: Colors.orange,
+                                          child: const Center(
+                                              child: Text('Email'))),
+                                    ],
+                                  ),
                                 ),
                                 const SizedBox(
                                   height: 30,
                                 ),
 
-// details
+                                // details
                                 const SizedBox(
                                   height: 15,
                                 ),
 
-// edit
+                                // edit
                               ],
                             ),
                           ),
