@@ -1,6 +1,8 @@
+
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:ffi';
+
+
 
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
@@ -14,6 +16,7 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:dating/widgets/textField.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -22,6 +25,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -51,6 +55,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       _isSearchFieldVisible = false;
     });
   }
+
 
   Map<String, dynamic>? paymentIntent;
 
@@ -127,6 +132,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
   }
 
+
   final List<Subscription> subscriptions = [
     Subscription(
       type: 'Basic',
@@ -184,6 +190,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           height: 10,
         ),
 
+
         // icons
 
         // post
@@ -205,12 +212,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               itemCount: subscriptions.length,
               itemBuilder: (context, index) {
                 final subscription = subscriptions[index];
+
                 return SubscriptionCard(
                   subscription: subscription,
                   onTap: () {
                     makePayment(subscription.pricePerWeek);
                   },
                 );
+
               },
             ),
           ),
@@ -702,9 +711,13 @@ class Subscription {
 
 class SubscriptionCard extends StatelessWidget {
   final Subscription subscription;
+
   VoidCallback? onTap;
 
   SubscriptionCard({required this.subscription, this.onTap});
+
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -795,6 +808,7 @@ class SubscriptionCard extends StatelessWidget {
                 )),
             // subscribe button
             Spacer(),
+
             GestureDetector(
               onTap: onTap,
               child: Container(
@@ -814,6 +828,7 @@ class SubscriptionCard extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
+
                   ),
                 ),
               ),
