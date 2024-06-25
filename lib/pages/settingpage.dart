@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/subscriptionPage.dart';
 import 'package:dating/utils/colors.dart';
@@ -9,7 +11,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -27,6 +31,7 @@ class _SettingPageState extends State<SettingPage> {
 
   int _selectedIndex = 1;
 
+ 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -201,7 +206,9 @@ class _SettingPageState extends State<SettingPage> {
         ),
 
         Container(
-          height: MediaQuery.sizeOf(context).height * 1,
+
+          height: MediaQuery.sizeOf(context).height,
+
           child: IndexedStack(
             index: _selectedIndex,
             children: [

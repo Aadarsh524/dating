@@ -216,12 +216,12 @@ class _HomePageState extends State<HomePage> {
                   width: 15,
                 ),
                 // add friemd
-                ButtonWithLabel(
-                  text: null,
-                  labelText: 'Add Friend',
-                  onPressed: () {},
-                  icon: const Icon(Icons.add),
-                ),
+                // ButtonWithLabel(
+                //   text: null,
+                //   labelText: 'Add Friend',
+                //   onPressed: () {},
+                //   icon: const Icon(Icons.add),
+                // ),
 
                 const SizedBox(
                   width: 15,

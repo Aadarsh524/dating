@@ -166,30 +166,30 @@ class _UserPostState extends State<UserPost> {
                 ),
               ),
               const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                              hasLiked
-                                  ? Icons.thumb_up_sharp
-                                  : Icons.thumb_up_off_alt,
-                              size: 30),
-                          onPressed: _toggleLike,
-                        ),
-                        const SizedBox(width: 10),
-                        const Icon(Icons.mode_comment_outlined, size: 30),
-                      ],
-                    ),
-                    const Icon(Icons.ios_share_outlined),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 20),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     children: [
+              //       Row(
+              //         children: [
+              //           IconButton(
+              //             icon: Icon(
+              //                 hasLiked
+              //                     ? Icons.thumb_up_sharp
+              //                     : Icons.thumb_up_off_alt,
+              //                 size: 30),
+              //             onPressed: _toggleLike,
+              //           ),
+              //           const SizedBox(width: 10),
+              //           const Icon(Icons.mode_comment_outlined, size: 30),
+              //         ],
+              //       ),
+              //       const Icon(Icons.ios_share_outlined),
+              //     ],
+              //   ),
+              // ),
+              //const SizedBox(height: 10),
             ],
           ),
         ),
