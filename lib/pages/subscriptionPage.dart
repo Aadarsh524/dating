@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:ffi';
+
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/profilepage.dart';
@@ -10,11 +14,14 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:dating/widgets/textField.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -43,6 +50,81 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     setState(() {
       _isSearchFieldVisible = false;
     });
+  }
+
+  Map<String, dynamic>? paymentIntent;
+
+  Future<void> makePayment(String amount) async {
+    log("make payment");
+    try {
+      // Step 1: Create Payment Intent
+      paymentIntent = await createPaymentIntent(amount);
+
+      // Step 2: Initialize Payment Sheet
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: paymentIntent!["client_secret"],
+          merchantDisplayName: "Your Company Name",
+          googlePay: PaymentSheetGooglePay(
+            merchantCountryCode: "US",
+            currencyCode: "USD",
+            testEnv: true,
+          ),
+          style: ThemeMode.light,
+          // Additional configuration can be added here
+        ),
+      );
+
+      // Step 3: Display Payment Sheet
+      await displayPaymentSheet();
+    } catch (e) {
+      log(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment failed: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> displayPaymentSheet() async {
+    try {
+      log("not executed");
+      await Stripe.instance.presentPaymentSheet();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment successful!')),
+      );
+    } catch (e) {
+      log("executed");
+      if (e is StripeException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Error from Stripe: ${e.error.localizedMessage}')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unforeseen error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  createPaymentIntent(String amount) async {
+    try {
+      Map<String, dynamic> body = {
+        "amount": amount,
+        "currency": "USD",
+        "payment_method_types[]": "card",
+      };
+      http.Response response = await http.post(
+          Uri.parse("https://api.stripe.com/v1/payments_intents"),
+          body: body,
+          headers: {
+            "Authorization": "Bearer sk_test_4eC39HqLyjWDarjtT1zdp7dc",
+            "Content-Type": "application/x-www-form-urlencoded"
+          });
+      return json.decode(response.body);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 
   final List<Subscription> subscriptions = [
@@ -101,83 +183,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         SizedBox(
           height: 10,
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // profile
-              GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        CupertinoPageRoute(
-                            builder: (context) => MyProfilePage()));
-                  },
-                  child: profileButton()),
-
-              // search icon
-              Row(
-                children: [
-                  if (_isSearchFieldVisible)
-                    Container(
-                      width: 200,
-                      margin: const EdgeInsets.only(right: 10.0),
-                      child: Neumorphic(
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'Search',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ButtonWithLabel(
-                    text: null,
-                    onPressed: () {
-                      _toggleSearchField();
-                    },
-                    icon: Icon(
-                      Icons.search,
-                    ),
-                    labelText: null,
-                  ),
-
-                  // settings icon
-
-                  ButtonWithLabel(
-                    text: null,
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SettingPage()));
-                    },
-                    icon: Icon(
-                      Icons.settings,
-                    ),
-                    labelText: null,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        SizedBox(
-          height: 40,
-        ),
 
         // icons
 
@@ -200,7 +205,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               itemCount: subscriptions.length,
               itemBuilder: (context, index) {
                 final subscription = subscriptions[index];
-                return SubscriptionCard(subscription: subscription);
+                return SubscriptionCard(
+                  subscription: subscription,
+                  onTap: () {
+                    makePayment(subscription.pricePerWeek);
+                  },
+                );
               },
             ),
           ),
@@ -692,8 +702,9 @@ class Subscription {
 
 class SubscriptionCard extends StatelessWidget {
   final Subscription subscription;
+  VoidCallback? onTap;
 
-  SubscriptionCard({required this.subscription});
+  SubscriptionCard({required this.subscription, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -784,21 +795,25 @@ class SubscriptionCard extends StatelessWidget {
                 )),
             // subscribe button
             Spacer(),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              decoration: ShapeDecoration(
-                color: Color(0xFF5400FF),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4)),
-              ),
-              child: Center(
-                child: Text(
-                  'Subscribe Now',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+            GestureDetector(
+              onTap: onTap,
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                decoration: ShapeDecoration(
+                  color: Color(0xFF5400FF),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4)),
+                ),
+                child: Center(
+                  child: Text(
+                    'Subscribe Now',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
