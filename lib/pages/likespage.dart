@@ -1,13 +1,20 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:dating/datamodel/interaction/user_interaction_model.dart';
+import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class LikePage extends StatefulWidget {
   const LikePage({super.key});
@@ -17,11 +24,22 @@ class LikePage extends StatefulWidget {
 }
 
 class _LikePageState extends State<LikePage> {
+  User? user = FirebaseAuth.instance.currentUser;
+  int _selectedIndex = 0; // Default to 'Liked Me' tab
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
 
-  int _selectedIndex = 1;
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<UserInteractionProvider>(context, listen: false)
+        .getUserInteraction(user!.uid);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,192 +62,110 @@ class _LikePageState extends State<LikePage> {
 
   Widget MobileLikePage() {
     return Scaffold(
-      body: Column(children: [
-        SizedBox(
-          height: 10,
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // profile
-
-              // search icon
-              ButtonWithLabel(
-                text: null,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(
-                  Icons.arrow_back,
+      body: Column(
+        children: [
+          SizedBox(height: 10),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Back button
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back),
                 ),
-                labelText: null,
-              ),
-
-              Text(
-                'Likes',
-                style: AppTextStyles().primaryStyle,
-              ),
-
-              // view icon
-              ButtonWithLabel(
-                text: null,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: SvgPicture.asset(AppIcons.threedots),
-                labelText: null,
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 30,
-        ),
-
-        // details
-
-        // tabbar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: NeumorphicToggle(
-            padding: EdgeInsets.zero,
-            style: NeumorphicToggleStyle(
-              borderRadius: BorderRadius.circular(100),
-              depth: 10,
-              disableDepth: false,
-              backgroundColor: AppColors.backgroundColor,
+                // Title
+                Text(
+                  'Likes',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                // Menu button (dots)
+                IconButton(
+                  onPressed: () {
+                    // Handle menu button press
+                  },
+                  icon: SvgPicture.asset('assets/icons/threedots.svg'),
+                ),
+              ],
             ),
-            height: 40,
-            width: 900,
-            selectedIndex: _selectedIndex,
-            children: [
-              // Billing
-
-              ToggleElement(
-                background: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 202, 215, 225),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Center(
-                      child: Text(
-                    'Liked Me',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
-                  )),
-                ),
-                foreground: Center(
-                  child: Text(
-                    'Liked Me',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
-                  ),
-                ),
-              ),
-
-              // profile
-
-              ToggleElement(
-                background: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 202, 215, 225),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Center(
-                      child: Text(
-                    'My Likes',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
-                  )),
-                ),
-                foreground: Center(
-                  child: Text(
-                    'My Likes',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
-                  ),
-                ),
-              ),
-              ToggleElement(
-                background: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 202, 215, 225),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Mutual Likes',
-                      style: AppTextStyles().secondaryStyle.copyWith(
-                            color: Colors.black,
-                            fontSize: 12,
-                          ),
-                    ),
-                  ),
-                ),
-                foreground: Center(
-                  child: Text(
-                    'Mutual Likes',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
-                  ),
-                ),
-              )
-            ],
-            onChanged: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            thumb: Text(''),
           ),
-        ),
-
-        SizedBox(
-          height: 30,
-        ),
-
-        Expanded(
-          child: ListView(
-            scrollDirection: Axis.vertical,
-            children: [
-              IndexedStack(
-                index: _selectedIndex,
-                children: [
-                  // fav tab
-                  likeListMobile(),
-                  likeListMobile(),
-                  likeListMobile(),
-                ],
-              ),
-            ],
+          SizedBox(height: 30),
+          // Tab bar
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                // Liked Me tab
+                TabButton(
+                  text: 'Liked Me',
+                  isSelected: _selectedIndex == 0,
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 0;
+                    });
+                  },
+                ),
+                SizedBox(width: 10),
+                // My Likes tab
+                TabButton(
+                  text: 'My Likes',
+                  isSelected: _selectedIndex == 1,
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 1;
+                    });
+                  },
+                ),
+                SizedBox(width: 10),
+                // Mutual Likes tab
+                TabButton(
+                  text: 'Mutual Likes',
+                  isSelected: _selectedIndex == 2,
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 2;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-
-        // details edit
-      ]),
+          SizedBox(height: 20),
+          // List of liked users based on tab selection
+          Expanded(
+            child: Consumer<UserInteractionProvider>(
+              builder: (context, provider, _) {
+                switch (_selectedIndex) {
+                  case 0:
+                    return likedMeList(provider);
+                  case 1:
+                    return myLikesList(provider);
+                  case 2:
+                    return mutualLikesList(provider);
+                  default:
+                    return Container();
+                }
+              },
+            ),
+          ),
+        ],
+      ),
       bottomSheet: NavBar(),
     );
   }
 
-  Padding likeListMobile() {
+  Widget likedMeList(UserInteractionProvider provider) {
+    List<LikedByUsers>? likedMeUsers =
+        provider.userInteractionModel?.likedByUsers;
+
+    if (likedMeUsers == null || likedMeUsers.isEmpty) {
+      return Center(child: Text('No users have liked you yet.'));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -242,17 +178,18 @@ class _LikePageState extends State<LikePage> {
             crossAxisSpacing: 15, // Horizontal spacing between items
             mainAxisSpacing: 15, // Vertical spacing between items
           ),
-          itemCount: 12, // Total number of containers in the grid
+          itemCount: likedMeUsers.length,
           itemBuilder: (context, index) {
+            LikedByUsers user = likedMeUsers[index];
             return Container(
               height: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 image: DecorationImage(
-                  image: AssetImage(AppImages.profile), // Image asset path
+                  image: MemoryImage(base64ToImage(user.userDetail!.image!)),
                   fit: BoxFit
                       .cover, // Adjust how the image should fit inside the container
-                ), // Adjust how the image should fit inside the container
+                ),
               ),
               child: Container(
                 decoration: BoxDecoration(
@@ -278,16 +215,13 @@ class _LikePageState extends State<LikePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          SvgPicture.asset(AppIcons.heartoutline),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          SvgPicture.asset(AppIcons.chatoutline),
+                          SvgPicture.asset('assets/icons/heartoutline.svg'),
+                          SizedBox(width: 8),
+                          SvgPicture.asset('assets/icons/chatoutline.svg'),
                         ],
                       ),
                     ),
-
-// name address
+                    // name and address
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 10),
@@ -298,7 +232,7 @@ class _LikePageState extends State<LikePage> {
                           Row(
                             children: [
                               Text(
-                                'John Doe, 25',
+                                '${user.userDetail!.name!}, ${user.userDetail!.age!}',
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
                                   fontSize: 18,
@@ -306,18 +240,16 @@ class _LikePageState extends State<LikePage> {
                                   height: 0,
                                 ),
                               ),
-
-                              // male female
+                              // gender
                               Icon(
-                                Icons.male,
+                                "male" == 'male' ? Icons.male : Icons.female,
                                 color: Colors.white,
                               ),
                             ],
                           ),
                           // address
-
                           Text(
-                            'Malang, Jawa Timur..',
+                            user.userDetail!.address!,
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
@@ -325,9 +257,8 @@ class _LikePageState extends State<LikePage> {
                               height: 0,
                             ),
                           ),
-
                           Text(
-                            'Sent: 13 hour ago',
+                            'Sent: 13 hours ago', // Assuming this is static text; adjust if needed
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
@@ -337,7 +268,249 @@ class _LikePageState extends State<LikePage> {
                           ),
                         ],
                       ),
-                    )
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget myLikesList(UserInteractionProvider provider) {
+    List<LikedUsers>? myLikesUsers = provider.userInteractionModel?.likedUsers;
+
+    if (myLikesUsers == null || myLikesUsers.isEmpty) {
+      return Center(child: Text('You have not liked anyone yet.'));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        width: double.infinity,
+        height: 900,
+        child: GridView.builder(
+          clipBehavior: Clip.none,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, // Number of columns in the grid
+            crossAxisSpacing: 15, // Horizontal spacing between items
+            mainAxisSpacing: 15, // Vertical spacing between items
+          ),
+          itemCount: myLikesUsers.length,
+          itemBuilder: (context, index) {
+            LikedUsers user = myLikesUsers[index];
+            return Container(
+              height: 250,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                image: DecorationImage(
+                  image: MemoryImage(base64ToImage(user.userDetail!.image!)),
+                  fit: BoxFit
+                      .cover, // Adjust how the image should fit inside the container
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black
+                          .withOpacity(0), // Transparent black at the top
+                      Colors.black
+                          .withOpacity(0.75), // Solid black at the bottom
+                    ],
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // like and chat
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SvgPicture.asset('assets/icons/heartoutline.svg'),
+                          SizedBox(width: 8),
+                          SvgPicture.asset('assets/icons/chatoutline.svg'),
+                        ],
+                      ),
+                    ),
+                    // name and address
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // name
+                          Row(
+                            children: [
+                              Text(
+                                '${user.userDetail!.name!}, ${user.userDetail!.age!}',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
+                                  height: 0,
+                                ),
+                              ),
+                              // gender
+                              Icon(
+                                "male" == 'male' ? Icons.male : Icons.female,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          // address
+                          Text(
+                            user.userDetail!.address!,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.75),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              height: 0,
+                            ),
+                          ),
+                          Text(
+                            'Sent: 13 hours ago', // Assuming this is static text; adjust if needed
+                            style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.75),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              height: 0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // Widget for displaying users who have mutual likes with the current user
+  Widget mutualLikesList(UserInteractionProvider provider) {
+    List<MutualLikes>? mutualLikesUsers =
+        provider.userInteractionModel?.mutualLikes;
+
+    if (mutualLikesUsers == null || mutualLikesUsers.isEmpty) {
+      return Center(child: Text('You have no mutual likes yet.'));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        width: double.infinity,
+        height: 900,
+        child: GridView.builder(
+          clipBehavior: Clip.none,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, // Number of columns in the grid
+            crossAxisSpacing: 15, // Horizontal spacing between items
+            mainAxisSpacing: 15, // Vertical spacing between items
+          ),
+          itemCount: mutualLikesUsers.length,
+          itemBuilder: (context, index) {
+            MutualLikes user = mutualLikesUsers[index];
+            return Container(
+              height: 250,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                image: DecorationImage(
+                  image: MemoryImage(base64ToImage(user.userDetail!.image!)),
+                  fit: BoxFit
+                      .cover, // Adjust how the image should fit inside the container
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black
+                          .withOpacity(0), // Transparent black at the top
+                      Colors.black
+                          .withOpacity(0.75), // Solid black at the bottom
+                    ],
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // like and chat
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SvgPicture.asset('assets/icons/heartoutline.svg'),
+                          SizedBox(width: 8),
+                          SvgPicture.asset('assets/icons/chatoutline.svg'),
+                        ],
+                      ),
+                    ),
+                    // name and address
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // name
+                          Row(
+                            children: [
+                              Text(
+                                '${user.userDetail!.name!}, ${user.userDetail!.age!}',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
+                                  height: 0,
+                                ),
+                              ),
+                              // gender
+                              Icon(
+                                "male" == 'male' ? Icons.male : Icons.female,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          // address
+                          Text(
+                            user.userDetail!.address!,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.75),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              height: 0,
+                            ),
+                          ),
+                          Text(
+                            'Sent: 13 hours ago', // Assuming this is static text; adjust if needed
+                            style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.75),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              height: 0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -965,6 +1138,55 @@ class profileButton extends StatelessWidget {
         child: Image.asset(
           AppImages.loginimage,
           fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}
+
+class InteractedUser {
+  final String id;
+  final String name;
+  final String profileImageUrl;
+  final int age;
+  final String location;
+
+  InteractedUser({
+    required this.id,
+    required this.name,
+    required this.profileImageUrl,
+    required this.age,
+    required this.location,
+  });
+}
+
+class TabButton extends StatelessWidget {
+  final String text;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const TabButton({
+    required this.text,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
