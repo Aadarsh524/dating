@@ -175,21 +175,6 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {},
                   icon: const Icon(Icons.people),
                 ),
-                const SizedBox(
-                  width: 15,
-                ),
-                // messages
-                ButtonWithLabel(
-                  text: null,
-                  labelText: 'Messages',
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ChatPage()));
-                  },
-                  icon: const Icon(Icons.messenger_outline),
-                ),
 
                 const SizedBox(
                   width: 15,
@@ -248,40 +233,44 @@ class _HomePageState extends State<HomePage> {
           height: 30,
         ),
 
-        Consumer<LoadingProvider>(builder: (context, loading, _) {
-          return loading.isLoading
-              ? const ShimmerSkeleton(count: 5, height: 250)
-              : Expanded(
-                  child: Consumer<DashboardProvider>(
-                      builder: (context, snapshot, _) {
+        Consumer<LoadingProvider>(
+          builder: (context, loading, _) {
+            if (loading.isLoading) {
+              return const ShimmerSkeleton(count: 1, height: 250);
+            } else {
+              return Expanded(
+                child: Consumer<DashboardProvider>(
+                  builder: (context, snapshot, _) {
                     List<d.DashboardResponseModel>? data =
                         Provider.of<DashboardProvider>(context, listen: false)
                             .dashboardList;
 
                     return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: data!.length,
-                        itemBuilder: (context, index) {
-                          final alluploads = data[index].uploads;
-                          if (alluploads!.isNotEmpty) {
-                            return SingleChildScrollView(
-                                child: UserPost(
-                              post: data[index],
-                              currentUserId: user!.uid,
-                              onLike: (postId) {
-                                final userInteraction =
-                                    context.read<UserInteractionProvider>();
-                                userInteraction.likeUser(
-                                    user!.uid, "likedUserId");
-                              },
-                            ));
-                          } else {
-                            return Container();
-                          }
-                        });
-                  }),
-                );
-        })
+                      itemCount: data!.length,
+                      itemBuilder: (context, index) {
+                        final alluploads = data[index].uploads;
+                        if (alluploads!.isNotEmpty) {
+                          return UserPost(
+                            post: data[index],
+                            currentUserId: user!.uid,
+                            onLike: (postId) {
+                              final userInteraction =
+                                  context.read<UserInteractionProvider>();
+                              userInteraction.likeUser(
+                                  user!.uid, "likedUserId");
+                            },
+                          );
+                        } else {
+                          return Container();
+                        }
+                      },
+                    );
+                  },
+                ),
+              );
+            }
+          },
+        )
       ]),
       bottomSheet: const NavBar(),
     );

@@ -54,6 +54,94 @@ class UserInteractionProvider extends ChangeNotifier {
     }
   }
 
+  Future<LikedByUsers?> fetchLikesByUser(String userId, int page) async {
+    try {
+      // String api =
+      //     getApiEndpoint(); // Replace with your actual API endpoint getter
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final uri = Uri.parse("http://10.0.2.2:8001/like/$userId&page=$page");
+
+      final response = await http.get(uri, headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        final likedByUsers = LikedByUsers.fromJson(json.decode(response.body));
+        return likedByUsers;
+      } else {
+        throw Exception(
+            'Failed to fetch likes by user: ${response.statusCode}');
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<LikedUsers?> fetchLikedByUser(String userId, int page) async {
+    try {
+      // String api =
+      //     getApiEndpoint(); // Replace with your actual API endpoint getter
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final uri = Uri.parse("http://10.0.2.2:8001/liked/$userId&page=$page");
+
+      final response = await http.get(uri, headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        final likeUserModel = LikedUsers.fromJson(json.decode(response.body));
+        return likeUserModel;
+      } else {
+        throw Exception(
+            'Failed to fetch liked by user: ${response.statusCode}');
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<MutualLikes?> fetchMutualLikes(String userId, int page) async {
+    try {
+      // String api =
+      //     getApiEndpoint(); // Replace with your actual API endpoint getter
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final uri =
+          Uri.parse("http://10.0.2.2:8001/like/mutual/$userId&page=$page");
+
+      final response = await http.get(uri, headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        final mutualLikedModel =
+            MutualLikes.fromJson(json.decode(response.body));
+        return mutualLikedModel;
+      } else {
+        throw Exception('Failed to fetch mutual likes: ${response.statusCode}');
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
   Future<void> likeUser(String userId, String likedUserId) async {
     try {
       final token = await TokenManager.getToken();

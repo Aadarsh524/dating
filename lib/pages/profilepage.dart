@@ -47,21 +47,6 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  // void toggleLike() async {
-  //   if (isProfileLiked) {
-  //     // Call unlike API
-  //     await unlikeUser(userId);
-  //   } else {
-  //     // Call like API
-  //     await likeUser(userId);
-  //   }
-
-  //   // Toggle the state
-  //   setState(() {
-  //     isProfileLiked = !isProfileLiked;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
