@@ -206,7 +206,9 @@ class _SettingPageState extends State<SettingPage> {
         ),
 
         Container(
+
           height: MediaQuery.sizeOf(context).height,
+
           child: IndexedStack(
             index: _selectedIndex,
             children: [
