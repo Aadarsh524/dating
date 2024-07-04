@@ -61,6 +61,8 @@ class _EditInfoState extends State<EditInfo> {
   String country = 'COUNTRY';
   String age = 'AGE';
 
+ 
+
   Uint8List? _imageBytes;
   List<Uploads> allUploads = [];
 
@@ -566,7 +568,7 @@ class _EditInfoState extends State<EditInfo> {
             const SizedBox(
               height: 25,
             ),
-
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
