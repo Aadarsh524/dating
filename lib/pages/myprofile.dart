@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/datamodel/approve_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/settingpage.dart';
@@ -38,6 +39,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
+  String selectedFileType = 'Citizenship';
 
   // int _selectedPhotoIndex = 0;
 
@@ -51,6 +53,49 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Uint8List base64ToImage(String? base64String) {
     return base64Decode(base64String!);
+  }
+
+  Uint8List? _imageBytes;
+
+  void uploadDocument() async {
+    try {
+      final storageStatus = await Permission.storage.request();
+      if (!storageStatus.isGranted) {
+        throw Exception('Storage permission is required to upload the image.');
+      }
+
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png', 'jpeg'],
+      );
+
+      // Handle result
+      if (result != null && result.files.isNotEmpty) {
+        context.read<LoadingProvider>().setLoading(true);
+        File imageFile = File(result.files.single.path!);
+
+        String base64 = convertIntoBase64(imageFile);
+        _imageBytes = base64ToImage(base64);
+        final document =
+            ApproveModel(uid: user!.uid, verificationStatus: 1, documents: [
+          Documents(
+              file: base64.toString(),
+              fileName: 'Document',
+              timeStamp: DateTime.now().toString(),
+              documentType: selectedFileType)
+        ]);
+        await context
+            .read<UserProfileProvider>()
+            .approveDocument(document);
+      } else {
+        // Handle cases like user canceling the selection or errors
+        print('No image selected.');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
+    }
   }
 
   pickImage() async {
@@ -338,6 +383,92 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
                   // edit
 
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Verify',
+                            style: AppTextStyles().primaryStyle.copyWith(
+                                  color: AppColors.black.withOpacity(0.75),
+                                ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          // seperator
+                          Container(
+                            decoration: const ShapeDecoration(
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                  width: 0.50,
+                                  strokeAlign: BorderSide.strokeAlignCenter,
+                                  color: Color(0xFFAAAAAA),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            'Verify that you are real',
+                            style: AppTextStyles().secondaryStyle.copyWith(
+                                  color: AppColors.black,
+                                ),
+                          ),
+                          Row(
+                            children: [
+                              DropdownButton<String>(
+                                value: selectedFileType,
+                                dropdownColor: Colors.white,
+                                icon: Icon(Icons.arrow_downward,
+                                    color: Colors.black),
+                                iconSize: 24,
+                                elevation: 16,
+                                style: TextStyle(color: Colors.black),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedFileType = newValue!;
+                                  });
+                                },
+                                items: <String>[
+                                  'Citizenship',
+                                  'Passport'
+                                ].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value,
+                                      style: AppTextStyles()
+                                          .secondaryStyle
+                                          .copyWith(
+                                            color: AppColors.black,
+                                          ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                              Spacer(),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    uploadDocument();
+                                  },
+                                  child: Text(
+                                    'Select Image',
+                                    style:
+                                        AppTextStyles().secondaryStyle.copyWith(
+                                              color: AppColors.black,
+                                            ),
+                                  ))
+                            ],
+                          ),
+                        ],
+                      )),
                   const SizedBox(
                     height: 25,
                   ),
