@@ -1,9 +1,8 @@
 import 'dart:convert';
 
 import 'package:dating/backend/MongoDB/token_manager.dart';
-import 'package:dating/datamodel/approve_model.dart';
+import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
-import 'package:dio/dio.dart';
 import '../../platform/platform.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
@@ -50,7 +49,8 @@ class UserProfileProvider extends ChangeNotifier {
     }
   }
 
-  Future<UserProfileModel?> approveDocument(ApproveModel approveModel) async {
+  Future<bool> uploadDocumentsForVerification(
+      DocumentVerificationModel documentVerificationModel) async {
     try {
       String api = getApiEndpoint();
       final response = await http.post(
@@ -59,21 +59,22 @@ class UserProfileProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode(approveModel.toJson()),
+        body: jsonEncode(documentVerificationModel.toJson()),
       );
       if (response.statusCode == 200) {
-         notifyListeners();
-        print('Successfully sent for approval');
-      }else{
-         print('Not sent for approval');
-       throw Exception('Cant upload data');
+        getUserProfile(documentVerificationModel.uid);
+        notifyListeners();
+        return true;
+      } else {
+        print('Not sent for approval');
+        throw Exception('Cant upload data');
       }
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<UserProfileModel?> getUserData(uid) async {
+  Future<UserProfileModel?> getUserProfile(uid) async {
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
@@ -120,7 +121,7 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        getUserData(uid!).then(
+        getUserProfile(uid!).then(
           (value) {
             if (value != null) {
               setCurrentUserProfile(value);
@@ -159,7 +160,7 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        await getUserData(uid).then(
+        await getUserProfile(uid).then(
           (value) {
             if (value != null) {
               setCurrentUserProfile(value);
@@ -195,7 +196,7 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        await getUserData(uid).then(
+        await getUserProfile(uid).then(
           (value) {
             if (value != null) {
               setCurrentUserProfile(value);
@@ -232,7 +233,7 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        getUserData(uid).then(
+        getUserProfile(uid).then(
           (value) {
             if (value != null) {
               setCurrentUserProfile(value);

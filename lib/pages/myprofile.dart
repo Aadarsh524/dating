@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/approve_model.dart';
+import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/settingpage.dart';
@@ -55,9 +56,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
     return base64Decode(base64String!);
   }
 
-  Uint8List? _imageBytes;
-
   void uploadDocument() async {
+    context.read<LoadingProvider>().setLoading(true);
     try {
       final storageStatus = await Permission.storage.request();
       if (!storageStatus.isGranted) {
@@ -74,19 +74,23 @@ class _MyProfilePageState extends State<MyProfilePage> {
         context.read<LoadingProvider>().setLoading(true);
         File imageFile = File(result.files.single.path!);
 
+        log(selectedFileType);
+
         String base64 = convertIntoBase64(imageFile);
-        _imageBytes = base64ToImage(base64);
-        final document =
-            ApproveModel(uid: user!.uid, verificationStatus: 1, documents: [
-          Documents(
-              file: base64.toString(),
-              fileName: 'Document',
-              timeStamp: DateTime.now().toString(),
-              documentType: selectedFileType)
-        ]);
+        final document = DocumentVerificationModel(
+            uid: user!.uid,
+            verificationStatus: 1,
+            documents: [
+              Documents(
+                  fileType: '',
+                  file: base64.toString(),
+                  fileName: 'Document',
+                  timeStamp: DateTime.now().toString(),
+                  documentType: selectedFileType)
+            ]);
         await context
             .read<UserProfileProvider>()
-            .approveDocument(document);
+            .uploadDocumentsForVerification(document);
       } else {
         // Handle cases like user canceling the selection or errors
         print('No image selected.');
