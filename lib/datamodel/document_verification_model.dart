@@ -1,13 +1,12 @@
-class ApproveModel {
-  String? id;
+class DocumentVerificationModel {
   String? uid;
   int? verificationStatus;
   List<Documents>? documents;
 
-  ApproveModel({this.id, this.uid, this.verificationStatus, this.documents});
+  DocumentVerificationModel(
+      {this.uid, this.verificationStatus, this.documents});
 
-  ApproveModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+  DocumentVerificationModel.fromJson(Map<String, dynamic> json) {
     uid = json['uid'];
     verificationStatus = json['verificationStatus'];
     if (json['documents'] != null) {
@@ -20,7 +19,6 @@ class ApproveModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
     data['uid'] = this.uid;
     data['verificationStatus'] = this.verificationStatus;
     if (this.documents != null) {

@@ -48,179 +48,145 @@ class _SettingPageState extends State<SettingPage> {
 
   Widget MobileProfile() {
     return Scaffold(
-      body: ListView(children: [
-        const SizedBox(
-          height: 10,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // profile
-
-              // search icon
-              ButtonWithLabel(
-                text: null,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.arrow_back,
+      body: ListView(
+        children: [
+          SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ButtonWithLabel(
+                  text: null,
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.arrow_back),
+                  labelText: null,
                 ),
-                labelText: null,
-              ),
-
-              Text(
-                'Settings',
-                style: AppTextStyles().primaryStyle,
-              ),
-
-              // view icon
-
-              const SizedBox(
-                width: 30,
-              )
-            ],
-          ),
-        ),
-        const SizedBox(
-          height: 30,
-        ),
-
-// details
-
-// tabbar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: NeumorphicToggle(
-            padding: EdgeInsets.zero,
-            style: NeumorphicToggleStyle(
-              borderRadius: BorderRadius.circular(100),
-              depth: 10,
-              disableDepth: false,
-              backgroundColor: AppColors.backgroundColor,
+                Text('Settings', style: AppTextStyles().primaryStyle),
+                SizedBox(width: 30),
+              ],
             ),
-            height: 40,
-            width: 150,
-            selectedIndex: _selectedIndex,
-            children: [
-              // Billing
-
-              ToggleElement(
-                background: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 202, 215, 225),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Center(
-                      child: Text(
-                    'Billing',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                        ),
-                  )),
-                ),
-                foreground: Center(
-                  child: Text(
-                    'Billing',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                        ),
-                  ),
-                ),
+          ),
+          SizedBox(height: 30),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: NeumorphicToggle(
+              padding: EdgeInsets.zero,
+              style: NeumorphicToggleStyle(
+                borderRadius: BorderRadius.circular(100),
+                depth: 10,
+                disableDepth: false,
+                backgroundColor: AppColors.backgroundColor,
               ),
-
-              // profile
-
-              ToggleElement(
-                background: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 202, 215, 225),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Center(
+              height: 40,
+              width: 300,
+              selectedIndex: _selectedIndex,
+              children: [
+                ToggleElement(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 202, 215, 225),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Center(
                       child: Text(
-                    'Profile',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                        ),
-                  )),
-                ),
-                foreground: Center(
-                  child: Text(
-                    'Profile',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                        ),
+                        'Billing',
+                        style: AppTextStyles()
+                            .secondaryStyle
+                            .copyWith(color: Colors.black),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              ToggleElement(
-                background: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 202, 215, 225),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Center(
+                  foreground: Center(
                     child: Text(
-                      'Email',
-                      style: AppTextStyles().secondaryStyle.copyWith(
-                            color: Colors.black,
-                          ),
+                      'Billing',
+                      style: AppTextStyles()
+                          .secondaryStyle
+                          .copyWith(color: Colors.black),
                     ),
                   ),
                 ),
-                foreground: Center(
-                  child: Text(
-                    'Email',
-                    style: AppTextStyles().secondaryStyle.copyWith(
-                          color: Colors.black,
-                        ),
+                ToggleElement(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 202, 215, 225),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Profile',
+                        style: AppTextStyles()
+                            .secondaryStyle
+                            .copyWith(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  foreground: Center(
+                    child: Text(
+                      'Profile',
+                      style: AppTextStyles()
+                          .secondaryStyle
+                          .copyWith(color: Colors.black),
+                    ),
                   ),
                 ),
-              )
-            ],
-            onChanged: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            thumb: const Text(''),
+                ToggleElement(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 202, 215, 225),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Email',
+                        style: AppTextStyles()
+                            .secondaryStyle
+                            .copyWith(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  foreground: Center(
+                    child: Text(
+                      'Email',
+                      style: AppTextStyles()
+                          .secondaryStyle
+                          .copyWith(color: Colors.black),
+                    ),
+                  ),
+                ),
+              ],
+              onChanged: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              thumb: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundColor,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ),
+            ),
           ),
-        ),
-
-        const SizedBox(
-          height: 10,
-        ),
-
-        Container(
-          height: MediaQuery.sizeOf(context).height,
-          child: IndexedStack(
-            index: _selectedIndex,
-            children: [
-              SubscriptionPage(),
-              // Container(
-              //     color: Colors.green,
-              //     child: const Center(child: Text('Billing'))),
-              // Profile tab
-              profileTab(),
-
-              Container(
+          SizedBox(height: 10),
+          Container(
+            height: MediaQuery.of(context).size.height,
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: [
+                SubscriptionPage(),
+                profileTab(),
+                Container(
                   color: Colors.orange,
-                  child: const Center(child: Text('Email'))),
-            ],
+                  child: const Center(child: Text('Email')),
+                ),
+              ],
+            ),
           ),
-        ),
-
-        // details edit
-      ]),
+        ],
+      ),
       bottomSheet: Container(
         height: 60,
         width: double.infinity,
@@ -230,57 +196,46 @@ class _SettingPageState extends State<SettingPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // cancel
-            Neumorphic(
+            NeumorphicButton(
               style: NeumorphicStyle(
-                boxShape: NeumorphicBoxShape.roundRect(
-                  BorderRadius.circular(16),
-                ),
+                boxShape:
+                    NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
                 depth: 5,
                 intensity: 0.75,
               ),
-              child: NeumorphicButton(
-                padding: EdgeInsets.zero,
-                child: SizedBox(
-                  height: 50,
-                  width: 100,
-                  child: Center(
-                    child: Text(
-                      'Cancel',
-                      style: AppTextStyles().secondaryStyle.copyWith(
-                            color: Colors.red,
-                          ),
-                    ),
+              child: SizedBox(
+                height: 50,
+                width: 100,
+                child: Center(
+                  child: Text(
+                    'Cancel',
+                    style: AppTextStyles()
+                        .secondaryStyle
+                        .copyWith(color: Colors.red),
                   ),
                 ),
               ),
             ),
-
-            // save
-            Neumorphic(
+            NeumorphicButton(
               style: NeumorphicStyle(
-                boxShape: NeumorphicBoxShape.roundRect(
-                  BorderRadius.circular(16),
-                ),
+                boxShape:
+                    NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
                 depth: 5,
                 intensity: 0.75,
               ),
-              child: NeumorphicButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                padding: EdgeInsets.zero,
-                child: Container(
-                  height: 50,
-                  width: 100,
-                  color: Colors.blue,
-                  child: Center(
-                    child: Text(
-                      'Save',
-                      style: AppTextStyles().secondaryStyle.copyWith(
-                            color: Colors.white,
-                          ),
-                    ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                height: 50,
+                width: 100,
+                color: Colors.blue,
+                child: Center(
+                  child: Text(
+                    'Save',
+                    style: AppTextStyles()
+                        .secondaryStyle
+                        .copyWith(color: Colors.white),
                   ),
                 ),
               ),

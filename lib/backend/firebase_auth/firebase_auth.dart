@@ -35,7 +35,7 @@ class AuthService {
 
         final userProfileProvider = context.read<UserProfileProvider>();
         final userProfile =
-            await userProfileProvider.getUserData(userCredential.user!.uid);
+            await userProfileProvider.getUserProfile(userCredential.user!.uid);
 
         if (userProfile != null) {
           userProfileProvider.setCurrentUserProfile(userProfile);
@@ -76,18 +76,21 @@ class AuthService {
         await TokenManager.saveToken(value!);
 
         final UserProfileModel newUser = UserProfileModel(
-          uid: userCredential.user!.uid,
-          name: name,
-          email: email,
-          gender: gender,
-          image: '',
-          age: age,
-          bio: '',
-          address: '',
-          interests: '',
-          seeking: Seeking(age: '', gender: ''),
-          uploads: [],
-        );
+            uid: userCredential.user!.uid,
+            name: name,
+            email: email,
+            gender: gender,
+            image: '',
+            age: age,
+            bio: '',
+            address: '',
+            interests: '',
+            seeking: Seeking(fromAge: '', toAge: '', gender: ''),
+            uploads: [],
+            isVerified: false,
+            documentStatus: 1,
+            userStatus: "",
+            userSubscription: UserSubscription());
         await context.read<UserProfileProvider>().addNewUser(newUser, context);
 
         await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
@@ -131,18 +134,21 @@ class AuthService {
             await TokenManager.saveToken(value!);
 
             final UserProfileModel newUser = UserProfileModel(
-              uid: userCredential.user!.uid,
-              name: '',
-              email: '',
-              gender: '',
-              image: '',
-              age: '',
-              bio: '',
-              address: '',
-              interests: '',
-              seeking: Seeking(age: '', gender: ''),
-              uploads: [],
-            );
+                uid: userCredential.user!.uid,
+                name: "",
+                email: userCredential.user!.email,
+                gender: "",
+                image: '',
+                age: '',
+                bio: '',
+                address: '',
+                interests: '',
+                seeking: Seeking(fromAge: '', toAge: '', gender: ''),
+                uploads: [],
+                isVerified: false,
+                documentStatus: 1,
+                userStatus: "",
+                userSubscription: UserSubscription());
             await context
                 .read<UserProfileProvider>()
                 .addNewUser(newUser, context);
@@ -160,7 +166,7 @@ class AuthService {
 
           await context
               .read<UserProfileProvider>()
-              .getUserData(userCredential.user!.uid)
+              .getUserProfile(userCredential.user!.uid)
               .then((value) async {
             if (value != null) {
               Provider.of<UserProfileProvider>(context, listen: false)

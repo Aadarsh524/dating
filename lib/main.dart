@@ -5,6 +5,7 @@ import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/dashboard_provider.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/providers/loading_provider.dart';
+import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -15,6 +16,7 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   Stripe.publishableKey =
       "pk_test_51PVaJmAL5L5DqNFSGw0OoujleoUPkpH0nsWCQ1RyVlPruzpInF7Gv9iwtT2qd1WIOB19GJeNLJNeAqOFDidbqI0V00slOhPWCy";
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -26,6 +28,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => ChatMessageProvider()),
     ChangeNotifierProvider(create: (_) => ChatRoomProvider()),
     ChangeNotifierProvider(create: (_) => UserInteractionProvider()),
+    ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
   ], child: const MyApp()));
 }
 

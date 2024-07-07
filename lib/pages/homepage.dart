@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     context
         .read<UserProfileProvider>()
-        .getUserData(user!.uid)
+        .getUserProfile(user!.uid)
         .then((value) async {
       if (value != null) {
         context.read<UserProfileProvider>().setCurrentUserProfile(value);

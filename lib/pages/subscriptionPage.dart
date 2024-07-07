@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:dating/datamodel/subscription_model.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/settingpage.dart';
+import 'package:dating/providers/loading_provider.dart';
+import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/foundation.dart';
@@ -18,6 +22,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -48,46 +53,77 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     });
   }
 
-  Map<String, dynamic>? paymentIntent;
-
   Future<void> makePayment(String amount) async {
+    context.read<LoadingProvider>().setLoading(true);
     log("make payment");
     try {
       // Step 1: Create Payment Intent
-      paymentIntent = await createPaymentIntent(amount);
+      final paymentIntent = await createPaymentIntent(amount);
+      final clientSecret = paymentIntent['client_secret'];
+      log(clientSecret);
 
       // Step 2: Initialize Payment Sheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: paymentIntent!["client_secret"],
+          paymentIntentClientSecret: clientSecret,
           merchantDisplayName: "Your Company Name",
-          googlePay: PaymentSheetGooglePay(
+          googlePay: const PaymentSheetGooglePay(
             merchantCountryCode: "US",
             currencyCode: "USD",
             testEnv: true,
           ),
           style: ThemeMode.light,
-          // Additional configuration can be added here
+          billingDetails: const BillingDetails(
+            email: 'email@example.com',
+            phone: '+48888000888',
+            address: Address(
+              city: 'Houston',
+              country: 'US',
+              line1: '1459 Circle Drive',
+              line2: '',
+              state: 'Texas',
+              postalCode: '77063',
+            ),
+          ),
         ),
       );
 
       // Step 3: Display Payment Sheet
-      await displayPaymentSheet();
+      await displayPaymentSheet(clientSecret);
     } catch (e) {
       log(e.toString());
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Payment failed: ${e.toString()}')),
       );
+    } finally {
+      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
-  Future<void> displayPaymentSheet() async {
+  Future<void> displayPaymentSheet(String paymentIntentToken) async {
+    User? user = FirebaseAuth.instance.currentUser;
+
     try {
       log("not executed");
       await Stripe.instance.presentPaymentSheet();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Payment successful!')),
-      );
+
+      final subscriptionProvider = context.read<SubscriptionProvider>();
+
+      final subscriptionModel = SubscriptionModel(
+          userId: user!.uid,
+          productId: '1',
+          duration: "4",
+          planType: '1',
+          paymentMethod: "Card",
+          paymentToken: paymentIntentToken);
+      final result =
+          await subscriptionProvider.buySubcription(subscriptionModel, context);
+      if (result == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment successful!')),
+        );
+      }
     } catch (e) {
       log("executed");
       if (e is StripeException) {
@@ -105,17 +141,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   createPaymentIntent(String amount) async {
     try {
-      Map<String, dynamic> body = {
-        "amount": amount,
+      final body = {
+        "amount": '1000',
         "currency": "USD",
-        "payment_method_types[]": "card",
       };
       http.Response response = await http.post(
-          Uri.parse("https://api.stripe.com/v1/payments_intents"),
+          Uri.parse('https://api.stripe.com/v1/payment_intents'),
           body: body,
           headers: {
-            "Authorization": "Bearer sk_test_4eC39HqLyjWDarjtT1zdp7dc",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Authorization":
+                "Bearer  sk_test_51PVaJmAL5L5DqNFSUgCjWSSbZXrwyoErFjgdCOQMIrK4FoDG5cz3IikJjnpZ6LOJm8u37JrjUjqDDcKQ9eRqXcO700J2wqRvgK",
+            "Content-Type": "application/x-www-form-urlencoded",
           });
       return json.decode(response.body);
     } catch (e) {
@@ -127,17 +163,22 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     Subscription(
       type: 'Basic',
       pricePerWeek: '\$5',
-      description:
-          'Description of the tier list will go here, copy should be concise and impactful.',
+      description: '.',
       subTitle: 'Get started with basic features',
-      features: ['Feature 1', 'Feature 2', 'Feature 3'],
+      features: [
+        'Feature 1',
+      ],
     ),
     Subscription(
       type: 'Plus',
       pricePerWeek: '\$10',
       description: 'An intermediate plan for regular users.',
       subTitle: 'Enjoy more features and flexibility',
-      features: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4'],
+      features: [
+        'Feature 1',
+        'Feature 2',
+        'Feature 3',
+      ],
     ),
     Subscription(
       type: 'Gold',
@@ -149,7 +190,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         'Feature 2',
         'Feature 3',
         'Feature 4',
-        'Feature 5'
       ],
     ),
   ];
@@ -175,47 +215,53 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget MobileHome() {
     return Scaffold(
-      body: Column(children: [
-        SizedBox(
-          height: 10,
-        ),
-
-        // icons
-
-        // post
-        SizedBox(
-          height: 30,
-        ),
-
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-            child: GridView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, // Adjust to show 2 cards per row
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-                childAspectRatio: 3 / 4,
-              ),
-              itemCount: subscriptions.length,
-              itemBuilder: (context, index) {
-                final subscription = subscriptions[index];
-
-                return SubscriptionCard(
-                  subscription: subscription,
-                  onTap: () {
-                    makePayment(subscription.pricePerWeek);
-                  },
-                );
-              },
+      body: Consumer<LoadingProvider>(
+        builder: (context, loading, _) {
+          if (loading.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return Column(children: [
+            const SizedBox(
+              height: 10,
             ),
-          ),
-        ),
-        SizedBox(
-          height: 25,
-        ),
-      ]),
+
+            // icons
+
+            // post
+            const SizedBox(
+              height: 30,
+            ),
+
+            Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                child: GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 1, // Adjust to show 2 cards per row
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20,
+                    childAspectRatio: 3 / 4,
+                  ),
+                  itemCount: subscriptions.length,
+                  itemBuilder: (context, index) {
+                    return SubscriptionCard(
+                      subscription: subscriptions[index],
+                      onTap: () {
+                        makePayment(subscriptions[index].pricePerWeek);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+          ]);
+        },
+      ),
       // bottomSheet: NavBar(),
     );
   }
@@ -224,11 +270,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -240,10 +286,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => MyProfilePage()));
+                                  builder: (context) => const MyProfilePage()));
                         },
-                        child: profileButton()),
-                    SizedBox(
+                        child: const profileButton()),
+                    const SizedBox(
                       width: 20,
                     ),
                     Text(
@@ -274,11 +320,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.blue),
+                                borderSide:
+                                    const BorderSide(color: Colors.blue),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.blue),
+                                borderSide:
+                                    const BorderSide(color: Colors.blue),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                             ),
@@ -291,7 +339,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       onPressed: () {
                         _toggleSearchField();
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.search,
                       ),
                       labelText: null,
@@ -305,9 +353,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         Navigator.push(
                             context,
                             CupertinoPageRoute(
-                                builder: (context) => SettingPage()));
+                                builder: (context) => const SettingPage()));
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.settings,
                       ),
                       labelText: null,
@@ -318,7 +366,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ),
           ),
 
-          SizedBox(
+          const SizedBox(
             height: 40,
           ),
 
@@ -562,7 +610,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 // NavBarDesktop(),
 
 // posts
-                SizedBox(
+                const SizedBox(
                   width: 20,
                 ),
                 Expanded(
@@ -580,16 +628,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                               height: 0,
                             ),
                           ),
-                          Spacer(),
+                          const Spacer(),
 // switch
                           Neumorphic(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 2),
                               child: DropdownButton<String>(
                                 underline: Container(),
                                 style: AppTextStyles().secondaryStyle,
                                 value: duration,
-                                icon: Icon(
+                                icon: const Icon(
                                     Icons.arrow_drop_down), // Dropdown icon
                                 onChanged: (String? newValue) {
                                   setState(() {
@@ -616,10 +664,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                   );
                                 }).toList(),
                               )),
-                          Spacer(),
+                          const Spacer(),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 30,
                       ),
                       Expanded(
@@ -627,7 +675,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 100),
                           child: GridView.builder(
                             gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
+                                const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount:
                                   3, // Adjust to show 2 cards per row
                               mainAxisSpacing: 20,
@@ -664,7 +712,7 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
       child: Container(
@@ -700,127 +748,136 @@ class Subscription {
 // ignore: must_be_immutable
 class SubscriptionCard extends StatelessWidget {
   final Subscription subscription;
-
-  VoidCallback? onTap;
+  final VoidCallback? onTap;
 
   SubscriptionCard({required this.subscription, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Neumorphic(
-      style: NeumorphicStyle(
-        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)),
-        depth: 5,
-        intensity: 0.75,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              subscription.type,
-              style: GoogleFonts.poppins(
-                color: Color(0xFF1A1A1A),
-                fontSize: 27,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.54,
-              ),
-            ),
-            SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Neumorphic(
+          style: NeumorphicStyle(
+            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)),
+            depth: 5,
+            intensity: 0.75,
+            color: Colors.white,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  subscription.pricePerWeek,
+                  subscription.type,
                   style: GoogleFonts.poppins(
-                    color: Color(0xFF1A1A1A),
+                    color: const Color(0xFF1A1A1A),
                     fontSize: 27,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.54,
                   ),
                 ),
-                SizedBox(
-                  width: 5,
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      subscription.pricePerWeek,
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF1A1A1A),
+                        fontSize: 27,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.54,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      '/ week',
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF1A1A1A),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                  ],
                 ),
-//  per week
+                const SizedBox(height: 8),
                 Text(
-                  '/ week',
+                  subscription.description,
                   style: GoogleFonts.poppins(
-                    color: Color(0xFF1A1A1A),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF667085),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Container(
+                  height: 1,
+                  color: const Color(0xFFD9D9D9),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  subscription.subTitle,
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFF667085),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Column(
+                  children: subscription.features
+                      .map((feature) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              children: [
+                                SvgPicture.asset(AppIcons.check),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    feature,
+                                    style: GoogleFonts.poppins(
+                                      color: const Color(0xFF1A1A1A),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: onTap,
+                  child: Container(
+                    width: double.infinity,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    decoration: ShapeDecoration(
+                      color: const Color(0xFF5400FF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Subscribe Now',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 )
               ],
             ),
-            SizedBox(height: 8),
-            Text(
-              subscription.description,
-              style: GoogleFonts.poppins(
-                color: Color(0xFF667085),
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            SizedBox(height: 15),
-            Container(
-              height: 1,
-              decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-            ),
-            SizedBox(height: 15),
-            Text(
-              subscription.subTitle,
-              style: GoogleFonts.poppins(
-                color: Color(0xFF667085),
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            SizedBox(height: 16),
-            ...subscription.features.map((feature) => Row(
-                  children: [
-                    SvgPicture.asset(AppIcons.check),
-                    SizedBox(width: 8),
-                    Text(
-                      feature,
-                      style: GoogleFonts.poppins(
-                        color: Color(0xFF1A1A1A),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                )),
-            // subscribe button
-            Spacer(),
-
-            GestureDetector(
-              onTap: onTap,
-              child: Container(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                decoration: ShapeDecoration(
-                  color: Color(0xFF5400FF),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
-                ),
-                child: Center(
-                  child: Text(
-                    'Subscribe Now',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

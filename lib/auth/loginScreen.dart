@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (user != null) {
         var value =
-            await context.read<UserProfileProvider>().getUserData(user.uid);
+            await context.read<UserProfileProvider>().getUserProfile(user.uid);
 
         if (value != null) {
           Provider.of<UserProfileProvider>(context, listen: false)
