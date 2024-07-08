@@ -1,6 +1,7 @@
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/pages/state_loader.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -31,7 +32,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
 
     if (result != null) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const HomePage()));
+          context, MaterialPageRoute(builder: (context) => const StateLoader()));
       flag = true;
       return flag;
     } else {
