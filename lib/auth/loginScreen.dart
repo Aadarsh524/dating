@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const   LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -20,13 +20,13 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // Check if user is logged in when the widget is initialized
+    print("object");
     checkLoginStatus();
   }
 
   void checkLoginStatus() async {
     try {
-      context.read<LoadingProvider>().setLoading(true);
+      await context.read<LoadingProvider>().setLoading(true);
 
       User? user = FirebaseAuth.instance.currentUser;
 
