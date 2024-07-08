@@ -47,7 +47,7 @@ class SubscriptionProvider extends ChangeNotifier {
     }
   }
 
-  createPaymentIntent(SubscriptionModel subscription) async {
+  Future<String> viewSubcription() async {
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
@@ -55,19 +55,21 @@ class SubscriptionProvider extends ChangeNotifier {
     }
 
     try {
-      Map<String, dynamic> body = {
-        "amount": "10",
-        "currency": "USD",
-        "payment_method_types[]": "card",
-      };
-      http.Response response =
-          await http.post(Uri.parse('$api/Subscription'), body: body, headers: {
-        "Authorization": "Bearer sk_test_4eC39HqLyjWDarjtT1zdp7dc",
-        "Content-Type": "application/x-www-form-urlencoded",
-      });
-      return json.decode(response.body);
+      final response = await http.get(
+        Uri.parse('$api/admin/subscriptions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return '';
     } catch (e) {
-      throw Exception(e.toString());
+      print(e.toString());
+      rethrow;
     }
   }
 }
