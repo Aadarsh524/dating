@@ -3,6 +3,7 @@
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/pages/homepage.dart';
+import 'package:dating/pages/state_loader.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -36,7 +37,7 @@ class _LoginMobileState extends State<LoginMobile> {
 
     if (result != null) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const HomePage()));
+          context, MaterialPageRoute(builder: (context) => const StateLoader()));
       return true;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
