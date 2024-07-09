@@ -1,24 +1,31 @@
 import 'dart:convert';
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/platform/platform_mobile.dart';
-import 'package:dating/providers/loading_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 class CallProvider extends ChangeNotifier {
+  bool _isCallLoading = false;
+
+  bool get isCallLoading => _isCallLoading;
+
+  Future<void> setCallLoading(bool value) async {
+    _isCallLoading = value;
+    notifyListeners();
+  }
+
   Future<bool> createRoom(
-      String roomId,
-      Map<String, dynamic> offer,
-      String callerCandidateUid,
-      String calleeCandidateUid,
-      BuildContext context) async {
+    String roomId,
+    Map<String, dynamic> offer,
+    String callerCandidateUid,
+    String calleeCandidateUid,
+  ) async {
+    setCallLoading(true);
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
     try {
       final response = await http.post(
         Uri.parse('$api/api/Call/createRoom'),
@@ -43,18 +50,19 @@ class CallProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setCallLoading(false);
     }
   }
 
-  Future<bool> updateRoom(
-      String roomId, String sdp, String type, BuildContext context) async {
+  Future<bool> updateRoom(String roomId, String sdp, String type) async {
+    setCallLoading(true);
+
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.post(
         Uri.parse('$api/api/Call/room/$roomId'),
@@ -77,18 +85,20 @@ class CallProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setCallLoading(false);
     }
   }
 
   Future<bool> addIceCandidate(String roomId, bool isCaller, String candidate,
-      String sdpMid, int sdpMLineIndex, BuildContext context) async {
+      String sdpMid, int sdpMLineIndex) async {
+    setCallLoading(true);
+
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.post(
         Uri.parse('$api/api/Call/addIceCandidate'),
@@ -114,7 +124,7 @@ class CallProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setCallLoading(false);
     }
   }
 }

@@ -5,9 +5,7 @@ import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -50,7 +48,7 @@ class _SettingPageState extends State<SettingPage> {
     return Scaffold(
       body: ListView(
         children: [
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
@@ -65,11 +63,11 @@ class _SettingPageState extends State<SettingPage> {
                   labelText: null,
                 ),
                 Text('Settings', style: AppTextStyles().primaryStyle),
-                SizedBox(width: 30),
+                const SizedBox(width: 30),
               ],
             ),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: NeumorphicToggle(
@@ -170,13 +168,13 @@ class _SettingPageState extends State<SettingPage> {
               ),
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Container(
             height: MediaQuery.of(context).size.height,
             child: IndexedStack(
               index: _selectedIndex,
               children: [
-                SubscriptionPage(),
+                const SubscriptionPage(),
                 profileTab(),
                 Container(
                   color: Colors.orange,
@@ -854,7 +852,7 @@ class _SettingPageState extends State<SettingPage> {
                                     index: _selectedIndex,
                                     children: [
                                       //for billing
-                                      SubscriptionPage(),
+                                      const SubscriptionPage(),
 
                                       // Container(
                                       //     color: Colors.green,

@@ -2,15 +2,23 @@ import 'dart:convert';
 
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/platform/platform.dart';
-import 'package:dating/providers/loading_provider.dart';
+
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 import '../../backend/MongoDB/token_manager.dart';
 
 class ChatRoomProvider extends ChangeNotifier {
   ChatRoomModel? _userChatRoomModel;
+
+  bool _isChatRoomLoading = false;
+
+  bool get isChatRoomLoading => _isChatRoomLoading;
+
+  Future<void> setChatRoomLoading(bool value) async {
+    _isChatRoomLoading = value;
+    notifyListeners();
+  }
 
   void setChatRoomProvider(ChatRoomModel chatRoomModel) {
     _userChatRoomModel = chatRoomModel;
@@ -20,7 +28,7 @@ class ChatRoomProvider extends ChangeNotifier {
   ChatRoomModel? get userChatRoomModel => _userChatRoomModel;
 
   Future<void> fetchChatRoom(BuildContext context, uid) async {
-    context.read<LoadingProvider>().setLoading(true);
+    setChatRoomLoading(true);
     try {
       final token = await TokenManager.getToken();
       if (token == null) {
@@ -50,7 +58,7 @@ class ChatRoomProvider extends ChangeNotifier {
     } catch (e) {
       rethrow; // Rethrow the exception to handle it in the caller
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setChatRoomLoading(false);
     }
   }
 }

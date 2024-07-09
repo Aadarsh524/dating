@@ -5,10 +5,8 @@ import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/platform/platform_mobile.dart';
 
-import 'package:dating/providers/loading_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 class AdminDashboardProvider extends ChangeNotifier {
   List<UserProfileModel>? _usersListProvider;
@@ -17,6 +15,15 @@ class AdminDashboardProvider extends ChangeNotifier {
   List<UserProfileModel>? get usersList => _usersListProvider;
   List<DocumentVerificationModel>? get documentsList =>
       _documentsVerificationListProvider;
+
+  bool _isAdminDataLoading = false;
+
+  bool get isAdminDataLoading => _isAdminDataLoading;
+
+  Future<void> setAdminLoading(bool value) async {
+    _isAdminDataLoading = value;
+    notifyListeners();
+  }
 
   void setUsers(List<UserProfileModel> usersList) {
     _usersListProvider = usersList;
@@ -29,12 +36,13 @@ class AdminDashboardProvider extends ChangeNotifier {
   }
 
   Future<List<UserProfileModel>> fetchUsers(BuildContext context) async {
+    setAdminLoading(true);
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.get(
         Uri.parse('$api/admin/dashboard/users'),
@@ -60,18 +68,20 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setAdminLoading(true);
     }
   }
 
   Future<List<DashboardResponseModel>> fetchElement(
       BuildContext context) async {
+    setAdminLoading(true);
+
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.get(
         Uri.parse('$api/admin/dashboard/elements'),
@@ -91,17 +101,19 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setAdminLoading(false);
     }
   }
 
   Future<bool> banUser(String userId, BuildContext context) async {
+    setAdminLoading(true);
+
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.post(
         Uri.parse('$api/admin/dashboard/user/ban?userId=$userId'),
@@ -120,17 +132,19 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setAdminLoading(true);
     }
   }
 
   Future<bool> activateUser(String userId, BuildContext context) async {
+    setAdminLoading(true);
+
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.post(
         Uri.parse('$api/admin/dashboard/user/active?userId=$userId'),
@@ -149,17 +163,18 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setAdminLoading(false);
     }
   }
 
   Future<List<UserProfileModel>> fetchDocuments(BuildContext context) async {
+    setAdminLoading(true);
+
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
     try {
       final response = await http.get(
         Uri.parse('$api/admin/ApproveDocument'),
@@ -185,18 +200,20 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setAdminLoading(true);
     }
   }
 
   Future<bool> approveDocument(
       String userId, int approvalStatus, BuildContext context) async {
+    setAdminLoading(true);
+
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.post(
         Uri.parse(
@@ -216,18 +233,20 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setAdminLoading(true);
     }
   }
 
   Future<DocumentVerificationModel?> fetchDocumentById(
       String userId, String id, BuildContext context) async {
+    setAdminLoading(true);
+
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.get(
         Uri.parse('$api/admin/ApproveDocument/$id?userId=$userId'),
@@ -248,7 +267,7 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setAdminLoading(true);
     }
   }
 }

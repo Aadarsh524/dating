@@ -10,6 +10,15 @@ import '../../backend/MongoDB/token_manager.dart';
 class ChatMessageProvider extends ChangeNotifier {
   ChatMessageModel? chatMessageModel;
 
+  bool _isMessagesLoading = false;
+
+  bool get isMessagesLoading => _isMessagesLoading;
+
+  Future<void> setMessagesLoading(bool value) async {
+    _isMessagesLoading = value;
+    notifyListeners();
+  }
+
   void setChatMessageProvider(ChatMessageModel chatRoomModel) {
     chatMessageModel = chatRoomModel;
     notifyListeners();
@@ -19,6 +28,7 @@ class ChatMessageProvider extends ChangeNotifier {
 
   Future<void> sendChat(
       SendMessageModel sendMessageModel, String chatID, String uid) async {
+    setMessagesLoading(true);
     try {
       // Get API endpoint
       String api = getApiEndpoint();
@@ -67,11 +77,14 @@ class ChatMessageProvider extends ChangeNotifier {
       }
     } catch (e) {
       print(e.toString());
+    } finally {
+      setMessagesLoading(false);
     }
   }
 
   Future<ChatMessageModel?> getMessage(String chatID, String uid) async {
     String api = getApiEndpoint();
+    setMessagesLoading(true);
 
     try {
       var headers = {'Content-Type': 'application/json'};
@@ -97,6 +110,8 @@ class ChatMessageProvider extends ChangeNotifier {
       }
     } catch (e) {
       return null;
+    } finally {
+      setMessagesLoading(false);
     }
   }
 }

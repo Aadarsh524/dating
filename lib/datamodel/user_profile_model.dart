@@ -1,93 +1,86 @@
 class UserProfileModel {
-  String? id;
   String? uid;
+  String? image;
   String? name;
   String? email;
-  String? gender;
-  String? image;
+
   String? address;
   String? age;
+  String? gender;
   String? bio;
-  String? userStatus;
-  String? createdTimestamp;
   String? interests;
+  String? userStatus;
+  String? subscriptionStatus;
+  String? createdTimestamp;
   bool? isVerified;
   int? documentStatus;
   Seeking? seeking;
   List<Uploads>? uploads;
-  UserSubscription? userSubscription;
 
   UserProfileModel(
-      {this.id,
-      this.uid,
+      {this.uid,
+      this.image,
       this.name,
       this.email,
-      this.gender,
-      this.image,
       this.address,
       this.age,
+      this.gender,
       this.bio,
-      this.userStatus,
-      this.createdTimestamp,
       this.interests,
+      this.userStatus,
+      this.subscriptionStatus,
+      this.createdTimestamp,
       this.isVerified,
       this.documentStatus,
       this.seeking,
-      this.uploads,
-      this.userSubscription});
+      this.uploads});
 
   UserProfileModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
     uid = json['uid'];
+    image = json['image'];
     name = json['name'];
     email = json['email'];
-    gender = json['gender'];
-    image = json['image'];
     address = json['address'];
     age = json['age'];
+    gender = json['gender'];
     bio = json['bio'];
-    userStatus = json['userStatus'];
-    createdTimestamp = json['createdTimestamp'];
     interests = json['interests'];
+    userStatus = json['userStatus'];
+    subscriptionStatus = json['subscriptionStatus'];
+    createdTimestamp = json['createdTimestamp'];
     isVerified = json['isVerified'];
     documentStatus = json['documentStatus'];
     seeking =
-        json['seeking'] != null ? new Seeking.fromJson(json['seeking']) : null;
+        json['seeking'] != null ? Seeking.fromJson(json['seeking']) : null;
     if (json['uploads'] != null) {
       uploads = <Uploads>[];
       json['uploads'].forEach((v) {
-        uploads!.add(new Uploads.fromJson(v));
+        uploads!.add(Uploads.fromJson(v));
       });
     }
-    userSubscription = json['userSubscription'] != null
-        ? new UserSubscription.fromJson(json['userSubscription'])
-        : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['uid'] = this.uid;
-    data['name'] = this.name;
-    data['email'] = this.email;
-    data['gender'] = this.gender;
-    data['image'] = this.image;
-    data['address'] = this.address;
-    data['age'] = this.age;
-    data['bio'] = this.bio;
-    data['userStatus'] = this.userStatus;
-    data['createdTimestamp'] = this.createdTimestamp;
-    data['interests'] = this.interests;
-    data['isVerified'] = this.isVerified;
-    data['documentStatus'] = this.documentStatus;
-    if (this.seeking != null) {
-      data['seeking'] = this.seeking!.toJson();
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['uid'] = uid;
+    data['image'] = image;
+    data['name'] = name;
+    data['email'] = email;
+    data['address'] = address;
+    data['age'] = age;
+    data['gender'] = gender;
+    data['bio'] = bio;
+    data['interests'] = interests;
+    data['userStatus'] = userStatus;
+    data['subscriptionStatus'] = subscriptionStatus;
+    data['createdTimestamp'] = createdTimestamp;
+    data['isVerified'] = isVerified;
+    data['documentStatus'] = documentStatus;
+    if (seeking != null) {
+      data['seeking'] = seeking!.toJson();
     }
-    if (this.uploads != null) {
-      data['uploads'] = this.uploads!.map((v) => v.toJson()).toList();
-    }
-    if (this.userSubscription != null) {
-      data['userSubscription'] = this.userSubscription!.toJson();
+    if (uploads != null) {
+      data['uploads'] = uploads!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -107,10 +100,10 @@ class Seeking {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['fromAge'] = this.fromAge;
-    data['toAge'] = this.toAge;
-    data['gender'] = this.gender;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['fromAge'] = fromAge;
+    data['toAge'] = toAge;
+    data['gender'] = gender;
     return data;
   }
 }
@@ -131,56 +124,11 @@ class Uploads {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['file'] = this.file;
-    data['name'] = this.name;
-    data['uploadDate'] = this.uploadDate;
-    return data;
-  }
-}
-
-class UserSubscription {
-  String? id;
-  String? uid;
-  String? transactionId;
-  String? productId;
-  String? subscriptionDate;
-  String? expirationDate;
-  String? duration;
-  String? planType;
-
-  UserSubscription(
-      {this.id,
-      this.uid,
-      this.transactionId,
-      this.productId,
-      this.subscriptionDate,
-      this.expirationDate,
-      this.duration,
-      this.planType});
-
-  UserSubscription.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    uid = json['uid'];
-    transactionId = json['transactionId'];
-    productId = json['productId'];
-    subscriptionDate = json['subscriptionDate'];
-    expirationDate = json['expirationDate'];
-    duration = json['duration'];
-    planType = json['planType'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['uid'] = this.uid;
-    data['transactionId'] = this.transactionId;
-    data['productId'] = this.productId;
-    data['subscriptionDate'] = this.subscriptionDate;
-    data['expirationDate'] = this.expirationDate;
-    data['duration'] = this.duration;
-    data['planType'] = this.planType;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['id'] = id;
+    data['file'] = file;
+    data['name'] = name;
+    data['uploadDate'] = uploadDate;
     return data;
   }
 }

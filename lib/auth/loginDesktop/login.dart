@@ -1,8 +1,7 @@
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/pages/homepage.dart';
-import 'package:dating/backend/firebase_auth/firebase_auth.dart';
 import 'package:dating/pages/state_loader.dart';
-import 'package:dating/providers/loading_provider.dart';
+import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
@@ -23,34 +22,38 @@ class _LoginDesktopState extends State<LoginDesktop> {
   bool _isChecked = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
 
-  Future<bool> _login(BuildContext context) async {
-    String? result = await _authService.signInWithEmailAndPassword(
-        _emailController.text.trim(), _passwordController.text.trim(), context);
-    bool flag = false;
+  Future<void> _login(BuildContext context) async {
+    final authenticationProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    String? result = await authenticationProvider.signInWithEmailAndPassword(
+        email, password, context);
 
     if (result != null) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const StateLoader()));
-      flag = true;
-      return flag;
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                const StateLoaderPage()), // Replace StateLoader with your actual widget
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error login: $result'),
         ),
       );
-      return flag;
-      // Login failed, show error message to the user
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LoadingProvider>(builder: (context, loadingProvider, _) {
-      print(loadingProvider.isLoading);
-      return loadingProvider.isLoading
+    return Consumer<AuthenticationProvider>(
+        builder: (context, authenticationProvider, _) {
+      return authenticationProvider.isAuthLoading
           ? Container(
               color: Colors.white, // Add background color with opacity
               child: const Center(
@@ -304,15 +307,7 @@ class _LoginDesktopState extends State<LoginDesktop> {
                               height: 55,
                               child: Button(
                                 onPressed: () {
-                                  _login(context).then((value) {
-                                    if (value) {
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const HomePage()));
-                                    }
-                                  });
+                                  _login(context);
                                 },
                                 text: 'Login',
                               ),
@@ -344,18 +339,16 @@ class _LoginDesktopState extends State<LoginDesktop> {
                               height: 55,
                               child: Button(
                                 onPressed: () {
-                                  _authService
+                                  authenticationProvider
                                       .signInWithGoogle(context)
                                       .then((user) {
                                     if (user != null) {
-                                      // Sign-in successful, navigate to home page
                                       Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const HomePage()));
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => const HomePage()),
+                                      );
                                     } else {
-                                      // Sign-in canceled or failed, show error message (optional)
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         const SnackBar(

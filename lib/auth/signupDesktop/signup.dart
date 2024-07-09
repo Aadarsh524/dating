@@ -1,12 +1,12 @@
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/homepage.dart';
-import 'package:dating/backend/firebase_auth/firebase_auth.dart';
+import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/utils/colors.dart';
-// import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/textField.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,21 +25,17 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
   bool _isChecked = false;
   String? selectedGender;
   String _selectedAge = '18'; // Initial age
-  final AuthService _auth = AuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmpasswordController =
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
 
-  Future<bool> _register(BuildContext context) async {
-    // String? seekingGender;
-    // if (selectedGender == "Male") {
-    //   seekingGender = "Female";
-    // }else{
-    //   seekingGender = "Male";
-    // }
-    bool result = await _auth.registerWithEmailAndPassword(
+  Future<void> _register(BuildContext context) async {
+    final authenticationProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+
+    User? user = await authenticationProvider.registerWithEmailAndPassword(
       context,
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
@@ -48,7 +44,7 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
       age: _selectedAge,
     );
 
-    if (result) {
+    if (user != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration successful!'),
@@ -61,16 +57,18 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Registration error: $result'),
+        const SnackBar(
+          content: Text('Registration error: Could not register.'),
         ),
       );
     }
-    return false;
   }
 
   @override
   Widget build(BuildContext context) {
+    final authenticationProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+
     return Stack(
       children: [
         ListView(
@@ -692,14 +690,16 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
                           height: 55,
                           child: Button(
                             onPressed: () {
-                              _auth.signInWithGoogle(context).then((user) {
+                              authenticationProvider
+                                  .signInWithGoogle(context)
+                                  .then((user) {
                                 if (user != null) {
                                   Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => const HomePage()));
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => const HomePage()),
+                                  );
                                 } else {
-                                  // Sign-in canceled or failed, show error message (optional)
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(

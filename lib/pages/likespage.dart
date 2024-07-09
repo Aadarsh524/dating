@@ -64,9 +64,9 @@ class _LikePageState extends State<LikePage> {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -75,10 +75,10 @@ class _LikePageState extends State<LikePage> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back),
                 ),
                 // Title
-                Text(
+                const Text(
                   'Likes',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
@@ -92,11 +92,11 @@ class _LikePageState extends State<LikePage> {
               ],
             ),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           // Tab bar
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
                 // Liked Me tab
@@ -109,7 +109,7 @@ class _LikePageState extends State<LikePage> {
                     });
                   },
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 // My Likes tab
                 TabButton(
                   text: 'My Likes',
@@ -120,7 +120,7 @@ class _LikePageState extends State<LikePage> {
                     });
                   },
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 // Mutual Likes tab
                 TabButton(
                   text: 'Mutual Likes',
@@ -134,7 +134,7 @@ class _LikePageState extends State<LikePage> {
               ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           // List of liked users based on tab selection
           Expanded(
             child: Consumer<UserInteractionProvider>(
@@ -154,7 +154,7 @@ class _LikePageState extends State<LikePage> {
           ),
         ],
       ),
-      bottomSheet: NavBar(),
+      bottomSheet: const NavBar(),
     );
   }
 
@@ -163,7 +163,7 @@ class _LikePageState extends State<LikePage> {
         provider.userInteractionModel?.likedByUsers;
 
     if (likedMeUsers == null || likedMeUsers.isEmpty) {
-      return Center(child: Text('No users have liked you yet.'));
+      return const Center(child: Text('No users have liked you yet.'));
     }
 
     return Padding(
@@ -173,7 +173,7 @@ class _LikePageState extends State<LikePage> {
         height: 900,
         child: GridView.builder(
           clipBehavior: Clip.none,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, // Number of columns in the grid
             crossAxisSpacing: 15, // Horizontal spacing between items
             mainAxisSpacing: 15, // Vertical spacing between items
@@ -216,7 +216,7 @@ class _LikePageState extends State<LikePage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           SvgPicture.asset('assets/icons/heartoutline.svg'),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           SvgPicture.asset('assets/icons/chatoutline.svg'),
                         ],
                       ),
@@ -241,7 +241,7 @@ class _LikePageState extends State<LikePage> {
                                 ),
                               ),
                               // gender
-                              Icon(
+                              const Icon(
                                 "male" == 'male' ? Icons.male : Icons.female,
                                 color: Colors.white,
                               ),
@@ -283,7 +283,7 @@ class _LikePageState extends State<LikePage> {
     List<LikedUsers>? myLikesUsers = provider.userInteractionModel?.likedUsers;
 
     if (myLikesUsers == null || myLikesUsers.isEmpty) {
-      return Center(child: Text('You have not liked anyone yet.'));
+      return const Center(child: Text('You have not liked anyone yet.'));
     }
 
     return Padding(
@@ -293,7 +293,7 @@ class _LikePageState extends State<LikePage> {
         height: 900,
         child: GridView.builder(
           clipBehavior: Clip.none,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, // Number of columns in the grid
             crossAxisSpacing: 15, // Horizontal spacing between items
             mainAxisSpacing: 15, // Vertical spacing between items
@@ -336,7 +336,7 @@ class _LikePageState extends State<LikePage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           SvgPicture.asset('assets/icons/heartoutline.svg'),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           SvgPicture.asset('assets/icons/chatoutline.svg'),
                         ],
                       ),
@@ -361,7 +361,7 @@ class _LikePageState extends State<LikePage> {
                                 ),
                               ),
                               // gender
-                              Icon(
+                              const Icon(
                                 "male" == 'male' ? Icons.male : Icons.female,
                                 color: Colors.white,
                               ),
@@ -405,7 +405,7 @@ class _LikePageState extends State<LikePage> {
         provider.userInteractionModel?.mutualLikes;
 
     if (mutualLikesUsers == null || mutualLikesUsers.isEmpty) {
-      return Center(child: Text('You have no mutual likes yet.'));
+      return const Center(child: Text('You have no mutual likes yet.'));
     }
 
     return Padding(
@@ -415,7 +415,7 @@ class _LikePageState extends State<LikePage> {
         height: 900,
         child: GridView.builder(
           clipBehavior: Clip.none,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, // Number of columns in the grid
             crossAxisSpacing: 15, // Horizontal spacing between items
             mainAxisSpacing: 15, // Vertical spacing between items
@@ -458,7 +458,7 @@ class _LikePageState extends State<LikePage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           SvgPicture.asset('assets/icons/heartoutline.svg'),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           SvgPicture.asset('assets/icons/chatoutline.svg'),
                         ],
                       ),
@@ -483,7 +483,7 @@ class _LikePageState extends State<LikePage> {
                                 ),
                               ),
                               // gender
-                              Icon(
+                              const Icon(
                                 "male" == 'male' ? Icons.male : Icons.female,
                                 color: Colors.white,
                               ),
@@ -529,7 +529,7 @@ class _LikePageState extends State<LikePage> {
         height: 900,
         child: GridView.builder(
           clipBehavior: Clip.none,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4, // Number of columns in the grid
             crossAxisSpacing: 15, // Horizontal spacing between items
             mainAxisSpacing: 15, // Vertical spacing between items
@@ -540,7 +540,7 @@ class _LikePageState extends State<LikePage> {
               height: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
+                image: const DecorationImage(
                   image: AssetImage(AppImages.profile), // Image asset path
                   fit: BoxFit
                       .cover, // Adjust how the image should fit inside the container
@@ -571,7 +571,7 @@ class _LikePageState extends State<LikePage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           SvgPicture.asset(AppIcons.heartoutline),
-                          SizedBox(
+                          const SizedBox(
                             width: 8,
                           ),
                           SvgPicture.asset(AppIcons.chatoutline),
@@ -600,7 +600,7 @@ class _LikePageState extends State<LikePage> {
                               ),
 
                               // male female
-                              Icon(
+                              const Icon(
                                 Icons.male,
                                 color: Colors.white,
                               ),
@@ -643,11 +643,11 @@ class _LikePageState extends State<LikePage> {
   Widget DesktopLikePage() {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -661,8 +661,8 @@ class _LikePageState extends State<LikePage> {
                         //     CupertinoPageRoute(
                         //         builder: (context) => ProfilePage()));
                       },
-                      child: profileButton()),
-                  SizedBox(
+                      child: const profileButton()),
+                  const SizedBox(
                     width: 20,
                   ),
                   Text(
@@ -682,7 +682,7 @@ class _LikePageState extends State<LikePage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -695,7 +695,7 @@ class _LikePageState extends State<LikePage> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -709,12 +709,12 @@ class _LikePageState extends State<LikePage> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -729,9 +729,9 @@ class _LikePageState extends State<LikePage> {
                           text: null,
                           labelText: 'Matches',
                           onPressed: () {},
-                          icon: Icon(Icons.people),
+                          icon: const Icon(Icons.people),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // messages
@@ -739,10 +739,10 @@ class _LikePageState extends State<LikePage> {
                           text: null,
                           labelText: 'Messages',
                           onPressed: () {},
-                          icon: Icon(Icons.messenger_outline),
+                          icon: const Icon(Icons.messenger_outline),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // popular
@@ -750,9 +750,9 @@ class _LikePageState extends State<LikePage> {
                           text: null,
                           labelText: 'Popular',
                           onPressed: () {},
-                          icon: Icon(Icons.star),
+                          icon: const Icon(Icons.star),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // photos
@@ -760,10 +760,10 @@ class _LikePageState extends State<LikePage> {
                           text: null,
                           labelText: 'Photos',
                           onPressed: () {},
-                          icon: Icon(Icons.photo_library_sharp),
+                          icon: const Icon(Icons.photo_library_sharp),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // add friemd
@@ -771,10 +771,10 @@ class _LikePageState extends State<LikePage> {
                           text: null,
                           labelText: 'Add Friend',
                           onPressed: () {},
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // online
@@ -782,7 +782,7 @@ class _LikePageState extends State<LikePage> {
                           text: null,
                           labelText: 'Online',
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.circle_outlined,
                             color: Colors.green,
                           ),
@@ -790,7 +790,7 @@ class _LikePageState extends State<LikePage> {
                       ],
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
 
@@ -801,13 +801,14 @@ class _LikePageState extends State<LikePage> {
                         // seeking
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: seeking,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 seeking = newValue!;
@@ -831,20 +832,21 @@ class _LikePageState extends State<LikePage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // country
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: country,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 country = newValue!;
@@ -868,20 +870,21 @@ class _LikePageState extends State<LikePage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // age
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: age,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 age = newValue!;
@@ -917,7 +920,7 @@ class _LikePageState extends State<LikePage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -925,10 +928,10 @@ class _LikePageState extends State<LikePage> {
           child: Row(
             children: [
 // side bar
-              NavBarDesktop(),
+              const NavBarDesktop(),
 
 // posts
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Expanded(
@@ -1066,12 +1069,12 @@ class _LikePageState extends State<LikePage> {
                                 _selectedIndex = index;
                               });
                             },
-                            thumb: Text(''),
+                            thumb: const Text(''),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 25,
                     ),
                     Expanded(
@@ -1093,12 +1096,12 @@ class _LikePageState extends State<LikePage> {
                                     likeListDesktop(),
                                   ],
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 30,
                                 ),
 
 // details
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
 
@@ -1129,7 +1132,7 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
       child: Container(
@@ -1176,7 +1179,7 @@ class TabButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue : Colors.transparent,
           borderRadius: BorderRadius.circular(20),

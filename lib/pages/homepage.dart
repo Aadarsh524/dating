@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:dating/auth/db_client.dart';
-
 import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 
@@ -15,7 +13,6 @@ import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/dashboard_provider.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
-import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/shimmer.dart';
@@ -53,21 +50,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    context
-        .read<UserProfileProvider>()
-        .getUserProfile(user!.uid)
-        .then((value) async {
-      if (value != null) {
-        context.read<UserProfileProvider>().setCurrentUserProfile(value);
-        await DbClient().setData(dbKey: "uid", value: value.uid ?? '');
-        await DbClient().setData(dbKey: "userName", value: value.name ?? '');
-
-        await DbClient().setData(dbKey: "email", value: value.email ?? '');
-      }
-    });
-    context.read<DashboardProvider>().dashboard(1, context);
-
     super.initState();
+
+    context.read<DashboardProvider>().dashboard(1, context);
   }
 
   @override
@@ -233,9 +218,9 @@ class _HomePageState extends State<HomePage> {
           height: 30,
         ),
 
-        Consumer<LoadingProvider>(
-          builder: (context, loading, _) {
-            if (loading.isLoading) {
+        Consumer<DashboardProvider>(
+          builder: (context, dashboardProvider, _) {
+            if (dashboardProvider.isDashboardLoading) {
               return const ShimmerSkeleton(count: 1, height: 250);
             } else {
               return Expanded(
@@ -617,9 +602,9 @@ class _HomePageState extends State<HomePage> {
 
                       //main dashboard section for desktop
                       Expanded(
-                        child: Consumer<LoadingProvider>(
-                            builder: (context, loading, _) {
-                          return loading.isLoading
+                        child: Consumer<DashboardProvider>(
+                            builder: (context, dashboardProvider, _) {
+                          return dashboardProvider.isDashboardLoading
                               ? const ShimmerSkeleton(count: 1, height: 300)
                               : Consumer<DashboardProvider>(
                                   builder: (context, snapshot, _) {
