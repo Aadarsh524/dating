@@ -3,7 +3,7 @@ import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
-import 'package:dating/providers/loading_provider.dart';
+
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/shimmer.dart';
@@ -150,9 +150,9 @@ class _ChatPageState extends State<ChatPage> {
             child: Neumorphic(
               child: Container(
                 padding: const EdgeInsets.only(top: 20),
-                child: Consumer<LoadingProvider>(
-                  builder: (context, loading, _) {
-                    return loading.isLoading
+                child: Consumer<ChatRoomProvider>(
+                  builder: (context, chatRoomProvider, _) {
+                    return chatRoomProvider.isChatRoomLoading
                         ? const ShimmerSkeleton(count: 2, height: 100)
                         : Consumer<ChatRoomProvider>(
                             builder: (context, chatRoomProvider, _) {

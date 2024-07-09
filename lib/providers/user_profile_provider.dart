@@ -10,6 +10,15 @@ import 'package:http/http.dart' as http;
 class UserProfileProvider extends ChangeNotifier {
   UserProfileModel? currentUserProfileModel;
 
+  bool _isProfileLoading = false;
+
+  bool get isProfileLoading => _isProfileLoading;
+
+  Future<void> setProfileLoading(bool value) async {
+    _isProfileLoading = value;
+    notifyListeners();
+  }
+
   void setCurrentUserProfile(UserProfileModel userProfile) {
     currentUserProfileModel = userProfile;
     notifyListeners();
@@ -17,8 +26,8 @@ class UserProfileProvider extends ChangeNotifier {
 
   UserProfileModel? get currentUserProfile => currentUserProfileModel;
 
-  Future<UserProfileModel> addNewUser(
-      UserProfileModel userProfileModel, BuildContext context) async {
+  Future<UserProfileModel> addNewUser(UserProfileModel userProfileModel) async {
+    setProfileLoading(true);
     try {
       String api = getApiEndpoint();
 
@@ -46,11 +55,14 @@ class UserProfileProvider extends ChangeNotifier {
       }
     } catch (e) {
       rethrow;
+    } finally {
+      setProfileLoading(false);
     }
   }
 
   Future<bool> uploadDocumentsForVerification(
       DocumentVerificationModel documentVerificationModel) async {
+    setProfileLoading(true);
     try {
       String api = getApiEndpoint();
       final response = await http.post(
@@ -71,10 +83,13 @@ class UserProfileProvider extends ChangeNotifier {
       }
     } catch (e) {
       rethrow;
+    } finally {
+      setProfileLoading(false);
     }
   }
 
   Future<UserProfileModel?> getUserProfile(uid) async {
+    setProfileLoading(true);
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
@@ -90,18 +105,24 @@ class UserProfileProvider extends ChangeNotifier {
         },
       );
       if (response.statusCode == 200) {
+        final userProfile =
+            UserProfileModel.fromJson(json.decode(response.body));
+        setCurrentUserProfile(userProfile); // Add this line
         notifyListeners();
-        return UserProfileModel.fromJson(json.decode(response.body));
+        return userProfile;
       } else {
         return null;
       }
     } catch (e) {
       rethrow;
+    } finally {
+      setProfileLoading(false);
     }
   }
 
   Future<UserProfileModel> updateUserProfile(
-      BuildContext context, UserProfileModel updatedProfile) async {
+      UserProfileModel updatedProfile) async {
+    setProfileLoading(true);
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
@@ -136,11 +157,13 @@ class UserProfileProvider extends ChangeNotifier {
       }
     } catch (error) {
       rethrow;
+    } finally {
+      setProfileLoading(false);
     }
   }
 
-  Future<Uploads> uploadPost(
-      BuildContext context, newUpload, String uid) async {
+  Future<Uploads> uploadPost(newUpload, String uid) async {
+    setProfileLoading(true);
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
@@ -174,10 +197,13 @@ class UserProfileProvider extends ChangeNotifier {
       }
     } catch (error) {
       rethrow;
+    } finally {
+      setProfileLoading(false);
     }
   }
 
   Future<bool> deletePost(String uid) async {
+    setProfileLoading(true);
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
@@ -210,11 +236,13 @@ class UserProfileProvider extends ChangeNotifier {
       }
     } catch (error) {
       rethrow;
+    } finally {
+      setProfileLoading(false);
     }
   }
 
-  Future<void> updateProfileImage(
-      BuildContext context, base64image, String uid) async {
+  Future<void> updateProfileImage(base64image, String uid) async {
+    setProfileLoading(true);
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
@@ -244,6 +272,8 @@ class UserProfileProvider extends ChangeNotifier {
       } else {}
     } catch (error) {
       print('Error updating profile image: $error');
+    } finally {
+      setProfileLoading(false);
     }
   }
 }

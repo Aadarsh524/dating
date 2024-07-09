@@ -7,7 +7,6 @@ import 'package:dating/datamodel/chat/chat_message_model.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
-import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
@@ -90,8 +89,6 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
       }
     } catch (e) {
       throw Exception(e.toString());
-    } finally {
-      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
@@ -186,49 +183,53 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
               builder: (context, chatMessageProvider, child) {
                 ChatMessageModel? chatRoomModel =
                     chatMessageProvider.userChatMessageModel;
-
-                if (chatRoomModel == null) {
+                if (chatMessageProvider.isMessagesLoading) {
                   return const Center(child: CircularProgressIndicator());
-                }
+                } else {
+                  if (chatRoomModel == null) {
+                    return const Center(child: Text(""));
+                  }
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemCount: chatRoomModel.messages!.length,
-                  itemBuilder: (context, index) {
-                    var reversedMessages =
-                        chatRoomModel.messages!.reversed.toList();
-                    var message = reversedMessages[index];
-                    bool isCurrentUser = message.senderId == user!.uid;
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: chatRoomModel.messages!.length,
+                    itemBuilder: (context, index) {
+                      var reversedMessages =
+                          chatRoomModel.messages!.reversed.toList();
+                      var message = reversedMessages[index];
+                      bool isCurrentUser = message.senderId == user!.uid;
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: isCurrentUser
-                            ? MainAxisAlignment.end
-                            : MainAxisAlignment.start,
-                        children: [
-                          Flexible(
-                            child: Neumorphic(
-                              style: NeumorphicStyle(
-                                color:
-                                    isCurrentUser ? Colors.blue : Colors.white,
-                                depth: 2,
-                                intensity: 0.8,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15, vertical: 10),
-                                child: _buildMessageContent(
-                                    message, isCurrentUser),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: isCurrentUser
+                              ? MainAxisAlignment.end
+                              : MainAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: Neumorphic(
+                                style: NeumorphicStyle(
+                                  color: isCurrentUser
+                                      ? Colors.blue
+                                      : Colors.white,
+                                  depth: 2,
+                                  intensity: 0.8,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 10),
+                                  child: _buildMessageContent(
+                                      message, isCurrentUser),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
               },
             )),
             const SizedBox(height: 10),
@@ -306,7 +307,7 @@ Widget _buildMessageContent(Messages message, bool isCurrentUser) {
             ),
       );
     case 'Image':
-      return _buildImageContent(message.fileName!, isCurrentUser);
+      return _buildImageContent(message.file!.cast<File>(), isCurrentUser);
     // case 'Audio':
     //   return AudioPlayerWidget(audioUrl: message.audioUrl!);
     // case 'Call':

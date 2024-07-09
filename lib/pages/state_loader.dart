@@ -1,57 +1,40 @@
-import 'package:dating/pages/admin/pages/dashboard_page.dart';
-import 'package:dating/providers/chat_provider/call_provider.dart';
-import 'package:dating/providers/chat_provider/chat_room_provider.dart';
-import 'package:dating/providers/dashboard_provider.dart';
-import 'package:dating/providers/subscription_provider.dart';
+import 'package:dating/pages/homepage.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class StateLoader extends StatefulWidget {
-  const StateLoader({super.key});
+class StateLoaderPage extends StatelessWidget {
+  const StateLoaderPage({Key? key}) : super(key: key);
 
-  @override
-  State<StateLoader> createState() => _StateLoaderState();
-}
+  Future<void> _fetchData(BuildContext context) async {
+    firebase.User? user = firebase.FirebaseAuth.instance.currentUser;
 
-class _StateLoaderState extends State<StateLoader> {
-  bool isApiFetched = false;
+    // await context.read<DashboardProvider>().dashboard(1, context);
+    // await context.read<ChatRoomProvider>().fetchChatRoom(context, user!.uid);
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchData();
-  }
+    await context.read<UserProfileProvider>().getUserProfile(user!.uid);
 
-  Future<void> _fetchData() async {
-    try {
-      firebase.User? user = firebase.FirebaseAuth.instance.currentUser;
-      await Future.wait([
-        context.read<DashboardProvider>().dashboard(1, context),
-        context.read<ChatRoomProvider>().fetchChatRoom(context, user!.uid),
-        context.read<UserProfileProvider>().getUserProfile(user.uid),
-        context.read<SubscriptionProvider>().viewSubcription(),
-        // Add more providers here
-      ]);
-      setState(() {
-        isApiFetched = true;
-      });
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: ((context) => DashboardPage())));
-      // Navigate to home screen
-    } catch (e) {
-      print(e.toString());
-      // Handle error
-    }
+    // await context.read<SubscriptionProvider>().viewSubcription();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: isApiFetched ? Container() : CircularProgressIndicator(),
+      body: FutureBuilder(
+        future: _fetchData(context),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const HomePage()),
+              );
+            });
+            return Container();
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
       ),
     );
   }

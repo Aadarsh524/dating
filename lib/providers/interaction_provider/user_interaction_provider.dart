@@ -9,6 +9,15 @@ import 'package:flutter/material.dart';
 class UserInteractionProvider extends ChangeNotifier {
   UserInteractionModel? userInteractionModel;
 
+  bool _isInteractionLoading = false;
+
+  bool get isInteractionLoading => _isInteractionLoading;
+
+  Future<void> setInteractionLoading(bool value) async {
+    _isInteractionLoading = value;
+    notifyListeners();
+  }
+
   void setUserInteractionProvider(UserInteractionModel model) {
     userInteractionModel = model;
     notifyListeners();
@@ -23,6 +32,7 @@ class UserInteractionProvider extends ChangeNotifier {
   }
 
   Future<UserInteractionModel?> getUserInteraction(String userId) async {
+    setInteractionLoading(true);
     try {
       String api = getApiEndpoint();
       final token = await TokenManager.getToken();
@@ -51,10 +61,13 @@ class UserInteractionProvider extends ChangeNotifier {
     } catch (e) {
       print(e.toString());
       return null;
+    } finally {
+      setInteractionLoading(false);
     }
   }
 
   Future<LikedByUsers?> fetchLikesByUser(String userId, int page) async {
+    setInteractionLoading(true);
     try {
       // String api =
       //     getApiEndpoint(); // Replace with your actual API endpoint getter
@@ -80,10 +93,13 @@ class UserInteractionProvider extends ChangeNotifier {
     } catch (e) {
       print(e.toString());
       return null;
+    } finally {
+      setInteractionLoading(false);
     }
   }
 
   Future<LikedUsers?> fetchLikedByUser(String userId, int page) async {
+    setInteractionLoading(true);
     try {
       // String api =
       //     getApiEndpoint(); // Replace with your actual API endpoint getter
@@ -109,10 +125,13 @@ class UserInteractionProvider extends ChangeNotifier {
     } catch (e) {
       print(e.toString());
       return null;
+    } finally {
+      setInteractionLoading(false);
     }
   }
 
   Future<MutualLikes?> fetchMutualLikes(String userId, int page) async {
+    setInteractionLoading(false);
     try {
       // String api =
       //     getApiEndpoint(); // Replace with your actual API endpoint getter
@@ -139,10 +158,13 @@ class UserInteractionProvider extends ChangeNotifier {
     } catch (e) {
       print(e.toString());
       return null;
+    } finally {
+      setInteractionLoading(false);
     }
   }
 
   Future<void> likeUser(String userId, String likedUserId) async {
+    setInteractionLoading(true);
     try {
       final token = await TokenManager.getToken();
       if (token == null) {
@@ -168,10 +190,13 @@ class UserInteractionProvider extends ChangeNotifier {
       }
     } catch (e) {
       print(e.toString());
+    } finally {
+      setInteractionLoading(false);
     }
   }
 
   Future<void> unlikeUser(String userId, String likedUserId) async {
+    setInteractionLoading(false);
     try {
       final token = await TokenManager.getToken();
       if (token == null) {
@@ -198,6 +223,8 @@ class UserInteractionProvider extends ChangeNotifier {
       }
     } catch (e) {
       print(e.toString());
+    } finally {
+      setInteractionLoading(false);
     }
   }
 

@@ -44,11 +44,11 @@ class _FavouritePageState extends State<FavouritePage> {
   Widget MobileFavorite() {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -60,7 +60,7 @@ class _FavouritePageState extends State<FavouritePage> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back,
                 ),
                 labelText: null,
@@ -83,7 +83,7 @@ class _FavouritePageState extends State<FavouritePage> {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -197,11 +197,11 @@ class _FavouritePageState extends State<FavouritePage> {
                 _selectedIndex = index;
               });
             },
-            thumb: Text(''),
+            thumb: const Text(''),
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -224,7 +224,7 @@ class _FavouritePageState extends State<FavouritePage> {
 
         // details edit
       ]),
-      bottomSheet: NavBar(),
+      bottomSheet: const NavBar(),
     );
   }
 
@@ -236,7 +236,7 @@ class _FavouritePageState extends State<FavouritePage> {
         height: 900,
         child: GridView.builder(
           clipBehavior: Clip.none,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, // Number of columns in the grid
             crossAxisSpacing: 15, // Horizontal spacing between items
             mainAxisSpacing: 15, // Vertical spacing between items
@@ -247,7 +247,7 @@ class _FavouritePageState extends State<FavouritePage> {
               height: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
+                image: const DecorationImage(
                   image: AssetImage(AppImages.profile), // Image asset path
                   fit: BoxFit
                       .cover, // Adjust how the image should fit inside the container
@@ -278,7 +278,7 @@ class _FavouritePageState extends State<FavouritePage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           SvgPicture.asset(AppIcons.heartoutline),
-                          SizedBox(
+                          const SizedBox(
                             width: 8,
                           ),
                           SvgPicture.asset(AppIcons.chatoutline),
@@ -307,7 +307,7 @@ class _FavouritePageState extends State<FavouritePage> {
                               ),
 
                               // male female
-                              Icon(
+                              const Icon(
                                 Icons.male,
                                 color: Colors.white,
                               ),
@@ -355,7 +355,7 @@ class _FavouritePageState extends State<FavouritePage> {
         height: 900,
         child: GridView.builder(
           clipBehavior: Clip.none,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4, // Number of columns in the grid
             crossAxisSpacing: 15, // Horizontal spacing between items
             mainAxisSpacing: 15, // Vertical spacing between items
@@ -366,7 +366,7 @@ class _FavouritePageState extends State<FavouritePage> {
               height: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
+                image: const DecorationImage(
                   image: AssetImage(AppImages.profile), // Image asset path
                   fit: BoxFit
                       .cover, // Adjust how the image should fit inside the container
@@ -397,7 +397,7 @@ class _FavouritePageState extends State<FavouritePage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           SvgPicture.asset(AppIcons.heartoutline),
-                          SizedBox(
+                          const SizedBox(
                             width: 8,
                           ),
                           SvgPicture.asset(AppIcons.chatoutline),
@@ -426,7 +426,7 @@ class _FavouritePageState extends State<FavouritePage> {
                               ),
 
                               // male female
-                              Icon(
+                              const Icon(
                                 Icons.male,
                                 color: Colors.white,
                               ),
@@ -469,11 +469,11 @@ class _FavouritePageState extends State<FavouritePage> {
   Widget DesktopFavorite() {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -487,8 +487,8 @@ class _FavouritePageState extends State<FavouritePage> {
                         //     CupertinoPageRoute(
                         //         builder: (context) => ProfilePage()));
                       },
-                      child: profileButton()),
-                  SizedBox(
+                      child: const profileButton()),
+                  const SizedBox(
                     width: 20,
                   ),
                   Text(
@@ -508,7 +508,7 @@ class _FavouritePageState extends State<FavouritePage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -521,7 +521,7 @@ class _FavouritePageState extends State<FavouritePage> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -535,12 +535,12 @@ class _FavouritePageState extends State<FavouritePage> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -555,9 +555,9 @@ class _FavouritePageState extends State<FavouritePage> {
                           text: null,
                           labelText: 'Matches',
                           onPressed: () {},
-                          icon: Icon(Icons.people),
+                          icon: const Icon(Icons.people),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // messages
@@ -565,10 +565,10 @@ class _FavouritePageState extends State<FavouritePage> {
                           text: null,
                           labelText: 'Messages',
                           onPressed: () {},
-                          icon: Icon(Icons.messenger_outline),
+                          icon: const Icon(Icons.messenger_outline),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // popular
@@ -576,9 +576,9 @@ class _FavouritePageState extends State<FavouritePage> {
                           text: null,
                           labelText: 'Popular',
                           onPressed: () {},
-                          icon: Icon(Icons.star),
+                          icon: const Icon(Icons.star),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // photos
@@ -586,10 +586,10 @@ class _FavouritePageState extends State<FavouritePage> {
                           text: null,
                           labelText: 'Photos',
                           onPressed: () {},
-                          icon: Icon(Icons.photo_library_sharp),
+                          icon: const Icon(Icons.photo_library_sharp),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // add friemd
@@ -597,10 +597,10 @@ class _FavouritePageState extends State<FavouritePage> {
                           text: null,
                           labelText: 'Add Friend',
                           onPressed: () {},
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // online
@@ -608,7 +608,7 @@ class _FavouritePageState extends State<FavouritePage> {
                           text: null,
                           labelText: 'Online',
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.circle_outlined,
                             color: Colors.green,
                           ),
@@ -616,7 +616,7 @@ class _FavouritePageState extends State<FavouritePage> {
                       ],
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
 
@@ -627,13 +627,14 @@ class _FavouritePageState extends State<FavouritePage> {
                         // seeking
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: seeking,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 seeking = newValue!;
@@ -657,20 +658,21 @@ class _FavouritePageState extends State<FavouritePage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // country
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: country,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 country = newValue!;
@@ -694,20 +696,21 @@ class _FavouritePageState extends State<FavouritePage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // age
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: age,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 age = newValue!;
@@ -743,7 +746,7 @@ class _FavouritePageState extends State<FavouritePage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -751,10 +754,10 @@ class _FavouritePageState extends State<FavouritePage> {
           child: Row(
             children: [
 // side bar
-              NavBarDesktop(),
+              const NavBarDesktop(),
 
 // posts
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Expanded(
@@ -892,12 +895,12 @@ class _FavouritePageState extends State<FavouritePage> {
                                 _selectedIndex = index;
                               });
                             },
-                            thumb: Text(''),
+                            thumb: const Text(''),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 25,
                     ),
                     Expanded(
@@ -919,12 +922,12 @@ class _FavouritePageState extends State<FavouritePage> {
                                     favListCardDesktop(),
                                   ],
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 30,
                                 ),
 
 // details
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
 
@@ -955,7 +958,7 @@ class profileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Neumorphic(
-      style: NeumorphicStyle(
+      style: const NeumorphicStyle(
         boxShape: NeumorphicBoxShape.circle(),
       ),
       child: Container(

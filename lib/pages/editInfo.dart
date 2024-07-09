@@ -7,7 +7,6 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/myprofile.dart';
-import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
@@ -65,15 +64,10 @@ class _EditInfoState extends State<EditInfo> {
   List<Uploads> allUploads = [];
 
   void deletePost(String? postId) async {
-    print(postId);
-    context.read<LoadingProvider>().setLoading(true);
-
     try {
       await context.read<UserProfileProvider>().deletePost(postId!);
     } catch (e) {
       return;
-    } finally {
-      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
@@ -153,9 +147,7 @@ class _EditInfoState extends State<EditInfo> {
       uploads: [],
     );
 
-    await context
-        .read<UserProfileProvider>()
-        .updateUserProfile(context, newUser);
+    await context.read<UserProfileProvider>().updateUserProfile(newUser);
     await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
 
     // Exit editing mode
@@ -196,22 +188,19 @@ class _EditInfoState extends State<EditInfo> {
 
       // Handle result
       if (result != null && result.files.isNotEmpty) {
-        context.read<LoadingProvider>().setLoading(true);
         File imageFile = File(result.files.single.path!);
 
         String base64 = convertIntoBase64(imageFile);
         _imageBytes = base64ToImage(base64);
         await context
             .read<UserProfileProvider>()
-            .updateProfileImage(context, base64, user!.uid);
+            .updateProfileImage(base64, user!.uid);
       } else {
         // Handle cases like user canceling the selection or errors
         print('No image selected.');
       }
     } catch (e) {
       throw Exception(e.toString());
-    } finally {
-      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
@@ -745,9 +734,9 @@ class _EditInfoState extends State<EditInfo> {
               height: 25,
             ),
           ]),
-          Consumer<LoadingProvider>(
-            builder: (context, loadingProvider, _) {
-              return loadingProvider.isLoading
+          Consumer<UserProfileProvider>(
+            builder: (context, userProfileProvider, _) {
+              return userProfileProvider.isProfileLoading
                   ? Container(
                       color: Colors.black.withOpacity(
                           0.5), // Add background color with opacity
@@ -1658,9 +1647,9 @@ class _EditInfoState extends State<EditInfo> {
               ),
             )
           ]),
-          Consumer<LoadingProvider>(
-            builder: (context, loadingProvider, _) {
-              return loadingProvider.isLoading
+          Consumer<UserProfileProvider>(
+            builder: (context, userProfileProvider, _) {
+              return userProfileProvider.isProfileLoading
                   ? Container(
                       color: Colors.black.withOpacity(
                           0.5), // Add background color with opacity

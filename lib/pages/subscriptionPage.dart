@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:dating/datamodel/subscription_model.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/settingpage.dart';
-import 'package:dating/providers/loading_provider.dart';
+
 import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
@@ -14,9 +14,6 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -54,7 +51,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Future<void> makePayment(String amount) async {
-    context.read<LoadingProvider>().setLoading(true);
     log("make payment");
     try {
       // Step 1: Create Payment Intent
@@ -96,8 +92,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Payment failed: ${e.toString()}')),
       );
-    } finally {
-      context.read<LoadingProvider>().setLoading(false);
     }
   }
 
@@ -215,9 +209,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget MobileHome() {
     return Scaffold(
-      body: Consumer<LoadingProvider>(
-        builder: (context, loading, _) {
-          if (loading.isLoading) {
+      body: Consumer<SubscriptionProvider>(
+        builder: (context, subscriptionProvider, _) {
+          if (subscriptionProvider.isSubscriptionLoading) {
             return const Center(child: CircularProgressIndicator());
           }
           return Column(children: [

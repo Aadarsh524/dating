@@ -1,9 +1,7 @@
 import 'package:dating/auth/loginDesktop/login.dart';
 import 'package:dating/auth/loginMobile/login.dart';
-import 'package:dating/pages/homepage.dart';
-import 'package:dating/providers/loading_provider.dart';
-import 'package:dating/providers/user_profile_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dating/pages/state_loader.dart';
+import 'package:dating/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,53 +13,35 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _isLoggedIn = false; // Flag to track login status
+  bool _isUserLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
-    print("object");
-    checkLoginStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkLoginStatus();
+    });
   }
 
-  void checkLoginStatus() async {
+  Future<void> checkLoginStatus() async {
     try {
-      await context.read<LoadingProvider>().setLoading(true);
-
-      User? user = FirebaseAuth.instance.currentUser;
-
-      if (user != null) {
-        var value =
-            await context.read<UserProfileProvider>().getUserProfile(user.uid);
-
-        if (value != null) {
-          Provider.of<UserProfileProvider>(context, listen: false)
-              .setCurrentUserProfile(value);
-          setState(() {
-            _isLoggedIn = true;
-          });
-        }
-      } else {
-        // User is not logged in
-        setState(() {
-          _isLoggedIn = false;
-        });
-      }
+      bool isUserLoggedIn = await context
+          .read<AuthenticationProvider>()
+          .checkLoginStatus(context);
+      setState(() {
+        _isUserLoggedIn = isUserLoggedIn;
+      });
+      print(_isUserLoggedIn);
     } catch (e) {
-      // Handle errors
-    } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      print("Error checking login status: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // If user is logged in, navigate to homepage
-    if (_isLoggedIn) {
-      return const HomePage(); // Replace HomePage() with your actual homepage widget
+    if (_isUserLoggedIn) {
+      return const StateLoaderPage();
     }
-
-    // If user is not logged in, display login screen
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white, // Change background color if needed

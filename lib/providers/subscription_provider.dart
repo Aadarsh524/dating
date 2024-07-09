@@ -3,15 +3,22 @@ import 'dart:convert';
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/subscription_model.dart';
 import 'package:dating/platform/platform_mobile.dart';
-import 'package:dating/providers/loading_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
   SubscriptionModel? subscriptionProvider;
 
   SubscriptionModel? get getSubcriptionModel => subscriptionProvider;
+
+  bool _isSubscriptionLoading = false;
+
+  bool get isSubscriptionLoading => _isSubscriptionLoading;
+
+  Future<void> setSubscriptionLoading(bool value) async {
+    _isSubscriptionLoading = value;
+    notifyListeners();
+  }
 
   void setSubscriptionModel(SubscriptionModel subscriptionData) {
     subscriptionProvider = subscriptionData;
@@ -20,12 +27,12 @@ class SubscriptionProvider extends ChangeNotifier {
 
   Future<bool> buySubcription(
       SubscriptionModel subscription, BuildContext context) async {
+    setSubscriptionLoading(true);
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
     try {
       final response = await http.post(Uri.parse('$api/Subscription'),
           headers: {
@@ -43,11 +50,12 @@ class SubscriptionProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      setSubscriptionLoading(false);
     }
   }
 
   Future<String> viewSubcription() async {
+    setSubscriptionLoading(true);
     String api = getApiEndpoint();
     final token = await TokenManager.getToken();
     if (token == null) {
@@ -70,6 +78,8 @@ class SubscriptionProvider extends ChangeNotifier {
     } catch (e) {
       print(e.toString());
       rethrow;
+    } finally {
+      setSubscriptionLoading(false);
     }
   }
 }

@@ -2,24 +2,22 @@ import 'dart:convert';
 
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
-import 'package:dating/providers/loading_provider.dart';
 import '../../platform/platform.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
 class DashboardProvider extends ChangeNotifier {
   List<DashboardResponseModel>? _dashboardListProvider;
   List<DashboardResponseModel>? get dashboardList => _dashboardListProvider;
 
-  void setDashboard(List<DashboardResponseModel> dashboardResponseModel) {
-    _dashboardListProvider = dashboardResponseModel;
-    notifyListeners();
-  }
+  bool _isDashboardLoading = false;
+  bool get isDashboardLoading => _isDashboardLoading;
 
-  Future<List<DashboardResponseModel>> dashboard(
-      int page, BuildContext context) async {
+  Future<void> dashboard(int page, BuildContext context) async {
+    _isDashboardLoading = true;
+    // We're not calling notifyListeners() here
+
     User? user = FirebaseAuth.instance.currentUser;
     String uid = user!.uid;
     String api = getApiEndpoint();
@@ -28,7 +26,7 @@ class DashboardProvider extends ChangeNotifier {
     if (token == null) {
       throw Exception('No token found');
     }
-    context.read<LoadingProvider>().setLoading(true);
+
     try {
       final response = await http.get(
         Uri.parse('$api/Dashboard/$uid&page=$page'),
@@ -40,23 +38,18 @@ class DashboardProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        List<DashboardResponseModel> dashboardList = [];
-        List<dynamic> data = jsonDecode(response.body.toString());
-        for (Map<String, dynamic> i in data) {
-          dashboardList.add(DashboardResponseModel.fromJson(i));
-        }
-        setDashboard(dashboardList);
-        notifyListeners();
-
-        return dashboardList;
+        List<dynamic> data = jsonDecode(response.body);
+        _dashboardListProvider =
+            data.map((i) => DashboardResponseModel.fromJson(i)).toList();
       } else {
-        return [];
+        _dashboardListProvider = [];
       }
     } catch (e) {
       print(e.toString());
-      rethrow;
+      _dashboardListProvider = [];
     } finally {
-      context.read<LoadingProvider>().setLoading(false);
+      _isDashboardLoading = false;
+      notifyListeners(); // We only call notifyListeners once, at the end
     }
   }
 }
