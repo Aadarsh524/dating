@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
@@ -63,6 +64,7 @@ class UserProfileProvider extends ChangeNotifier {
   Future<bool> uploadDocumentsForVerification(
       DocumentVerificationModel documentVerificationModel) async {
     setProfileLoading(true);
+    log(documentVerificationModel.toJson().toString());
     try {
       String api = getApiEndpoint();
       final response = await http.post(
@@ -78,7 +80,6 @@ class UserProfileProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        print('Not sent for approval');
         throw Exception('Cant upload data');
       }
     } catch (e) {
@@ -120,17 +121,19 @@ class UserProfileProvider extends ChangeNotifier {
     }
   }
 
-  Future<UserProfileModel> updateUserProfile(
+  Future<UserProfileModel?> updateUserProfile(
       UserProfileModel updatedProfile) async {
     setProfileLoading(true);
-    final token = await TokenManager.getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
     try {
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
       String api = getApiEndpoint();
       String? uid = updatedProfile.uid;
-      final url = Uri.parse('$api/userprofile/${updatedProfile.uid}');
+      final url = Uri.parse('$api/userprofile/$uid');
+
       final response = await http.put(
         url,
         headers: {
@@ -142,21 +145,22 @@ class UserProfileProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        getUserProfile(uid!).then(
-          (value) {
-            if (value != null) {
-              setCurrentUserProfile(value);
-              notifyListeners();
-            }
-          },
-        );
-
-        return updatedProfile;
+        final updatedUserProfile = await getUserProfile(uid!);
+        if (updatedUserProfile != null) {
+          setCurrentUserProfile(updatedUserProfile);
+          notifyListeners();
+        }
+        return updatedUserProfile;
       } else {
-        throw Exception('Failed to update user profile');
+        // Parse error message from response body
+        final errorBody = json.decode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Unknown error occurred';
+        throw Exception('Failed to update user profile: $errorMessage');
       }
     } catch (error) {
-      rethrow;
+      print('Error updating user profile: $error');
+      // You can handle specific errors here if needed
+      return null;
     } finally {
       setProfileLoading(false);
     }
@@ -202,7 +206,7 @@ class UserProfileProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> deletePost(String uid) async {
+  Future<bool> deletePost(String uid, String postid) async {
     setProfileLoading(true);
     final token = await TokenManager.getToken();
     if (token == null) {
@@ -211,7 +215,7 @@ class UserProfileProvider extends ChangeNotifier {
     try {
       String api = getApiEndpoint();
 
-      final url = Uri.parse('$api/file/$uid');
+      final url = Uri.parse('$api/File/$uid/$postid');
       final response = await http.delete(
         url,
         headers: {
