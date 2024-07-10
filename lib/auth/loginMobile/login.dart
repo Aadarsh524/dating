@@ -1,7 +1,6 @@
 // import 'package:dating/auth/signupMobile/signup.dart';
 
 import 'package:dating/auth/signupScreen.dart';
-import 'package:dating/pages/homepage.dart';
 import 'package:dating/pages/state_loader.dart';
 import 'package:dating/providers/authentication_provider.dart';
 
@@ -280,7 +279,7 @@ class _LoginMobileState extends State<LoginMobile> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => const HomePage()),
+                                  builder: (_) => const StateLoaderPage()),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(

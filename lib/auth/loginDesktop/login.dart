@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:dating/auth/signupScreen.dart';
-import 'package:dating/pages/homepage.dart';
 import 'package:dating/pages/state_loader.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -354,7 +353,8 @@ class _LoginDesktopState extends State<LoginDesktop> {
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (_) => const HomePage()),
+                                            builder: (_) =>
+                                                const StateLoaderPage()),
                                       );
                                     } else {
                                       ScaffoldMessenger.of(context)
