@@ -1,5 +1,6 @@
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/firebase_options.dart';
+import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/providers/chat_provider/call_provider.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
@@ -37,6 +38,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
     ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
     ChangeNotifierProvider(create: (_) => CallProvider()),
+    ChangeNotifierProvider(create: (_) => AdminDashboardProvider()),
   ], child: const MyApp()));
 }
 
