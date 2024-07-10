@@ -881,9 +881,7 @@ class _HomePageState extends State<HomePage> {
 // profile button
 // ignore: must_be_immutable
 class ProfileButton extends StatelessWidget {
-  const ProfileButton({
-    Key? key,
-  }) : super(key: key);
+  const ProfileButton({Key? key}) : super(key: key);
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
@@ -892,10 +890,37 @@ class ProfileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<UserProfileProvider>(
-      builder: (context, imageProvider, _) {
+      builder: (context, userProfileProvider, _) {
+        if (userProfileProvider.isProfileLoading) {
+          return CircularProgressIndicator();
+        }
+
         UserProfileModel? userProfileModel =
-            Provider.of<UserProfileProvider>(context, listen: false)
-                .currentUserProfile;
+            userProfileProvider.currentUserProfile;
+
+        if (userProfileModel == null) {
+          // Return a placeholder if userProfileModel is null
+          return Neumorphic(
+            style: const NeumorphicStyle(
+              boxShape: NeumorphicBoxShape.circle(),
+            ),
+            child: SizedBox(
+              height: 50,
+              width: 50,
+              child: Image.memory(
+                base64ToImage(defaultBase64Avatar),
+                fit: BoxFit.cover,
+              ), // Placeholder for when userProfileModel is null
+            ),
+          );
+        }
+
+        // Check if userProfileModel.image is null or empty
+        Uint8List imageBytes =
+            userProfileModel.image != null && userProfileModel.image!.isNotEmpty
+                ? base64ToImage(userProfileModel.image!)
+                : base64ToImage(defaultBase64Avatar);
+
         return Neumorphic(
           style: const NeumorphicStyle(
             boxShape: NeumorphicBoxShape.circle(),
@@ -903,16 +928,10 @@ class ProfileButton extends StatelessWidget {
           child: SizedBox(
             height: 50,
             width: 50,
-            child:
-                userProfileModel!.image != null && userProfileModel.image != ''
-                    ? Image.memory(
-                        base64ToImage(userProfileModel.image!),
-                        fit: BoxFit.cover,
-                      )
-                    : Image.memory(
-                        base64ToImage(defaultBase64Avatar),
-                        fit: BoxFit.cover,
-                      ), // Placeholder for when imageBytes is null
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
+            ),
           ),
         );
       },

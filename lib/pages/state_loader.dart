@@ -10,12 +10,16 @@ class StateLoaderPage extends StatelessWidget {
   Future<void> _fetchData(BuildContext context) async {
     firebase.User? user = firebase.FirebaseAuth.instance.currentUser;
 
-    // await context.read<DashboardProvider>().dashboard(1, context);
-    // await context.read<ChatRoomProvider>().fetchChatRoom(context, user!.uid);
-
-    await context.read<UserProfileProvider>().getUserProfile(user!.uid);
-
-    // await context.read<SubscriptionProvider>().viewSubcription();
+    if (user != null) {
+      try {
+        await context.read<UserProfileProvider>().getUserProfile(user.uid);
+      } catch (e, stacktrace) {
+        print("Error fetching user profile: $e");
+        print("Stacktrace: $stacktrace");
+      }
+    } else {
+      print("No user is currently logged in");
+    }
   }
 
   @override
@@ -25,6 +29,7 @@ class StateLoaderPage extends StatelessWidget {
         future: _fetchData(context),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
+            // Delay the navigation to ensure build process is complete
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (_) => const HomePage()),

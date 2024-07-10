@@ -39,7 +39,10 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future<String?> signInWithEmailAndPassword(
-      String email, String password, BuildContext context) async {
+    String email,
+    String password,
+    BuildContext context,
+  ) async {
     setAuthLoading(true);
     try {
       final UserCredential userCredential = await _auth
@@ -48,7 +51,11 @@ class AuthenticationProvider extends ChangeNotifier {
       if (userCredential.user != null) {
         String token = await ApiClient().validateToken() ?? '';
         await TokenManager.saveToken(token);
-        await _initializeUserProfile(userCredential.user!.uid, context);
+
+        // // Initialize user profile and wait for the completion
+        // await _initializeUserProfile(userCredential.user!.uid, context);
+
+        // Return the user ID after initialization is complete
         return userCredential.user!.uid;
       } else {
         print("Login successful but user object is null");
@@ -75,7 +82,6 @@ class AuthenticationProvider extends ChangeNotifier {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      // Check if the user is logged in
       if (userCredential.user != null) {
         await _createNewUserProfile(
           userCredential.user!.uid,
@@ -87,12 +93,12 @@ class AuthenticationProvider extends ChangeNotifier {
         );
         return userCredential.user;
       } else {
-        // User registration successful but login failed
         print("User registered but not logged in");
         return null;
       }
-    } catch (e) {
+    } catch (e, stacktrace) {
       print("Error during registration: $e");
+      print("Stacktrace: $stacktrace");
       return null;
     } finally {
       setAuthLoading(false);
