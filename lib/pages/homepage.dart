@@ -8,9 +8,11 @@ import 'package:dating/datamodel/dashboard_response_model.dart' as d;
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/pages/admin/adminPage.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/settingpage.dart';
+import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/providers/dashboard_provider.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
@@ -53,6 +55,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     context.read<DashboardProvider>().dashboard(1, context);
+   
   }
 
   @override
@@ -423,7 +426,13 @@ class _HomePageState extends State<HomePage> {
                           ButtonWithLabel(
                             text: null,
                             labelText: 'Online',
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          const AdminPage())));
+                            },
                             icon: const Icon(
                               Icons.circle_outlined,
                               color: Colors.green,

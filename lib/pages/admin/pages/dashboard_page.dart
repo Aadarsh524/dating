@@ -1,11 +1,17 @@
+import 'dart:developer';
+
+import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
+import 'package:dating/utils/shimmer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -33,6 +39,15 @@ class _DashboardPageState extends State<DashboardPage> {
         }
       });
     }
+  }
+
+  //init state
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //context.read<AdminDashboardProvider>().fetchUsers(1, context);
+    Provider.of<AdminDashboardProvider>(context).fetchUsers(1, context);
   }
 
   // for status
@@ -316,191 +331,212 @@ class _DashboardPageState extends State<DashboardPage> {
             height: 15,
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: users.length,
-              itemBuilder: (BuildContext context, int index) {
-                final user = users[index];
-                // for subscription color
-                Color textColor;
-                switch (user.subscriptionPlan) {
-                  case '+Basic':
-                    textColor = Colors.green;
-                    break;
-                  case '+Plus':
-                    textColor = Colors.blue;
-                    break;
-                  case '+Gold':
-                    textColor = Colors.amber; // Or any shade of gold color
-                    break;
-                  default:
-                    textColor = Colors.black;
-                }
-                return Padding(
-                  padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
-                  child: Container(
-                    //  padding
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    decoration: ShapeDecoration(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 2,
-                          strokeAlign: BorderSide.strokeAlignOutside,
-                          color: Color(0xFFEAE7FF),
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // profile pic and user name
-                          SizedBox(
-                            width: 200,
-                            child: Row(
-                              children: [
-                                Container(
-                                  height: 35,
-                                  width: 35,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100),
-                                    image: DecorationImage(
-                                      image: NetworkImage(user.photoUrl),
-                                      fit: BoxFit.cover,
+            child: Consumer<AdminDashboardProvider>(
+                builder: (context, adminProvider, _) {
+              log("${adminProvider.isAdminDataLoading}");
+              return adminProvider.isAdminDataLoading
+                  ? const ShimmerSkeleton(count: 7, height: 80)
+                  : Consumer<AdminDashboardProvider>(
+                      builder: (context, adminProvider, _) {
+                      List<UserProfileModel>? data = adminProvider.usersList;
+
+                      if (data == null || data.isEmpty) {
+                        return Center(child: Text('No data available'));
+                      }
+                      log("${data.length}");
+                      return ListView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final user = users[index];
+                          // for subscription color
+                          Color textColor;
+                          switch (user.subscriptionPlan) {
+                            case '+Basic':
+                              textColor = Colors.green;
+                              break;
+                            case '+Plus':
+                              textColor = Colors.blue;
+                              break;
+                            case '+Gold':
+                              textColor =
+                                  Colors.amber; // Or any shade of gold color
+                              break;
+                            default:
+                              textColor = Colors.black;
+                          }
+                          return Padding(
+                            padding: EdgeInsets.only(
+                                left: 20, right: 20, bottom: 10),
+                            child: Container(
+                              //  padding
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              decoration: ShapeDecoration(
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    width: 2,
+                                    strokeAlign: BorderSide.strokeAlignOutside,
+                                    color: Color(0xFFEAE7FF),
+                                  ),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // profile pic and user name
+                                    SizedBox(
+                                      width: 200,
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            height: 35,
+                                            width: 35,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              image: DecorationImage(
+                                                image:
+                                                    NetworkImage(user.photoUrl),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+
+                                          // user name
+                                          SizedBox(
+                                            width: 30,
+                                          ),
+                                          Text(
+                                            user.name,
+                                            style: GoogleFonts.poppins(
+                                              color: Color(0xFF04103B),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ),
 
-                                // user name
-                                SizedBox(
-                                  width: 30,
-                                ),
-                                Text(
-                                  user.name,
-                                  style: GoogleFonts.poppins(
-                                    color: Color(0xFF04103B),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                                    //
 
-                          //
-
-                          SizedBox(
-                            width: 100,
-                            child: Text(
-                              user.id,
-                              style: GoogleFonts.poppins(
-                                color: Color(0xFF797D8C),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 50,
-                            child: Image.network(
-                              user.countryFlagUrl,
-                              height: 20,
-                              width: 20,
-                            ),
-                          ),
-
-                          SizedBox(
-                            width: 50,
-                            child: user.isVerified
-                                ? SvgPicture.asset(AppIcons.verified)
-                                : SvgPicture.asset(AppIcons.unverified),
-                          ),
-                          SizedBox(
-                            width: 100,
-                            child: Text(
-                              '${user.subscriptionPlan}',
-                              style: GoogleFonts.poppins(
-                                color: textColor,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-
-                          // three dots icon
-                          PopupMenuButton<int>(
-                            icon: SvgPicture.asset(AppIcons.dots),
-                            onSelected: (int result) {
-                              switch (result) {
-                                case 0:
-                                  // Handle block action
-                                  break;
-                                case 1:
-                                  _showSendMessageDialog(context);
-                                  break;
-                                case 2:
-                                  // Handle alert action
-                                  break;
-                              }
-                            },
-                            itemBuilder: (BuildContext context) =>
-                                <PopupMenuEntry<int>>[
-                              PopupMenuItem<int>(
-                                value: 0,
-                                child: ListTile(
-                                  leading:
-                                      Icon(Icons.block, color: AppColors.blue),
-                                  title: Text(
-                                    'Block',
-                                    style: GoogleFonts.poppins(
-                                      color: Color(0xFF1F192F),
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        user.id,
+                                        style: GoogleFonts.poppins(
+                                          color: Color(0xFF797D8C),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ),
-                              PopupMenuItem<int>(
-                                value: 1,
-                                child: ListTile(
-                                  leading: Icon(Icons.message,
-                                      color: AppColors.blue),
-                                  title: Text(
-                                    'Send Message',
-                                    style: GoogleFonts.poppins(
-                                      color: Color(0xFF1F192F),
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
+                                    SizedBox(
+                                      width: 50,
+                                      child: Image.network(
+                                        user.countryFlagUrl,
+                                        height: 20,
+                                        width: 20,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ),
-                              PopupMenuItem<int>(
-                                value: 2,
-                                child: ListTile(
-                                  leading: Icon(Icons.warning,
-                                      color: AppColors.blue),
-                                  title: Text(
-                                    'Alert',
-                                    style: GoogleFonts.poppins(
-                                      color: Color(0xFF1F192F),
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
+
+                                    SizedBox(
+                                      width: 50,
+                                      child: user.isVerified
+                                          ? SvgPicture.asset(AppIcons.verified)
+                                          : SvgPicture.asset(
+                                              AppIcons.unverified),
                                     ),
-                                  ),
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        '${user.subscriptionPlan}',
+                                        style: GoogleFonts.poppins(
+                                          color: textColor,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+
+                                    // three dots icon
+                                    PopupMenuButton<int>(
+                                      icon: SvgPicture.asset(AppIcons.dots),
+                                      onSelected: (int result) {
+                                        switch (result) {
+                                          case 0:
+                                            // Handle block action
+                                            break;
+                                          case 1:
+                                            _showSendMessageDialog(context);
+                                            break;
+                                          case 2:
+                                            // Handle alert action
+                                            break;
+                                        }
+                                      },
+                                      itemBuilder: (BuildContext context) =>
+                                          <PopupMenuEntry<int>>[
+                                        PopupMenuItem<int>(
+                                          value: 0,
+                                          child: ListTile(
+                                            leading: Icon(Icons.block,
+                                                color: AppColors.blue),
+                                            title: Text(
+                                              'Block',
+                                              style: GoogleFonts.poppins(
+                                                color: Color(0xFF1F192F),
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        PopupMenuItem<int>(
+                                          value: 1,
+                                          child: ListTile(
+                                            leading: Icon(Icons.message,
+                                                color: AppColors.blue),
+                                            title: Text(
+                                              'Send Message',
+                                              style: GoogleFonts.poppins(
+                                                color: Color(0xFF1F192F),
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        PopupMenuItem<int>(
+                                          value: 2,
+                                          child: ListTile(
+                                            leading: Icon(Icons.warning,
+                                                color: AppColors.blue),
+                                            title: Text(
+                                              'Alert',
+                                              style: GoogleFonts.poppins(
+                                                color: Color(0xFF1F192F),
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+                            ),
+                          );
+                        },
+                      );
+                    });
+            }),
           ),
         ],
       ),

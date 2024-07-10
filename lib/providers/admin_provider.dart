@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
@@ -35,25 +36,37 @@ class AdminDashboardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<UserProfileModel>> fetchUsers(BuildContext context) async {
-    setAdminLoading(true);
-    String api = getApiEndpoint();
-    final token = await TokenManager.getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
+  Future<List<UserProfileModel>> fetchUsers(
+      int page, BuildContext context) async {
     try {
+      log('this is stsdas');
+      setAdminLoading(true);
+
+      String api = getApiEndpoint();
+      var httpURI =
+          Uri.parse('$api/admin/dashboard/users').replace(queryParameters: {
+        'page': page.toString(),
+      });
+      log(httpURI.toString());
+
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
       final response = await http.get(
-        Uri.parse('$api/admin/dashboard/users'),
+        Uri.parse('$api/admin/dashboard/users').replace(queryParameters: {
+          'page': page.toString(),
+        }),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
-
+      log('this is step2: ${response.statusCode}');
       if (response.statusCode == 200) {
+        log('this is step3: ${response.statusCode}');
         List<UserProfileModel> userProfileList = [];
         List<dynamic> data = jsonDecode(response.body.toString());
         for (Map<String, dynamic> i in data) {
@@ -68,7 +81,8 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      setAdminLoading(true);
+      setAdminLoading(false);
+      //notifyListeners();
     }
   }
 
