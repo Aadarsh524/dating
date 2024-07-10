@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dating/auth/signupScreen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/pages/state_loader.dart';
@@ -35,26 +37,23 @@ class _LoginDesktopState extends State<LoginDesktop> {
           email, password, context);
 
       if (result != null) {
-        // If result is not null, it's a valid UID
+        log('login successfull');
+        log(result);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const StateLoaderPage()),
         );
       } else {
-        // If result is null, show an error message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login failed: User not found'),
-          ),
+          const SnackBar(content: Text('Login failed: User not found')),
         );
       }
-    } catch (e) {
-      // Catch any errors thrown by signInWithEmailAndPassword
+    } catch (e, stacktrace) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login failed: ${e.toString()}'),
-        ),
+        SnackBar(content: Text('Login failed: ${e.toString()}')),
       );
+      print("Login error: $e");
+      print("Stacktrace: $stacktrace");
     }
   }
 
