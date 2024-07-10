@@ -65,7 +65,7 @@ class _EditInfoState extends State<EditInfo> {
 
   void deletePost(String? postId) async {
     try {
-      await context.read<UserProfileProvider>().deletePost(postId!);
+      await context.read<UserProfileProvider>().deletePost(user!.uid, postId!);
     } catch (e) {
       return;
     }
@@ -73,100 +73,81 @@ class _EditInfoState extends State<EditInfo> {
 
   @override
   void initState() {
-    UserProfileModel? userProfileModel =
-        Provider.of<UserProfileProvider>(context, listen: false)
-            .currentUserProfile;
-
-    if (userProfileModel?.name != null && userProfileModel!.name!.isNotEmpty) {
-      _textName = userProfileModel.name!;
-      _controllerName.text = _textName;
-    } else {
-      _textName = "Enter Name";
-    }
-
-    if (userProfileModel?.address != null &&
-        userProfileModel!.address!.isNotEmpty) {
-      _textAddress = userProfileModel.address!;
-      _controllerAddress.text = _textAddress;
-    } else {
-      _textAddress = 'Enter Address';
-    }
-
-    if (userProfileModel?.bio != null && userProfileModel!.bio!.isNotEmpty) {
-      _textBio = userProfileModel.bio!;
-      _controllerBio.text = _textBio;
-    } else {
-      _textBio = 'Enter Bio';
-    }
-
-    if (userProfileModel?.interests != null &&
-        userProfileModel!.interests!.isNotEmpty) {
-      _textInterests = userProfileModel.interests!;
-      _controllerInterests.text = _textInterests;
-    } else {
-      _textInterests = 'Enter Interests';
-    }
-
-    if (userProfileModel?.image != null &&
-        userProfileModel!.image!.isNotEmpty) {
-      _imageBytes = base64ToImage(userProfileModel.image);
-    } else {
-      _imageBytes = base64ToImage(defaultBase64Avatar);
-    }
-
-    _controllerName.text = _textName;
-    _controllerAddress.text = _textAddress;
-    _controllerBio.text = _textBio;
-    _controllerInterests.text = _textInterests;
-
     super.initState();
-  }
 
-  Future<void> _saveChanges() async {
-    // Update data in the provider
-    UserProfileModel? userProfileModel =
-        Provider.of<UserProfileProvider>(context, listen: false)
-            .currentUserProfile;
+    final userProfile = Provider.of<UserProfileProvider>(context, listen: false)
+        .currentUserProfile;
+
+    void setField(
+        String? value, String defaultValue, TextEditingController controller) {
+      final text = (value != null && value.isNotEmpty) ? value : defaultValue;
+      controller.text = text;
+    }
+
+    setField(userProfile?.name, "Enter Name", _controllerName);
+    setField(userProfile?.address, "Enter Address", _controllerAddress);
+    setField(userProfile?.bio, "Enter Bio", _controllerBio);
+    setField(userProfile?.interests, "Enter Interests", _controllerInterests);
+
+    _imageBytes = base64ToImage(
+        (userProfile?.image != null && userProfile!.image!.isNotEmpty)
+            ? userProfile.image!
+            : defaultBase64Avatar);
 
     _textName = _controllerName.text;
     _textAddress = _controllerAddress.text;
     _textBio = _controllerBio.text;
     _textInterests = _controllerInterests.text;
+  }
 
-    final UserProfileModel newUser = UserProfileModel(
+  @override
+  void dispose() {
+    _controllerName.dispose();
+    _controllerBio.dispose();
+    _controllerAddress.dispose();
+    _controllerBio.dispose();
+    // Dispose of other controllers
+    super.dispose();
+  }
+
+  Future<void> _saveChanges() async {
+    final provider = Provider.of<UserProfileProvider>(context, listen: false);
+    final currentProfile = provider.currentUserProfile!;
+
+    final newUser = UserProfileModel(
       uid: user!.uid,
-      name: _textName,
-      email: userProfileModel!.email ?? '',
-      gender: userProfileModel.gender ?? '',
-      image: userProfileModel.image ?? '',
-      age: userProfileModel.age ?? '',
-      bio: _textBio,
-      address: _textAddress,
-      interests: _textInterests,
-      seeking: Seeking(fromAge: '', toAge: '', gender: ''),
-      uploads: [],
+      name: _controllerName.text,
+      address: _controllerAddress.text,
+      bio: _controllerBio.text,
+      interests: _controllerInterests.text,
+      gender: currentProfile.gender,
+      image: currentProfile.image,
+      age: currentProfile.age,
+      userStatus: currentProfile.userStatus,
+      subscriptionStatus: currentProfile.subscriptionStatus,
+      createdTimestamp: currentProfile.createdTimestamp,
+      isVerified: currentProfile.isVerified,
+      documentStatus: currentProfile.documentStatus,
+      seeking: currentProfile.seeking,
+      uploads: currentProfile.uploads,
     );
-
-    await context.read<UserProfileProvider>().updateUserProfile(newUser);
+    await provider.updateUserProfile(newUser);
     await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
 
-    // Exit editing mode
     setState(() {
-      _isEditingName = false;
-      _isEditingAddress = false;
-      _isEditingBio = false;
-      _isEditingInterests = false;
+      _isEditingName =
+          _isEditingAddress = _isEditingBio = _isEditingInterests = false;
+      _textName = _controllerName.text;
+      _textAddress = _controllerAddress.text;
+      _textBio = _controllerBio.text;
+      _textInterests = _controllerInterests.text;
     });
   }
 
   void _cancelChanges() {
-    // Discard changes and exit editing mode
     setState(() {
-      _isEditingName = false;
-      _isEditingAddress = false;
-      _isEditingBio = false;
-      _isEditingInterests = false;
-      // Reset text fields to previous values
+      _isEditingName =
+          _isEditingAddress = _isEditingBio = _isEditingInterests = false;
       _controllerName.text = _textName;
       _controllerAddress.text = _textAddress;
       _controllerBio.text = _textBio;
@@ -174,29 +155,25 @@ class _EditInfoState extends State<EditInfo> {
     });
   }
 
-  void pickImage() async {
+  Future<void> pickImage() async {
     try {
-      final storageStatus = await Permission.storage.request();
-      if (!storageStatus.isGranted) {
+      if (!await Permission.storage.request().isGranted) {
         throw Exception('Storage permission is required to upload the image.');
       }
 
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png', 'jpeg'],
       );
 
-      // Handle result
-      if (result != null && result.files.isNotEmpty) {
-        File imageFile = File(result.files.single.path!);
-
-        String base64 = convertIntoBase64(imageFile);
-        _imageBytes = base64ToImage(base64);
+      if (result?.files.isNotEmpty ?? false) {
+        final imageFile = File(result!.files.single.path!);
+        final base64 = base64Encode(imageFile.readAsBytesSync());
+        _imageBytes = base64Decode(base64);
         await context
             .read<UserProfileProvider>()
             .updateProfileImage(base64, user!.uid);
       } else {
-        // Handle cases like user canceling the selection or errors
         print('No image selected.');
       }
     } catch (e) {
@@ -204,19 +181,7 @@ class _EditInfoState extends State<EditInfo> {
     }
   }
 
-  String convertIntoBase64(File file) {
-    List<int> imageBytes = file.readAsBytesSync();
-    String base64File = base64Encode(imageBytes);
-    return base64File;
-  }
-
-  String imageToBase64(Uint8List imageBytes) {
-    return base64Encode(imageBytes);
-  }
-
-  Uint8List base64ToImage(String? base64String) {
-    return base64Decode(base64String!);
-  }
+  Uint8List base64ToImage(String? base64String) => base64Decode(base64String!);
 
   @override
   Widget build(BuildContext context) {
@@ -676,10 +641,6 @@ class _EditInfoState extends State<EditInfo> {
                         itemCount: alluploads.length,
                         itemBuilder: (context, index) {
                           final upload = reversedUploads[index];
-                          print(upload.file);
-                          print(upload.name);
-                          print(upload.id);
-                          print(upload.uploadDate);
 
                           return Stack(
                             children: [
@@ -708,7 +669,6 @@ class _EditInfoState extends State<EditInfo> {
                                 right: 10,
                                 child: IconButton(
                                   onPressed: () {
-                                    print(upload.id);
                                     deletePost(upload.id);
                                   },
                                   icon: const Icon(
@@ -1258,11 +1218,6 @@ class _EditInfoState extends State<EditInfo> {
                                                             final upload =
                                                                 reversedUploads[
                                                                     index];
-                                                            print(upload.file);
-                                                            print(upload.name);
-                                                            print(upload.id);
-                                                            print(upload
-                                                                .uploadDate);
 
                                                             return Stack(
                                                               children: [
@@ -1305,8 +1260,6 @@ class _EditInfoState extends State<EditInfo> {
                                                                       IconButton(
                                                                     onPressed:
                                                                         () {
-                                                                      print(upload
-                                                                          .id);
                                                                       deletePost(
                                                                           upload
                                                                               .id);

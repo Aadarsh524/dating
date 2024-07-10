@@ -45,15 +45,18 @@ class AuthenticationProvider extends ChangeNotifier {
       final UserCredential userCredential = await _auth
           .signInWithEmailAndPassword(email: email, password: password);
 
-      String token = await ApiClient().validateToken() ?? '';
-      if (token.isNotEmpty) {
+      if (userCredential.user != null) {
+        String token = await ApiClient().validateToken() ?? '';
         await TokenManager.saveToken(token);
         await _initializeUserProfile(userCredential.user!.uid, context);
+        return userCredential.user!.uid;
+      } else {
+        print("Login successful but user object is null");
+        return null;
       }
-
-      return userCredential.user?.uid;
     } catch (e) {
-      return e.toString();
+      print("Error during sign in: $e");
+      throw e; // Throw the error instead of returning it as a string
     } finally {
       setAuthLoading(false);
     }
@@ -72,17 +75,24 @@ class AuthenticationProvider extends ChangeNotifier {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      await _createNewUserProfile(
-        userCredential.user!.uid,
-        context,
-        name: name,
-        email: email,
-        gender: gender,
-        age: age,
-      );
-
-      return userCredential.user;
+      // Check if the user is logged in
+      if (userCredential.user != null) {
+        await _createNewUserProfile(
+          userCredential.user!.uid,
+          context,
+          name: name,
+          email: email,
+          gender: gender,
+          age: age,
+        );
+        return userCredential.user;
+      } else {
+        // User registration successful but login failed
+        print("User registered but not logged in");
+        return null;
+      }
     } catch (e) {
+      print("Error during registration: $e");
       return null;
     } finally {
       setAuthLoading(false);
@@ -107,11 +117,13 @@ class AuthenticationProvider extends ChangeNotifier {
         final UserCredential userCredential =
             await _auth.signInWithCredential(credential);
 
-        if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-          await _createNewUserProfile(userCredential.user!.uid, context,
-              email: userCredential.user!.email);
-        } else {
-          await _initializeUserProfile(userCredential.user!.uid, context);
+        if (userCredential.credential != null) {
+          if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+            await _createNewUserProfile(userCredential.user!.uid, context,
+                email: userCredential.user!.email);
+          } else {
+            await _initializeUserProfile(userCredential.user!.uid, context);
+          }
         }
 
         return userCredential.user;
@@ -141,7 +153,7 @@ class AuthenticationProvider extends ChangeNotifier {
       await DbClient().setData(dbKey: "uid", value: userProfile.uid ?? '');
       await DbClient()
           .setData(dbKey: "userName", value: userProfile.name ?? '');
-      await DbClient().setData(dbKey: "email", value: userProfile.email ?? '');
+      // await DbClient().setData(dbKey: "email", value: userProfile.email ?? '');
     }
   }
 
@@ -158,7 +170,7 @@ class AuthenticationProvider extends ChangeNotifier {
       final newUser = UserProfileModel(
         uid: uid,
         name: name ?? '',
-        email: email ?? '',
+        // email: email ?? '',
         gender: gender ?? '',
         image: '',
         age: age ?? '',
@@ -180,7 +192,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
       await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
       await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
-      await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
+      // await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
     });
   }
 }

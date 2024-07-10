@@ -36,20 +36,29 @@ class _LoginMobileState extends State<LoginMobile> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    String? result = await authenticationProvider.signInWithEmailAndPassword(
-        email, password, context);
+    try {
+      String? result = await authenticationProvider.signInWithEmailAndPassword(
+          email, password, context);
 
-    if (result != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                const StateLoaderPage()), // Replace StateLoader with your actual widget
-      );
-    } else {
+      if (result != null) {
+        // If result is not null, it's a valid UID
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const StateLoaderPage()),
+        );
+      } else {
+        // If result is null, show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login failed: User not found'),
+          ),
+        );
+      }
+    } catch (e) {
+      // Catch any errors thrown by signInWithEmailAndPassword
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error login: $result'),
+          content: Text('Login failed: ${e.toString()}'),
         ),
       );
     }

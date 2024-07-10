@@ -45,76 +45,66 @@ class _MyProfilePageState extends State<MyProfilePage> {
     return base64Decode(base64String!);
   }
 
-  Future<void> uploadDocument() async {
+  Future<void> _pickAndUploadFile({bool isDocument = false}) async {
     try {
-      final storageStatus = await Permission.storage.request();
-      if (!storageStatus.isGranted) {
-        throw Exception('Storage permission is required to upload the image.');
+      if (!await Permission.storage.request().isGranted) {
+        throw Exception('Storage permission is required to upload the file.');
       }
 
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png', 'jpeg'],
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        File imageFile = File(result.files.single.path!);
-        String base64 = base64Encode(imageFile.readAsBytesSync());
+      if (result?.files.isNotEmpty ?? false) {
+        final file = File(result!.files.single.path!);
+        final base64 = base64Encode(file.readAsBytesSync());
 
-        final document = DocumentVerificationModel(
-            uid: user!.uid,
-            verificationStatus: 1,
-            documents: [
-              Documents(
-                  fileType: '',
-                  file: base64,
-                  fileName: 'Document',
-                  timeStamp: DateTime.now().toString(),
-                  documentType: selectedFileType)
-            ]);
-
-        await context
-            .read<UserProfileProvider>()
-            .uploadDocumentsForVerification(document);
+        if (isDocument) {
+          await _uploadDocument(base64);
+        } else {
+          await _uploadPost(base64);
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      _showErrorSnackBar(e.toString());
     }
   }
 
-  Future<void> pickImage() async {
-    try {
-      final storageStatus = await Permission.storage.request();
-      if (!storageStatus.isGranted) {
-        throw Exception('Storage permission is required to upload the image.');
-      }
-
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'png', 'jpeg'],
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        File imageFile = File(result.files.single.path!);
-        String base64 = base64Encode(imageFile.readAsBytesSync());
-
-        final newUpload = Uploads(
-          id: '',
-          file: base64,
-          name: 'Post',
-          uploadDate: DateTime.now().toString(),
-        );
-
-        await context
-            .read<UserProfileProvider>()
-            .uploadPost(newUpload, user!.uid);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
-    }
+  Future<void> _uploadDocument(String base64) async {
+    final document = DocumentVerificationModel(
+        uid: user!.uid,
+        verificationStatus: 1,
+        documents: [
+          Documents(
+              fileType: 'Verification',
+              file: base64.toString(),
+              fileName: selectedFileType,
+              timeStamp: DateTime.now().toString(),
+              documentType: selectedFileType)
+        ]);
+    await context
+        .read<UserProfileProvider>()
+        .uploadDocumentsForVerification(document);
   }
+
+  Future<void> _uploadPost(String base64) async {
+    final newUpload = Uploads(
+      file: base64.toString(),
+      name: 'Post',
+      uploadDate: DateTime.now().toString(),
+    );
+    await context.read<UserProfileProvider>().uploadPost(newUpload, user!.uid);
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Error: $message')));
+  }
+
+// Usage:
+  Future<void> uploadDocument() => _pickAndUploadFile(isDocument: true);
+  Future<void> pickImage() => _pickAndUploadFile();
 
   @override
   Widget build(BuildContext context) {
