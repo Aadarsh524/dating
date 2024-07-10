@@ -52,10 +52,6 @@ class AuthenticationProvider extends ChangeNotifier {
         String token = await ApiClient().validateToken() ?? '';
         await TokenManager.saveToken(token);
 
-        // // Initialize user profile and wait for the completion
-        // await _initializeUserProfile(userCredential.user!.uid, context);
-
-        // Return the user ID after initialization is complete
         return userCredential.user!.uid;
       } else {
         print("Login successful but user object is null");
@@ -127,8 +123,6 @@ class AuthenticationProvider extends ChangeNotifier {
           if (userCredential.additionalUserInfo?.isNewUser ?? false) {
             await _createNewUserProfile(userCredential.user!.uid, context,
                 email: userCredential.user!.email);
-          } else {
-            await _initializeUserProfile(userCredential.user!.uid, context);
           }
         }
 
@@ -149,19 +143,19 @@ class AuthenticationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _initializeUserProfile(String uid, BuildContext context) async {
-    final userProfileProvider = context.read<UserProfileProvider>();
-    final userProfile = await userProfileProvider.getUserProfile(uid);
+  // Future<void> _initializeUserProfile(String uid, BuildContext context) async {
+  //   final userProfileProvider = context.read<UserProfileProvider>();
+  //   final userProfile = await userProfileProvider.getUserProfile(uid);
 
-    if (userProfile != null) {
-      userProfileProvider.setCurrentUserProfile(userProfile);
+  //   if (userProfile != null) {
+  //     userProfileProvider.setCurrentUserProfile(userProfile);
 
-      await DbClient().setData(dbKey: "uid", value: userProfile.uid ?? '');
-      await DbClient()
-          .setData(dbKey: "userName", value: userProfile.name ?? '');
-      // await DbClient().setData(dbKey: "email", value: userProfile.email ?? '');
-    }
-  }
+  //     await DbClient().setData(dbKey: "uid", value: userProfile.uid ?? '');
+  //     await DbClient()
+  //         .setData(dbKey: "userName", value: userProfile.name ?? '');
+  //     // await DbClient().setData(dbKey: "email", value: userProfile.email ?? '');
+  //   }
+  // }
 
   Future<void> _createNewUserProfile(String uid, BuildContext context,
       {String? name,
