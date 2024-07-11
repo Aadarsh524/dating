@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dating/platform/platform.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
@@ -76,9 +77,12 @@ class Signaling {
 
   final String baseUrl = getApiEndpoint();
 
-  Future<String> createRoom(
-      RTCVideoRenderer remoteRenderer, String roomIdd) async {
-    roomId = roomIdd;
+  String generateUniqueRoomId() {
+    return DateTime.now().millisecondsSinceEpoch.toString();
+  }
+
+  Future<String> createRoom(RTCVideoRenderer remoteRenderer) async {
+    roomId = generateUniqueRoomId();
     peerConnection =
         await createPeerConnection(configuration, offerSdpConstraints);
 
@@ -96,7 +100,7 @@ class Signaling {
 
     // Create a room in the API server
     final response = await http.post(
-      Uri.parse('$baseUrl/createRoom'),
+      Uri.parse('$baseUrl/call/createRoom'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -120,6 +124,8 @@ class Signaling {
 
       // Listen for remote session description and ICE candidates
       listenForRoomUpdates(roomId!);
+      //room id
+      log('this is roomID=$roomId');
 
       return roomId!;
     } else {
@@ -137,7 +143,7 @@ class Signaling {
     });
 
     // Retrieve the room information from the API server
-    final response = await http.get(Uri.parse('$baseUrl/room/$roomId'));
+    final response = await http.get(Uri.parse('$baseUrl/call/room/$roomId'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -182,7 +188,7 @@ class Signaling {
   Future<void> addIceCandidate(
       String roomId, RTCIceCandidate candidate, bool isCaller) async {
     await http.post(
-      Uri.parse('$baseUrl/addIceCandidate'),
+      Uri.parse('$baseUrl/call/addIceCandidate'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

@@ -313,10 +313,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         Row(
                           children: [
-                            const Icon(
-                              Icons.female,
-                              color: AppColors.secondaryColor,
-                            ),
+                            widget.dashboardresponsemodel.gender == 'female'
+                                ? const Icon(
+                                    Icons.female,
+                                    color: AppColors.secondaryColor,
+                                  )
+                                : const Icon(
+                                    Icons.male,
+                                    color: AppColors.secondaryColor,
+                                  ),
                             const SizedBox(
                               width: 5,
                             ),
@@ -498,6 +503,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget DesktopProfile() {
+    final alluploads = widget.dashboardresponsemodel.uploads;
+
+    List<Uploads> reversedUploads = alluploads!.reversed.toList();
+
     List<String> photoAssetPaths = [
       AppImages.profile, // Main photo
       AppImages.loginimage,
@@ -870,7 +879,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         crossAxisSpacing: 20.0,
                                         mainAxisSpacing: 8.0,
                                       ),
-                                      itemCount: 3,
+                                      itemCount: reversedUploads.length,
                                       itemBuilder: (context, index) {
                                         return GestureDetector(
                                           onTap: () => _selectPhoto(index + 1),
@@ -929,26 +938,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               // heart
-                              Neumorphic(
-                                style: const NeumorphicStyle(
-                                  boxShape: NeumorphicBoxShape.circle(),
-                                  depth: 5,
-                                  intensity: 0.75,
-                                ),
-                                child: NeumorphicButton(
-                                  child: SizedBox(
-                                    height: 40,
-                                    width: 40,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5.0),
-                                      child: SvgPicture.asset(
-                                        AppIcons.heartfilled,
-                                        height: 20,
-                                        width: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              LikeButton(
+                                currentUserId: user!.uid,
+                                likedUserId: widget.dashboardresponsemodel.uid!,
                               ),
 
                               // chat
@@ -1032,11 +1024,14 @@ class _ProfilePageState extends State<ProfilePage> {
                               Row(
                                 children: [
                                   Text(
-                                    'Sekar Lia, 25',
+                                    '${widget.dashboardresponsemodel.name}, ${widget.dashboardresponsemodel.age}',
                                     style: AppTextStyles().primaryStyle,
                                   ),
                                   const SizedBox(width: 5),
-                                  const Icon(Icons.female)
+                                  widget.dashboardresponsemodel.gender ==
+                                          "female"
+                                      ? Icon(Icons.female)
+                                      : Icon(Icons.male)
                                 ],
                               ),
 
@@ -1079,7 +1074,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     width: 5,
                                   ),
                                   Text(
-                                    "Malang, Jawa Timur, Indonesia",
+                                    "${widget.dashboardresponsemodel.address}",
                                     style: AppTextStyles().secondaryStyle,
                                   )
                                 ],
@@ -1091,15 +1086,21 @@ class _ProfilePageState extends State<ProfilePage> {
 
                               Row(
                                 children: [
-                                  const Icon(
-                                    Icons.female,
-                                    color: AppColors.secondaryColor,
-                                  ),
+                                  widget.dashboardresponsemodel.gender ==
+                                          'female'
+                                      ? const Icon(
+                                          Icons.female,
+                                          color: AppColors.secondaryColor,
+                                        )
+                                      : const Icon(
+                                          Icons.male,
+                                          color: AppColors.secondaryColor,
+                                        ),
                                   const SizedBox(
                                     width: 5,
                                   ),
                                   Text(
-                                    "Female / Single",
+                                    "${widget.dashboardresponsemodel.gender}",
                                     style: AppTextStyles().secondaryStyle,
                                   )
                                 ],
@@ -1163,7 +1164,7 @@ class _ProfilePageState extends State<ProfilePage> {
 // text about
 
                           Text(
-                            'Caring and hard working',
+                            '${widget.dashboardresponsemodel.bio}',
                             style: AppTextStyles().secondaryStyle,
                           ),
 
@@ -1194,7 +1195,7 @@ class _ProfilePageState extends State<ProfilePage> {
 // text about
 
                           Text(
-                            'Hi there!  i’m Ghina. Just ordinary girl. Looking for a time traveler so i can meet you in the future inshaAllah ^^ Not interested in short term, so lets know each other well first, dont be hurry.  Be polite pls :)',
+                            '${widget.dashboardresponsemodel.bio}',
                             style: AppTextStyles().secondaryStyle,
                           ),
                         ],
