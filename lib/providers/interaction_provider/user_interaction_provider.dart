@@ -69,14 +69,14 @@ class UserInteractionProvider extends ChangeNotifier {
   Future<LikedByUsers?> fetchLikesByUser(String userId, int page) async {
     setInteractionLoading(true);
     try {
-      // String api =
-      //     getApiEndpoint(); // Replace with your actual API endpoint getter
+      String api =
+          getApiEndpoint(); // Replace with your actual API endpoint getter
       final token = await TokenManager.getToken();
       if (token == null) {
         throw Exception('No token found');
       }
 
-      final uri = Uri.parse("http://10.0.2.2:8001/like/$userId&page=$page");
+      final uri = Uri.parse("$api/like/$userId&page=$page");
 
       final response = await http.get(uri, headers: {
         'Authorization': 'Bearer $token',
@@ -101,14 +101,14 @@ class UserInteractionProvider extends ChangeNotifier {
   Future<LikedUsers?> fetchLikedByUser(String userId, int page) async {
     setInteractionLoading(true);
     try {
-      // String api =
-      //     getApiEndpoint(); // Replace with your actual API endpoint getter
+      String api =
+          getApiEndpoint(); // Replace with your actual API endpoint getter
       final token = await TokenManager.getToken();
       if (token == null) {
         throw Exception('No token found');
       }
 
-      final uri = Uri.parse("http://10.0.2.2:8001/liked/$userId&page=$page");
+      final uri = Uri.parse("$api/liked/$userId&page=$page");
 
       final response = await http.get(uri, headers: {
         'Authorization': 'Bearer $token',
@@ -133,15 +133,14 @@ class UserInteractionProvider extends ChangeNotifier {
   Future<MutualLikes?> fetchMutualLikes(String userId, int page) async {
     setInteractionLoading(false);
     try {
-      // String api =
-      //     getApiEndpoint(); // Replace with your actual API endpoint getter
+      String api =
+          getApiEndpoint(); // Replace with your actual API endpoint getter
       final token = await TokenManager.getToken();
       if (token == null) {
         throw Exception('No token found');
       }
 
-      final uri =
-          Uri.parse("http://10.0.2.2:8001/like/mutual/$userId&page=$page");
+      final uri = Uri.parse("$api/like/mutual/$userId&page=$page");
 
       final response = await http.get(uri, headers: {
         'Authorization': 'Bearer $token',
@@ -165,13 +164,14 @@ class UserInteractionProvider extends ChangeNotifier {
 
   Future<void> likeUser(String userId, String likedUserId) async {
     setInteractionLoading(true);
+    String api = getApiEndpoint();
     try {
       final token = await TokenManager.getToken();
       if (token == null) {
         throw Exception('No token found');
       }
 
-      final uri = Uri.parse("http://10.0.2.2:8001/Like");
+      final uri = Uri.parse("$api/Like");
       final response = await http.post(
         uri,
         headers: {
@@ -197,13 +197,14 @@ class UserInteractionProvider extends ChangeNotifier {
 
   Future<void> unlikeUser(String userId, String likedUserId) async {
     setInteractionLoading(false);
+    String api = getApiEndpoint();
     try {
       final token = await TokenManager.getToken();
       if (token == null) {
         throw Exception('No token found');
       }
 
-      final uri = Uri.parse("http://10.0.2.2:8001/like");
+      final uri = Uri.parse("$api/like");
       final response = await http.delete(
         uri,
         headers: {

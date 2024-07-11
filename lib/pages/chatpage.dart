@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+import 'package:dating/helpers/signaling.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
@@ -12,8 +14,11 @@ import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:dating/widgets/textField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -27,12 +32,49 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
   User? user = FirebaseAuth.instance.currentUser;
+  final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
+  final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
 
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
   final TextEditingController _message = TextEditingController();
   List<AllMessages> lastMessage = [];
+  Signaling _signaling = Signaling();
+
+  void _showPopupDialog(BuildContext context) {
+    TextEditingController _textFieldController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter Information'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: _textFieldController,
+                decoration: InputDecoration(hintText: "Enter something"),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                // Handle button press
+                String enteredText = _textFieldController.text;
+                _signaling.joinRoom(enteredText,_localRenderer);
+
+                log("Entered text: $enteredText");
+              },
+              child: Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Uint8List base64ToImage(String? base64String) {
     return base64Decode(base64String!);
@@ -1087,7 +1129,7 @@ class _ChatPageState extends State<ChatPage> {
 
                                             // VIDEO AND AUDIO Cll
 
-                                            const Row(
+                                            Row(
                                               children: [
                                                 Icon(
                                                   Icons.circle,
@@ -1097,11 +1139,23 @@ class _ChatPageState extends State<ChatPage> {
                                                 SizedBox(
                                                   width: 8,
                                                 ),
-                                                Icon(Icons.call_outlined),
+                                                GestureDetector(
+                                                  child:
+                                                      Icon(Icons.call_outlined),
+                                                  onTap: () {
+                                                    _signaling.createRoom(
+                                                        _remoteRenderer);
+                                                  },
+                                                ),
                                                 SizedBox(
                                                   width: 8,
                                                 ),
-                                                Icon(Icons.video_call),
+                                                GestureDetector(
+                                                    onTap: () {
+                                                      _showPopupDialog(context);
+                                                    },
+                                                    child:
+                                                        Icon(Icons.video_call)),
                                               ],
                                             )
                                           ],
