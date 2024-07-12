@@ -12,7 +12,6 @@ import 'package:dating/pages/admin/adminPage.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/settingpage.dart';
-import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/providers/dashboard_provider.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';

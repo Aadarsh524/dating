@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:dating/backend/MongoDB/token_manager.dart';
+import 'package:dating/datamodel/complaint/complaint_filter_model.dart';
+import 'package:dating/datamodel/complaint/complaint_model.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
+import 'package:dating/datamodel/admin_subscription_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/platform/platform_mobile.dart';
 
@@ -11,9 +15,18 @@ import 'package:http/http.dart' as http;
 
 class AdminDashboardProvider extends ChangeNotifier {
   List<UserProfileModel>? _usersListProvider;
+  List<AdminSubscriptionModel>? _userSubscriptionList;
   List<DocumentVerificationModel>? _documentsVerificationListProvider;
 
+  List<ComplaintModel>? _usersComplaintProvider;
+
   List<UserProfileModel>? get usersList => _usersListProvider;
+
+  List<ComplaintModel>? get usersComplainList => _usersComplaintProvider;
+
+  List<AdminSubscriptionModel>? get userSubscriptionList =>
+      _userSubscriptionList;
+
   List<DocumentVerificationModel>? get documentsList =>
       _documentsVerificationListProvider;
 
@@ -31,6 +44,16 @@ class AdminDashboardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setUserComplaints(List<ComplaintModel> usersList) {
+    _usersComplaintProvider = usersList;
+    notifyListeners();
+  }
+
+  void setUserSubscriptionList(List<AdminSubscriptionModel> usersList) {
+    _userSubscriptionList = usersList;
+    notifyListeners();
+  }
+
   void setDocuments(List<DocumentVerificationModel> documentsList) {
     _documentsVerificationListProvider = documentsList;
     notifyListeners();
@@ -39,50 +62,121 @@ class AdminDashboardProvider extends ChangeNotifier {
   Future<List<UserProfileModel>> fetchUsers(
       int page, BuildContext context) async {
     try {
-      log('this is stsdas');
+      log('Fetching users - start');
       setAdminLoading(true);
 
-      String api = getApiEndpoint();
-      var httpURI =
-          Uri.parse('$api/admin/dashboard/users').replace(queryParameters: {
-        'page': page.toString(),
-      });
-      log(httpURI.toString());
+      String api;
+      try {
+        api = getApiEndpoint();
+        log('API endpoint: $api');
+      } catch (e) {
+        log('Error getting API endpoint: $e');
+        api = 'http://localhost:8001/api'; // Fallback to a default value
+      }
 
       final token = await TokenManager.getToken();
       if (token == null) {
+        log('No token found');
         throw Exception('No token found');
       }
+      log('Token retrieved successfully');
+
+      final url =
+          Uri.parse('$api/admin/dasboard/users').replace(queryParameters: {
+        'page': page.toString(),
+      });
+      log('Request URL: $url');
 
       final response = await http.get(
-        Uri.parse('$api/admin/dashboard/users').replace(queryParameters: {
-          'page': page.toString(),
-        }),
+        url,
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          'Accept': 'text/plain',
           'Authorization': 'Bearer $token',
         },
       );
-      log('this is step2: ${response.statusCode}');
+
+      log('Response status code: ${response.statusCode}');
       if (response.statusCode == 200) {
-        log('this is step3: ${response.statusCode}');
         List<UserProfileModel> userProfileList = [];
-        List<dynamic> data = jsonDecode(response.body.toString());
-        for (Map<String, dynamic> i in data) {
+        List<dynamic> data = jsonDecode(response.body);
+
+        for (var i in data) {
           userProfileList.add(UserProfileModel.fromJson(i));
         }
+
+        log('Parsed ${userProfileList.length} user profiles');
         setUsers(userProfileList);
         return userProfileList;
       } else {
-        return [];
+        log('Error response: ${response.body}');
+        throw HttpException('Failed to load users: ${response.statusCode}');
       }
     } catch (e) {
-      print(e.toString());
+      log('Error in fetchUsers: ${e.toString()}');
       rethrow;
     } finally {
       setAdminLoading(false);
-      //notifyListeners();
+      notifyListeners(); // Make sure this is uncommented if you're using ChangeNotifier
+    }
+  }
+
+  Future<List<AdminSubscriptionModel>> fetchUserSubscription(int page) async {
+    try {
+      setAdminLoading(true);
+
+      String api;
+      try {
+        api = getApiEndpoint();
+        log('API endpoint: $api');
+      } catch (e) {
+        log('Error getting API endpoint: $e');
+        api = 'http://localhost:8001/api'; // Fallback to a default value
+      }
+
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        log('No token found');
+        throw Exception('No token found');
+      }
+      log('Token retrieved successfully');
+
+      final url =
+          Uri.parse('$api/admin/subscriptions').replace(queryParameters: {
+        'page': page.toString(),
+      });
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/plain',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      log('Response status code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        List<AdminSubscriptionModel> userSubscriptionList = [];
+        List<dynamic> data = jsonDecode(response.body);
+
+        for (var i in data) {
+          userSubscriptionList.add(AdminSubscriptionModel.fromJson(i));
+        }
+
+        log('Parsed ${userSubscriptionList.length} user profiles');
+        setUserSubscriptionList(userSubscriptionList);
+        return userSubscriptionList;
+      } else {
+        log('Error response: ${response.body}');
+        throw HttpException('Failed to load users: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('Error in fetchUsers: ${e.toString()}');
+      rethrow;
+    } finally {
+      setAdminLoading(false);
+      notifyListeners(); // Make sure this is uncommented if you're using ChangeNotifier
     }
   }
 
@@ -119,7 +213,7 @@ class AdminDashboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> banUser(String userId, BuildContext context) async {
+  Future<bool> banUser(String userId) async {
     setAdminLoading(true);
 
     String api = getApiEndpoint();
@@ -207,6 +301,44 @@ class AdminDashboardProvider extends ChangeNotifier {
         }
         setUsers(userProfileList);
         return userProfileList;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    } finally {
+      setAdminLoading(true);
+    }
+  }
+
+  Future<List<ComplaintModel>> fetchComplaints(
+      ComplaintFilterModel complaintModel, BuildContext context) async {
+    setAdminLoading(true);
+
+    String api = getApiEndpoint();
+    final token = await TokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
+    try {
+      final response = await http.get(
+        Uri.parse('$api/admin/complains'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<ComplaintModel> userComplainList = [];
+        List<dynamic> data = jsonDecode(response.body.toString());
+        for (Map<String, dynamic> i in data) {
+          userComplainList.add(ComplaintModel.fromJson(i));
+        }
+        setUserComplaints(userComplainList);
+        return userComplainList;
       } else {
         return [];
       }

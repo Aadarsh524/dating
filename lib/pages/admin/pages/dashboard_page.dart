@@ -1,14 +1,14 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
+import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
-import 'package:dating/utils/images.dart';
 import 'package:dating/utils/shimmer.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -41,15 +41,6 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  //init state
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    //context.read<AdminDashboardProvider>().fetchUsers(1, context);
-    Provider.of<AdminDashboardProvider>(context).fetchUsers(1, context);
-  }
-
   // for status
   String? _selectedStatus = 'Status';
 
@@ -60,100 +51,27 @@ class _DashboardPageState extends State<DashboardPage> {
   ];
 
 //  // Sample user data
-  final List<User> users = [
-    User(
-      name: 'Pankaj Subedi',
-      id: '_subba12',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: true,
-      subscriptionPlan: '+Basic',
-    ),
 
-    User(
-      name: 'Bishnu Rijal',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: false,
-      subscriptionPlan: '+Gold',
-    ),
-    User(
-      name: 'Rita Thapa',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: true,
-      subscriptionPlan: '+Plus',
-    ),
-    User(
-      name: 'Dhanu GC',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: false,
-      subscriptionPlan: '+Basic',
-    ),
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the profile data when the screen is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AdminDashboardProvider>(context, listen: false)
+          .fetchUsers(1, context);
+    });
+  }
 
-    User(
-      name: 'Bishnu Rijal',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: false,
-      subscriptionPlan: '+Gold',
-    ),
-    User(
-      name: 'Rita Thapa',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: true,
-      subscriptionPlan: '+Plus',
-    ),
-    User(
-      name: 'Dhanu GC',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: false,
-      subscriptionPlan: '+Basic',
-    ),
-
-    User(
-      name: 'Bishnu Rijal',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: false,
-      subscriptionPlan: '+Gold',
-    ),
-    User(
-      name: 'Rita Thapa',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: true,
-      subscriptionPlan: '+Plus',
-    ),
-    User(
-      name: 'Dhanu GC',
-      id: 'hayyf66',
-      photoUrl: AppImages.profile,
-      countryFlagUrl: AppImages.google,
-      isVerified: false,
-      subscriptionPlan: '+Basic',
-    ),
-
-    // Add more user data here
-  ];
+  Uint8List base64ToImage(String? base64String) {
+    return base64Decode(base64String!);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           // top filter
@@ -169,11 +87,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     Container(
                       height: 50,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 2, color: Color(0xFFE5E5E5)),
+                          side: const BorderSide(
+                              width: 2, color: Color(0xFFE5E5E5)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -181,7 +100,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         child: DropdownButton<String>(
                           padding: EdgeInsets.zero,
                           style: GoogleFonts.poppins(
-                            color: Color(0xFF7879F1),
+                            color: const Color(0xFF7879F1),
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                           ),
@@ -190,7 +109,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             AppIcons
                                 .chevronoutline, // Replace with your SVG path
                             height: 14,
-                            color: Color.fromARGB(255, 120, 120, 241),
+                            color: const Color.fromARGB(255, 120, 120, 241),
                           ),
                           elevation: 0,
                           onChanged: (String? newValue) {
@@ -215,18 +134,19 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     // date bick rom
 
                     Container(
                       height: 50,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 2, color: Color(0xFFE5E5E5)),
+                          side: const BorderSide(
+                              width: 2, color: Color(0xFFE5E5E5)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -238,13 +158,13 @@ class _DashboardPageState extends State<DashboardPage> {
                             Text(
                               _fromDate,
                               style: GoogleFonts.poppins(
-                                color: Color(0xFF868690),
+                                color: const Color(0xFF868690),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                                 letterSpacing: 0.20,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 10,
                             ),
                             SvgPicture.asset(
@@ -263,11 +183,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
                     Container(
                       height: 50,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 2, color: Color(0xFFE5E5E5)),
+                          side: const BorderSide(
+                              width: 2, color: Color(0xFFE5E5E5)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -279,13 +200,13 @@ class _DashboardPageState extends State<DashboardPage> {
                             Text(
                               _toDate,
                               style: GoogleFonts.poppins(
-                                color: Color(0xFF868690),
+                                color: const Color(0xFF868690),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                                 letterSpacing: 0.20,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 10,
                             ),
                             SvgPicture.asset(
@@ -301,7 +222,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
 // filter icon
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   height: 50,
                   decoration: BoxDecoration(
                     color: AppColors.blue,
@@ -327,30 +248,29 @@ class _DashboardPageState extends State<DashboardPage> {
 
 // users
 
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
           Expanded(
             child: Consumer<AdminDashboardProvider>(
                 builder: (context, adminProvider, _) {
-              log("${adminProvider.isAdminDataLoading}");
               return adminProvider.isAdminDataLoading
-                  ? const ShimmerSkeleton(count: 7, height: 80)
+                  ? const ShimmerSkeleton(count: 4, height: 80)
                   : Consumer<AdminDashboardProvider>(
                       builder: (context, adminProvider, _) {
                       List<UserProfileModel>? data = adminProvider.usersList;
 
                       if (data == null || data.isEmpty) {
-                        return Center(child: Text('No data available'));
+                        return const Center(child: Text('No data available'));
                       }
                       log("${data.length}");
                       return ListView.builder(
                         itemCount: data.length,
                         itemBuilder: (BuildContext context, int index) {
-                          final user = users[index];
+                          final user = data[index];
                           // for subscription color
                           Color textColor;
-                          switch (user.subscriptionPlan) {
+                          switch (user.subscriptionStatus) {
                             case '+Basic':
                               textColor = Colors.green;
                               break;
@@ -365,15 +285,15 @@ class _DashboardPageState extends State<DashboardPage> {
                               textColor = Colors.black;
                           }
                           return Padding(
-                            padding: EdgeInsets.only(
+                            padding: const EdgeInsets.only(
                                 left: 20, right: 20, bottom: 10),
                             child: Container(
                               //  padding
-                              padding: EdgeInsets.symmetric(vertical: 10),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
                               decoration: ShapeDecoration(
                                 color: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  side: BorderSide(
+                                  side: const BorderSide(
                                     width: 2,
                                     strokeAlign: BorderSide.strokeAlignOutside,
                                     color: Color(0xFFEAE7FF),
@@ -382,7 +302,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                               ),
                               child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -399,21 +320,23 @@ class _DashboardPageState extends State<DashboardPage> {
                                               borderRadius:
                                                   BorderRadius.circular(100),
                                               image: DecorationImage(
-                                                image:
-                                                    NetworkImage(user.photoUrl),
+                                                image: MemoryImage(
+                                                  base64ToImage(user.image ??
+                                                      defaultBase64Avatar),
+                                                ),
                                                 fit: BoxFit.cover,
                                               ),
                                             ),
                                           ),
 
                                           // user name
-                                          SizedBox(
+                                          const SizedBox(
                                             width: 30,
                                           ),
                                           Text(
-                                            user.name,
+                                            user.name!,
                                             style: GoogleFonts.poppins(
-                                              color: Color(0xFF04103B),
+                                              color: const Color(0xFF04103B),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -427,26 +350,26 @@ class _DashboardPageState extends State<DashboardPage> {
                                     SizedBox(
                                       width: 100,
                                       child: Text(
-                                        user.id,
+                                        user.uid!,
                                         style: GoogleFonts.poppins(
-                                          color: Color(0xFF797D8C),
+                                          color: const Color(0xFF797D8C),
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: 50,
-                                      child: Image.network(
-                                        user.countryFlagUrl,
-                                        height: 20,
-                                        width: 20,
-                                      ),
-                                    ),
+                                    // SizedBox(
+                                    //   width: 50,
+                                    //   child: Image.network(
+                                    //     user.countryFlagUrl,
+                                    //     height: 20,
+                                    //     width: 20,
+                                    //   ),
+                                    // ),
 
                                     SizedBox(
                                       width: 50,
-                                      child: user.isVerified
+                                      child: user.isVerified!
                                           ? SvgPicture.asset(AppIcons.verified)
                                           : SvgPicture.asset(
                                               AppIcons.unverified),
@@ -454,7 +377,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     SizedBox(
                                       width: 100,
                                       child: Text(
-                                        '${user.subscriptionPlan}',
+                                        user.subscriptionStatus!,
                                         style: GoogleFonts.poppins(
                                           color: textColor,
                                           fontSize: 14,
@@ -469,7 +392,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                       onSelected: (int result) {
                                         switch (result) {
                                           case 0:
-                                            // Handle block action
+                                            _showUserBlockDialog(
+                                                user.uid!, context);
                                             break;
                                           case 1:
                                             _showSendMessageDialog(context);
@@ -484,12 +408,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                         PopupMenuItem<int>(
                                           value: 0,
                                           child: ListTile(
-                                            leading: Icon(Icons.block,
+                                            leading: const Icon(Icons.block,
                                                 color: AppColors.blue),
                                             title: Text(
                                               'Block',
                                               style: GoogleFonts.poppins(
-                                                color: Color(0xFF1F192F),
+                                                color: const Color(0xFF1F192F),
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w500,
                                               ),
@@ -499,12 +423,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                         PopupMenuItem<int>(
                                           value: 1,
                                           child: ListTile(
-                                            leading: Icon(Icons.message,
+                                            leading: const Icon(Icons.message,
                                                 color: AppColors.blue),
                                             title: Text(
                                               'Send Message',
                                               style: GoogleFonts.poppins(
-                                                color: Color(0xFF1F192F),
+                                                color: const Color(0xFF1F192F),
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w500,
                                               ),
@@ -514,12 +438,12 @@ class _DashboardPageState extends State<DashboardPage> {
                                         PopupMenuItem<int>(
                                           value: 2,
                                           child: ListTile(
-                                            leading: Icon(Icons.warning,
+                                            leading: const Icon(Icons.warning,
                                                 color: AppColors.blue),
                                             title: Text(
                                               'Alert',
                                               style: GoogleFonts.poppins(
-                                                color: Color(0xFF1F192F),
+                                                color: const Color(0xFF1F192F),
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w500,
                                               ),
@@ -565,6 +489,60 @@ class User {
 
 // for send message
 
+void _showUserBlockDialog(String uid, BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(
+          'Block User',
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF343C6A),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to block this user?',
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF2C2C2C),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(
+                color: AppColors.blue,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Provider.of<AdminDashboardProvider>(context, listen: false)
+                  .banUser(uid);
+              Navigator.pop(context);
+            },
+            child: Text(
+              'Block',
+              style: GoogleFonts.poppins(
+                color: Colors.red,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 void _showSendMessageDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -573,7 +551,7 @@ void _showSendMessageDialog(BuildContext context) {
         title: Text(
           'Send Message',
           style: GoogleFonts.poppins(
-            color: Color(0xFF343C6A),
+            color: const Color(0xFF343C6A),
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -601,7 +579,7 @@ void _showSendMessageDialog(BuildContext context) {
                       )),
                   hintText: "Title",
                   hintStyle: GoogleFonts.poppins(
-                    color: Color(0xFF2C2C2C),
+                    color: const Color(0xFF2C2C2C),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -626,7 +604,7 @@ void _showSendMessageDialog(BuildContext context) {
                       )),
                   hintText: "Message here",
                   hintStyle: GoogleFonts.poppins(
-                    color: Color(0xFF2C2C2C),
+                    color: const Color(0xFF2C2C2C),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -641,7 +619,7 @@ void _showSendMessageDialog(BuildContext context) {
                     onTap: () => Navigator.pop(context),
                     child: Container(
                       width: 100,
-                      padding: EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         color: AppColors.blue,
                         borderRadius: BorderRadius.circular(100),
@@ -657,7 +635,7 @@ void _showSendMessageDialog(BuildContext context) {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 5,
                           ),
                           // send icon
