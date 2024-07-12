@@ -1,31 +1,40 @@
 import 'dart:developer';
-
 import 'package:http/http.dart' as http;
-
 import '../../platform/platform.dart';
+import 'dart:convert';
 
 class ApiClient {
   Future<String?> validateToken() async {
     String api = getApiEndpoint();
-    log(api);
+    log('API Endpoint: $api');
+
+    final url = Uri.parse('$api/validate');
+    log('Full URL: $url');
 
     try {
       final response = await http.post(
-        Uri.parse('$api/validate'),
+        url,
         headers: {
-          'Content-Type': 'text/plain',
-          'Accept': 'text/plain',
-          "Authorization": 'Basic apikeyxxx'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Basic apikeyxxx'
         },
-        body: '',
+        body: json.encode({}), // Send an empty JSON object if no body is needed
       );
 
+      log('Response status code: ${response.statusCode}');
+      log('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
-        return response.body.toString();
+        return response.body;
+      } else {
+        log('Non-200 status code received');
+        return null;
       }
-      return '';
     } catch (e) {
-      throw Exception(e.toString());
+      log('Error in validateToken: $e');
+
+      rethrow; // Rethrow the exception for the caller to handle
     }
   }
 }

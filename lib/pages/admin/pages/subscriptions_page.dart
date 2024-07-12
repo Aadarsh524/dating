@@ -1,5 +1,9 @@
+import 'package:dating/datamodel/admin_subscription_model.dart';
+import 'package:dating/providers/admin_provider.dart';
+import 'package:dating/utils/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class SubscriptionsPage extends StatefulWidget {
   @override
@@ -29,34 +33,60 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Fetch the profile data when the screen is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AdminDashboardProvider>(context, listen: false)
+          .fetchUserSubscription(1);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3, // 2 items per row
-          crossAxisSpacing: 15.0,
-          mainAxisSpacing: 15,
-          childAspectRatio: 19 / 9, // Adjust the aspect ratio as needed
-        ),
-        itemCount: subscriptions.length,
-        itemBuilder: (context, index) {
-          return SubscriptionCard(subscription: subscriptions[index]);
-        },
-      ),
-    );
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Consumer<AdminDashboardProvider>(
+            builder: (context, adminProvider, _) {
+          return adminProvider.isAdminDataLoading
+              ? const ShimmerSkeleton(count: 4, height: 80)
+              : Consumer<AdminDashboardProvider>(
+                  builder: (context, adminProvider, _) {
+                    List<AdminSubscriptionModel>? data =
+                        adminProvider.userSubscriptionList;
+
+                    if (data == null || data.isEmpty) {
+                      return const Center(child: Text('No data available'));
+                    }
+                    return GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3, // 2 items per row
+                        crossAxisSpacing: 15.0,
+                        mainAxisSpacing: 15,
+                        childAspectRatio:
+                            19 / 9, // Adjust the aspect ratio as needed
+                      ),
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        return SubscriptionCard(subscription: data[index]);
+                      },
+                    );
+                  },
+                );
+        }));
   }
 }
 
 class SubscriptionCard extends StatelessWidget {
-  final Subscription subscription;
+  final AdminSubscriptionModel subscription;
 
   const SubscriptionCard({required this.subscription});
 
   @override
   Widget build(BuildContext context) {
     Color subscriptionColor;
-    switch (subscription.subscriptionType) {
+    switch (subscription.userSubscription!.planType) {
       case '+Basic':
         subscriptionColor = Colors.green;
         break;
@@ -81,7 +111,7 @@ class SubscriptionCard extends StatelessWidget {
       ),
       child: ListTile(
         title: Text(
-          subscription.userName,
+          subscription.miniProfile!.name!,
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontSize: 18,
@@ -92,7 +122,7 @@ class SubscriptionCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              subscription.subscriptionType,
+              subscription.userSubscription!.planType.toString(),
               style: GoogleFonts.poppins(
                 color: subscriptionColor,
                 fontSize: 18,
@@ -100,7 +130,7 @@ class SubscriptionCard extends StatelessWidget {
               ),
             ),
             Text(
-              'Start Date: ${subscription.startDate.toLocal().toString().split(' ')[0]}',
+              'Start Date: ${subscription.userSubscription!.subscriptionDate.toString().split(' ')[0]}',
               style: GoogleFonts.poppins(
                 color: Color(0xFF514F6E),
                 fontSize: 14,
@@ -108,7 +138,7 @@ class SubscriptionCard extends StatelessWidget {
               ),
             ),
             Text(
-              'End Date: ${subscription.endDate.toLocal().toString().split(' ')[0]}',
+              'End Date: ${subscription.userSubscription!.expirationDate.toString().split(' ')[0]}',
               style: GoogleFonts.poppins(
                 color: Color(0xFF514F6E),
                 fontSize: 14,
