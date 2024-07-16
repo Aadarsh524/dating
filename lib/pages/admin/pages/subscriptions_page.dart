@@ -1,4 +1,4 @@
-import 'package:dating/datamodel/admin_subscription_model.dart';
+import 'package:dating/datamodel/admin/admin_subscription_model.dart';
 import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/utils/shimmer.dart';
 import 'package:flutter/material.dart';

@@ -1,9 +1,15 @@
+import 'dart:convert';
+
+import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
-import 'package:dating/utils/images.dart';
+
+import 'package:dating/utils/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ApprovePicturesPage extends StatefulWidget {
   @override
@@ -11,7 +17,6 @@ class ApprovePicturesPage extends StatefulWidget {
 }
 
 class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
-// for date picker
   String _fromDate = 'From';
   String _toDate = 'To';
 
@@ -33,55 +38,29 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
     }
   }
 
-  List<UserImage> userImages = [
-    UserImage(
-      imageUrl: AppImages.loginimage,
-      uploaderName: 'John Doe',
-      uploaderProfilePicUrl: AppImages.profile,
-    ),
-    UserImage(
-      imageUrl: AppImages.loginimage,
-      uploaderName: 'Jane Smith',
-      uploaderProfilePicUrl: AppImages.profile,
-    ),
-    UserImage(
-      imageUrl: AppImages.loginimage,
-      uploaderName: 'Alice Johnson',
-      uploaderProfilePicUrl: AppImages.profile,
-    ),
-    UserImage(
-      imageUrl: AppImages.loginimage,
-      uploaderName: 'Bob Brown',
-      uploaderProfilePicUrl: AppImages.profile,
-    ),
-  ];
-
-  // for status
   String? _selectedStatus = 'Status';
+  final List<String> _statuses = ['Active', 'Inactive', 'Blocked'];
 
-  final List<String> _statuses = [
-    'Active',
-    'Inactive',
-    'Blocked',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AdminDashboardProvider>(context, listen: false)
+          .fetchUsers(1, context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(
-            height: 20,
-          ),
-          // top filter
+          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
-              // for filterr icon and statuses
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // status
-// filter
                 Row(
                   children: [
                     Container(
@@ -104,8 +83,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                           ),
                           value: _selectedStatus,
                           icon: SvgPicture.asset(
-                            AppIcons
-                                .chevronoutline, // Replace with your SVG path
+                            AppIcons.chevronoutline,
                             height: 14,
                             color: Color.fromARGB(255, 120, 120, 241),
                           ),
@@ -131,12 +109,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                         ),
                       ),
                     ),
-
-                    SizedBox(
-                      width: 10,
-                    ),
-                    // date bick rom
-
+                    const SizedBox(width: 10),
                     Container(
                       height: 50,
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -161,23 +134,13 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                                 letterSpacing: 0.20,
                               ),
                             ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            SvgPicture.asset(
-                              AppIcons.calendar,
-                              height: 14,
-                            ),
+                            const SizedBox(width: 10),
+                            SvgPicture.asset(AppIcons.calendar, height: 14),
                           ],
                         ),
                       ),
                     ),
-
-                    // swap icon
                     SvgPicture.asset(AppIcons.swap),
-
-                    // to date picker
-
                     Container(
                       height: 50,
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -202,21 +165,14 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                                 letterSpacing: 0.20,
                               ),
                             ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            SvgPicture.asset(
-                              AppIcons.calendar,
-                              height: 14,
-                            ),
+                            const SizedBox(width: 10),
+                            SvgPicture.asset(AppIcons.calendar, height: 14),
                           ],
                         ),
                       ),
                     ),
                   ],
                 ),
-
-// filter icon
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   height: 50,
@@ -241,156 +197,93 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
               ],
             ),
           ),
-
-// users
-
-          SizedBox(
-            height: 15,
-          ),
-
-//
+          const SizedBox(height: 15),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GridView.builder(
-                itemCount: userImages.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // Four images per row
-                  crossAxisSpacing: 8.0,
-                  mainAxisSpacing: 8.0,
-                ),
-                itemBuilder: (context, index) {
-                  return UserImageCard(
-                    userImage: userImages[index],
-                    onDelete: () => setState(() {
-                      userImages.removeAt(index);
-                    }),
-                    onApprove: () => setState(() {
-                      userImages[index].isApproved =
-                          !userImages[index].isApproved;
-                    }),
-                    onReupload: () {
-                      // Implement re-upload logic
-                    },
-                  );
+              child: Consumer<AdminDashboardProvider>(
+                builder: (context, adminProvider, _) {
+                  List<UserProfileModel>? data = adminProvider.usersList;
+
+                  if (data == null || data.isEmpty) {
+                    return const Center(child: Text('No data available'));
+                  }
+
+                  return adminProvider.isAdminDataLoading
+                      ? const ShimmerSkeleton(count: 4, height: 80)
+                      : adminProvider.usersList == null ||
+                              adminProvider.usersList!.isEmpty
+                          ? const Center(child: Text('No data available'))
+                          : ListView.builder(
+                              itemCount: adminProvider.usersList!.length,
+                              itemBuilder: (context, index) {
+                                final users = adminProvider.usersList![index];
+                                return ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundImage: MemoryImage(
+                                      base64Decode(users.image!),
+                                    ),
+                                  ),
+                                  title: Text(users.name!),
+                                  subtitle: Text(
+                                      'Status: ${users.isVerified == true}'),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.more_vert),
+                                    onPressed: () =>
+                                        _showImageDialog(context, users.uid!),
+                                  ),
+                                );
+                              },
+                            );
                 },
               ),
             ),
-          ),
+          )
         ],
       ),
     );
   }
-}
 
-//
-class UserImage {
-  final String imageUrl;
-  final String uploaderName;
-  final String uploaderProfilePicUrl;
-  bool isApproved;
+  void _showImageDialog(BuildContext context, String uid) {
+    final adminProvider =
+        Provider.of<AdminDashboardProvider>(context, listen: false);
+    final document = adminProvider.approvedocuments;
 
-  UserImage({
-    required this.imageUrl,
-    required this.uploaderName,
-    required this.uploaderProfilePicUrl,
-    this.isApproved = false,
-  });
-}
+    if (document == null) return;
 
-class UserImageCard extends StatelessWidget {
-  final UserImage userImage;
-  final VoidCallback onDelete;
-  final VoidCallback onApprove;
-  final VoidCallback onReupload;
-
-  const UserImageCard({
-    required this.userImage,
-    required this.onDelete,
-    required this.onApprove,
-    required this.onReupload,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Image.network(
-              userImage.imageUrl,
-              fit: BoxFit.cover,
-            ),
-          ),
-          ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(userImage.uploaderProfilePicUrl),
-            ),
-            title: Text(
-              userImage.uploaderName,
-              style: GoogleFonts.poppins(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('User Image'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.memory(base64Decode(document.documents![0].file!)),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      adminProvider.sendApprovalStatus(uid, 2);
+                      Navigator.pop(context);
+                    },
+                    child: Text('Approve'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      adminProvider.sendApprovalStatus(uid, 3);
+                      Navigator.pop(context);
+                    },
+                    child: Text('Reject'),
+                  ),
+                ],
               ),
-            ),
-            trailing: PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'delete') {
-                  onDelete();
-                } else if (value == 'approve') {
-                  onApprove();
-                } else if (value == 'reupload') {
-                  onReupload();
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                PopupMenuItem<String>(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete),
-                      SizedBox(width: 8),
-                      Text('Delete'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<String>(
-                  value: 'approve',
-                  child: Row(
-                    children: [
-                      Icon(userImage.isApproved
-                          ? Icons.check_circle
-                          : Icons.check_circle_outline),
-                      SizedBox(width: 8),
-                      Text(userImage.isApproved ? 'Unapprove' : 'Approve'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<String>(
-                  value: 'reupload',
-                  child: Row(
-                    children: [
-                      Icon(Icons.upload),
-                      SizedBox(width: 8),
-                      Text('Reupload'),
-                    ],
-                  ),
-                ),
-              ],
-              child: Icon(Icons.more_vert),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

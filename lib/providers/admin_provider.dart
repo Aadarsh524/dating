@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:dating/backend/MongoDB/token_manager.dart';
+import 'package:dating/datamodel/admin/approve_document_model.dart';
 import 'package:dating/datamodel/complaint/complaint_filter_model.dart';
 import 'package:dating/datamodel/complaint/complaint_model.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
-import 'package:dating/datamodel/admin_subscription_model.dart';
+import 'package:dating/datamodel/admin/admin_subscription_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/platform/platform_mobile.dart';
 
@@ -14,48 +15,47 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 class AdminDashboardProvider extends ChangeNotifier {
-  List<UserProfileModel>? _usersListProvider;
-  List<AdminSubscriptionModel>? _userSubscriptionList;
-  List<DocumentVerificationModel>? _documentsVerificationListProvider;
-
-  List<ComplaintModel>? _usersComplaintProvider;
-
-  List<UserProfileModel>? get usersList => _usersListProvider;
-
-  List<ComplaintModel>? get usersComplainList => _usersComplaintProvider;
-
-  List<AdminSubscriptionModel>? get userSubscriptionList =>
-      _userSubscriptionList;
-
-  List<DocumentVerificationModel>? get documentsList =>
-      _documentsVerificationListProvider;
-
   bool _isAdminDataLoading = false;
-
   bool get isAdminDataLoading => _isAdminDataLoading;
-
   Future<void> setAdminLoading(bool value) async {
     _isAdminDataLoading = value;
     notifyListeners();
   }
 
+  List<UserProfileModel>? _usersListProvider;
+  List<UserProfileModel>? get usersList => _usersListProvider;
   void setUsers(List<UserProfileModel> usersList) {
     _usersListProvider = usersList;
     notifyListeners();
   }
 
-  void setUserComplaints(List<ComplaintModel> usersList) {
-    _usersComplaintProvider = usersList;
-    notifyListeners();
-  }
-
+  List<AdminSubscriptionModel>? _userSubscriptionList;
+  List<AdminSubscriptionModel>? get userSubscriptionList =>
+      _userSubscriptionList;
   void setUserSubscriptionList(List<AdminSubscriptionModel> usersList) {
     _userSubscriptionList = usersList;
     notifyListeners();
   }
 
-  void setDocuments(List<DocumentVerificationModel> documentsList) {
+  List<DocumentVerificationModel>? _documentsVerificationListProvider;
+  List<DocumentVerificationModel>? get documentsList =>
+      _documentsVerificationListProvider;
+  void setDocumentsVerification(List<DocumentVerificationModel> documentsList) {
     _documentsVerificationListProvider = documentsList;
+    notifyListeners();
+  }
+
+  List<ComplaintModel>? _usersComplaintProvider;
+  List<ComplaintModel>? get usersComplainList => _usersComplaintProvider;
+  void setUserComplaints(List<ComplaintModel> usersList) {
+    _usersComplaintProvider = usersList;
+    notifyListeners();
+  }
+
+  ApproveDocumentModel? _approveDocumentListProvider;
+  ApproveDocumentModel? get approvedocuments => _approveDocumentListProvider;
+  void setApproveDocument(ApproveDocumentModel documentsList) {
+    _approveDocumentListProvider = documentsList;
     notifyListeners();
   }
 
@@ -275,43 +275,6 @@ class AdminDashboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<UserProfileModel>> fetchDocuments(BuildContext context) async {
-    setAdminLoading(true);
-
-    String api = getApiEndpoint();
-    final token = await TokenManager.getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
-    try {
-      final response = await http.get(
-        Uri.parse('$api/admin/ApproveDocument'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        List<UserProfileModel> userProfileList = [];
-        List<dynamic> data = jsonDecode(response.body.toString());
-        for (Map<String, dynamic> i in data) {
-          userProfileList.add(UserProfileModel.fromJson(i));
-        }
-        setUsers(userProfileList);
-        return userProfileList;
-      } else {
-        return [];
-      }
-    } catch (e) {
-      print(e.toString());
-      rethrow;
-    } finally {
-      setAdminLoading(true);
-    }
-  }
-
   Future<List<ComplaintModel>> fetchComplaints(
       ComplaintFilterModel complaintModel, BuildContext context) async {
     setAdminLoading(true);
@@ -350,8 +313,7 @@ class AdminDashboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> approveDocument(
-      String userId, int approvalStatus, BuildContext context) async {
+  Future<bool> sendApprovalStatus(String userId, int approvalStatus) async {
     setAdminLoading(true);
 
     String api = getApiEndpoint();
@@ -379,12 +341,12 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      setAdminLoading(true);
+      setAdminLoading(false);
     }
   }
 
-  Future<DocumentVerificationModel?> fetchDocumentById(
-      String userId, String id, BuildContext context) async {
+  Future<ApproveDocumentModel?> fetchDocumentById(
+      String userId, String id) async {
     setAdminLoading(true);
 
     String api = getApiEndpoint();
@@ -404,8 +366,11 @@ class AdminDashboardProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> data = jsonDecode(response.body.toString());
-        return DocumentVerificationModel.fromJson(data);
+        final approveDocumentModel =
+            ApproveDocumentModel.fromJson(json.decode(response.body));
+        setApproveDocument(approveDocumentModel); // Add this line
+        notifyListeners();
+        return approveDocumentModel;
       } else {
         return null;
       }
@@ -413,7 +378,7 @@ class AdminDashboardProvider extends ChangeNotifier {
       print(e.toString());
       rethrow;
     } finally {
-      setAdminLoading(true);
+      setAdminLoading(false);
     }
   }
 }

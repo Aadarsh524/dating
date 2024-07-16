@@ -37,15 +37,19 @@ class UserProfileProvider extends ChangeNotifier {
         throw Exception('No token found');
       }
       setCurrentUserProfile(userProfileModel);
+      log(jsonEncode(userProfileModel.toJson()));
+
       final response = await http.post(
-        Uri.parse('$api/user'), // Replace with your API endpoint
+        Uri.parse('$api/User'), // Replace with your API endpoint
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $token', // Uncomment this line if needed
         },
-
-        body: jsonEncode(userProfileModel.toJson()),
+        body: jsonEncode({
+          "user":
+              userProfileModel.toJson(), // Add this line to wrap data in 'user'
+        }),
       );
       if (response.statusCode == 200) {
         setCurrentUserProfile(userProfileModel);

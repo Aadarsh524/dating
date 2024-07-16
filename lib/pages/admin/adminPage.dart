@@ -1,9 +1,12 @@
+import 'package:dating/auth/db_client.dart';
+import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/pages/admin/customNav.dart';
 import 'package:dating/pages/admin/pages/approvePicture.dart';
 import 'package:dating/pages/admin/pages/complaints_page.dart';
 import 'package:dating/pages/admin/pages/dashboard_page.dart';
 import 'package:dating/pages/admin/pages/messages_page.dart';
 import 'package:dating/pages/admin/pages/subscriptions_page.dart';
+import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
@@ -13,6 +16,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -61,23 +65,25 @@ class _AdminPageState extends State<AdminPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authenticationProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
     return Scaffold(
       body: Row(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.blue,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // / space
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Row(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 40,
                     ),
                     Text(
@@ -92,7 +98,7 @@ class _AdminPageState extends State<AdminPage> {
                 ),
 
                 // space
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 CustomNavigationRailDestination(
@@ -138,8 +144,9 @@ class _AdminPageState extends State<AdminPage> {
               children: [
                 //  top bar
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  decoration: BoxDecoration(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                   ),
                   child: Row(
@@ -149,7 +156,7 @@ class _AdminPageState extends State<AdminPage> {
                         Text(
                           _pageTitles[_selectedIndex],
                           style: GoogleFonts.poppins(
-                            color: Color(0xFF1F192F),
+                            color: const Color(0xFF1F192F),
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
                           ),
@@ -160,7 +167,7 @@ class _AdminPageState extends State<AdminPage> {
                             // serch box
                             Container(
                                 width: 200, height: 40, child: searchBox()),
-                            SizedBox(
+                            const SizedBox(
                               width: 20,
                             ),
 
@@ -169,7 +176,7 @@ class _AdminPageState extends State<AdminPage> {
                               AppIcons.notification,
                               height: 20,
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 20,
                             ),
                             // profile picture
@@ -178,7 +185,7 @@ class _AdminPageState extends State<AdminPage> {
                               width: 30,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(200),
-                                image: DecorationImage(
+                                image: const DecorationImage(
                                   image: AssetImage(
                                     AppImages.profile,
                                   ),
@@ -187,13 +194,13 @@ class _AdminPageState extends State<AdminPage> {
                               ),
                             ),
                             // profile name
-                            SizedBox(
+                            const SizedBox(
                               width: 6,
                             ),
                             Text(
-                              'Pankaj Subedi',
+                              'Admin',
                               style: GoogleFonts.poppins(
-                                color: Color(0xFF54657E),
+                                color: const Color(0xFF54657E),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -207,8 +214,18 @@ class _AdminPageState extends State<AdminPage> {
                                 height: 6,
                               ),
                               onSelected: (String result) {
-                                // Handle menu selection (optional)
-                                print(result);
+                                if (result == 'logout') {
+                                  authenticationProvider.signOut();
+                                  DbClient().clearAllData();
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginScreen()),
+                                  );
+                                } else if (result == 'switch_account') {
+                                  // Handle switch account logic
+                                }
                               },
                               itemBuilder: (BuildContext context) =>
                                   <PopupMenuEntry<String>>[
@@ -216,12 +233,13 @@ class _AdminPageState extends State<AdminPage> {
                                   value: 'logout',
                                   child: Row(
                                     children: [
-                                      Icon(Icons.logout, color: AppColors.blue),
-                                      SizedBox(width: 8),
+                                      const Icon(Icons.logout,
+                                          color: AppColors.blue),
+                                      const SizedBox(width: 8),
                                       Text(
                                         'Logout',
                                         style: GoogleFonts.poppins(
-                                          color: Color(0xFF1F192F),
+                                          color: const Color(0xFF1F192F),
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -233,13 +251,13 @@ class _AdminPageState extends State<AdminPage> {
                                   value: 'switch_account',
                                   child: Row(
                                     children: [
-                                      Icon(Icons.switch_account,
+                                      const Icon(Icons.switch_account,
                                           color: AppColors.blue),
-                                      SizedBox(width: 8),
+                                      const SizedBox(width: 8),
                                       Text(
                                         'Switch Account',
                                         style: GoogleFonts.poppins(
-                                          color: Color(0xFF1F192F),
+                                          color: const Color(0xFF1F192F),
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -281,13 +299,13 @@ class _AdminPageState extends State<AdminPage> {
 
 // border color
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: Color.fromARGB(255, 199, 190, 255),
           ),
           borderRadius: BorderRadius.circular(200),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.blue),
+          borderSide: const BorderSide(color: AppColors.blue),
           borderRadius: BorderRadius.circular(200),
         ),
 
@@ -300,7 +318,7 @@ class _AdminPageState extends State<AdminPage> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(200),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             width: 1,
             strokeAlign: BorderSide.strokeAlignCenter,
             color: AppColors.blue,
