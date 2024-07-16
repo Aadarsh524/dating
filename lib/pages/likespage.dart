@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
-import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';

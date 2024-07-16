@@ -124,7 +124,7 @@ class _EditInfoState extends State<EditInfo> {
       image: currentProfile.image,
       age: currentProfile.age,
       userStatus: currentProfile.userStatus,
-      subscriptionStatus: currentProfile.subscriptionStatus,
+      userSubscription: currentProfile.userSubscription,
       createdTimestamp: currentProfile.createdTimestamp,
       isVerified: currentProfile.isVerified,
       documentStatus: currentProfile.documentStatus,

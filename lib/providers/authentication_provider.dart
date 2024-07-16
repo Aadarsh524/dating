@@ -78,6 +78,9 @@ class AuthenticationProvider extends ChangeNotifier {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
+      String token = await ApiClient().validateToken() ?? '';
+      await TokenManager.saveToken(token);
+
       if (userCredential.user != null) {
         await _createNewUserProfile(
           userCredential.user!.uid,
@@ -86,19 +89,24 @@ class AuthenticationProvider extends ChangeNotifier {
           email: email,
           gender: gender,
           age: age,
-        );
-        return userCredential.user;
+        ).then((value) {
+          if (value == true) {
+            return userCredential.user;
+          } else {
+            signOut();
+            notifyListeners();
+            return false;
+          }
+        });
       } else {
-        print("User registered but not logged in");
         return null;
       }
-    } catch (e, stacktrace) {
-      print("Error during registration: $e");
-      print("Stacktrace: $stacktrace");
+    } catch (e) {
       return null;
     } finally {
       setAuthLoading(false);
     }
+    return null;
   }
 
   Future<User?> signInWithGoogle(BuildContext context) async {
@@ -122,7 +130,16 @@ class AuthenticationProvider extends ChangeNotifier {
         if (userCredential.credential != null) {
           if (userCredential.additionalUserInfo?.isNewUser ?? false) {
             await _createNewUserProfile(userCredential.user!.uid, context,
-                email: userCredential.user!.email);
+                    email: userCredential.user!.email)
+                .then((value) {
+              if (value == true) {
+                return userCredential.user;
+              } else {
+                signOut();
+                notifyListeners();
+                return false;
+              }
+            });
           }
         }
 
@@ -138,6 +155,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
     await _auth.signOut();
     notifyListeners();
@@ -157,42 +175,53 @@ class AuthenticationProvider extends ChangeNotifier {
   //   }
   // }
 
-  Future<void> _createNewUserProfile(String uid, BuildContext context,
+  Future<bool> _createNewUserProfile(String uid, BuildContext context,
       {String? name,
       String? email,
       String? gender,
       String? age,
       String? fromAge,
       String? toAge}) async {
-    await ApiClient().validateToken().then((token) async {
-      await TokenManager.saveToken(token!);
+    try {
+      // Validate token and save it
+      String? token = await ApiClient().validateToken();
+      if (token != null) {
+        await TokenManager.saveToken(token);
+      } else {
+        print('Token validation failed');
+        return false; // Token validation failed
+      }
 
+      // Create new user profile
       final newUser = UserProfileModel(
         uid: uid,
         name: name ?? '',
-        // email: email ?? '',
+        email: email ?? '',
         gender: gender ?? '',
-        image: '',
         age: age ?? '',
-        bio: '',
-        address: '',
-        interests: '',
-        seeking: Seeking(
-            fromAge: fromAge ?? '',
-            toAge: toAge ?? '',
-            gender: (gender != '' && gender == 'male') ? "male" : 'female'),
-        uploads: [],
-        isVerified: false,
         documentStatus: 1,
-        userStatus: "",
+        seeking: Seeking(
+          fromAge: fromAge ?? 'string',
+          toAge: toAge ?? 'string',
+          gender: (gender != '' && gender == 'male') ? 'Female' : 'male',
+        ),
+        uploads: [],
+        userSubscription: UserSubscription(),
       );
 
+      // Add new user to the provider
       final userProfileProvider = context.read<UserProfileProvider>();
       await userProfileProvider.addNewUser(newUser);
 
-      await DbClient().setData(dbKey: "uid", value: newUser.uid ?? '');
-      await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
-      // await DbClient().setData(dbKey: "email", value: newUser.email ?? '');
-    });
+      // Save user data in the database
+      await DbClient().setData(dbKey: 'uid', value: newUser.uid ?? '');
+      await DbClient().setData(dbKey: 'userName', value: newUser.name ?? '');
+
+      return true; // Successful profile creation
+    } catch (e) {
+      // Handle any errors
+      print('Error creating user profile: $e');
+      return false; // Profile creation failed
+    }
   }
 }
