@@ -231,6 +231,8 @@ class _HomePageState extends State<HomePage> {
                         Provider.of<DashboardProvider>(context, listen: false)
                             .dashboardList;
 
+                    print(data);
+
                     return ListView.builder(
                       itemCount: data!.length,
                       itemBuilder: (context, index) {
@@ -675,28 +677,10 @@ class ProfileButton extends StatelessWidget {
         UserProfileModel? userProfileModel =
             userProfileProvider.currentUserProfile;
 
-        if (userProfileModel == null) {
-          // Return a placeholder if userProfileModel is null
-          return Neumorphic(
-            style: const NeumorphicStyle(
-              boxShape: NeumorphicBoxShape.circle(),
-            ),
-            child: SizedBox(
-              height: 50,
-              width: 50,
-              child: Image.memory(
-                base64ToImage(defaultBase64Avatar),
-                fit: BoxFit.cover,
-              ), // Placeholder for when userProfileModel is null
-            ),
-          );
-        }
-
-        // Check if userProfileModel.image is null or empty
-        Uint8List imageBytes =
-            userProfileModel.image != null && userProfileModel.image!.isNotEmpty
-                ? base64ToImage(userProfileModel.image!)
-                : base64ToImage(defaultBase64Avatar);
+        Uint8List imageBytes = userProfileModel!.image != null &&
+                userProfileModel.image!.isNotEmpty
+            ? base64ToImage(userProfileModel.image!)
+            : base64ToImage(defaultBase64Avatar);
 
         return Neumorphic(
           style: const NeumorphicStyle(

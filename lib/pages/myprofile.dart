@@ -90,6 +90,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Future<void> _uploadPost(String base64) async {
     final newUpload = Uploads(
+      id: '',
       file: base64.toString(),
       name: 'Post',
       uploadDate: DateTime.now().toString(),

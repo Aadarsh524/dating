@@ -347,7 +347,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               width: 5,
                             ),
                             Text(
-                              "Seeking ${widget.dashboardresponsemodel.seeking?.gender} ${widget.dashboardresponsemodel.seeking?.age} ",
+                              "Seeking ${widget.dashboardresponsemodel.seeking?.gender} ${widget.dashboardresponsemodel.seeking?.fromAge} ",
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],

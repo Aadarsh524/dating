@@ -75,38 +75,46 @@ class AuthenticationProvider extends ChangeNotifier {
   }) async {
     setAuthLoading(true);
     try {
-      UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
-
-      String token = await ApiClient().validateToken() ?? '';
-      await TokenManager.saveToken(token);
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
       if (userCredential.user != null) {
-        await _createNewUserProfile(
+        String? token = await ApiClient().validateToken();
+        if (token != null) {
+          await TokenManager.saveToken(token);
+        } else {
+          throw Exception('Token validation failed');
+        }
+
+        bool profileCreated = await _createNewUserProfile(
           userCredential.user!.uid,
           context,
           name: name,
           email: email,
           gender: gender,
           age: age,
-        ).then((value) {
-          if (value == true) {
-            return userCredential.user;
-          } else {
-            signOut();
-            notifyListeners();
-            return false;
-          }
-        });
+        );
+
+        if (profileCreated) {
+          return userCredential.user;
+        } else {
+          await signOut();
+          return null;
+        }
       } else {
         return null;
       }
     } catch (e) {
+      // Handle any specific exceptions you want to catch and process
+      print(e);
       return null;
     } finally {
       setAuthLoading(false);
+      notifyListeners(); // Ensure to notify listeners in the finally block
     }
-    return null;
   }
 
   Future<User?> signInWithGoogle(BuildContext context) async {
@@ -192,7 +200,6 @@ class AuthenticationProvider extends ChangeNotifier {
         return false; // Token validation failed
       }
 
-      // Create new user profile
       final newUser = UserProfileModel(
         uid: uid,
         name: name ?? '',
@@ -209,7 +216,7 @@ class AuthenticationProvider extends ChangeNotifier {
         userSubscription: UserSubscription(),
       );
 
-      // Add new user to the provider
+// Add new user to the provider
       final userProfileProvider = context.read<UserProfileProvider>();
       await userProfileProvider.addNewUser(newUser);
 

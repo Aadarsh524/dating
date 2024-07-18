@@ -44,7 +44,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   // for status
   String? _selectedStatus = 'Status';
-  final List<String> _statuses = ['Status', 'Active', 'Inactive', 'Blocked'];
+  final List<String> _statuses = ['Status', 'active', 'inactive', 'blocked'];
 
   @override
   void initState() {
@@ -63,8 +63,9 @@ class _DashboardPageState extends State<DashboardPage> {
   List<UserProfileModel> _applyFilters(List<UserProfileModel> users) {
     DateTime fromDate =
         _fromDate == 'From' ? DateTime(2000) : DateTime.parse(_fromDate);
-    DateTime toDate =
-        _toDate == 'To' ? DateTime(2101) : DateTime.parse(_toDate);
+    DateTime toDate = _toDate == 'To'
+        ? DateTime(2101)
+        : DateTime.parse(_toDate).add(Duration(days: 1));
 
     return users.where((user) {
       bool matchesStatus =
@@ -272,20 +273,21 @@ class _DashboardPageState extends State<DashboardPage> {
                           final user = data[index];
                           // for subscription color
                           Color textColor;
-                          switch (user.userSubscription!.planType) {
-                            case '+Basic':
+                          switch (user.userSubscription?.planType ?? 'Basic') {
+                            case 'Basic':
                               textColor = Colors.green;
                               break;
-                            case '+Plus':
+                            case 'Plus':
                               textColor = Colors.blue;
                               break;
-                            case '+Gold':
+                            case 'Gold':
                               textColor =
                                   Colors.amber; // Or any shade of gold color
                               break;
                             default:
                               textColor = Colors.black;
                           }
+
                           return Padding(
                             padding: const EdgeInsets.only(
                                 left: 20, right: 20, bottom: 10),
@@ -336,7 +338,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      user.userSubscription!.planType!,
+                                      user.userSubscription?.planType ?? '',
                                       style: GoogleFonts.poppins(
                                         color: textColor,
                                         fontSize: 12,
@@ -345,7 +347,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      user.createdTimestamp ?? '',
+                                      user.createdTimestamp.toString(),
                                       style: GoogleFonts.poppins(
                                         color: Colors.grey,
                                         fontSize: 10,

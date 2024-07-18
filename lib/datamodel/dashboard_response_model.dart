@@ -1,44 +1,56 @@
-
-
 class DashboardResponseModel {
   String? uid;
-  String? name;
-  String? email;
-  String? gender;
   String? image;
+  String? name;
   String? address;
   String? age;
+  String? gender;
+  String? email;
   String? bio;
   String? interests;
+  String? userStatus;
+  String? subscriptionStatus;
+  String? createdTimestamp;
+  bool? isVerified;
+  int? documentStatus;
   Seeking? seeking;
   List<Uploads>? uploads;
 
   DashboardResponseModel(
       {this.uid,
-      this.name,
-      this.email,
-      this.gender,
       this.image,
+      this.name,
       this.address,
       this.age,
+      this.gender,
+      this.email,
       this.bio,
       this.interests,
+      this.userStatus,
+      this.subscriptionStatus,
+      this.createdTimestamp,
+      this.isVerified,
+      this.documentStatus,
       this.seeking,
       this.uploads});
 
   DashboardResponseModel.fromJson(Map<String, dynamic> json) {
     uid = json['uid'];
-    name = json['name'];
-    email = json['email'];
-    gender = json['gender'];
     image = json['image'];
+    name = json['name'];
     address = json['address'];
     age = json['age'];
+    gender = json['gender'];
+    email = json['email'];
     bio = json['bio'];
     interests = json['interests'];
-    seeking = json['seeking'] != null
-        ? Seeking.fromJson(json['seeking'])
-        : Seeking(age: '', gender: '');
+    userStatus = json['userStatus'];
+    subscriptionStatus = json['subscriptionStatus'];
+    createdTimestamp = json['createdTimestamp'];
+    isVerified = json['isVerified'];
+    documentStatus = json['documentStatus'];
+    seeking =
+        json['seeking'] != null ? Seeking.fromJson(json['seeking']) : null;
     if (json['uploads'] != null) {
       uploads = <Uploads>[];
       json['uploads'].forEach((v) {
@@ -48,16 +60,21 @@ class DashboardResponseModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['uid'] = uid;
-    data['name'] = name;
-    data['email'] = email;
-    data['gender'] = gender;
     data['image'] = image;
+    data['name'] = name;
     data['address'] = address;
     data['age'] = age;
+    data['gender'] = gender;
+    data['email'] = email;
     data['bio'] = bio;
     data['interests'] = interests;
+    data['userStatus'] = userStatus;
+    data['subscriptionStatus'] = subscriptionStatus;
+    data['createdTimestamp'] = createdTimestamp;
+    data['isVerified'] = isVerified;
+    data['documentStatus'] = documentStatus;
     if (seeking != null) {
       data['seeking'] = seeking!.toJson();
     }
@@ -69,19 +86,22 @@ class DashboardResponseModel {
 }
 
 class Seeking {
-  String? age;
+  String? fromAge;
+  String? toAge;
   String? gender;
 
-  Seeking({required this.age, required this.gender});
+  Seeking({this.fromAge, this.toAge, this.gender});
 
   Seeking.fromJson(Map<String, dynamic> json) {
-    age = json['age'];
+    fromAge = json['fromAge'];
+    toAge = json['toAge'];
     gender = json['gender'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['age'] = age;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['fromAge'] = fromAge;
+    data['toAge'] = toAge;
     data['gender'] = gender;
     return data;
   }
@@ -93,11 +113,7 @@ class Uploads {
   String? name;
   String? uploadDate;
 
-  Uploads(
-      {required this.id,
-      required this.file,
-      required this.name,
-      required this.uploadDate});
+  Uploads({this.id, this.file, this.name, this.uploadDate});
 
   Uploads.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -107,8 +123,8 @@ class Uploads {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['userId'] = id;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['id'] = id;
     data['file'] = file;
     data['name'] = name;
     data['uploadDate'] = uploadDate;

@@ -65,268 +65,265 @@ class _LoginMobileState extends State<LoginMobile> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthenticationProvider>(
-        builder: (context, authenticationProvider, _) {
-      return authenticationProvider.isAuthLoading
-          ? Container(
-              color: Colors.white, // Add background color with opacity
-              child: const Center(
-                child: CircularProgressIndicator(),
+    final authenticationProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+
+    return ListView(
+      children: [
+        // space above
+        const SizedBox(
+          height: 20,
+        ),
+        Image.asset(
+          AppImages.login,
+          height: 200,
+        ),
+
+        // login text
+        const SizedBox(
+          height: 25,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Text(
+                'Find your match',
+                style: AppTextStyles().authMainStyle,
               ),
-            )
-          : ListView(
-              children: [
-                // space above
-                const SizedBox(
+            ],
+          ),
+        ),
+        // space betn find your match and text field
+        const SizedBox(height: 15),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Row(
+            children: [
+              Text(
+                'Email Address',
+                style: AppTextStyles().authLabelStyle,
+              )
+            ],
+          ),
+        ),
+
+        const SizedBox(
+          height: 6,
+        ),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: AppTextField(
+            inputcontroller: _emailController,
+            hintText: 'Enter Email',
+            keyboardType: TextInputType.emailAddress,
+          ),
+        ),
+
+        // password
+
+        const SizedBox(height: 15),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Row(
+            children: [
+              Text(
+                'Password',
+                style: AppTextStyles().authLabelStyle,
+              )
+            ],
+          ),
+        ),
+
+        const SizedBox(
+          height: 6,
+        ),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: AppTextField(
+            inputcontroller: _passwordController,
+            hintText: 'Enter Your Password',
+            keyboardType: TextInputType.visiblePassword,
+            obscureText: true,
+          ),
+        ),
+
+        const SizedBox(
+          height: 10,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'Forgot Password ?',
+                style: AppTextStyles().secondaryStyle.copyWith(
+                      fontSize: 14,
+                    ),
+              ),
+            ],
+          ),
+        ),
+
+        // spacer
+        const SizedBox(height: 35),
+
+        // checkbox
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 35,
+                child: NeumorphicSwitch(
                   height: 20,
+                  value: _isChecked,
+                  onChanged: (value) {
+                    setState(() {
+                      _isChecked = value;
+                      // Do something when the switch is toggled
+                    });
+                  },
                 ),
-                Image.asset(
-                  AppImages.login,
-                  height: 200,
-                ),
-
-                // login text
-                const SizedBox(
-                  height: 25,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Find your match',
-                        style: AppTextStyles().authMainStyle,
-                      ),
-                    ],
-                  ),
-                ),
-                // space betn find your match and text field
-                const SizedBox(height: 15),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Email Address',
-                        style: AppTextStyles().authLabelStyle,
-                      )
-                    ],
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 6,
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: AppTextField(
-                    inputcontroller: _emailController,
-                    hintText: 'Enter Email',
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ),
-
-                // password
-
-                const SizedBox(height: 15),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Password',
-                        style: AppTextStyles().authLabelStyle,
-                      )
-                    ],
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 6,
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: AppTextField(
-                    inputcontroller: _passwordController,
-                    hintText: 'Enter Your Password',
-                    keyboardType: TextInputType.visiblePassword,
-                    obscureText: true,
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Forgot Password ?',
-                        style: AppTextStyles().secondaryStyle.copyWith(
-                              fontSize: 14,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // spacer
-                const SizedBox(height: 35),
-
-                // checkbox
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
+              ),
+              const SizedBox(width: 20),
+              // space
+              Expanded(
+                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        width: 35,
-                        child: NeumorphicSwitch(
-                          height: 20,
-                          value: _isChecked,
-                          onChanged: (value) {
-                            setState(() {
-                              _isChecked = value;
-                              // Do something when the switch is toggled
-                            });
-                          },
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            'Keep me logged in',
+                            style: AppTextStyles().authLabelStyle.copyWith(
+                                  fontSize: 14,
+                                ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 20),
-                      // space
-                      Expanded(
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    'Keep me logged in',
-                                    style:
-                                        AppTextStyles().authLabelStyle.copyWith(
-                                              fontSize: 14,
-                                            ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                "Don't check this box if you're at a public or shared computer",
-                                style: AppTextStyles().authLabelStyle.copyWith(
-                                      fontSize: 14,
-                                      color: AppColors.secondaryColor,
-                                    ),
-                              ),
-                            ]),
-                      )
-                    ],
-                  ),
-                ),
+                      Text(
+                        "Don't check this box if you're at a public or shared computer",
+                        style: AppTextStyles().authLabelStyle.copyWith(
+                              fontSize: 14,
+                              color: AppColors.secondaryColor,
+                            ),
+                      ),
+                    ]),
+              )
+            ],
+          ),
+        ),
 
-                // button
-                const SizedBox(
-                  height: 25,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SizedBox(
-                    height: 55,
-                    child: Button(
-                      onPressed: () {
-                        _login(context);
-                      },
-                      text: 'Login',
-                    ),
-                  ),
-                ),
+        // button
+        const SizedBox(
+          height: 25,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SizedBox(
+            height: 55,
+            child: Consumer<AuthenticationProvider>(
+              builder: (context, authenticationProvider, _) {
+                return ElevatedButton(
+                  onPressed: authenticationProvider.isAuthLoading
+                      ? null
+                      : () {
+                          _login(context);
+                        },
+                  child: authenticationProvider.isAuthLoading
+                      ? const CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text('Login'),
+                );
+              },
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
 
-                const SizedBox(
-                  height: 10,
-                ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Or',
+              style: AppTextStyles()
+                  .authLabelStyle
+                  .copyWith(color: AppColors.secondaryColor),
+            )
+          ],
+        ),
+        const SizedBox(
+          height: 10,
+        ),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Or',
-                      style: AppTextStyles()
-                          .authLabelStyle
-                          .copyWith(color: AppColors.secondaryColor),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
+        // sign in with
 
-                // sign in with
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SizedBox(
+            height: 55,
+            child: Button(
+              onPressed: () {
+                authenticationProvider.signInWithGoogle(context).then((user) {
+                  if (user != null) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const StateLoaderPage()),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Google Sign-In canceled or failed.'),
+                      ),
+                    );
+                  }
+                });
+              },
+              text: 'Login With',
+              imagePath: 'assets/images/google.png',
+            ),
+          ),
+        ),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SizedBox(
-                    height: 55,
-                    child: Button(
-                      onPressed: () {
-                        authenticationProvider
-                            .signInWithGoogle(context)
-                            .then((user) {
-                          if (user != null) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const StateLoaderPage()),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Google Sign-In canceled or failed.'),
-                              ),
-                            );
-                          }
-                        });
-                      },
-                      text: 'Login With',
-                      imagePath: 'assets/images/google.png',
-                    ),
-                  ),
-                ),
+        // dont have an account
+        const SizedBox(
+          height: 25,
+        ),
 
-                // dont have an account
-                const SizedBox(
-                  height: 25,
-                ),
-
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Text(
-                    "Don't have an account?",
-                    style:
-                        AppTextStyles().secondaryStyle.copyWith(fontSize: 14),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SignUpScreen()));
-                    },
-                    child: Text(
-                      'Register',
-                      style:
-                          AppTextStyles().primaryStyle.copyWith(fontSize: 14),
-                    ),
-                  ),
-                ])
-              ],
-            );
-    });
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(
+            "Don't have an account?",
+            style: AppTextStyles().secondaryStyle.copyWith(fontSize: 14),
+          ),
+          const SizedBox(
+            width: 5,
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SignUpScreen()));
+            },
+            child: Text(
+              'Register',
+              style: AppTextStyles().primaryStyle.copyWith(fontSize: 14),
+            ),
+          ),
+        ])
+      ],
+    );
   }
 }
