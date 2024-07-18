@@ -36,8 +36,19 @@ class UserProfileProvider extends ChangeNotifier {
       if (token == null) {
         throw Exception('No token found');
       }
-      setCurrentUserProfile(userProfileModel);
-      log(jsonEncode(userProfileModel.toJson()));
+
+      var requestBody = jsonEncode({
+        "uid": userProfileModel.uid,
+        "name": userProfileModel.name,
+        "email": userProfileModel.email,
+        "age": userProfileModel.age,
+        "gender": userProfileModel.gender,
+        "seeking": {
+          "fromAge": userProfileModel.seeking!.fromAge,
+          "toAge": userProfileModel.seeking!.toAge,
+          "gender": userProfileModel.seeking!.gender,
+        }
+      });
 
       final response = await http.post(
         Uri.parse('$api/User'), // Replace with your API endpoint
@@ -46,19 +57,19 @@ class UserProfileProvider extends ChangeNotifier {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token', // Uncomment this line if needed
         },
-        body: jsonEncode({
-          "user":
-              userProfileModel.toJson(), // Add this line to wrap data in 'user'
-        }),
+        body: requestBody,
       );
+
       if (response.statusCode == 200) {
-        setCurrentUserProfile(userProfileModel);
+        getUserProfile(userProfileModel.uid);
         notifyListeners();
         return userProfileModel;
       } else {
+        log('Failed to upload data: ${response.body}');
         throw Exception('Cant upload data');
       }
     } catch (e) {
+      log('Error: $e');
       rethrow;
     } finally {
       setProfileLoading(false);

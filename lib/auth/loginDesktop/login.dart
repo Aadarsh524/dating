@@ -58,367 +58,359 @@ class _LoginDesktopState extends State<LoginDesktop> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthenticationProvider>(
-        builder: (context, authenticationProvider, _) {
-      return authenticationProvider.isAuthLoading
-          ? Container(
-              color: Colors.white, // Add background color with opacity
-              child: const Center(
-                child: CircularProgressIndicator(),
+    final authenticationProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+    return ListView(
+      children: [
+        // space above
+        const SizedBox(height: 15),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Dating App',
+                style: GoogleFonts.poppins(
+                  color: AppColors.black,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            )
-          : ListView(
-              children: [
-                // space above
-                const SizedBox(height: 15),
+              // Image.asset("assets/images/heart.png"),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Dating App',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.black,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w600,
-                        ),
+              // change language
+
+              Neumorphic(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                child: DropdownButton<String>(
+                  underline: Container(),
+                  style: AppTextStyles().secondaryStyle,
+                  value: _selectedLanguage,
+                  icon: const Icon(Icons.arrow_drop_down), // Dropdown icon
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedLanguage = newValue!;
+                    });
+                  },
+                  items: <String>[
+                    'English',
+                    'Spanish',
+                    'French',
+                    'German'
+                  ] // Language options
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: AppTextStyles().secondaryStyle,
                       ),
-                      // Image.asset("assets/images/heart.png"),
-
-                      // change language
-
-                      Neumorphic(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 2),
-                        child: DropdownButton<String>(
-                          underline: Container(),
-                          style: AppTextStyles().secondaryStyle,
-                          value: _selectedLanguage,
-                          icon: const Icon(
-                              Icons.arrow_drop_down), // Dropdown icon
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedLanguage = newValue!;
-                            });
-                          },
-                          items: <String>[
-                            'English',
-                            'Spanish',
-                            'French',
-                            'German'
-                          ] // Language options
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(
-                                value,
-                                style: AppTextStyles().secondaryStyle,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  }).toList(),
                 ),
+              ),
+            ],
+          ),
+        ),
 
-                // end top bar
-                const SizedBox(
-                  height: 30,
+        // end top bar
+        const SizedBox(
+          height: 30,
+        ),
+        // login
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    Neumorphic(
+                      child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.amberAccent,
+                          ),
+                          child: const Image(
+                              image: AssetImage('assets/images/login.png'))),
+                    )
+                  ],
                 ),
-                // login
+              ),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Neumorphic(
-                              child: Container(
-                                  decoration: const BoxDecoration(
-                                    color: Colors.amberAccent,
-                                  ),
-                                  child: const Image(
-                                      image: AssetImage(
-                                          'assets/images/login.png'))),
-                            )
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(width: 50),
+              const SizedBox(width: 50),
 // login fields
 
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Members Login',
-                              style: GoogleFonts.poppins(
-                                color: AppColors.black,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w600,
-                                height: 0,
-                              ),
-                            ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Members Login',
+                      style: GoogleFonts.poppins(
+                        color: AppColors.black,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w600,
+                        height: 0,
+                      ),
+                    ),
 
-                            //
+                    //
 
-                            // fields
+                    // fields
 
-                            // space betn find your match and text field
-                            const SizedBox(height: 15),
+                    // space betn find your match and text field
+                    const SizedBox(height: 15),
 
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Email Address',
-                                    style: AppTextStyles().authLabelStyle,
-                                  )
-                                ],
-                              ),
-                            ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Email Address',
+                            style: AppTextStyles().authLabelStyle,
+                          )
+                        ],
+                      ),
+                    ),
 
-                            // label email
-                            const SizedBox(
-                              height: 6,
-                            ),
+                    // label email
+                    const SizedBox(
+                      height: 6,
+                    ),
 
-                            SizedBox(
-                              child: AppTextField(
-                                inputcontroller: _emailController,
-                                hintText: 'Enter Email',
-                                keyboardType: TextInputType.emailAddress,
-                                obscureText: false,
-                                suffixIcon: null,
-                              ),
-                            ),
+                    SizedBox(
+                      child: AppTextField(
+                        inputcontroller: _emailController,
+                        hintText: 'Enter Email',
+                        keyboardType: TextInputType.emailAddress,
+                        obscureText: false,
+                        suffixIcon: null,
+                      ),
+                    ),
 
-                            // password
+                    // password
 
-                            const SizedBox(height: 15),
+                    const SizedBox(height: 15),
 
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    'Password',
-                                    style: AppTextStyles().authLabelStyle,
-                                  )
-                                ],
-                              ),
-                            ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Password',
+                            style: AppTextStyles().authLabelStyle,
+                          )
+                        ],
+                      ),
+                    ),
 
-                            const SizedBox(
-                              height: 6,
-                            ),
+                    const SizedBox(
+                      height: 6,
+                    ),
 
-                            AppTextField(
-                              inputcontroller: _passwordController,
-                              hintText: 'Enter Your Password',
-                              keyboardType: TextInputType.visiblePassword,
-                              obscureText: true,
-                            ),
+                    AppTextField(
+                      inputcontroller: _passwordController,
+                      hintText: 'Enter Your Password',
+                      keyboardType: TextInputType.visiblePassword,
+                      obscureText: true,
+                    ),
 
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'Forgot Password ?',
-                                    style:
-                                        AppTextStyles().secondaryStyle.copyWith(
-                                              fontSize: 14,
-                                            ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Forgot Password ?',
+                            style: AppTextStyles().secondaryStyle.copyWith(
+                                  fontSize: 14,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
 
 // spacer
-                            const SizedBox(height: 35),
+                    const SizedBox(height: 35),
 
 // checkbox
-                            Row(
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 35,
+                          child: NeumorphicSwitch(
+                            height: 20,
+                            value: _isChecked,
+                            onChanged: (value) {
+                              setState(() {
+                                _isChecked = value;
+                                // Do something when the switch is toggled
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        // space
+                        Expanded(
+                          child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(
-                                  width: 35,
-                                  child: NeumorphicSwitch(
-                                    height: 20,
-                                    value: _isChecked,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _isChecked = value;
-                                        // Do something when the switch is toggled
-                                      });
-                                    },
-                                  ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Keep me logged in',
+                                      style: AppTextStyles()
+                                          .authLabelStyle
+                                          .copyWith(
+                                            fontSize: 14,
+                                          ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 20),
-                                // space
-                                Expanded(
-                                  child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Keep me logged in',
-                                              style: AppTextStyles()
-                                                  .authLabelStyle
-                                                  .copyWith(
-                                                    fontSize: 14,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                        Text(
-                                          "Don't check this box if you're at a public or shared computer",
-                                          style: AppTextStyles()
-                                              .authLabelStyle
-                                              .copyWith(
-                                                fontSize: 14,
-                                                color: AppColors.secondaryColor,
-                                              ),
-                                        ),
-                                      ]),
-                                )
-                              ],
-                            ),
+                                Text(
+                                  "Don't check this box if you're at a public or shared computer",
+                                  style:
+                                      AppTextStyles().authLabelStyle.copyWith(
+                                            fontSize: 14,
+                                            color: AppColors.secondaryColor,
+                                          ),
+                                ),
+                              ]),
+                        )
+                      ],
+                    ),
 
 // button
-                            const SizedBox(
-                              height: 35,
-                            ),
-                            SizedBox(
-                              height: 55,
-                              child: Button(
-                                onPressed: () {
-                                  _login(context);
-                                },
-                                text: 'Login',
-                              ),
-                            ),
-// or
-                            const SizedBox(
-                              height: 10,
-                            ),
+                    const SizedBox(
+                      height: 35,
+                    ),
+                    SizedBox(
+                      height: 55,
+                      child: Consumer<AuthenticationProvider>(
+                        builder: (context, authenticationProvider, _) {
+                          return ElevatedButton(
+                            onPressed: authenticationProvider.isAuthLoading
+                                ? null
+                                : () {
+                                    _login(context);
+                                  },
+                            child: authenticationProvider.isAuthLoading
+                                ? const CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  )
+                                : const Text(
+                                    'Login',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                          );
+                        },
+                      ),
+                    ),
 
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Or',
-                                  style: AppTextStyles()
-                                      .authLabelStyle
-                                      .copyWith(
-                                          color: AppColors.secondaryColor),
-                                )
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Or',
+                          style: AppTextStyles()
+                              .authLabelStyle
+                              .copyWith(color: AppColors.secondaryColor),
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
 
 // sign in with
 
-                            SizedBox(
-                              height: 55,
-                              child: Button(
-                                onPressed: () {
-                                  authenticationProvider
-                                      .signInWithGoogle(context)
-                                      .then((user) {
-                                    if (user != null) {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) =>
-                                                const StateLoaderPage()),
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'Google Sign-In canceled or failed.'),
-                                        ),
-                                      );
-                                    }
-                                  });
-                                },
-                                text: 'Login With',
-                                imagePath: 'assets/images/google.png',
-                              ),
-                            ),
+                    SizedBox(
+                      height: 55,
+                      child: Button(
+                        onPressed: () {
+                          authenticationProvider
+                              .signInWithGoogle(context)
+                              .then((user) {
+                            if (user != null) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const StateLoaderPage()),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Google Sign-In canceled or failed.'),
+                                ),
+                              );
+                            }
+                          });
+                        },
+                        text: 'Login With',
+                        imagePath: 'assets/images/google.png',
+                      ),
+                    ),
 
 // dont have an account
-                            const SizedBox(
-                              height: 15,
-                            ),
+                    const SizedBox(
+                      height: 15,
+                    ),
 
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Don't have an account?",
-                                    style: AppTextStyles()
-                                        .secondaryStyle
-                                        .copyWith(fontSize: 14),
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const SignUpScreen()));
-                                    },
-                                    child: Text(
-                                      'Register',
-                                      style: AppTextStyles()
-                                          .primaryStyle
-                                          .copyWith(fontSize: 14),
-                                    ),
-                                  ),
-                                ]),
-                          ],
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Text(
+                        "Don't have an account?",
+                        style: AppTextStyles()
+                            .secondaryStyle
+                            .copyWith(fontSize: 14),
+                      ),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignUpScreen()));
+                        },
+                        child: Text(
+                          'Register',
+                          style: AppTextStyles()
+                              .primaryStyle
+                              .copyWith(fontSize: 14),
                         ),
                       ),
-                    ],
-                  ),
+                    ]),
+                  ],
                 ),
+              ),
+            ],
+          ),
+        ),
 
-                // login text
+        // login text
 
-                // space betn find your match and text field
+        // space betn find your match and text field
 
 // password
-              ],
-            );
-    });
+      ],
+    );
   }
 }

@@ -514,21 +514,35 @@ class _SignUpMobileState extends State<SignUpMobile> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SizedBox(
                 height: 55,
-                child: Button(
-                  onPressed: () {
-                    bool passwordsMatch = _passwordController.text ==
-                        _confirmpasswordController.text;
-                    if (passwordsMatch) {
-                      _register(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Passwords do not match!'),
-                        ),
-                      );
-                    }
+                child: Consumer<AuthenticationProvider>(
+                  builder: (context, authenticationProvider, _) {
+                    return ElevatedButton(
+                      onPressed: authenticationProvider.isAuthLoading
+                          ? null
+                          : () {
+                              bool passwordsMatch = _passwordController.text ==
+                                  _confirmpasswordController.text;
+                              if (passwordsMatch) {
+                                _register(context);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Passwords do not match!'),
+                                  ),
+                                );
+                              }
+                            },
+                      child: authenticationProvider.isAuthLoading
+                          ? const CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            )
+                          : const Text(
+                              'Sign Up',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                    );
                   },
-                  text: 'Sign Up',
                 ),
               ),
             ),
