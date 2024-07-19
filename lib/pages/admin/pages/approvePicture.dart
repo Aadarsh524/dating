@@ -4,7 +4,6 @@ import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
-
 import 'package:dating/utils/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -19,6 +18,10 @@ class ApprovePicturesPage extends StatefulWidget {
 class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
   String _fromDate = 'From';
   String _toDate = 'To';
+  String? _selectedStatus = 'Status';
+  final List<String> _statuses = ['Status', 'Active', 'Inactive', 'Blocked'];
+  bool _isFilterApplied = false;
+  List<UserProfileModel>? filteredData;
 
   Future<void> _selectDate(BuildContext context, bool isFrom) async {
     final DateTime? picked = await showDatePicker(
@@ -38,8 +41,35 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
     }
   }
 
-  String? _selectedStatus = 'Status';
-  final List<String> _statuses = ['Active', 'Inactive', 'Blocked'];
+  List<UserProfileModel> _applyFilters(List<UserProfileModel> users) {
+    DateTime fromDate =
+        _fromDate == 'From' ? DateTime(2000) : DateTime.parse(_fromDate);
+    DateTime toDate =
+        _toDate == 'To' ? DateTime(2101) : DateTime.parse(_toDate);
+
+    return users.where((user) {
+      bool matchesStatus = _selectedStatus == 'Status' ||
+          user.userStatus.toString() == _selectedStatus;
+
+      bool matchesDate = true;
+      if (user.createdTimestamp != null) {
+        DateTime userDate = DateTime.parse(user.createdTimestamp.toString());
+        matchesDate = userDate.isAfter(fromDate) && userDate.isBefore(toDate);
+      }
+
+      return matchesStatus && matchesDate;
+    }).toList();
+  }
+
+  void _filterData() {
+    final adminProvider =
+        Provider.of<AdminDashboardProvider>(context, listen: false);
+    final allUsers = adminProvider.usersList ?? [];
+    setState(() {
+      filteredData = _applyFilters(allUsers);
+      _isFilterApplied = true;
+    });
+  }
 
   @override
   void initState() {
@@ -93,7 +123,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                               _selectedStatus = newValue!;
                             });
                           },
-                          items: <String>['Status', ..._statuses]
+                          items: _statuses
                               .map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -180,20 +210,23 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                     color: AppColors.blue,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(
-                    children: [
-                      SvgPicture.asset(AppIcons.filter),
-                      Text(
-                        'Filter',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                  child: TextButton(
+                    onPressed: _filterData,
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(AppIcons.filter),
+                        Text(
+                          'Filter',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -203,42 +236,40 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Consumer<AdminDashboardProvider>(
                 builder: (context, adminProvider, _) {
-                  List<UserProfileModel>? data = adminProvider.usersList;
+                  List<UserProfileModel>? users =
+                      _isFilterApplied ? filteredData : adminProvider.usersList;
 
-                  if (data == null || data.isEmpty) {
+                  if (users == null || users.isEmpty) {
                     return const Center(child: Text('No data available'));
                   }
 
                   return adminProvider.isAdminDataLoading
                       ? const ShimmerSkeleton(count: 4, height: 80)
-                      : adminProvider.usersList == null ||
-                              adminProvider.usersList!.isEmpty
-                          ? const Center(child: Text('No data available'))
-                          : ListView.builder(
-                              itemCount: adminProvider.usersList!.length,
-                              itemBuilder: (context, index) {
-                                final users = adminProvider.usersList![index];
-                                return ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundImage: MemoryImage(
-                                      base64Decode(users.image!),
-                                    ),
-                                  ),
-                                  title: Text(users.name!),
-                                  subtitle: Text(
-                                      'Status: ${users.isVerified == true}'),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.more_vert),
-                                    onPressed: () =>
-                                        _showImageDialog(context, users.uid!),
-                                  ),
-                                );
-                              },
+                      : ListView.builder(
+                          itemCount: users.length,
+                          itemBuilder: (context, index) {
+                            final user = users[index];
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: MemoryImage(
+                                  base64Decode(user.image!),
+                                ),
+                              ),
+                              title: Text(user.name!),
+                              subtitle: Text(
+                                  'Status: ${user.isVerified == true ? "Verified" : "Not Verified"}'),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.more_vert),
+                                onPressed: () =>
+                                    _showImageDialog(context, user.uid!),
+                              ),
                             );
+                          },
+                        );
                 },
               ),
             ),
-          )
+          ),
         ],
       ),
     );

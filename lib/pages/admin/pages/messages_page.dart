@@ -11,7 +11,7 @@ class MessagesPage extends StatefulWidget {
 }
 
 class _MessagesPageState extends State<MessagesPage> {
-// for date picker
+  // For date picker
   String _fromDate = 'From';
   String _toDate = 'To';
 
@@ -33,72 +33,66 @@ class _MessagesPageState extends State<MessagesPage> {
     }
   }
 
-  // for status
+  // For status
   String? _selectedStatus = 'Status';
+  final List<String> _statuses = ['Status', 'Active', 'Inactive', 'Blocked'];
 
-  final List<String> _statuses = [
-    'Active',
-    'Inactive',
-    'Blocked',
-  ];
-
-//  // Sample user data
+  // Sample user data
   final List<User> users = [
     User(
-        name: 'Pankaj Subedi',
-        date: DateTime.now().subtract(Duration(days: 1)),
-        photoUrl: AppImages.profile,
-        message:
-            'Hello Pankaj Your account is in risk. Please add two factor authentication soon.'),
-
-    User(
-        name: 'Pankaj Subedi',
-        date: DateTime.now().subtract(Duration(days: 1)),
-        photoUrl: AppImages.profile,
-        message:
-            'Hello Pankaj Your account is in risk. Please add two factor authentication soon.'),
-
-    User(
-        name: 'Pankaj Subedi',
-        date: DateTime.now().subtract(Duration(days: 1)),
-        photoUrl: AppImages.profile,
-        message:
-            'Hello Pankaj Your account is in risk. Please add two factor authentication soon.'),
-
-    User(
-        name: 'Pankaj Subedi',
-        date: DateTime.now().subtract(Duration(days: 1)),
-        photoUrl: AppImages.profile,
-        message:
-            'Hello Pankaj Your account is in risk. Please add two factor authentication soon.'),
-
-    User(
-        name: 'Pankaj Subedi',
-        date: DateTime.now().subtract(Duration(days: 1)),
-        photoUrl: AppImages.profile,
-        message:
-            'Hello Pankaj Your account is in risk. Please add two factor authentication soon.'),
-
+      name: 'Pankaj Subedi',
+      date: DateTime.now().subtract(Duration(days: 1)),
+      photoUrl: AppImages.profile,
+      message:
+          'Hello Pankaj Your account is in risk. Please add two factor authentication soon.',
+      status: 'Active',
+    ),
     // Add more user data here
   ];
+
+  // Filtered user data
+  List<User> filteredUsers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredUsers = users;
+  }
+
+  List<User> _applyFilters(List<User> users) {
+    DateTime fromDate =
+        _fromDate == 'From' ? DateTime(2000) : DateTime.parse(_fromDate);
+    DateTime toDate =
+        _toDate == 'To' ? DateTime(2101) : DateTime.parse(_toDate);
+
+    return users.where((user) {
+      bool matchesStatus =
+          _selectedStatus == 'Status' || user.status == _selectedStatus;
+      bool matchesDate =
+          user.date.isAfter(fromDate) && user.date.isBefore(toDate);
+      return matchesStatus && matchesDate;
+    }).toList();
+  }
+
+  void _filterData() {
+    setState(() {
+      filteredUsers = _applyFilters(users);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(
-            height: 20,
-          ),
-          // top filter
+          SizedBox(height: 20),
+          // Top filter
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
-              // for filterr icon and statuses
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // status
-// filter
+                // Filter
                 Row(
                   children: [
                     Container(
@@ -121,8 +115,7 @@ class _MessagesPageState extends State<MessagesPage> {
                           ),
                           value: _selectedStatus,
                           icon: SvgPicture.asset(
-                            AppIcons
-                                .chevronoutline, // Replace with your SVG path
+                            AppIcons.chevronoutline,
                             height: 14,
                             color: Color.fromARGB(255, 120, 120, 241),
                           ),
@@ -148,12 +141,8 @@ class _MessagesPageState extends State<MessagesPage> {
                         ),
                       ),
                     ),
-
-                    SizedBox(
-                      width: 10,
-                    ),
-                    // date bick rom
-
+                    SizedBox(width: 10),
+                    // From date picker
                     Container(
                       height: 50,
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -178,9 +167,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                 letterSpacing: 0.20,
                               ),
                             ),
-                            SizedBox(
-                              width: 10,
-                            ),
+                            SizedBox(width: 10),
                             SvgPicture.asset(
                               AppIcons.calendar,
                               height: 14,
@@ -189,12 +176,9 @@ class _MessagesPageState extends State<MessagesPage> {
                         ),
                       ),
                     ),
-
-                    // swap icon
+                    // Swap icon
                     SvgPicture.asset(AppIcons.swap),
-
-                    // to date picker
-
+                    // To date picker
                     Container(
                       height: 50,
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -219,9 +203,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                 letterSpacing: 0.20,
                               ),
                             ),
-                            SizedBox(
-                              width: 10,
-                            ),
+                            SizedBox(width: 10),
                             SvgPicture.asset(
                               AppIcons.calendar,
                               height: 14,
@@ -232,8 +214,7 @@ class _MessagesPageState extends State<MessagesPage> {
                     ),
                   ],
                 ),
-
-// filter icon
+                // Filter icon
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   height: 50,
@@ -241,40 +222,36 @@ class _MessagesPageState extends State<MessagesPage> {
                     color: AppColors.blue,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(
-                    children: [
-                      SvgPicture.asset(AppIcons.filter),
-                      Text(
-                        'Filter',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                  child: TextButton(
+                    onPressed: _filterData,
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(AppIcons.filter),
+                        Text(
+                          'Filter',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
-
-// users
-
-          SizedBox(
-            height: 15,
-          ),
+          // Users
+          SizedBox(height: 15),
           Expanded(
             child: ListView.builder(
-              itemCount: users.length,
+              itemCount: filteredUsers.length,
               itemBuilder: (BuildContext context, int index) {
-                final user = users[index];
-                // for subscription color
-
+                final user = filteredUsers[index];
                 return Padding(
                   padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
                   child: Container(
-                    //  padding
                     padding: EdgeInsets.symmetric(vertical: 10),
                     decoration: ShapeDecoration(
                       color: Colors.white,
@@ -292,7 +269,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // profile pic and user name
+                          // Profile pic and user name
                           SizedBox(
                             width: 200,
                             child: Row(
@@ -308,11 +285,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                     ),
                                   ),
                                 ),
-
-                                // user name
-                                SizedBox(
-                                  width: 30,
-                                ),
+                                SizedBox(width: 30),
                                 Text(
                                   user.name,
                                   style: GoogleFonts.poppins(
@@ -324,9 +297,6 @@ class _MessagesPageState extends State<MessagesPage> {
                               ],
                             ),
                           ),
-
-                          //
-
                           SizedBox(
                             width: 100,
                             child: Text(
@@ -338,31 +308,32 @@ class _MessagesPageState extends State<MessagesPage> {
                               ),
                             ),
                           ),
-                          Text(
-                            truncateWithEllipsis(60, user.message),
-                            style: GoogleFonts.poppins(
-                              color: Color(0xFF3A3949),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
+                          Expanded(
+                            child: Text(
+                              truncateWithEllipsis(60, user.message),
+                              style: GoogleFonts.poppins(
+                                color: Color(0xFF3A3949),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          // three dots icon
+                          // Three dots icon
                           Row(
                             children: [
-// delete icon
                               IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.delete_forever,
-                                    color: Colors.red,
-                                    size: 20,
-                                  )),
-                              SizedBox(
-                                width: 30,
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.delete_forever,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
                               ),
+                              SizedBox(width: 30),
                               SvgPicture.asset(AppIcons.dots),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -383,12 +354,14 @@ class User {
   final DateTime date;
   final String photoUrl;
   final String message;
+  final String status;
 
   User({
     required this.name,
     required this.date,
     required this.photoUrl,
     required this.message,
+    required this.status,
   });
 }
 
