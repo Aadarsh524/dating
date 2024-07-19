@@ -3,7 +3,6 @@ import 'package:dating/datamodel/complaint/complaint_model.dart';
 import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,71 +15,73 @@ class ComplaintsPage extends StatefulWidget {
 
 class _ComplaintsPageState extends State<ComplaintsPage> {
   // for date picker
-  late DateTime _fromDate;
-  late DateTime _toDate;
+  String _fromDate = 'From';
+  String _toDate = 'To';
+  bool _isFilterApplied = false;
+  List<ComplaintModel>? filteredData;
 
   Future<void> _selectDate(BuildContext context, bool isFrom) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isFrom ? _fromDate : _toDate,
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
     if (picked != null) {
       setState(() {
         if (isFrom) {
-          _fromDate = picked;
+          _fromDate = "${picked.toLocal()}".split(' ')[0];
         } else {
-          _toDate = picked;
+          _toDate = "${picked.toLocal()}".split(' ')[0];
         }
       });
     }
   }
 
-  void filter(DateTime fromDate, DateTime toDate) {
-    ComplaintFilterModel complaintModel = ComplaintFilterModel(
-      from: fromDate.toIso8601String(),
-      to: toDate.toIso8601String(),
-      status: 'Active',
-      page: '1',
-    );
-
-    print(complaintModel.from);
-    print(complaintModel.to);
-
-    Provider.of<AdminDashboardProvider>(context, listen: false)
-        .fetchComplaints(complaintModel, context);
-  }
-
   // for status
   String? _selectedStatus = 'Status';
-
-  final List<String> _statuses = [
-    'Active',
-    'Inactive',
-    'Blocked',
-  ];
+  final List<String> _statuses = ['Status', 'Active', 'Inactive', 'Blocked'];
 
   @override
   void initState() {
     super.initState();
-
-    DateTime now = DateTime.now();
-    DateTime oneWeekAgo = now.subtract(const Duration(days: 7));
-
-    _toDate = now;
-    _fromDate = oneWeekAgo;
-
-    ComplaintFilterModel complaintModel = ComplaintFilterModel(
-      from: _fromDate.toIso8601String(),
-      to: _toDate.toIso8601String(),
-      status: 'Active',
-      page: '1',
-    );
-
+    // Fetch the profile data when the screen is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AdminDashboardProvider>(context, listen: false)
-          .fetchComplaints(complaintModel, context);
+          .fetchComplaints(
+              ComplaintFilterModel(from: '', to: '', status: '', page: '1'),
+              context);
+    });
+  }
+
+  List<ComplaintModel> _applyFilters(List<ComplaintModel> complaints) {
+    DateTime fromDate =
+        _fromDate == 'From' ? DateTime(2000) : DateTime.parse(_fromDate);
+    DateTime toDate =
+        _toDate == 'To' ? DateTime(2101) : DateTime.parse(_toDate);
+
+    return complaints.where((complaint) {
+      bool matchesStatus = _selectedStatus == 'Status' ||
+          complaint.status.toString() == _selectedStatus;
+
+      bool matchesDate = true;
+      if (complaint.timestamp != null) {
+        DateTime complaintDate = DateTime.parse(complaint.timestamp.toString());
+        matchesDate =
+            complaintDate.isAfter(fromDate) && complaintDate.isBefore(toDate);
+      }
+
+      return matchesStatus && matchesDate;
+    }).toList();
+  }
+
+  void _filterData() {
+    final adminProvider =
+        Provider.of<AdminDashboardProvider>(context, listen: false);
+    final allComplaints = adminProvider.usersComplainList ?? [];
+    setState(() {
+      filteredData = _applyFilters(allComplaints);
+      _isFilterApplied = true;
     });
   }
 
@@ -131,7 +132,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                               _selectedStatus = newValue!;
                             });
                           },
-                          items: <String>['Status', ..._statuses]
+                          items: _statuses
                               .map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -166,7 +167,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              _fromDate.toString(),
+                              _fromDate,
                               style: GoogleFonts.poppins(
                                 color: const Color(0xFF868690),
                                 fontSize: 14,
@@ -202,7 +203,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              _toDate.toString(),
+                              _toDate,
                               style: GoogleFonts.poppins(
                                 color: const Color(0xFF868690),
                                 fontSize: 14,
@@ -230,9 +231,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: TextButton(
-                    onPressed: () {
-                      filter(_fromDate as DateTime, _toDate as DateTime);
-                    },
+                    onPressed: _filterData,
                     child: Row(
                       children: [
                         SvgPicture.asset(AppIcons.filter),
@@ -257,14 +256,15 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Consumer<AdminDashboardProvider>(
                 builder: (context, adminProvider, child) {
-                  List<ComplaintModel>? complaints =
-                      adminProvider.usersComplainList;
+                  List<ComplaintModel>? complaints = _isFilterApplied
+                      ? filteredData
+                      : adminProvider.usersComplainList;
 
                   if (adminProvider.isAdminDataLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  if (complaints == null) {
+                  if (complaints == null || complaints.isEmpty) {
                     return const Center(child: Text('No complaints available'));
                   }
 
@@ -382,23 +382,4 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
       ),
     );
   }
-}
-
-// Define a Complaint data model
-class Complaint {
-  final String title;
-  final String text;
-  final String userProfilePicUrl;
-  final String userName;
-  final String userId;
-  final DateTime publishDate;
-
-  Complaint({
-    required this.title,
-    required this.text,
-    required this.userProfilePicUrl,
-    required this.userName,
-    required this.userId,
-    required this.publishDate,
-  });
 }
