@@ -7,19 +7,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
-class DashboardProvider extends ChangeNotifier {
-  List<DashboardResponseModel>? _dashboardListProvider;
-  List<DashboardResponseModel>? get dashboardList => _dashboardListProvider;
-
+class DashboardProvider with ChangeNotifier {
   bool _isDashboardLoading = false;
+  List<DashboardResponseModel> _dashboardListProvider = [];
+
   bool get isDashboardLoading => _isDashboardLoading;
+  List<DashboardResponseModel> get dashboardList => _dashboardListProvider;
 
   Future<void> dashboard(int page, BuildContext context) async {
     _isDashboardLoading = true;
-    // We're not calling notifyListeners() here
+    notifyListeners();
 
     User? user = FirebaseAuth.instance.currentUser;
-    String uid = user!.uid;
+    if (user == null) {
+      throw Exception('No user is logged in');
+    }
+    String uid = user.uid;
     String api = getApiEndpoint();
 
     final token = await TokenManager.getToken();
@@ -45,11 +48,11 @@ class DashboardProvider extends ChangeNotifier {
         _dashboardListProvider = [];
       }
     } catch (e) {
-      print(e.toString());
+      print('Error: ${e.toString()}');
       _dashboardListProvider = [];
     } finally {
       _isDashboardLoading = false;
-      notifyListeners(); // We only call notifyListeners once, at the end
+      notifyListeners();
     }
   }
 }

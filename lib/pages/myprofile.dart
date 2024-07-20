@@ -75,8 +75,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
     final document = DocumentVerificationModel(
         uid: user!.uid,
         verificationStatus: 1,
-        documents: [
-          Documents(
+        document: [
+          Document(
               fileType: 'Verification',
               file: base64.toString(),
               fileName: selectedFileType,

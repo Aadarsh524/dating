@@ -5,6 +5,7 @@ import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 
 import 'package:dating/datamodel/dashboard_response_model.dart' as d;
+import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 
 import 'package:dating/datamodel/user_profile_model.dart';
@@ -219,45 +220,41 @@ class _HomePageState extends State<HomePage> {
           height: 30,
         ),
 
-        Consumer<DashboardProvider>(
-          builder: (context, dashboardProvider, _) {
-            if (dashboardProvider.isDashboardLoading) {
-              return const ShimmerSkeleton(count: 1, height: 250);
-            } else {
-              return Expanded(
-                child: Consumer<DashboardProvider>(
-                  builder: (context, snapshot, _) {
-                    List<d.DashboardResponseModel>? data =
-                        Provider.of<DashboardProvider>(context, listen: false)
-                            .dashboardList;
+        Expanded(
+          child: Consumer<DashboardProvider>(
+            builder: (context, dashboardProvider, _) {
+              if (dashboardProvider.isDashboardLoading) {
+                return const ShimmerSkeleton(count: 1, height: 250);
+              }
 
-                    print(data);
+              List<DashboardResponseModel>? data =
+                  dashboardProvider.dashboardList;
 
-                    return ListView.builder(
-                      itemCount: data!.length,
-                      itemBuilder: (context, index) {
-                        final alluploads = data[index].uploads;
-                        if (alluploads!.isNotEmpty) {
-                          return UserPost(
-                            post: data[index],
-                            currentUserId: user!.uid,
-                            onLike: (postId) {
-                              final userInteraction =
-                                  context.read<UserInteractionProvider>();
-                              userInteraction.likeUser(
-                                  user!.uid, "likedUserId");
-                            },
-                          );
-                        } else {
-                          return Container();
-                        }
+              if (data.isEmpty) {
+                return const Center(child: Text("No data available"));
+              }
+
+              return ListView.builder(
+                itemCount: data.length,
+                itemBuilder: (context, index) {
+                  final alluploads = data[index].uploads;
+                  if (alluploads != null && alluploads.isNotEmpty) {
+                    return UserPost(
+                      post: data[index],
+                      currentUserId: user!.uid,
+                      onLike: (postId) {
+                        final userInteraction =
+                            context.read<UserInteractionProvider>();
+                        userInteraction.likeUser(user!.uid, "likedUserId");
                       },
                     );
-                  },
-                ),
+                  } else {
+                    return Container();
+                  }
+                },
               );
-            }
-          },
+            },
+          ),
         )
       ]),
       bottomSheet: const NavBar(),
@@ -623,7 +620,7 @@ class _HomePageState extends State<HomePage> {
                                           .dashboardList;
 
                                   return ListView.builder(
-                                      itemCount: data!.length,
+                                      itemCount: data.length,
                                       itemBuilder: (context, index) {
                                         final alluploads = data[index].uploads;
                                         if (alluploads!.isNotEmpty) {
@@ -671,7 +668,7 @@ class ProfileButton extends StatelessWidget {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfileProvider, _) {
         if (userProfileProvider.isProfileLoading) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
 
         UserProfileModel? userProfileModel =

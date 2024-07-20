@@ -115,6 +115,8 @@ class _EditInfoState extends State<EditInfo> {
     final currentProfile = provider.currentUserProfile!;
 
     final newUser = UserProfileModel(
+      id: currentProfile.id,
+      email: currentProfile.email,
       uid: user!.uid,
       name: _controllerName.text,
       address: _controllerAddress.text,
