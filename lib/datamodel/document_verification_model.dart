@@ -1,18 +1,17 @@
 class DocumentVerificationModel {
   String? uid;
   int? verificationStatus;
-  List<Documents>? documents;
+  List<Document>? document;
 
-  DocumentVerificationModel(
-      {this.uid, this.verificationStatus, this.documents});
+  DocumentVerificationModel({this.uid, this.verificationStatus, this.document});
 
   DocumentVerificationModel.fromJson(Map<String, dynamic> json) {
     uid = json['uid'];
     verificationStatus = json['verificationStatus'];
-    if (json['documents'] != null) {
-      documents = <Documents>[];
-      json['documents'].forEach((v) {
-        documents!.add(new Documents.fromJson(v));
+    if (json['document'] != null) {
+      document = <Document>[];
+      json['document'].forEach((v) {
+        document!.add(new Document.fromJson(v));
       });
     }
   }
@@ -21,28 +20,28 @@ class DocumentVerificationModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['uid'] = this.uid;
     data['verificationStatus'] = this.verificationStatus;
-    if (this.documents != null) {
-      data['documents'] = this.documents!.map((v) => v.toJson()).toList();
+    if (this.document != null) {
+      data['document'] = this.document!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class Documents {
+class Document {
   String? file;
   String? fileName;
   String? documentType;
   String? fileType;
   String? timeStamp;
 
-  Documents(
+  Document(
       {this.file,
       this.fileName,
       this.documentType,
       this.fileType,
       this.timeStamp});
 
-  Documents.fromJson(Map<String, dynamic> json) {
+  Document.fromJson(Map<String, dynamic> json) {
     file = json['file'];
     fileName = json['fileName'];
     documentType = json['documentType'];

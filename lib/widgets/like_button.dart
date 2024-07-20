@@ -32,33 +32,38 @@ class _LikeButtonState extends State<LikeButton> {
   Widget build(BuildContext context) {
     return Consumer<UserInteractionProvider>(
       builder: (context, userInteractionProvider, child) {
-        bool isLiked = userInteractionProvider.isUserLiked(widget.likedUserId);
+        if (userInteractionProvider.isInteractionLoading) {
+          return const CircularProgressIndicator();
+        } else {
+          bool isLiked =
+              userInteractionProvider.isUserLiked(widget.likedUserId);
 
-        return Neumorphic(
-          style: const NeumorphicStyle(
-            boxShape: NeumorphicBoxShape.circle(),
-            depth: 5,
-            intensity: 0.75,
-          ),
-          child: NeumorphicButton(
-            onPressed: () async {
-              await userInteractionProvider.toggleLikeStatus(
-                  widget.currentUserId, widget.likedUserId);
-            },
-            child: SizedBox(
-              height: 50,
-              width: 50,
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: SvgPicture.asset(
-                  isLiked ? AppIcons.heartfilled : AppIcons.heartoutline,
-                  height: 20,
-                  width: 20,
+          return Neumorphic(
+            style: const NeumorphicStyle(
+              boxShape: NeumorphicBoxShape.circle(),
+              depth: 5,
+              intensity: 0.75,
+            ),
+            child: NeumorphicButton(
+              onPressed: () async {
+                await userInteractionProvider.toggleLikeStatus(
+                    widget.currentUserId, widget.likedUserId);
+              },
+              child: SizedBox(
+                height: 50,
+                width: 50,
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: SvgPicture.asset(
+                    isLiked ? AppIcons.heartfilled : AppIcons.heartoutline,
+                    height: 20,
+                    width: 20,
+                  ),
                 ),
               ),
             ),
-          ),
-        );
+          );
+        }
       },
     );
   }

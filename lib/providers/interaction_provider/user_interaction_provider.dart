@@ -27,6 +27,9 @@ class UserInteractionProvider extends ChangeNotifier {
 
   bool isUserLiked(String userId) {
     if (userInteractionModel == null) return false;
+    if (userInteractionModel != null &&
+        userInteractionModel!.likedUsers == null) return false;
+
     return userInteractionModel!.likedUsers!
         .any((likedUser) => likedUser.uid == userId);
   }
@@ -171,7 +174,7 @@ class UserInteractionProvider extends ChangeNotifier {
         throw Exception('No token found');
       }
 
-      final uri = Uri.parse("$api/Like");
+      final uri = Uri.parse("$api/UserInteraction/api/Like");
       final response = await http.post(
         uri,
         headers: {
@@ -204,7 +207,7 @@ class UserInteractionProvider extends ChangeNotifier {
         throw Exception('No token found');
       }
 
-      final uri = Uri.parse("$api/like");
+      final uri = Uri.parse("$api/UserInteraction/api/like");
       final response = await http.delete(
         uri,
         headers: {

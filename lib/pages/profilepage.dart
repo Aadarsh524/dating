@@ -394,37 +394,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       "${widget.dashboardresponsemodel.bio}",
                       style: AppTextStyles().secondaryStyle,
                     ),
-
-                    const SizedBox(
-                      height: 20,
-                    ),
-
-                    Text(
-                      'Overview',
-                      style: AppTextStyles().primaryStyle.copyWith(
-                            color: AppColors.black.withOpacity(0.75),
-                          ),
-                    ),
-
-                    // seperator
-                    Container(
-                      decoration: const ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            width: 0.50,
-                            strokeAlign: BorderSide.strokeAlignCenter,
-                            color: Color(0xFFAAAAAA),
-                          ),
-                        ),
-                      ),
-                    ),
-
-// text about
-
-                    Text(
-                      '${widget.dashboardresponsemodel.bio}',
-                      style: AppTextStyles().secondaryStyle,
-                    ),
                   ],
                 ),
               ),
