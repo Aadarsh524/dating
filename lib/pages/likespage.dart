@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -162,6 +161,10 @@ class _LikePageState extends State<LikePage> {
     List<LikedByUsers>? likedMeUsers =
         provider.userInteractionModel?.likedByUsers;
 
+    if (provider.isInteractionLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     if (likedMeUsers == null || likedMeUsers.isEmpty) {
       return const Center(child: Text('No users have liked you yet.'));
     }
@@ -281,6 +284,10 @@ class _LikePageState extends State<LikePage> {
 
   Widget myLikesList(UserInteractionProvider provider) {
     List<LikedUsers>? myLikesUsers = provider.userInteractionModel?.likedUsers;
+
+    if (provider.isInteractionLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     if (myLikesUsers == null || myLikesUsers.isEmpty) {
       return const Center(child: Text('You have not liked anyone yet.'));
@@ -403,6 +410,10 @@ class _LikePageState extends State<LikePage> {
   Widget mutualLikesList(UserInteractionProvider provider) {
     List<MutualLikes>? mutualLikesUsers =
         provider.userInteractionModel?.mutualLikes;
+
+    if (provider.isInteractionLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     if (mutualLikesUsers == null || mutualLikesUsers.isEmpty) {
       return const Center(child: Text('You have no mutual likes yet.'));

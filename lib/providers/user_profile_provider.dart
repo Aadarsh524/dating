@@ -295,4 +295,9 @@ class UserProfileProvider extends ChangeNotifier {
       setProfileLoading(false);
     }
   }
+
+  void clearUserData() {
+    currentUserProfileModel = null;
+    notifyListeners();
+  }
 }

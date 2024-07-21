@@ -71,7 +71,7 @@ class ChatMessageProvider extends ChangeNotifier {
       var response = await request.send();
       // Handle the response
       if (response.statusCode == 200) {
-        await getMessage(chatID, uid);
+        await getMessage(chatID, 1);
       } else {
         throw Exception('Failed to send chat: ${response.statusCode}');
       }
@@ -82,7 +82,7 @@ class ChatMessageProvider extends ChangeNotifier {
     }
   }
 
-  Future<ChatMessageModel?> getMessage(String chatID, String uid) async {
+  Future<ChatMessageModel?> getMessage(String chatID, int page) async {
     String api = getApiEndpoint();
     setMessagesLoading(true);
 
@@ -92,7 +92,7 @@ class ChatMessageProvider extends ChangeNotifier {
 
       var request = http.Request('GET', requestUrl)
         ..headers.addAll(headers)
-        ..body = json.encode(uid).toString();
+        ..body = json.encode(page).toString();
 
       http.StreamedResponse streamedResponse = await request.send();
       http.Response response = await http.Response.fromStream(streamedResponse);

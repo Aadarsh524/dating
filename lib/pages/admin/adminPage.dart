@@ -215,7 +215,7 @@ class _AdminPageState extends State<AdminPage> {
                               ),
                               onSelected: (String result) {
                                 if (result == 'logout') {
-                                  authenticationProvider.signOut();
+                                  authenticationProvider.signOut(context);
                                   DbClient().clearAllData();
                                   Navigator.pushReplacement(
                                     context,

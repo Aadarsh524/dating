@@ -167,7 +167,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                         boxShape: NeumorphicBoxShape.circle(),
                       ),
                       onPressed: () async {
-                        await authenticationProvider.signOut();
+                        await authenticationProvider.signOut(context);
                         await DbClient().clearAllData();
                         Navigator.pushReplacement(
                           context,
@@ -497,7 +497,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       ButtonWithLabel(
                         text: null,
                         onPressed: () {
-                          authenticationProvider.signOut().then((value) {
+                          authenticationProvider.signOut(context).then((value) {
                             DbClient().clearAllData();
                             Navigator.pushReplacement(
                               context,

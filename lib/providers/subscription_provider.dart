@@ -82,4 +82,9 @@ class SubscriptionProvider extends ChangeNotifier {
       setSubscriptionLoading(false);
     }
   }
+
+  void clearUserData() {
+    subscriptionProvider = null;
+    notifyListeners();
+  }
 }

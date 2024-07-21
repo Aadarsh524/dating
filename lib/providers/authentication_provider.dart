@@ -2,6 +2,9 @@ import 'package:dating/auth/db_client.dart';
 import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/providers/chat_provider/chat_room_provider.dart';
+import 'package:dating/providers/dashboard_provider.dart';
+import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +104,7 @@ class AuthenticationProvider extends ChangeNotifier {
         if (profileCreated) {
           return userCredential.user;
         } else {
-          await signOut();
+          await signOut(context);
           return null;
         }
       } else {
@@ -143,7 +146,7 @@ class AuthenticationProvider extends ChangeNotifier {
               if (value == true) {
                 return userCredential.user;
               } else {
-                signOut();
+                signOut(context);
                 notifyListeners();
                 return false;
               }
@@ -162,10 +165,14 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> signOut() async {
+  Future<void> signOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
     await _auth.signOut();
+    Provider.of<UserProfileProvider>(context, listen: false).clearUserData();
+    Provider.of<DashboardProvider>(context, listen: false).clearUserData();
+    Provider.of<ChatRoomProvider>(context, listen: false).clearUserData();
+    Provider.of<SubscriptionProvider>(context, listen: false).clearUserData();
     notifyListeners();
   }
 
