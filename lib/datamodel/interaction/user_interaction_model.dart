@@ -7,32 +7,34 @@ class UserInteractionModel {
   int? totalLikedByUsers;
   int? totalMutualLikes;
 
-  UserInteractionModel({
-    this.uid,
-    this.likedUsers,
-    this.likedByUsers,
-    this.mutualLikes,
-    this.totalLikedUsers,
-    this.totalLikedByUsers,
-    this.totalMutualLikes,
-  });
+  UserInteractionModel(
+      {this.uid,
+      this.likedUsers,
+      this.likedByUsers,
+      this.mutualLikes,
+      this.totalLikedUsers,
+      this.totalLikedByUsers,
+      this.totalMutualLikes});
 
   UserInteractionModel.fromJson(Map<String, dynamic> json) {
     uid = json['uid'];
     if (json['likedUsers'] != null) {
-      likedUsers = List<LikedUsers>.from(
-        json['likedUsers'].map((v) => LikedUsers.fromJson(v)),
-      );
+      likedUsers = <LikedUsers>[];
+      json['likedUsers'].forEach((v) {
+        likedUsers!.add(LikedUsers.fromJson(v));
+      });
     }
     if (json['likedByUsers'] != null) {
-      likedByUsers = List<LikedByUsers>.from(
-        json['likedByUsers'].map((v) => LikedByUsers.fromJson(v)),
-      );
+      likedByUsers = <LikedByUsers>[];
+      json['likedByUsers'].forEach((v) {
+        likedByUsers!.add(LikedByUsers.fromJson(v));
+      });
     }
     if (json['mutualLikes'] != null) {
-      mutualLikes = List<MutualLikes>.from(
-        json['mutualLikes'].map((v) => MutualLikes.fromJson(v)),
-      );
+      mutualLikes = <MutualLikes>[];
+      json['mutualLikes'].forEach((v) {
+        mutualLikes!.add(MutualLikes.fromJson(v));
+      });
     }
     totalLikedUsers = json['totalLikedUsers'];
     totalLikedByUsers = json['totalLikedByUsers'];
@@ -40,7 +42,7 @@ class UserInteractionModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['uid'] = uid;
     if (likedUsers != null) {
       data['likedUsers'] = likedUsers!.map((v) => v.toJson()).toList();
@@ -74,7 +76,7 @@ class LikedUsers {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['uid'] = uid;
     data['likedDate'] = likedDate;
     if (userDetail != null) {
@@ -85,7 +87,6 @@ class LikedUsers {
 }
 
 class LikedByUsers {
-  // Assuming LikedByUsers has similar structure as LikedUsers
   String? uid;
   String? likedDate;
   UserDetail? userDetail;
@@ -101,7 +102,7 @@ class LikedByUsers {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['uid'] = uid;
     data['likedDate'] = likedDate;
     if (userDetail != null) {
@@ -112,7 +113,6 @@ class LikedByUsers {
 }
 
 class MutualLikes {
-  // Assuming MutualLikes has similar structure as LikedUsers
   String? uid;
   String? likedDate;
   UserDetail? userDetail;
@@ -128,7 +128,7 @@ class MutualLikes {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['uid'] = uid;
     data['likedDate'] = likedDate;
     if (userDetail != null) {
@@ -154,7 +154,7 @@ class UserDetail {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['name'] = name;
     data['address'] = address;
     data['age'] = age;

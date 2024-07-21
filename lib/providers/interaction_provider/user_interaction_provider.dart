@@ -56,6 +56,7 @@ class UserInteractionProvider extends ChangeNotifier {
         final userInteractionModel =
             UserInteractionModel.fromJson(json.decode(response.body));
         setUserInteractionProvider(userInteractionModel);
+        notifyListeners();
         return userInteractionModel;
       } else {
         throw Exception(

@@ -3,8 +3,11 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
+import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
+import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
@@ -18,6 +21,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:insta_image_viewer/insta_image_viewer.dart';
+import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable
 class ProfilePage extends StatefulWidget {
@@ -428,17 +432,61 @@ class _ProfilePageState extends State<ProfilePage> {
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
-                child: SizedBox(
-                  height: 65,
-                  width: 65,
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: SvgPicture.asset(
-                      AppIcons.chatfilled,
-                      height: 20,
-                      width: 20,
-                    ),
-                  ),
+                onPressed: () {
+                  final chatRoomProvider = context.read<ChatRoomProvider>();
+
+                  chatRoomProvider
+                      .fetchChatRoomToCheckUser(context, user!.uid,
+                          widget.dashboardresponsemodel.uid!)
+                      .then((value) {
+                    if (value != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => ChatScreemMobile(
+                                  chatID: value,
+                                  chatRoomModel: EndUserDetails(
+                                      name: widget.dashboardresponsemodel.name,
+                                      profileImage:
+                                          widget.dashboardresponsemodel.image),
+                                  recieverId:
+                                      widget.dashboardresponsemodel.uid!,
+                                )),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => ChatScreemMobile(
+                                  chatID: '',
+                                  chatRoomModel: EndUserDetails(
+                                      name: widget.dashboardresponsemodel.name,
+                                      profileImage:
+                                          widget.dashboardresponsemodel.image),
+                                  recieverId:
+                                      widget.dashboardresponsemodel.uid!,
+                                )),
+                      );
+                    }
+                  });
+                },
+                child: Consumer<ChatRoomProvider>(
+                  builder: (context, chatRoomProvider, child) {
+                    return SizedBox(
+                      height: 65,
+                      width: 65,
+                      child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: chatRoomProvider.isChatRoomLoading
+                            ? const CircularProgressIndicator()
+                            : SvgPicture.asset(
+                                AppIcons.chatfilled,
+                                height: 20,
+                                width: 20,
+                              ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

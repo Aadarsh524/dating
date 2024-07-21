@@ -105,12 +105,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       final subscriptionProvider = context.read<SubscriptionProvider>();
 
       final subscriptionModel = SubscriptionModel(
-          userId: user!.uid,
-          productId: '1',
-          duration: "4",
-          planType: '1',
-          paymentMethod: "Card",
-          paymentToken: paymentIntentToken);
+        userId: user!.uid,
+        productId: 'product1',
+        duration: "weekly",
+        planType: 'basic',
+      );
       final result =
           await subscriptionProvider.buySubcription(subscriptionModel, context);
       if (result == true) {

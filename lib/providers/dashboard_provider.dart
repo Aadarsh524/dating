@@ -55,4 +55,9 @@ class DashboardProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void clearUserData() {
+    _dashboardListProvider.clear();
+    notifyListeners();
+  }
 }

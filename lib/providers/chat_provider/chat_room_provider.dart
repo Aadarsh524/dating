@@ -61,4 +61,57 @@ class ChatRoomProvider extends ChangeNotifier {
       setChatRoomLoading(false);
     }
   }
+
+  Future<String?> fetchChatRoomToCheckUser(
+      BuildContext context, String uid, String ouid) async {
+    setChatRoomLoading(true);
+    try {
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      String api = getApiEndpoint();
+      final response = await http.get(
+        Uri.parse('$api/Communication/$uid'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+
+        final chatRoomModel = ChatRoomModel.fromJson(jsonData);
+
+        Conversations? userConversation;
+        for (var conversation in chatRoomModel.conversations ?? []) {
+          if (conversation.endUserId == ouid) {
+            userConversation = conversation;
+            break;
+          }
+        }
+        if (userConversation != null) {
+          return userConversation.chatId;
+        }
+
+        setChatRoomProvider(chatRoomModel);
+        notifyListeners();
+        return null;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      rethrow; // Rethrow the exception to handle it in the caller
+    } finally {
+      setChatRoomLoading(false);
+    }
+  }
+
+  void clearUserData() {
+    _userChatRoomModel = null;
+    notifyListeners();
+  }
 }

@@ -24,7 +24,7 @@ class _NavBarState extends State<NavBar> {
     return Neumorphic(
       child: Container(
         height: 70,
-        decoration: BoxDecoration(borderRadius: BorderRadius.zero),
+        decoration: const BoxDecoration(borderRadius: BorderRadius.zero),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
@@ -32,7 +32,7 @@ class _NavBarState extends State<NavBar> {
             children: [
               // home
               Neumorphic(
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 50,
                   child: NeumorphicButton(
@@ -40,10 +40,12 @@ class _NavBarState extends State<NavBar> {
                       setState(() {
                         _selectedIndex = 0;
                       });
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => HomePage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomePage()));
                     },
-                    style: NeumorphicStyle(
+                    style: const NeumorphicStyle(
                       depth: 5,
                       intensity: 0.75,
                     ),
@@ -58,7 +60,7 @@ class _NavBarState extends State<NavBar> {
 
               // chat
               Neumorphic(
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 50,
                   child: NeumorphicButton(
@@ -66,10 +68,12 @@ class _NavBarState extends State<NavBar> {
                       setState(() {
                         _selectedIndex = 1;
                       });
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => ChatPage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ChatPage()));
                     },
-                    style: NeumorphicStyle(
+                    style: const NeumorphicStyle(
                       depth: 5,
                       intensity: 0.75,
                     ),
@@ -84,7 +88,7 @@ class _NavBarState extends State<NavBar> {
 
               // star
               Neumorphic(
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 50,
                   child: NeumorphicButton(
@@ -92,13 +96,13 @@ class _NavBarState extends State<NavBar> {
                       Navigator.push(
                           context,
                           CupertinoPageRoute(
-                              builder: (context) => FavouritePage()));
+                              builder: (context) => const FavouritePage()));
                     },
-                    style: NeumorphicStyle(
+                    style: const NeumorphicStyle(
                       depth: 5,
                       intensity: 0.75,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.star,
                       size: 20,
                     ),
@@ -108,15 +112,17 @@ class _NavBarState extends State<NavBar> {
 
               // heart
               Neumorphic(
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 50,
                   child: NeumorphicButton(
                     onPressed: () {
-                      Navigator.push(context,
-                          CupertinoPageRoute(builder: (context) => LikePage()));
+                      Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) => const LikePage()));
                     },
-                    style: NeumorphicStyle(
+                    style: const NeumorphicStyle(
                       depth: 5,
                       intensity: 0.75,
                     ),
@@ -130,19 +136,21 @@ class _NavBarState extends State<NavBar> {
 
               // eye
               Neumorphic(
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: 50,
                   child: NeumorphicButton(
                     onPressed: () {
-                      Navigator.push(context,
-                          CupertinoPageRoute(builder: (context) => ViewPage()));
+                      Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) => const ViewPage()));
                     },
-                    style: NeumorphicStyle(
+                    style: const NeumorphicStyle(
                       depth: 5,
                       intensity: 0.75,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.remove_red_eye,
                       size: 20,
                     ),
@@ -169,7 +177,7 @@ class _NavBarDesktopState extends State<NavBarDesktop> {
   Widget build(BuildContext context) {
     return Container(
       height: 400,
-      decoration: BoxDecoration(borderRadius: BorderRadius.zero),
+      decoration: const BoxDecoration(borderRadius: BorderRadius.zero),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
@@ -177,19 +185,21 @@ class _NavBarDesktopState extends State<NavBarDesktop> {
           children: [
             // home
             Neumorphic(
-              child: Container(
+              child: SizedBox(
                 height: 50,
                 width: 50,
                 child: NeumorphicButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (context) => HomePage()));
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => const HomePage()));
                   },
-                  style: NeumorphicStyle(
+                  style: const NeumorphicStyle(
                     depth: 5,
                     intensity: 0.75,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.home_filled,
                     size: 20,
                   ),
@@ -199,19 +209,21 @@ class _NavBarDesktopState extends State<NavBarDesktop> {
 
             // chat
             Neumorphic(
-              child: Container(
+              child: SizedBox(
                 height: 50,
                 width: 50,
                 child: NeumorphicButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (context) => ChatPage()));
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => const ChatPage()));
                   },
-                  style: NeumorphicStyle(
+                  style: const NeumorphicStyle(
                     depth: 5,
                     intensity: 0.75,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.chat_bubble_outline,
                     size: 20,
                   ),
@@ -221,7 +233,7 @@ class _NavBarDesktopState extends State<NavBarDesktop> {
 
             // star
             Neumorphic(
-              child: Container(
+              child: SizedBox(
                 height: 50,
                 width: 50,
                 child: NeumorphicButton(
@@ -229,13 +241,13 @@ class _NavBarDesktopState extends State<NavBarDesktop> {
                     Navigator.push(
                         context,
                         CupertinoPageRoute(
-                            builder: (context) => FavouritePage()));
+                            builder: (context) => const FavouritePage()));
                   },
-                  style: NeumorphicStyle(
+                  style: const NeumorphicStyle(
                     depth: 5,
                     intensity: 0.75,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.star,
                     size: 20,
                   ),
@@ -245,15 +257,17 @@ class _NavBarDesktopState extends State<NavBarDesktop> {
 
             // heart
             Neumorphic(
-              child: Container(
+              child: SizedBox(
                 height: 50,
                 width: 50,
                 child: NeumorphicButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (context) => LikePage()));
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => const LikePage()));
                   },
-                  style: NeumorphicStyle(
+                  style: const NeumorphicStyle(
                     depth: 5,
                     intensity: 0.75,
                   ),
@@ -267,19 +281,21 @@ class _NavBarDesktopState extends State<NavBarDesktop> {
 
             // eye
             Neumorphic(
-              child: Container(
+              child: SizedBox(
                 height: 50,
                 width: 50,
                 child: NeumorphicButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (context) => ViewPage()));
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => const ViewPage()));
                   },
-                  style: NeumorphicStyle(
+                  style: const NeumorphicStyle(
                     depth: 5,
                     intensity: 0.75,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.remove_red_eye,
                     size: 20,
                   ),

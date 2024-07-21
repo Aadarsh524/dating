@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/helpers/signaling.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
+import 'package:dating/providers/user_profile_provider.dart';
 
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
@@ -64,7 +67,7 @@ class _ChatPageState extends State<ChatPage> {
               onPressed: () {
                 // Handle button press
                 String enteredText = _textFieldController.text;
-                _signaling.joinRoom(enteredText,_localRenderer);
+                _signaling.joinRoom(enteredText, _localRenderer);
 
                 log("Entered text: $enteredText");
               },
@@ -115,7 +118,7 @@ class _ChatPageState extends State<ChatPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const profileButton(),
+                const ProfileButton(),
                 Row(
                   children: [
                     ButtonWithLabel(
@@ -251,6 +254,9 @@ class _ChatPageState extends State<ChatPage> {
                                                               endUserDetails,
                                                           chatID: conversation
                                                               .chatId!,
+                                                          recieverId:
+                                                              chatRoomModel
+                                                                  .uid!,
                                                         )));
                                           },
                                           child: Column(
@@ -374,7 +380,7 @@ class _ChatPageState extends State<ChatPage> {
               // profile
               Row(
                 children: [
-                  const profileButton(),
+                  const ProfileButton(),
                   const SizedBox(
                     width: 20,
                   ),
@@ -1294,26 +1300,43 @@ class _ChatPageState extends State<ChatPage> {
   }
 }
 
-// profile button
-class profileButton extends StatelessWidget {
-  const profileButton({
-    super.key,
-  });
+class ProfileButton extends StatelessWidget {
+  const ProfileButton({Key? key}) : super(key: key);
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Neumorphic(
-      style: const NeumorphicStyle(
-        boxShape: NeumorphicBoxShape.circle(),
-      ),
-      child: Container(
-        height: 50,
-        width: 50,
-        child: Image.asset(
-          AppImages.loginimage,
-          fit: BoxFit.cover,
-        ),
-      ),
+    return Consumer<UserProfileProvider>(
+      builder: (context, userProfileProvider, _) {
+        if (userProfileProvider.isProfileLoading) {
+          return const CircularProgressIndicator();
+        }
+
+        UserProfileModel? userProfileModel =
+            userProfileProvider.currentUserProfile;
+
+        Uint8List imageBytes = userProfileModel!.image != null &&
+                userProfileModel.image!.isNotEmpty
+            ? base64ToImage(userProfileModel.image!)
+            : base64ToImage(defaultBase64Avatar);
+
+        return Neumorphic(
+          style: const NeumorphicStyle(
+            boxShape: NeumorphicBoxShape.circle(),
+          ),
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
     );
   }
 }
