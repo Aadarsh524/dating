@@ -611,7 +611,28 @@ class _HomePageState extends State<HomePage> {
                         child: Consumer<DashboardProvider>(
                             builder: (context, dashboardProvider, _) {
                           return dashboardProvider.isDashboardLoading
-                              ? const ShimmerSkeleton(count: 1, height: 300)
+                              ?const Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    SizedBox(
+                                        width: 300,
+                                        child: ShimmerSkeleton(
+                                            count: 1, height: 350)),
+                                    SizedBox(
+                                        width: 300,
+                                        child: ShimmerSkeleton(
+                                            count: 1, height: 350)),
+                                    SizedBox(
+                                        width: 300,
+                                        child: ShimmerSkeleton(
+                                            count: 1, height: 350)),
+                                    SizedBox(
+                                        width: 300,
+                                        child: ShimmerSkeleton(
+                                            count: 1, height: 350)),
+                                  ],
+                                )
                               : Consumer<DashboardProvider>(
                                   builder: (context, snapshot, _) {
                                   List<d.DashboardResponseModel>? data =
@@ -619,7 +640,17 @@ class _HomePageState extends State<HomePage> {
                                               listen: false)
                                           .dashboardList;
 
-                                  return ListView.builder(
+                                  return GridView.builder(
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 4, // Number of columns
+                                        childAspectRatio: .8,
+
+                                        crossAxisSpacing:
+                                            10.0, // Spacing between columns
+                                        mainAxisSpacing:
+                                            10.0, // Spacing between rows
+                                      ),
                                       itemCount: data.length,
                                       itemBuilder: (context, index) {
                                         final alluploads = data[index].uploads;
