@@ -9,7 +9,7 @@ class ChatMessageModel {
   ChatMessageModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     chatId = json['chatId'];
-    participants = json['participants'].cast<String>();
+    participants = List<String>.from(json['participants']);
     if (json['messages'] != null) {
       messages = <Messages>[];
       json['messages'].forEach((v) {
@@ -36,7 +36,7 @@ class Messages {
   String? messageContent;
   String? recieverId;
   List<String>? fileName;
-  List<String>? file;
+  List<dynamic>? file;
   String? timeStamp;
   String? type;
   CallDetails? callDetails;
@@ -57,8 +57,9 @@ class Messages {
     senderId = json['senderId'];
     messageContent = json['messageContent'];
     recieverId = json['recieverId'];
-    fileName = json['fileName'].cast<String>();
-    file = json['file'].cast<String>();
+    fileName =
+        json['fileName'] != null ? List<String>.from(json['fileName']) : null;
+    file = json['file'] != null ? List<dynamic>.from(json['file']) : null;
     timeStamp = json['timeStamp'];
     type = json['type'];
     callDetails = json['callDetails'] != null

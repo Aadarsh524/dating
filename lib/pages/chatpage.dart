@@ -255,8 +255,8 @@ class _ChatPageState extends State<ChatPage> {
                                                           chatID: conversation
                                                               .chatId!,
                                                           recieverId:
-                                                              chatRoomModel
-                                                                  .uid!,
+                                                              conversation
+                                                                  .endUserId!,
                                                         )));
                                           },
                                           child: Column(

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
+import 'package:dating/datamodel/interaction/user_match_model.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
@@ -38,6 +40,8 @@ class _LikePageState extends State<LikePage> {
     super.initState();
     Provider.of<UserInteractionProvider>(context, listen: false)
         .getUserInteraction(user!.uid);
+    Provider.of<UserInteractionProvider>(context, listen: false)
+        .getUserMatches(user!.uid);
   }
 
   @override
@@ -134,19 +138,28 @@ class _LikePageState extends State<LikePage> {
             ),
           ),
           const SizedBox(height: 20),
-          // List of liked users based on tab selection
           Expanded(
             child: Consumer<UserInteractionProvider>(
               builder: (context, provider, _) {
-                switch (_selectedIndex) {
-                  case 0:
-                    return likedMeList(provider);
-                  case 1:
-                    return myLikesList(provider);
-                  case 2:
-                    return mutualLikesList(provider);
-                  default:
-                    return Container();
+                bool isLoading = provider.isInteractionLoading;
+                List<UserMatchesModel>? userMatchModel =
+                    provider.getUserMatchModel;
+
+                if (isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else {
+                  switch (_selectedIndex) {
+                    case 0:
+                      return likedMeList(provider);
+                    case 1:
+                      return myLikesList(provider);
+                    case 2:
+                      return userMatchModel != null
+                          ? mutualLikesList(userMatchModel)
+                          : const Center(child: Text('No data available'));
+                    default:
+                      return Container();
+                  }
                 }
               },
             ),
@@ -160,10 +173,6 @@ class _LikePageState extends State<LikePage> {
   Widget likedMeList(UserInteractionProvider provider) {
     List<LikedByUsers>? likedMeUsers =
         provider.userInteractionModel?.likedByUsers;
-
-    if (provider.isInteractionLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
 
     if (likedMeUsers == null || likedMeUsers.isEmpty) {
       return const Center(child: Text('No users have liked you yet.'));
@@ -189,7 +198,9 @@ class _LikePageState extends State<LikePage> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 image: DecorationImage(
-                  image: MemoryImage(base64ToImage(user.userDetail!.image!)),
+                  image: user.userDetail!.image!.isNotEmpty
+                      ? MemoryImage(base64ToImage(user.userDetail!.image!))
+                      : MemoryImage(base64ToImage(defaultBase64Avatar)),
                   fit: BoxFit
                       .cover, // Adjust how the image should fit inside the container
                 ),
@@ -261,7 +272,7 @@ class _LikePageState extends State<LikePage> {
                             ),
                           ),
                           Text(
-                            'Sent: 13 hours ago', // Assuming this is static text; adjust if needed
+                            'Sent: ${user.likedDate} ', // Assuming this is static text; adjust if needed
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
@@ -284,10 +295,6 @@ class _LikePageState extends State<LikePage> {
 
   Widget myLikesList(UserInteractionProvider provider) {
     List<LikedUsers>? myLikesUsers = provider.userInteractionModel?.likedUsers;
-
-    if (provider.isInteractionLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
 
     if (myLikesUsers == null || myLikesUsers.isEmpty) {
       return const Center(child: Text('You have not liked anyone yet.'));
@@ -313,7 +320,9 @@ class _LikePageState extends State<LikePage> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 image: DecorationImage(
-                  image: MemoryImage(base64ToImage(user.userDetail!.image!)),
+                  image: user.userDetail!.image!.isNotEmpty
+                      ? MemoryImage(base64ToImage(user.userDetail!.image!))
+                      : MemoryImage(base64ToImage(defaultBase64Avatar)),
                   fit: BoxFit
                       .cover, // Adjust how the image should fit inside the container
                 ),
@@ -385,7 +394,7 @@ class _LikePageState extends State<LikePage> {
                             ),
                           ),
                           Text(
-                            'Sent: 13 hours ago', // Assuming this is static text; adjust if needed
+                            'Sent: ${user.likedDate} ', // Assuming this is static text; adjust if needed
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
@@ -407,18 +416,10 @@ class _LikePageState extends State<LikePage> {
   }
 
   // Widget for displaying users who have mutual likes with the current user
-  Widget mutualLikesList(UserInteractionProvider provider) {
-    List<MutualLikes>? mutualLikesUsers =
-        provider.userInteractionModel?.mutualLikes;
-
-    if (provider.isInteractionLoading) {
-      return const Center(child: CircularProgressIndicator());
+  Widget mutualLikesList(List<UserMatchesModel> userMatchesModel) {
+    if (userMatchesModel.isEmpty) {
+      return const Center(child: Text('You have not liked anyone yet.'));
     }
-
-    if (mutualLikesUsers == null || mutualLikesUsers.isEmpty) {
-      return const Center(child: Text('You have no mutual likes yet.'));
-    }
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -427,19 +428,21 @@ class _LikePageState extends State<LikePage> {
         child: GridView.builder(
           clipBehavior: Clip.none,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Number of columns in the grid
-            crossAxisSpacing: 15, // Horizontal spacing between items
-            mainAxisSpacing: 15, // Vertical spacing between items
+            crossAxisCount: 2,
+            crossAxisSpacing: 15,
+            mainAxisSpacing: 15,
           ),
-          itemCount: mutualLikesUsers.length,
+          itemCount: userMatchesModel.length,
           itemBuilder: (context, index) {
-            MutualLikes user = mutualLikesUsers[index];
+            UserMatchesModel user = userMatchesModel[index];
             return Container(
               height: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 image: DecorationImage(
-                  image: MemoryImage(base64ToImage(user.userDetail!.image!)),
+                  image: user.userDetail!.image!.isNotEmpty
+                      ? MemoryImage(base64ToImage(user.userDetail!.image!))
+                      : MemoryImage(base64ToImage(defaultBase64Avatar)),
                   fit: BoxFit
                       .cover, // Adjust how the image should fit inside the container
                 ),
@@ -451,17 +454,14 @@ class _LikePageState extends State<LikePage> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black
-                          .withOpacity(0), // Transparent black at the top
-                      Colors.black
-                          .withOpacity(0.75), // Solid black at the bottom
+                      Colors.black.withOpacity(0),
+                      Colors.black.withOpacity(0.75),
                     ],
                   ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // like and chat
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5),
@@ -474,14 +474,12 @@ class _LikePageState extends State<LikePage> {
                         ],
                       ),
                     ),
-                    // name and address
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // name
                           Row(
                             children: [
                               Text(
@@ -493,14 +491,12 @@ class _LikePageState extends State<LikePage> {
                                   height: 0,
                                 ),
                               ),
-                              // gender
                               const Icon(
-                                "male" == 'male' ? Icons.male : Icons.female,
+                                Icons.male,
                                 color: Colors.white,
                               ),
                             ],
                           ),
-                          // address
                           Text(
                             user.userDetail!.address!,
                             style: GoogleFonts.poppins(
@@ -511,7 +507,7 @@ class _LikePageState extends State<LikePage> {
                             ),
                           ),
                           Text(
-                            'Sent: 13 hours ago', // Assuming this is static text; adjust if needed
+                            'Sent: ${user.likedDate} ',
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
@@ -637,7 +633,7 @@ class _LikePageState extends State<LikePage> {
                           ),
 
                           Text(
-                            'Sent: 19 hour ago',
+                            'Sent: ${user.likedDate} ',
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
