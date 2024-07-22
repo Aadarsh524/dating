@@ -18,10 +18,12 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class ChatScreemMobile extends StatefulWidget {
   final String chatID;
   final EndUserDetails chatRoomModel;
   final String recieverId;
+  User? user = FirebaseAuth.instance.currentUser;
 
   ChatScreemMobile(
       {Key? key,
@@ -52,7 +54,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
 
     if (!_isNewChat) {
       final chatMessageProvider = context.read<ChatMessageProvider>();
-      chatMessageProvider.getMessage(widget.chatID, 1);
+      chatMessageProvider.getMessage(widget.chatID, 1, user!.uid);
     }
   }
 

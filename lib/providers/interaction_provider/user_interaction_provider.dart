@@ -1,4 +1,5 @@
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
+import 'package:dating/datamodel/interaction/user_match_model.dart';
 import 'package:dating/platform/platform_mobile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,15 @@ import 'package:flutter/material.dart';
 
 class UserInteractionProvider extends ChangeNotifier {
   UserInteractionModel? userInteractionModel;
+
+  List<UserMatchesModel>? userMatchesModel;
+
+  void setUserMatchesProvider(List<UserMatchesModel> model) {
+    userMatchesModel = model;
+    notifyListeners();
+  }
+
+  List<UserMatchesModel>? get getUserMatchModel => userMatchesModel;
 
   bool _isInteractionLoading = false;
 
@@ -58,6 +68,39 @@ class UserInteractionProvider extends ChangeNotifier {
         setUserInteractionProvider(userInteractionModel);
         notifyListeners();
         return userInteractionModel;
+      } else {
+        throw Exception(
+            'Failed to load user interaction: ${response.statusCode}');
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
+    } finally {
+      setInteractionLoading(false);
+    }
+  }
+
+  Future<List<UserMatchesModel>?> getUserMatches(String userId) async {
+    setInteractionLoading(true);
+    try {
+      String api = getApiEndpoint();
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final uri = Uri.parse("$api/UserMatch/$userId&page=1");
+      final response = await http.get(uri, headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        final userMatchesList =
+            UserMatchesResponseModel.fromJson(json.decode(response.body));
+        setUserMatchesProvider(userMatchesList.userMatches!);
+        notifyListeners();
+        return userMatchesList.userMatches;
       } else {
         throw Exception(
             'Failed to load user interaction: ${response.statusCode}');
