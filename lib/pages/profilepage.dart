@@ -269,16 +269,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         Row(
                           children: [
-                            const Icon(
-                              Icons.circle,
-                              color: Colors.green,
-                              size: 10,
-                            ),
+                            widget.dashboardresponsemodel.userStatus == 'active'
+                                ? const Icon(Icons.circle,
+                                    size: 8, color: Colors.green)
+                                : const Icon(Icons.circle,
+                                    size: 8, color: AppColors.secondaryColor),
                             const SizedBox(
                               width: 4,
                             ),
                             Text(
-                              'Online',
+                              '${widget.dashboardresponsemodel.userStatus}',
                               style: AppTextStyles().secondaryStyle,
                             )
                           ],
@@ -525,10 +525,6 @@ class _ProfilePageState extends State<ProfilePage> {
     List<Uploads> reversedUploads = alluploads!.reversed.toList();
 
     List<String> photoAssetPaths = [
-      AppImages.profile, // Main photo
-      AppImages.loginimage,
-      AppImages.profile,
-      AppImages.profile,
       // Small photo 3
     ];
 
@@ -871,10 +867,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                       intensity: 0.75,
                                     ),
                                     child: Center(
-                                      child: Image.asset(
-                                        photoAssetPaths[_selectedPhotoIndex],
-                                        fit: BoxFit.fill,
-                                      ),
+                                      child: ListView.builder(
+                                          itemCount: 1,
+                                          itemBuilder: (context, index) {
+                                            final upload =
+                                                reversedUploads[index];
+                                            return Image.memory(
+                                              base64ToImage(upload
+                                                  .file![_selectedPhotoIndex]),
+                                              fit: BoxFit.fill,
+                                            );
+                                          }),
                                     ),
                                   ),
                                 ),
@@ -898,6 +901,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ),
                                       itemCount: reversedUploads.length,
                                       itemBuilder: (context, index) {
+                                        final upload = reversedUploads[index];
                                         return GestureDetector(
                                           onTap: () => _selectPhoto(index + 1),
                                           child: Container(
@@ -911,8 +915,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                                         index + 1
                                                     ? 1.0
                                                     : 0.5,
-                                                child: Image.asset(
-                                                  photoAssetPaths[index + 1],
+                                                child: Image.memory(
+                                                  base64ToImage(
+                                                      upload.file![index + 1]),
                                                   width: 500,
                                                   height: 300,
                                                   fit: BoxFit.cover,
@@ -1056,16 +1061,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
                               Row(
                                 children: [
-                                  const Icon(
-                                    Icons.circle,
-                                    color: Colors.green,
-                                    size: 10,
-                                  ),
+                                  widget.dashboardresponsemodel.userStatus ==
+                                          'active'
+                                      ? const Icon(Icons.circle,
+                                          size: 8, color: Colors.green)
+                                      : const Icon(Icons.circle,
+                                          size: 8,
+                                          color: AppColors.secondaryColor),
                                   const SizedBox(
                                     width: 4,
                                   ),
                                   Text(
-                                    'Online',
+                                    '${widget.dashboardresponsemodel.userStatus}',
                                     style: AppTextStyles().secondaryStyle,
                                   )
                                 ],

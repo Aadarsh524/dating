@@ -266,336 +266,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           const SizedBox(
             height: 10,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // profile
-                Row(
-                  children: [
-                    GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const MyProfilePage()));
-                        },
-                        child: const profileButton()),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    Text(
-                      'Dating App',
-                      style: GoogleFonts.poppins(
-                        color: AppColors.black,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-
-                // search icon
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (_isSearchFieldVisible)
-                      Container(
-                        width: 300,
-                        margin: const EdgeInsets.only(right: 10.0),
-                        child: Neumorphic(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Search',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: Colors.blue),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: Colors.blue),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    ButtonWithLabel(
-                      text: null,
-                      onPressed: () {
-                        _toggleSearchField();
-                      },
-                      icon: const Icon(
-                        Icons.search,
-                      ),
-                      labelText: null,
-                    ),
-
-                    // settings icon
-
-                    ButtonWithLabel(
-                      text: null,
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => const SettingPage()));
-                      },
-                      icon: const Icon(
-                        Icons.settings,
-                      ),
-                      labelText: null,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
           const SizedBox(
             height: 40,
           ),
-
-          // icons
-          // Container(
-          //   height: 90,
-          //   decoration: BoxDecoration(
-          //     color: AppColors.backgroundColor,
-          //     boxShadow: [
-          //       BoxShadow(
-          //         color: Colors.grey.withOpacity(0.25),
-          //         // spreadRadius: 5,
-          //         blurRadius: 20,
-          //         offset: Offset(0, 25), // horizontal and vertical offset
-          //       ),
-          //     ],
-          //   ),
-          //   child: Padding(
-          //     padding: EdgeInsets.symmetric(horizontal: 20),
-          //     child: ListView(
-          //       // physics: NeverScrollableScrollPhysics(),
-          //       scrollDirection: Axis.horizontal,
-          //       children: [
-          //         // matches
-          //         Row(
-          //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //           children: [
-          //             Row(
-          //               children: [
-          //                 ButtonWithLabel(
-          //                   text: null,
-          //                   labelText: 'Matches',
-          //                   onPressed: () {},
-          //                   icon: Icon(Icons.people),
-          //                 ),
-          //                 SizedBox(
-          //                   width: 15,
-          //                 ),
-          //                 // messages
-          //                 ButtonWithLabel(
-          //                   text: null,
-          //                   labelText: 'Messages',
-          //                   onPressed: () {
-          //                     Navigator.push(
-          //                         context,
-          //                         CupertinoPageRoute(
-          //                             builder: (context) => ChatPage()));
-          //                   },
-          //                   icon: Icon(Icons.messenger_outline),
-          //                 ),
-
-          //                 SizedBox(
-          //                   width: 15,
-          //                 ),
-          //                 // popular
-          //                 ButtonWithLabel(
-          //                   text: null,
-          //                   labelText: 'Popular',
-          //                   onPressed: () {},
-          //                   icon: Icon(Icons.star),
-          //                 ),
-          //                 SizedBox(
-          //                   width: 15,
-          //                 ),
-          //                 // photos
-          //                 ButtonWithLabel(
-          //                   text: null,
-          //                   labelText: 'Photos',
-          //                   onPressed: () {},
-          //                   icon: Icon(Icons.photo_library_sharp),
-          //                 ),
-
-          //                 SizedBox(
-          //                   width: 15,
-          //                 ),
-          //                 // add friemd
-          //                 ButtonWithLabel(
-          //                   text: null,
-          //                   labelText: 'Add Friend',
-          //                   onPressed: () {},
-          //                   icon: Icon(Icons.add),
-          //                 ),
-
-          //                 SizedBox(
-          //                   width: 15,
-          //                 ),
-          //                 // online
-          //                 ButtonWithLabel(
-          //                   text: null,
-          //                   labelText: 'Online',
-          //                   onPressed: () {},
-          //                   icon: Icon(
-          //                     Icons.circle_outlined,
-          //                     color: Colors.green,
-          //                   ),
-          //                 ),
-          //               ],
-          //             ),
-
-          //             SizedBox(
-          //               width: 100,
-          //             ),
-
-          //             // age seeking
-
-          //             Row(
-          //               children: [
-          //                 // seeking
-
-          //                 Neumorphic(
-          //                   padding: EdgeInsets.symmetric(
-          //                       horizontal: 20, vertical: 2),
-          //                   child: DropdownButton<String>(
-          //                     underline: Container(),
-          //                     style: AppTextStyles().secondaryStyle,
-          //                     value: seeking,
-          //                     icon:
-          //                         Icon(Icons.arrow_drop_down), // Dropdown icon
-          //                     onChanged: (String? newValue) {
-          //                       setState(() {
-          //                         seeking = newValue!;
-          //                       });
-          //                     },
-          //                     items: <String>[
-          //                       'SEEKING',
-          //                       'English',
-          //                       'Spanish',
-          //                       'French',
-          //                       'German'
-          //                     ] // Language options
-          //                         .map<DropdownMenuItem<String>>(
-          //                             (String value) {
-          //                       return DropdownMenuItem<String>(
-          //                         value: value,
-          //                         child: Text(
-          //                           value,
-          //                           style: AppTextStyles().secondaryStyle,
-          //                         ),
-          //                       );
-          //                     }).toList(),
-          //                   ),
-          //                 ),
-          //                 SizedBox(
-          //                   width: 50,
-          //                 ),
-
-          //                 // country
-
-          //                 Neumorphic(
-          //                   padding: EdgeInsets.symmetric(
-          //                       horizontal: 20, vertical: 2),
-          //                   child: DropdownButton<String>(
-          //                     underline: Container(),
-          //                     style: AppTextStyles().secondaryStyle,
-          //                     value: country,
-          //                     icon:
-          //                         Icon(Icons.arrow_drop_down), // Dropdown icon
-          //                     onChanged: (String? newValue) {
-          //                       setState(() {
-          //                         country = newValue!;
-          //                       });
-          //                     },
-          //                     items: <String>[
-          //                       'COUNTRY',
-          //                       'English',
-          //                       'Spanish',
-          //                       'French',
-          //                       'German'
-          //                     ] // Language options
-          //                         .map<DropdownMenuItem<String>>(
-          //                             (String value) {
-          //                       return DropdownMenuItem<String>(
-          //                         value: value,
-          //                         child: Text(
-          //                           value,
-          //                           style: AppTextStyles().secondaryStyle,
-          //                         ),
-          //                       );
-          //                     }).toList(),
-          //                   ),
-          //                 ),
-          //                 SizedBox(
-          //                   width: 50,
-          //                 ),
-
-          //                 // age
-
-          //                 Neumorphic(
-          //                   padding: EdgeInsets.symmetric(
-          //                       horizontal: 20, vertical: 2),
-          //                   child: DropdownButton<String>(
-          //                     underline: Container(),
-          //                     style: AppTextStyles().secondaryStyle,
-          //                     value: age,
-          //                     icon:
-          //                         Icon(Icons.arrow_drop_down), // Dropdown icon
-          //                     onChanged: (String? newValue) {
-          //                       setState(() {
-          //                         age = newValue!;
-          //                       });
-          //                     },
-          //                     items: <String>[
-          //                       'AGE',
-          //                       'English',
-          //                       'Spanish',
-          //                       'French',
-          //                       'German'
-          //                     ] // Language options
-          //                         .map<DropdownMenuItem<String>>(
-          //                             (String value) {
-          //                       return DropdownMenuItem<String>(
-          //                         value: value,
-          //                         child: Text(
-          //                           value,
-          //                           style: AppTextStyles().secondaryStyle,
-          //                         ),
-          //                       );
-          //                     }).toList(),
-          //                   ),
-          //                 ),
-          //               ],
-          //             ),
-          //           ],
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
-
-          //
-
-          // post
-          // SizedBox(
-          //   height: 30,
-          // ),
-
           Expanded(
             child: Row(
               children: [
@@ -663,27 +336,36 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       const SizedBox(
                         height: 30,
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 100),
-                          child: GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  3, // Adjust to show 2 cards per row
-                              mainAxisSpacing: 20,
-                              crossAxisSpacing: 20,
-                              childAspectRatio: 3 / 4,
+                      Consumer<SubscriptionProvider>(
+                          builder: (context, subscription, _) {
+                        return Expanded(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 100),
+                            child: GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount:
+                                    3, // Adjust to show 2 cards per row
+                                mainAxisSpacing: 20,
+                                crossAxisSpacing: 20,
+                                childAspectRatio: 3 / 4,
+                              ),
+                              itemCount: subscriptions.length,
+                              itemBuilder: (context, index) {
+                                final subscription = subscriptions[index];
+                                return SubscriptionCard(
+                                  subscription: subscription,
+                                  onTap: () {
+                                    makePayment(
+                                        subscriptions[index].pricePerWeek);
+                                  },
+                                );
+                              },
                             ),
-                            itemCount: subscriptions.length,
-                            itemBuilder: (context, index) {
-                              final subscription = subscriptions[index];
-                              return SubscriptionCard(
-                                  subscription: subscription);
-                            },
                           ),
-                        ),
-                      ),
+                        );
+                      }),
                     ],
                   ),
                 ),
