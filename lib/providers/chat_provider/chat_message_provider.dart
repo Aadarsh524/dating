@@ -93,7 +93,7 @@ class ChatMessageProvider extends ChangeNotifier {
 
       var request = http.Request('GET', requestUrl)
         ..headers.addAll(headers)
-        ..body = json.encode(uid);
+        ..body = jsonEncode(uid);
 
       http.StreamedResponse streamedResponse = await request.send();
       http.Response response = await http.Response.fromStream(streamedResponse);
