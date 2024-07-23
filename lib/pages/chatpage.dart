@@ -320,11 +320,19 @@ class _ChatPageState extends State<ChatPage> {
                                                   const Spacer(),
                                                   Row(
                                                     children: [
-                                                      const Icon(
-                                                        Icons.circle,
-                                                        size: 8,
-                                                        color: Colors.green,
-                                                      ),
+                                                      conversation.seen!
+                                                          ? const Icon(
+                                                              Icons.circle,
+                                                              size: 8,
+                                                              color:
+                                                                  Colors.green,
+                                                            )
+                                                          : Icon(
+                                                              Icons.circle,
+                                                              size: 8,
+                                                              color: AppColors
+                                                                  .secondaryColor,
+                                                            ),
                                                       const SizedBox(width: 5),
                                                       Text(
                                                         conversation.seen!
@@ -692,345 +700,176 @@ class _ChatPageState extends State<ChatPage> {
                                 Neumorphic(
                                   child: Container(
                                     padding: const EdgeInsets.only(top: 20),
-                                    child: Column(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                          child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                // profile pic
-                                                Row(
-                                                  children: [
-                                                    Neumorphic(
-                                                      style: NeumorphicStyle(
-                                                        boxShape:
-                                                            NeumorphicBoxShape
-                                                                .roundRect(
-                                                          BorderRadius.circular(
-                                                              1000),
-                                                        ),
-                                                      ),
-                                                      child: Container(
-                                                          height: 50,
-                                                          width: 50,
-                                                          decoration:
-                                                              const BoxDecoration(
-                                                                  shape: BoxShape
-                                                                      .circle,
-                                                                  image:
-                                                                      DecorationImage(
-                                                                    image: AssetImage(
-                                                                        AppImages
-                                                                            .profile),
-                                                                    fit: BoxFit
-                                                                        .cover,
-                                                                  ))),
-                                                    ),
+                                    child: Consumer<ChatRoomProvider>(builder:
+                                        (context, chatRoomProvider, _) {
+                                      return chatRoomProvider.isChatRoomLoading
+                                          ? const ShimmerSkeleton(
+                                              count: 2, height: 100)
+                                          : Consumer<ChatRoomProvider>(
+                                              builder: (context, chatRoomP, _) {
+                                              ChatRoomModel? chatRoomModel =
+                                                  Provider.of<ChatRoomProvider>(
+                                                context,
+                                                listen: false,
+                                              ).userChatRoomModel;
 
-                                                    // profile name and address
-                                                    const SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Rehan Ritviz',
-                                                          style: AppTextStyles()
-                                                              .primaryStyle
-                                                              .copyWith(
-                                                                  fontSize: 14),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                          'Hi how are you',
-                                                          style: AppTextStyles()
-                                                              .secondaryStyle
-                                                              .copyWith(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w300,
-                                                                  color: AppColors
-                                                                      .secondaryColor),
-                                                        )
-                                                      ],
-                                                    )
-                                                  ],
-                                                ),
+                                              if (chatRoomModel == null) {
+                                                return const Center(
+                                                  child: Text("No chats"),
+                                                );
+                                              }
 
-                                                Row(
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.circle,
-                                                      size: 8,
-                                                      color: Colors.green,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(
-                                                      'online',
-                                                      style: AppTextStyles()
-                                                          .secondaryStyle
-                                                          .copyWith(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                              color: AppColors
-                                                                  .black),
-                                                    ),
-                                                  ],
-                                                )
-                                              ]),
-                                        ),
+                                              var conversations =
+                                                  chatRoomModel.conversations;
+                                              return ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount:
+                                                      conversations!.length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    var conversation =
+                                                        conversations[index];
+                                                    var endUserDetails =
+                                                        conversation
+                                                            .endUserDetails;
+                                                    if (endUserDetails?.message
+                                                                ?.messages !=
+                                                            null &&
+                                                        endUserDetails!
+                                                            .message!
+                                                            .messages!
+                                                            .isNotEmpty) {
+                                                      // Reverse the messages list to get the latest message first
 
-                                        const SizedBox(
-                                          height: 20,
-                                        ),
-                                        // image
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                                      var lastMessageContent =
+                                                          '';
 
-                                //  another chat
+                                                      for (var message
+                                                          in endUserDetails
+                                                              .message!
+                                                              .messages!) {
+                                                        if (message.senderId !=
+                                                                user!.uid &&
+                                                            message.type ==
+                                                                "Text" &&
+                                                            message.messageContent !=
+                                                                null) {
+                                                          lastMessageContent =
+                                                              message
+                                                                  .messageContent!;
+                                                          break;
+                                                        }
+                                                      }
 
-                                Neumorphic(
-                                  child: Container(
-                                    padding: const EdgeInsets.only(top: 20),
-                                    child: Column(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                          child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                // profile pic
-                                                Row(
-                                                  children: [
-                                                    Neumorphic(
-                                                      style: NeumorphicStyle(
-                                                        boxShape:
-                                                            NeumorphicBoxShape
-                                                                .roundRect(
-                                                          BorderRadius.circular(
-                                                              1000),
-                                                        ),
-                                                      ),
-                                                      child: Container(
-                                                          height: 50,
-                                                          width: 50,
-                                                          decoration:
-                                                              const BoxDecoration(
-                                                                  shape: BoxShape
-                                                                      .circle,
-                                                                  image:
-                                                                      DecorationImage(
-                                                                    image: AssetImage(
-                                                                        AppImages
-                                                                            .profile),
-                                                                    fit: BoxFit
-                                                                        .cover,
-                                                                  ))),
-                                                    ),
+                                                      return Column(
+                                                        children: [
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        20),
+                                                            child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  // profile pic
+                                                                  Row(
+                                                                    children: [
+                                                                      Neumorphic(
+                                                                        style:
+                                                                            NeumorphicStyle(
+                                                                          boxShape:
+                                                                              NeumorphicBoxShape.roundRect(
+                                                                            BorderRadius.circular(1000),
+                                                                          ),
+                                                                        ),
+                                                                        child: Container(
+                                                                            height: 50,
+                                                                            width: 50,
+                                                                            decoration: BoxDecoration(
+                                                                                shape: BoxShape.circle,
+                                                                                image: DecorationImage(
+                                                                                  image: MemoryImage(base64ToImage(endUserDetails.profileImage)),
+                                                                                  fit: BoxFit.cover,
+                                                                                ))),
+                                                                      ),
 
-                                                    // profile name and address
-                                                    const SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Rehan Ritviz',
-                                                          style: AppTextStyles()
-                                                              .primaryStyle
-                                                              .copyWith(
-                                                                  fontSize: 14),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                          'Hi how are you',
-                                                          style: AppTextStyles()
-                                                              .secondaryStyle
-                                                              .copyWith(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w300,
-                                                                  color: AppColors
-                                                                      .secondaryColor),
-                                                        )
-                                                      ],
-                                                    )
-                                                  ],
-                                                ),
+                                                                      // profile name and address
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            20,
+                                                                      ),
+                                                                      Column(
+                                                                        crossAxisAlignment:
+                                                                            CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            endUserDetails.name!,
+                                                                            style:
+                                                                                AppTextStyles().primaryStyle.copyWith(fontSize: 14),
+                                                                          ),
+                                                                          const SizedBox(
+                                                                            height:
+                                                                                5,
+                                                                          ),
+                                                                          Text(
+                                                                            lastMessageContent,
+                                                                            style: AppTextStyles().secondaryStyle.copyWith(
+                                                                                fontSize: 14,
+                                                                                fontWeight: FontWeight.w300,
+                                                                                color: AppColors.secondaryColor),
+                                                                          )
+                                                                        ],
+                                                                      )
+                                                                    ],
+                                                                  ),
 
-                                                Row(
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.circle,
-                                                      size: 8,
-                                                      color: Colors.green,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(
-                                                      'online',
-                                                      style: AppTextStyles()
-                                                          .secondaryStyle
-                                                          .copyWith(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                              color: AppColors
-                                                                  .black),
-                                                    ),
-                                                  ],
-                                                )
-                                              ]),
-                                        ),
+                                                                  Row(
+                                                                    children: [
+                                                                      conversation
+                                                                              .seen!
+                                                                          ? const Icon(
+                                                                              Icons.circle,
+                                                                              size: 8,
+                                                                              color: Colors.green,
+                                                                            )
+                                                                          : const Icon(
+                                                                              Icons.circle,
+                                                                              size: 8,
+                                                                              color: AppColors.secondaryColor),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            5,
+                                                                      ),
+                                                                      Text(
+                                                                        conversation.seen!
+                                                                            ? 'online'
+                                                                            : 'offline',
+                                                                        style: AppTextStyles().secondaryStyle.copyWith(
+                                                                            fontSize:
+                                                                                14,
+                                                                            fontWeight:
+                                                                                FontWeight.w300,
+                                                                            color: AppColors.black),
+                                                                      ),
+                                                                    ],
+                                                                  )
+                                                                ]),
+                                                          ),
 
-                                        const SizedBox(
-                                          height: 20,
-                                        ),
-                                        // image
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                // chat
-                                Neumorphic(
-                                  child: Container(
-                                    padding: const EdgeInsets.only(top: 20),
-                                    child: Column(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                          child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                // profile pic
-                                                Row(
-                                                  children: [
-                                                    Neumorphic(
-                                                      style: NeumorphicStyle(
-                                                        boxShape:
-                                                            NeumorphicBoxShape
-                                                                .roundRect(
-                                                          BorderRadius.circular(
-                                                              1000),
-                                                        ),
-                                                      ),
-                                                      child: Container(
-                                                          height: 50,
-                                                          width: 50,
-                                                          decoration:
-                                                              const BoxDecoration(
-                                                                  shape: BoxShape
-                                                                      .circle,
-                                                                  image:
-                                                                      DecorationImage(
-                                                                    image: AssetImage(
-                                                                        AppImages
-                                                                            .profile),
-                                                                    fit: BoxFit
-                                                                        .cover,
-                                                                  ))),
-                                                    ),
-
-                                                    // profile name and address
-                                                    const SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Rehan Ritviz',
-                                                          style: AppTextStyles()
-                                                              .primaryStyle
-                                                              .copyWith(
-                                                                  fontSize: 14),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                          'Hi how are you',
-                                                          style: AppTextStyles()
-                                                              .secondaryStyle
-                                                              .copyWith(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w300,
-                                                                  color: AppColors
-                                                                      .secondaryColor),
-                                                        )
-                                                      ],
-                                                    )
-                                                  ],
-                                                ),
-
-                                                Row(
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.circle,
-                                                      size: 8,
-                                                      color: Colors.green,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(
-                                                      'online',
-                                                      style: AppTextStyles()
-                                                          .secondaryStyle
-                                                          .copyWith(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                              color: AppColors
-                                                                  .black),
-                                                    ),
-                                                  ],
-                                                )
-                                              ]),
-                                        ),
-
-                                        const SizedBox(
-                                          height: 20,
-                                        ),
-                                        // image
-                                      ],
-                                    ),
+                                                          const SizedBox(
+                                                            height: 20,
+                                                          ),
+                                                          // image
+                                                        ],
+                                                      );
+                                                    }
+                                                    return null;
+                                                  });
+                                            });
+                                    }),
                                   ),
                                 ),
                               ],

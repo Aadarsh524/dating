@@ -47,8 +47,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Future<void> _pickAndUploadFile({bool isDocument = false}) async {
     try {
-      if (!await Permission.storage.request().isGranted) {
-        throw Exception('Storage permission is required to upload the file.');
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        if (!await Permission.storage.request().isGranted) {
+          throw Exception(
+              'Storage permission is required to upload the image.');
+        }
       }
 
       final result = await FilePicker.platform.pickFiles(
@@ -57,8 +60,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
       );
 
       if (result?.files.isNotEmpty ?? false) {
-        final file = File(result!.files.single.path!);
-        final base64 = base64Encode(file.readAsBytesSync());
+        final file = kIsWeb
+            ? result!.files.single.bytes
+            : File(result!.files.single.path!).readAsBytesSync();
+        final base64 = base64Encode(file!);
 
         if (isDocument) {
           await _uploadDocument(base64);
@@ -1087,6 +1092,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                     intensity: 0.75,
                                                   ),
                                                   child: NeumorphicButton(
+                                                    onPressed: () {
+                                                      pickImage();
+                                                    },
                                                     padding: EdgeInsets.zero,
                                                     child: Container(
                                                       height: 70,

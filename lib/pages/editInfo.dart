@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'dart:io';
 import 'dart:typed_data';
@@ -17,6 +18,7 @@ import 'package:dating/widgets/navbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -159,8 +161,12 @@ class _EditInfoState extends State<EditInfo> {
 
   Future<void> pickImage() async {
     try {
-      if (!await Permission.storage.request().isGranted) {
-        throw Exception('Storage permission is required to upload the image.');
+      log("pick image is tapped");
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        if (!await Permission.storage.request().isGranted) {
+          throw Exception(
+              'Storage permission is required to upload the image.');
+        }
       }
 
       final result = await FilePicker.platform.pickFiles(
@@ -169,9 +175,13 @@ class _EditInfoState extends State<EditInfo> {
       );
 
       if (result?.files.isNotEmpty ?? false) {
-        final imageFile = File(result!.files.single.path!);
-        final base64 = base64Encode(imageFile.readAsBytesSync());
+        final imageFile = kIsWeb
+            ? result!.files.single.bytes
+            : File(result!.files.single.path!).readAsBytesSync();
+        log("File picked: ${result.files.single.path}");
+        final base64 = base64Encode(imageFile!);
         _imageBytes = base64Decode(base64);
+
         await context
             .read<UserProfileProvider>()
             .updateProfileImage(base64, user!.uid);

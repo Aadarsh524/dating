@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:dating/auth/db_client.dart';
 import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/subscriptionPage.dart';
+import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -413,6 +416,8 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   Widget DesktopProfile() {
+    final authenticationProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
     return Scaffold(
       body: Column(children: [
         const SizedBox(
@@ -980,8 +985,14 @@ class _SettingPageState extends State<SettingPage> {
               ),
               child: NeumorphicButton(
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()));
+                  authenticationProvider.signOut(context);
+                  DbClient().clearAllData();
+                  Navigator.pushReplacement(
+                    // ignore: use_build_context_synchronously
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const LoginScreen()),
+                  );
                 },
                 padding: EdgeInsets.zero,
                 child: Container(

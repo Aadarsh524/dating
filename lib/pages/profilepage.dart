@@ -42,6 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String country = 'COUNTRY';
   String age = 'AGE';
   bool isProfileLiked = false;
+  List<String?> photo = [];
 
   int _selectedPhotoIndex = 0;
 
@@ -49,6 +50,26 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       _selectedPhotoIndex = index;
     });
+  }
+
+  void _loadPhoto() async {
+    await Future.delayed(Duration(seconds: 2));
+    final allUploads = widget.dashboardresponsemodel.uploads;
+    List<Uploads> reversedUploads = allUploads!.reversed.toList();
+
+    setState(() {
+      photo.clear(); // Clear existing photos if needed
+      photo.addAll(reversedUploads.map((upload) => upload.file!));
+    });
+
+    log("This is the list of photos: $photo");
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadPhoto();
   }
 
   @override
@@ -524,10 +545,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     List<Uploads> reversedUploads = alluploads!.reversed.toList();
 
-    List<String> photoAssetPaths = [
-      // Small photo 3
-    ];
-
     return Scaffold(
       body: Column(children: [
         const SizedBox(
@@ -855,8 +872,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: ListView(
                               scrollDirection: Axis.vertical,
                               children: [
-                                // profilr photos selector
-
+                                // Profile photo selector
                                 GestureDetector(
                                   onTap: () => _selectPhoto(0),
                                   child: Neumorphic(
@@ -867,26 +883,22 @@ class _ProfilePageState extends State<ProfilePage> {
                                       intensity: 0.75,
                                     ),
                                     child: Center(
-                                      child: ListView.builder(
-                                          itemCount: 1,
-                                          itemBuilder: (context, index) {
-                                            final upload =
-                                                reversedUploads[index];
-                                            return Image.memory(
-                                              base64ToImage(upload
-                                                  .file![_selectedPhotoIndex]),
-                                              fit: BoxFit.fill,
-                                            );
-                                          }),
+                                      child: photo.isEmpty
+                                          ? CircularProgressIndicator()
+                                          : Image.memory(
+                                              base64ToImage(
+                                                  photo[_selectedPhotoIndex]!),
+                                              width: 500,
+                                              height: 300,
+                                              fit: BoxFit.cover,
+                                            ),
                                     ),
                                   ),
                                 ),
 
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                //
+                                const SizedBox(height: 20),
 
+                                // Grid of photos
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: SizedBox(
@@ -899,11 +911,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                         crossAxisSpacing: 20.0,
                                         mainAxisSpacing: 8.0,
                                       ),
-                                      itemCount: reversedUploads.length,
+                                      itemCount: photo.length,
                                       itemBuilder: (context, index) {
-                                        final upload = reversedUploads[index];
+                                        
+
                                         return GestureDetector(
-                                          onTap: () => _selectPhoto(index + 1),
+                                          onTap: () {
+                                            _selectPhoto(index);
+
+                                            log(_selectedPhotoIndex.toString());
+                                          },
                                           child: Container(
                                             decoration: BoxDecoration(
                                               borderRadius:
@@ -911,13 +928,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                             ),
                                             child: Center(
                                               child: Opacity(
-                                                opacity: _selectedPhotoIndex ==
-                                                        index + 1
-                                                    ? 1.0
-                                                    : 0.5,
+                                                opacity:
+                                                    _selectedPhotoIndex == index
+                                                        ? 1
+                                                        : 0.5,
                                                 child: Image.memory(
-                                                  base64ToImage(
-                                                      upload.file![index + 1]),
+                                                  base64ToImage(photo[index]!),
                                                   width: 500,
                                                   height: 300,
                                                   fit: BoxFit.cover,

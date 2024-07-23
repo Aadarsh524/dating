@@ -25,7 +25,10 @@ class ShimmerSkeleton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
-          )
+          ),
+        const SizedBox(
+          height: 40,
+        )
       ],
     );
   }
