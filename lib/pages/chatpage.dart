@@ -6,7 +6,9 @@ import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/helpers/signaling.dart';
+import 'package:dating/pages/call_screen.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
+import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
@@ -1016,8 +1018,15 @@ class _ChatPageState extends State<ChatPage> {
                   //                                 const SizedBox(width: 8),
                   //                                 GestureDetector(
                   //                                   onTap: () {
-                  //                                     _signaling.createRoom(
-                  //                                         _remoteRenderer);
+                  //                                     Navigator.pushReplacement(
+                  //                                         context,
+                  //                                         MaterialPageRoute(
+                  //                                             builder:
+                  //                                                 (context) =>
+                  //                                                     RingScreen(
+                  //                                                       roomId:
+                  //                                                           '123',
+                  //                                                     )));
                   //                                   },
                   //                                   child: const Icon(
                   //                                       Icons.call_outlined),
