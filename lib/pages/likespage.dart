@@ -528,10 +528,9 @@ class _LikePageState extends State<LikePage> {
     );
   }
 
-  Widget mutualLikesListDesktop(UserInteractionProvider provider) {
-    List<MutualLikes>? mutualLikesUsers =
-        provider.userInteractionModel?.mutualLikes;
-    if (mutualLikesUsers == null || mutualLikesUsers.isEmpty) {
+  Widget mutualLikesListDesktop(List<UserMatchesModel> userMatchesModel) {
+    List<UserMatchesModel>? mutualLikesUsers = userMatchesModel;
+    if (mutualLikesUsers.isEmpty) {
       return const Center(child: Text('No users have liked you yet.'));
     }
     return Padding(
@@ -549,7 +548,7 @@ class _LikePageState extends State<LikePage> {
           itemCount:
               mutualLikesUsers.length, // Total number of containers in the grid
           itemBuilder: (context, index) {
-            MutualLikes user = mutualLikesUsers[index];
+            UserMatchesModel user = mutualLikesUsers[index];
             return Container(
               height: 250,
               decoration: BoxDecoration(
@@ -1350,6 +1349,8 @@ class _LikePageState extends State<LikePage> {
                           Expanded(
                             child: Consumer<UserInteractionProvider>(
                                 builder: (context, provider, _) {
+                              List<UserMatchesModel>? userMatchModel =
+                                  provider.getUserMatchModel;
                               return ListView(
                                 scrollDirection: Axis.vertical,
                                 children: [
@@ -1360,7 +1361,7 @@ class _LikePageState extends State<LikePage> {
                                     children: [
                                       likedMeListDesktop(provider),
                                       myLikesListDesktop(provider),
-                                      mutualLikesListDesktop(provider),
+                                      mutualLikesListDesktop(userMatchModel!),
                                     ],
                                   ),
                                   const SizedBox(
