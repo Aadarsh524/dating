@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -45,22 +44,39 @@ class _EditInfoState extends State<EditInfo> {
 
   // for address
   final TextEditingController _controllerAddress = TextEditingController();
-  String _textAddress = 'Your Address';
+  String _textAddress = '';
   bool _isEditingAddress = false;
 
-// for address
+  // for bio
   final TextEditingController _controllerBio = TextEditingController();
   String _textBio = 'Write about yourself';
   bool _isEditingBio = false;
 
-// for address
+  // for interests
   final TextEditingController _controllerInterests = TextEditingController();
   String _textInterests = 'list your hobbies';
   bool _isEditingInterests = false;
 
-  String seeking = 'SEEKING';
-  String country = 'COUNTRY';
+  // for age
+  final TextEditingController _controllerAge = TextEditingController();
   String age = 'AGE';
+  bool _isEditingAge = false;
+
+  // for country
+  final TextEditingController _controllerCountry = TextEditingController();
+  String country = 'COUNTRY';
+  bool _isEditingCountry = false;
+
+  // for seeking from age
+  final TextEditingController _controllerSeekingFromAge =
+      TextEditingController();
+  String seekingFromAge = 'FROM AGE';
+  bool _isEditingSeekingFromAge = false;
+
+  // for seeking to age
+  final TextEditingController _controllerSeekingToAge = TextEditingController();
+  String seekingToAge = 'TO AGE';
+  bool _isEditingSeekingToAge = false;
 
   Uint8List? _imageBytes;
   List<Uploads> allUploads = [];
@@ -90,6 +106,12 @@ class _EditInfoState extends State<EditInfo> {
     setField(userProfile?.address, "Enter Address", _controllerAddress);
     setField(userProfile?.bio, "Enter Bio", _controllerBio);
     setField(userProfile?.interests, "Enter Interests", _controllerInterests);
+    setField(userProfile?.age, "Enter Age", _controllerAge);
+    setField(userProfile?.country, "Enter Country", _controllerCountry);
+    setField(userProfile?.seeking!.fromAge, "Enter Seeking From Age",
+        _controllerSeekingFromAge);
+    setField(userProfile?.seeking!.toAge, "Enter Seeking To Age",
+        _controllerSeekingToAge);
 
     _imageBytes = base64ToImage(
         (userProfile?.image != null && userProfile!.image!.isNotEmpty)
@@ -100,15 +122,22 @@ class _EditInfoState extends State<EditInfo> {
     _textAddress = _controllerAddress.text;
     _textBio = _controllerBio.text;
     _textInterests = _controllerInterests.text;
+    age = _controllerAge.text;
+    country = _controllerCountry.text;
+    seekingFromAge = _controllerSeekingFromAge.text;
+    seekingToAge = _controllerSeekingToAge.text;
   }
 
   @override
   void dispose() {
     _controllerName.dispose();
-    _controllerBio.dispose();
     _controllerAddress.dispose();
     _controllerBio.dispose();
-    // Dispose of other controllers
+    _controllerInterests.dispose();
+    _controllerAge.dispose();
+    _controllerCountry.dispose();
+    _controllerSeekingFromAge.dispose();
+    _controllerSeekingToAge.dispose();
     super.dispose();
   }
 
@@ -126,36 +155,52 @@ class _EditInfoState extends State<EditInfo> {
       interests: _controllerInterests.text,
       gender: currentProfile.gender,
       image: currentProfile.image,
-      age: currentProfile.age,
+      age: _controllerAge.text,
+      country: _controllerCountry.text,
       userStatus: currentProfile.userStatus,
       userSubscription: currentProfile.userSubscription,
       createdTimestamp: currentProfile.createdTimestamp,
       isVerified: currentProfile.isVerified,
       documentStatus: currentProfile.documentStatus,
-      seeking: currentProfile.seeking,
+      seeking: Seeking(
+        fromAge: _controllerSeekingFromAge.text,
+        gender: currentProfile.seeking!.gender,
+        toAge: _controllerSeekingToAge.text,
+        // Make sure to include other existing seeking fields
+      ),
       uploads: currentProfile.uploads,
     );
     await provider.updateUserProfile(newUser);
     await DbClient().setData(dbKey: "userName", value: newUser.name ?? '');
 
     setState(() {
-      _isEditingName =
-          _isEditingAddress = _isEditingBio = _isEditingInterests = false;
+      _isEditingName = _isEditingAddress = _isEditingBio = _isEditingInterests =
+          _isEditingAge = _isEditingCountry =
+              _isEditingSeekingFromAge = _isEditingSeekingToAge = false;
       _textName = _controllerName.text;
       _textAddress = _controllerAddress.text;
       _textBio = _controllerBio.text;
       _textInterests = _controllerInterests.text;
+      age = _controllerAge.text;
+      country = _controllerCountry.text;
+      seekingFromAge = _controllerSeekingFromAge.text;
+      seekingToAge = _controllerSeekingToAge.text;
     });
   }
 
   void _cancelChanges() {
     setState(() {
-      _isEditingName =
-          _isEditingAddress = _isEditingBio = _isEditingInterests = false;
+      _isEditingName = _isEditingAddress = _isEditingBio = _isEditingInterests =
+          _isEditingAge = _isEditingCountry =
+              _isEditingSeekingFromAge = _isEditingSeekingToAge = false;
       _controllerName.text = _textName;
       _controllerAddress.text = _textAddress;
       _controllerBio.text = _textBio;
       _controllerInterests.text = _textInterests;
+      _controllerAge.text = age;
+      _controllerCountry.text = country;
+      _controllerSeekingFromAge.text = seekingFromAge;
+      _controllerSeekingToAge.text = seekingToAge;
     });
   }
 
@@ -195,6 +240,67 @@ class _EditInfoState extends State<EditInfo> {
 
   Uint8List base64ToImage(String? base64String) => base64Decode(base64String!);
 
+  Widget editableField(
+      String label,
+      String value,
+      TextEditingController controller,
+      bool isEditing,
+      Function(bool) setEditing) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles().secondaryStyle.copyWith(
+                  color: AppColors.black,
+                ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: isEditing
+                    ? TextField(
+                        decoration: const InputDecoration(
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: AppTextStyles().secondaryStyle,
+                        controller: controller,
+                        autofocus: true,
+                      )
+                    : Text(
+                        value,
+                        style: AppTextStyles().secondaryStyle,
+                      ),
+              ),
+              IconButton(
+                icon: Icon(
+                  isEditing ? Icons.save : Icons.edit,
+                  size: 20,
+                  color: AppColors.secondaryColor,
+                ),
+                onPressed: () {
+                  setEditing(!isEditing);
+                  if (!isEditing) {
+                    controller.text = value;
+                  } else {
+                    // Save the changes
+                    // You might want to add validation here
+                    value = controller.text;
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -202,10 +308,8 @@ class _EditInfoState extends State<EditInfo> {
         body: LayoutBuilder(
           builder: (context, constraints) {
             if (constraints.maxWidth < 600) {
-              // For smaller screen sizes (e.g., mobile)
               return MobileProfile();
             } else {
-              // For larger screen sizes (e.g., tablet or desktop)
               return DesktopProfile();
             }
           },
@@ -529,9 +633,30 @@ class _EditInfoState extends State<EditInfo> {
             ),
 
             // mored details
-            const SizedBox(
-              height: 25,
-            ),
+
+            editableField('Age', age, _controllerAge, _isEditingAge,
+                (value) => setState(() => _isEditingAge = value)),
+            const SizedBox(height: 10),
+            editableField(
+                'Country',
+                country,
+                _controllerCountry,
+                _isEditingCountry,
+                (value) => setState(() => _isEditingCountry = value)),
+            const SizedBox(height: 10),
+            editableField(
+                'Seeking From Age',
+                seekingFromAge,
+                _controllerSeekingFromAge,
+                _isEditingSeekingFromAge,
+                (value) => setState(() => _isEditingSeekingFromAge = value)),
+            const SizedBox(height: 10),
+            editableField(
+                'Seeking To Age',
+                seekingToAge,
+                _controllerSeekingToAge,
+                _isEditingSeekingToAge,
+                (value) => setState(() => _isEditingSeekingToAge = value)),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -710,8 +835,7 @@ class _EditInfoState extends State<EditInfo> {
             builder: (context, userProfileProvider, _) {
               return userProfileProvider.isProfileLoading
                   ? Container(
-                      color: Colors.black.withOpacity(
-                          0.5), // Add background color with opacity
+                      color: Colors.black.withOpacity(0.5),
                       child: const Center(
                         child: CircularProgressIndicator(),
                       ),
@@ -730,7 +854,6 @@ class _EditInfoState extends State<EditInfo> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // cancel
             Neumorphic(
               style: NeumorphicStyle(
                 boxShape: NeumorphicBoxShape.roundRect(
@@ -740,9 +863,7 @@ class _EditInfoState extends State<EditInfo> {
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
-                onPressed: () {
-                  _cancelChanges();
-                },
+                onPressed: _cancelChanges,
                 padding: EdgeInsets.zero,
                 child: SizedBox(
                   height: 50,
@@ -758,8 +879,6 @@ class _EditInfoState extends State<EditInfo> {
                 ),
               ),
             ),
-
-            // save
             Neumorphic(
               style: NeumorphicStyle(
                 boxShape: NeumorphicBoxShape.roundRect(
@@ -769,9 +888,7 @@ class _EditInfoState extends State<EditInfo> {
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
-                onPressed: () {
-                  _saveChanges();
-                },
+                onPressed: _saveChanges,
                 padding: EdgeInsets.zero,
                 child: Container(
                   height: 50,
@@ -959,39 +1076,39 @@ class _EditInfoState extends State<EditInfo> {
                           children: [
                             // seeking
 
-                            Neumorphic(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 2),
-                              child: DropdownButton<String>(
-                                underline: Container(),
-                                style: AppTextStyles().secondaryStyle,
-                                value: seeking,
-                                icon: const Icon(
-                                    Icons.arrow_drop_down), // Dropdown icon
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    seeking = newValue!;
-                                  });
-                                },
-                                items: <String>[
-                                  'SEEKING',
-                                  'English',
-                                  'Spanish',
-                                  'French',
-                                  'German'
-                                ] // Language options
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      style: AppTextStyles().secondaryStyle,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
+                            // Neumorphic(
+                            //   padding: const EdgeInsets.symmetric(
+                            //       horizontal: 20, vertical: 2),
+                            //   child: DropdownButton<String>(
+                            //     underline: Container(),
+                            //     style: AppTextStyles().secondaryStyle,
+                            //     value: seeking,
+                            //     icon: const Icon(
+                            //         Icons.arrow_drop_down), // Dropdown icon
+                            //     onChanged: (String? newValue) {
+                            //       setState(() {
+                            //         seeking = newValue!;
+                            //       });
+                            //     },
+                            //     items: <String>[
+                            //       'SEEKING',
+                            //       'English',
+                            //       'Spanish',
+                            //       'French',
+                            //       'German'
+                            //     ] // Language options
+                            //         .map<DropdownMenuItem<String>>(
+                            //             (String value) {
+                            //       return DropdownMenuItem<String>(
+                            //         value: value,
+                            //         child: Text(
+                            //           value,
+                            //           style: AppTextStyles().secondaryStyle,
+                            //         ),
+                            //       );
+                            //     }).toList(),
+                            //   ),
+                            // ),
                             const SizedBox(
                               width: 50,
                             ),
