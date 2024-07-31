@@ -31,6 +31,8 @@ class MiniProfile {
   String? name;
   String? address;
   String? age;
+  String? country;
+  String? countryRiskCode;
   String? gender;
   Upload? upload;
 
@@ -40,6 +42,8 @@ class MiniProfile {
       this.name,
       this.address,
       this.age,
+      this.country,
+      this.countryRiskCode,
       this.gender,
       this.upload});
 
@@ -49,6 +53,8 @@ class MiniProfile {
     name = json['name'];
     address = json['address'];
     age = json['age'];
+    country = json['country'];
+    countryRiskCode = json['countryRiskCode'];
     gender = json['gender'];
     upload =
         json['upload'] != null ? new Upload.fromJson(json['upload']) : null;
@@ -61,6 +67,8 @@ class MiniProfile {
     data['name'] = this.name;
     data['address'] = this.address;
     data['age'] = this.age;
+    data['country'] = this.country;
+    data['countryRiskCode'] = this.countryRiskCode;
     data['gender'] = this.gender;
     if (this.upload != null) {
       data['upload'] = this.upload!.toJson();
