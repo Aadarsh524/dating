@@ -30,18 +30,30 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
 
+  String _selectedCountry = "United States";
+  final List<String> countries = [
+    'United States',
+    'Canada',
+    'India',
+    'Australia',
+    'United Kingdom'
+  ];
+  String _seekingAgeFrom = '18';
+  String _seekingAgeTo = '25';
   Future<void> _register(BuildContext context) async {
     final authenticationProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
 
     User? user = await authenticationProvider.registerWithEmailAndPassword(
-      context,
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-      name: _nameController.text.trim(),
-      gender: selectedGender ?? '',
-      age: _selectedAge,
-    );
+        context,
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        name: _nameController.text.trim(),
+        gender: selectedGender ?? '',
+        age: _selectedAge,
+        seekingAgeFrom: _seekingAgeFrom,
+        seekingAgeTo: _seekingAgeTo,
+        country: _selectedCountry);
 
     if (user != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -440,59 +452,110 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
                         // age picker
                         const Spacer(),
 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
+                            // Age Dropdown
                             Padding(
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Age',
-                                    style: AppTextStyles().authLabelStyle,
-                                  )
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Age',
+                                          style: AppTextStyles().authLabelStyle,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Neumorphic(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 0),
+                                    child: DropdownButton<String>(
+                                      underline: Container(),
+                                      style: AppTextStyles().secondaryStyle,
+                                      value: _selectedAge,
+                                      icon: const Icon(Icons
+                                          .arrow_drop_down), // Dropdown icon
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _selectedAge = newValue!;
+                                        });
+                                      },
+                                      items: <String>['18', '19', '20', '21']
+                                          .map<DropdownMenuItem<String>>(
+                                              (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            style:
+                                                AppTextStyles().secondaryStyle,
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
 
-                            // gender sletect
-                            // spacer
-                            const SizedBox(
-                              height: 6,
-                            ),
-
-                            Neumorphic(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 0),
-                              child: DropdownButton<String>(
-                                underline: Container(),
-                                style: AppTextStyles().secondaryStyle,
-                                value: _selectedAge,
-                                icon: const Icon(
-                                    Icons.arrow_drop_down), // Dropdown icon
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    _selectedAge = newValue!;
-                                  });
-                                },
-                                items: <String>[
-                                  '18',
-                                  '19',
-                                  '20',
-                                  '21'
-                                ] // Language options
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      style: AppTextStyles().secondaryStyle,
+                            // Country Dropdown
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Country',
+                                          style: AppTextStyles().authLabelStyle,
+                                        )
+                                      ],
                                     ),
-                                  );
-                                }).toList(),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Neumorphic(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 0),
+                                    child: DropdownButton<String>(
+                                      underline: Container(),
+                                      style: AppTextStyles().secondaryStyle,
+                                      value: _selectedCountry,
+                                      icon: const Icon(Icons.arrow_drop_down),
+                                      items: countries.map((country) {
+                                        return DropdownMenuItem(
+                                          value: country,
+                                          child: Text(
+                                            country,
+                                            style:
+                                                AppTextStyles().secondaryStyle,
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _selectedCountry = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -666,9 +729,11 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                         Colors.white),
                                   )
-                                : const Text(
+                                : Text(
                                     'Sign Up',
-                                    style: TextStyle(color: Colors.black),
+                                    style: AppTextStyles()
+                                        .primaryStyle
+                                        .copyWith(fontSize: 14),
                                   ),
                           );
                         },

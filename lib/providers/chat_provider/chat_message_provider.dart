@@ -88,11 +88,9 @@ class ChatMessageProvider extends ChangeNotifier {
 
     try {
       var headers = {'Content-Type': 'application/json'};
-      var requestUrl = Uri.parse('$api/Communication/$chatID/page=1');
+      var requestUrl = Uri.parse('$api/Communication/$uid/$chatID/page=1');
 
-      var request = http.Request('GET', requestUrl)
-        ..headers.addAll(headers)
-        ..body = jsonEncode(uid);
+      var request = http.Request('GET', requestUrl)..headers.addAll(headers);
 
       http.StreamedResponse streamedResponse = await request.send();
       http.Response response = await http.Response.fromStream(streamedResponse);

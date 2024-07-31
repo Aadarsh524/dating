@@ -333,7 +333,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
               ),
         );
       case 'Image':
-        return _buildImageContent(message.file!, isCurrentUser);
+        return _buildImageContent(message.fileName!, isCurrentUser);
       // case 'Audio':
       //   return AudioPlayerWidget(audioUrl: message.audioUrl!);
       // case 'Call':

@@ -611,7 +611,7 @@ class _HomePageState extends State<HomePage> {
                         child: Consumer<DashboardProvider>(
                             builder: (context, dashboardProvider, _) {
                           return dashboardProvider.isDashboardLoading
-                              ?const Row(
+                              ? const Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
                                   children: [

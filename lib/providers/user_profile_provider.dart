@@ -43,6 +43,7 @@ class UserProfileProvider extends ChangeNotifier {
         "email": userProfileModel.email,
         "age": userProfileModel.age,
         "gender": userProfileModel.gender,
+        "country": userProfileModel.country,
         "seeking": {
           "fromAge": userProfileModel.seeking!.fromAge,
           "toAge": userProfileModel.seeking!.toAge,

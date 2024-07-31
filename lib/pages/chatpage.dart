@@ -1192,7 +1192,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
         );
       case 'Image':
-        return _buildImageContent(message.file!.cast<File>(), isCurrentUser);
+        return _buildImageContent(message.file as List<File>, isCurrentUser);
       // case 'Audio':
       //   return AudioPlayerWidget(audioUrl: message.audioUrl!);
       // case 'Call':

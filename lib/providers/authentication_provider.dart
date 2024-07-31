@@ -75,6 +75,9 @@ class AuthenticationProvider extends ChangeNotifier {
     required String name,
     required String gender,
     required String age,
+    required String country,
+    required String seekingAgeFrom,
+    required String seekingAgeTo,
   }) async {
     setAuthLoading(true);
     try {
@@ -95,10 +98,13 @@ class AuthenticationProvider extends ChangeNotifier {
         bool profileCreated = await _createNewUserProfile(
           userCredential.user!.uid,
           context,
-          name: name,
           email: email,
+          name: name,
           gender: gender,
           age: age,
+          country: country,
+          fromAge: seekingAgeFrom,
+          toAge: seekingAgeTo,
         );
 
         if (profileCreated) {
@@ -177,27 +183,17 @@ class AuthenticationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Future<void> _initializeUserProfile(String uid, BuildContext context) async {
-  //   final userProfileProvider = context.read<UserProfileProvider>();
-  //   final userProfile = await userProfileProvider.getUserProfile(uid);
-
-  //   if (userProfile != null) {
-  //     userProfileProvider.setCurrentUserProfile(userProfile);
-
-  //     await DbClient().setData(dbKey: "uid", value: userProfile.uid ?? '');
-  //     await DbClient()
-  //         .setData(dbKey: "userName", value: userProfile.name ?? '');
-  //     // await DbClient().setData(dbKey: "email", value: userProfile.email ?? '');
-  //   }
-  // }
-
-  Future<bool> _createNewUserProfile(String uid, BuildContext context,
-      {String? name,
-      String? email,
-      String? gender,
-      String? age,
-      String? fromAge,
-      String? toAge}) async {
+  Future<bool> _createNewUserProfile(
+    String uid,
+    BuildContext context, {
+    String? name,
+    String? email,
+    String? gender,
+    String? age,
+    String? country,
+    String? fromAge,
+    String? toAge,
+  }) async {
     try {
       // Validate token and save it
       String? token = await ApiClient().validateToken();
@@ -214,11 +210,12 @@ class AuthenticationProvider extends ChangeNotifier {
         email: email ?? '',
         gender: gender ?? '',
         age: age ?? '',
-        documentStatus: 1,
+        documentStatus: 0,
+        country: country ?? '',
         seeking: Seeking(
           fromAge: fromAge ?? 'string',
           toAge: toAge ?? 'string',
-          gender: (gender != '' && gender == 'male') ? 'Female' : 'male',
+          gender: (gender != '' && gender == 'male') ? 'female' : 'male',
         ),
         uploads: [],
         userSubscription: UserSubscription(),
