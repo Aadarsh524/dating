@@ -66,7 +66,6 @@ class ChatMessageProvider extends ChangeNotifier {
           sendMessageModel.file!.path,
         );
         request.files.add(file);
-        request.fields['Type'] = "Image";
       }
       var response = await request.send();
       // Handle the response

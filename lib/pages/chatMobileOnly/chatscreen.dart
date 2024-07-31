@@ -333,7 +333,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
               ),
         );
       case 'Image':
-        return _buildImageContent(message.file!.cast<File>(), isCurrentUser);
+        return _buildImageContent(message.file!, isCurrentUser);
       // case 'Audio':
       //   return AudioPlayerWidget(audioUrl: message.audioUrl!);
       // case 'Call':
@@ -343,13 +343,13 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
     }
   }
 
-  Widget _buildImageContent(List<File> imageFiles, bool isCurrentUser) {
+  Widget _buildImageContent(List<dynamic> imageUrls, bool isCurrentUser) {
     return SizedBox(
       height: 50,
       width: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: imageFiles.length,
+        itemCount: imageUrls.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -361,8 +361,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Image.file(
-                imageFiles[index],
+              child: Image.network(
+                imageUrls[index],
                 fit: BoxFit.cover,
               ),
             ),

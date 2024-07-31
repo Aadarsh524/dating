@@ -1,5 +1,4 @@
 import 'package:dating/auth/db_client.dart';
-import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
@@ -167,7 +166,6 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future<void> signOut(BuildContext context) async {
-   
     await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
     await _auth.signOut();
