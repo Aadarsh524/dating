@@ -5,6 +5,7 @@ class DashboardResponseModel {
   String? address;
   String? age;
   String? gender;
+  String? country;
   String? email;
   String? bio;
   String? interests;
@@ -15,6 +16,7 @@ class DashboardResponseModel {
   int? documentStatus;
   Seeking? seeking;
   List<Uploads>? uploads;
+  String? countryRiskCode;
 
   DashboardResponseModel(
       {this.uid,
@@ -23,6 +25,7 @@ class DashboardResponseModel {
       this.address,
       this.age,
       this.gender,
+      this.country,
       this.email,
       this.bio,
       this.interests,
@@ -32,7 +35,8 @@ class DashboardResponseModel {
       this.isVerified,
       this.documentStatus,
       this.seeking,
-      this.uploads});
+      this.uploads,
+      this.countryRiskCode});
 
   DashboardResponseModel.fromJson(Map<String, dynamic> json) {
     uid = json['uid'];
@@ -41,6 +45,7 @@ class DashboardResponseModel {
     address = json['address'];
     age = json['age'];
     gender = json['gender'];
+    country = json['country'];
     email = json['email'];
     bio = json['bio'];
     interests = json['interests'];
@@ -57,6 +62,7 @@ class DashboardResponseModel {
         uploads!.add(Uploads.fromJson(v));
       });
     }
+    countryRiskCode = json['countryRiskCode'];
   }
 
   Map<String, dynamic> toJson() {
@@ -67,6 +73,7 @@ class DashboardResponseModel {
     data['address'] = address;
     data['age'] = age;
     data['gender'] = gender;
+    data['country'] = country;
     data['email'] = email;
     data['bio'] = bio;
     data['interests'] = interests;
@@ -81,6 +88,7 @@ class DashboardResponseModel {
     if (uploads != null) {
       data['uploads'] = uploads!.map((v) => v.toJson()).toList();
     }
+    data['countryRiskCode'] = countryRiskCode;
     return data;
   }
 }

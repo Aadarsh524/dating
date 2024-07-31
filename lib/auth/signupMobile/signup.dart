@@ -12,7 +12,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
 
 class SignUpMobile extends StatefulWidget {
-  const SignUpMobile({super.key});
+  const SignUpMobile({Key? key}) : super(key: key);
 
   @override
   State<SignUpMobile> createState() => _SignUpMobileState();
@@ -20,25 +20,39 @@ class SignUpMobile extends StatefulWidget {
 
 class _SignUpMobileState extends State<SignUpMobile> {
   String? selectedGender;
-  String _selectedAge = '18'; // Initial age
+  String? lookingFor;
+  String _selectedAge = '18';
+  String _seekingAgeFrom = '18';
+  String _seekingAgeTo = '25';
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmpasswordController =
+  final TextEditingController _confirmPasswordController =
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  String _selectedCountry = "United States";
+  final List<String> countries = [
+    'United States',
+    'Canada',
+    'India',
+    'Australia',
+    'United Kingdom'
+  ];
 
   Future<void> _register(BuildContext context) async {
     final authenticationProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
 
     User? user = await authenticationProvider.registerWithEmailAndPassword(
-      context,
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-      name: _nameController.text.trim(),
-      gender: selectedGender ?? '',
-      age: _selectedAge,
-    );
+        context,
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        name: _nameController.text.trim(),
+        gender: selectedGender ?? '',
+        age: _selectedAge,
+        seekingAgeFrom: _seekingAgeFrom,
+        seekingAgeTo: _seekingAgeTo,
+        country: _selectedCountry);
 
     if (user != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -60,583 +74,410 @@ class _SignUpMobileState extends State<SignUpMobile> {
     }
   }
 
+  Widget _buildLabeledField(String label, Widget field) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles().authLabelStyle),
+        const SizedBox(height: 6),
+        field,
+      ],
+    );
+  }
+
+  Widget _buildGenderSelect(
+      String gender, IconData icon, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+              color: isSelected ? Colors.blue : Colors.transparent, width: 2.0),
+        ),
+        child: Neumorphic(
+          style: NeumorphicStyle(
+            shape: NeumorphicShape.concave,
+            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15)),
+            depth: 8,
+            intensity: 0.6,
+          ),
+          child: Center(
+              child: Icon(icon, color: isSelected ? Colors.blue : Colors.grey)),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authenticationProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
-    return Stack(
-      children: [
-        ListView(
+
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
           children: [
-            // space above
-            const SizedBox(
-              height: 20,
-            ),
-            Image.asset(
-              AppImages.login,
-              height: 200,
-            ),
-
-            // login text
-            const SizedBox(
-              height: 25,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Text(
-                    'Find your match',
-                    style: AppTextStyles().authMainStyle,
-                  ),
-                ],
-              ),
-            ),
-            // space betn find your match and text field
-
-            const SizedBox(height: 15),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Row(
-                children: [
-                  Text(
-                    'Your Name',
-                    style: AppTextStyles().authLabelStyle,
-                  )
-                ],
-              ),
-            ),
-
-            const SizedBox(
-              height: 6,
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: AppTextField(
-                inputcontroller: _nameController,
-                hintText: 'Enter your name',
-                keyboardType: TextInputType.emailAddress,
-              ),
-            ),
-            const SizedBox(height: 15),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              'I am a',
-                              style: AppTextStyles().authLabelStyle,
-                            )
-                          ],
-                        ),
-                      ),
-
-                      // gender sletect
-                      // spacer
-                      const SizedBox(
-                        height: 6,
-                      ),
-
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedGender = 'male';
-                              });
-                            },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: selectedGender == 'male'
-                                      ? Colors
-                                          .blue // Border color when selected
-                                      : Colors
-                                          .transparent, // Border color when not selected
-                                  width: 2.0,
-                                ),
-                              ),
-                              child: Neumorphic(
-                                style: NeumorphicStyle(
-                                  shape: NeumorphicShape.concave,
-                                  boxShape: NeumorphicBoxShape.roundRect(
-                                      BorderRadius.circular(20)),
-                                  depth: 10,
-                                  intensity: 0.5,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.male,
-                                    color: selectedGender == 'male'
-                                        ? Colors.blue
-                                        : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // female
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedGender = 'female';
-                              });
-                            },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: selectedGender == 'female'
-                                      ? Colors
-                                          .blue // Border color when selected
-                                      : Colors
-                                          .transparent, // Border color when not selected
-                                  width: 2.0,
-                                ),
-                              ),
-                              child: Neumorphic(
-                                style: NeumorphicStyle(
-                                  shape: NeumorphicShape.concave,
-                                  boxShape: NeumorphicBoxShape.roundRect(
-                                      BorderRadius.circular(20)),
-                                  depth: 10,
-                                  intensity: 0.5,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.female,
-                                    color: selectedGender == 'female'
-                                        ? Colors.blue
-                                        : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  // looking for s
-                  const Spacer(),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Looking For',
-                              style: AppTextStyles().authLabelStyle,
-                            )
-                          ],
-                        ),
-                      ),
-
-                      // gender sletect
-                      // spacer
-                      const SizedBox(
-                        height: 6,
-                      ),
-
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedGender = 'female';
-                              });
-                            },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: selectedGender == 'female'
-                                      ? Colors
-                                          .blue // Border color when selected
-                                      : Colors
-                                          .transparent, // Border color when not selected
-                                  width: 2.0,
-                                ),
-                              ),
-                              child: Neumorphic(
-                                style: NeumorphicStyle(
-                                  shape: NeumorphicShape.concave,
-                                  boxShape: NeumorphicBoxShape.roundRect(
-                                      BorderRadius.circular(20)),
-                                  depth: 10,
-                                  intensity: 0.5,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.male,
-                                    color: selectedGender == 'female'
-                                        ? Colors.blue
-                                        : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // female
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedGender = 'male';
-                              });
-                            },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: selectedGender == 'male'
-                                      ? Colors
-                                          .blue // Border color when selected
-                                      : Colors
-                                          .transparent, // Border color when not selected
-                                  width: 2.0,
-                                ),
-                              ),
-                              child: Neumorphic(
-                                style: NeumorphicStyle(
-                                  shape: NeumorphicShape.concave,
-                                  boxShape: NeumorphicBoxShape.roundRect(
-                                      BorderRadius.circular(20)),
-                                  depth: 10,
-                                  intensity: 0.5,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.female,
-                                    color: selectedGender == 'male'
-                                        ? Colors.blue
-                                        : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  // age picker
-                  const Spacer(),
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight - 40),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Age',
-                          style: AppTextStyles().authLabelStyle,
-                        )
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Image.asset(AppImages.login, height: 120),
+                            const SizedBox(height: 20),
+                            Text('Find your match',
+                                style: AppTextStyles().authMainStyle,
+                                textAlign: TextAlign.center),
+                            const SizedBox(height: 20),
+                            _buildLabeledField(
+                                'Your Name',
+                                AppTextField(
+                                  inputcontroller: _nameController,
+                                  hintText: 'Enter your name',
+                                  keyboardType: TextInputType.name,
+                                )),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildLabeledField(
+                                    'I am a',
+                                    Row(
+                                      children: [
+                                        _buildGenderSelect(
+                                          'male',
+                                          Icons.male,
+                                          selectedGender == 'male',
+                                          () => setState(() {
+                                            selectedGender = 'male';
+                                            lookingFor =
+                                                'female'; // Set lookingFor to the opposite gender
+                                          }),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        _buildGenderSelect(
+                                          'female',
+                                          Icons.female,
+                                          selectedGender == 'female',
+                                          () => setState(() {
+                                            selectedGender = 'female';
+                                            lookingFor =
+                                                'male'; // Set lookingFor to the opposite gender
+                                          }),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: _buildLabeledField(
+                                    'Looking For',
+                                    Row(
+                                      children: [
+                                        _buildGenderSelect(
+                                          'male',
+                                          Icons.male,
+                                          lookingFor == 'male',
+                                          () => setState(() {
+                                            lookingFor = 'male';
+                                            selectedGender =
+                                                'female'; // Ensure selectedGender is updated to the opposite gender
+                                          }),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        _buildGenderSelect(
+                                          'female',
+                                          Icons.female,
+                                          lookingFor == 'female',
+                                          () => setState(() {
+                                            lookingFor = 'female';
+                                            selectedGender =
+                                                'male'; // Ensure selectedGender is updated to the opposite gender
+                                          }),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildNeomorphicDropdown(
+                                    'Age',
+                                    DropdownButtonFormField<String>(
+                                      value: _selectedAge,
+                                      items: List.generate(
+                                        83,
+                                        (index) => DropdownMenuItem(
+                                          value: (index + 18).toString(),
+                                          child: Text((index + 18).toString(),
+                                              style: AppTextStyles()
+                                                  .authLabelStyle),
+                                        ),
+                                      ),
+                                      onChanged: (value) =>
+                                          setState(() => _selectedAge = value!),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                      ),
+                                      style: AppTextStyles().authLabelStyle,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: _buildNeomorphicDropdown(
+                                    'Country',
+                                    DropdownButtonFormField<String>(
+                                      value: _selectedCountry,
+                                      items: countries
+                                          .map((country) => DropdownMenuItem(
+                                                value: country,
+                                                child: Text(country,
+                                                    style: AppTextStyles()
+                                                        .authLabelStyle),
+                                              ))
+                                          .toList(),
+                                      onChanged: (value) => setState(
+                                          () => _selectedCountry = value!),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                      ),
+                                      style: AppTextStyles().authLabelStyle,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildNeomorphicDropdown(
+                                    'Seeking Age From',
+                                    DropdownButtonFormField<String>(
+                                      value: _seekingAgeFrom,
+                                      items: List.generate(
+                                        83,
+                                        (index) => DropdownMenuItem(
+                                          value: (index + 18).toString(),
+                                          child: Text((index + 18).toString(),
+                                              style: AppTextStyles()
+                                                  .authLabelStyle),
+                                        ),
+                                      ),
+                                      onChanged: (value) => setState(
+                                          () => _seekingAgeFrom = value!),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                      ),
+                                      style: AppTextStyles().authLabelStyle,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: _buildNeomorphicDropdown(
+                                    'Seeking Age To',
+                                    DropdownButtonFormField<String>(
+                                      value: _seekingAgeTo,
+                                      items: List.generate(
+                                        83,
+                                        (index) => DropdownMenuItem(
+                                          value: (index + 18).toString(),
+                                          child: Text((index + 18).toString(),
+                                              style: AppTextStyles()
+                                                  .authLabelStyle),
+                                        ),
+                                      ),
+                                      onChanged: (value) => setState(
+                                          () => _seekingAgeTo = value!),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                      ),
+                                      style: AppTextStyles().authLabelStyle,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            _buildLabeledField(
+                                'Email Address',
+                                AppTextField(
+                                  inputcontroller: _emailController,
+                                  hintText: 'Enter Email',
+                                  keyboardType: TextInputType.emailAddress,
+                                )),
+                            const SizedBox(height: 15),
+                            _buildLabeledField(
+                                'Password',
+                                AppTextField(
+                                  inputcontroller: _passwordController,
+                                  hintText: 'Enter Your Password',
+                                  obscureText: true,
+                                )),
+                            const SizedBox(height: 15),
+                            _buildLabeledField(
+                                'Confirm Password',
+                                AppTextField(
+                                  inputcontroller: _confirmPasswordController,
+                                  hintText: 'Re-enter Your Password',
+                                  obscureText: true,
+                                )),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const SizedBox(height: 20),
+                            Consumer<AuthenticationProvider>(
+                              builder: (context, authProvider, _) {
+                                return ElevatedButton(
+                                  onPressed: authProvider.isAuthLoading
+                                      ? null
+                                      : () {
+                                          if (_passwordController.text ==
+                                              _confirmPasswordController.text) {
+                                            _register(context);
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'Passwords do not match!')),
+                                            );
+                                          }
+                                        },
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize:
+                                        const Size(double.infinity, 55),
+                                  ),
+                                  child: authProvider.isAuthLoading
+                                      ? const CircularProgressIndicator(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white))
+                                      : Text(
+                                          'Sign Up',
+                                          style: AppTextStyles()
+                                              .primaryStyle
+                                              .copyWith(fontSize: 14),
+                                        ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            Text('Or',
+                                style: AppTextStyles()
+                                    .authLabelStyle
+                                    .copyWith(color: AppColors.secondaryColor)),
+                            const SizedBox(height: 15),
+                            Button(
+                              onPressed: () {
+                                authenticationProvider
+                                    .signInWithGoogle(context)
+                                    .then((user) {
+                                  if (user != null) {
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => const HomePage()));
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Google Sign-In canceled or failed.')),
+                                    );
+                                  }
+                                });
+                              },
+                              text: 'Sign Up With',
+                              imagePath: 'assets/images/google.png',
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Already have an account?",
+                                    style: AppTextStyles()
+                                        .secondaryStyle
+                                        .copyWith(fontSize: 14)),
+                                const SizedBox(width: 5),
+                                GestureDetector(
+                                  onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LoginScreen())),
+                                  child: Text('LogIn',
+                                      style: AppTextStyles()
+                                          .primaryStyle
+                                          .copyWith(fontSize: 14)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-
-                  // gender sletect
-                  // spacer
-                  const SizedBox(
-                    height: 6,
-                  ),
-
-                  Neumorphic(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                    child: DropdownButton<String>(
-                      underline: Container(),
-                      style: AppTextStyles().secondaryStyle,
-                      value: _selectedAge,
-                      icon: const Icon(Icons.arrow_drop_down), // Dropdown icon
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedAge = newValue!;
-                        });
-                      },
-                      items:
-                          <String>['18', '19', '20', '21'] // Language options
-                              .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(
-                            value,
-                            style: AppTextStyles().secondaryStyle,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
-
-            // email
-            const SizedBox(height: 15),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Row(
-                children: [
-                  Text(
-                    'Email Address',
-                    style: AppTextStyles().authLabelStyle,
-                  )
-                ],
-              ),
+            Consumer<LoadingProvider>(
+              builder: (context, loadingProvider, _) {
+                return loadingProvider.isLoading
+                    ? Container(
+                        color: Colors.black.withOpacity(0.5),
+                        child: const Center(child: CircularProgressIndicator()),
+                      )
+                    : Container();
+              },
             ),
-
-            const SizedBox(
-              height: 6,
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: AppTextField(
-                inputcontroller: _emailController,
-                hintText: 'Enter Email',
-                keyboardType: TextInputType.emailAddress,
-              ),
-            ),
-
-//
-
-// password
-
-            const SizedBox(height: 15),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Row(
-                children: [
-                  Text(
-                    'Password',
-                    style: AppTextStyles().authLabelStyle,
-                  )
-                ],
-              ),
-            ),
-
-            const SizedBox(
-              height: 6,
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: AppTextField(
-                inputcontroller: _passwordController,
-                hintText: 'Enter Your Password',
-                keyboardType: TextInputType.visiblePassword,
-                obscureText: true,
-              ),
-            ),
-
-// confirm password
-
-            const SizedBox(height: 15),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Row(
-                children: [
-                  Text(
-                    'Confirm Password',
-                    style: AppTextStyles().authLabelStyle,
-                  )
-                ],
-              ),
-            ),
-
-            const SizedBox(
-              height: 6,
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: AppTextField(
-                inputcontroller: _confirmpasswordController,
-                hintText: 'Re-enter Your Password',
-                keyboardType: TextInputType.visiblePassword,
-                obscureText: true,
-              ),
-            ),
-
-            const SizedBox(
-              height: 10,
-            ),
-
-// spacer
-            const SizedBox(height: 35),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SizedBox(
-                height: 55,
-                child: Consumer<AuthenticationProvider>(
-                  builder: (context, authenticationProvider, _) {
-                    return ElevatedButton(
-                      onPressed: authenticationProvider.isAuthLoading
-                          ? null
-                          : () {
-                              bool passwordsMatch = _passwordController.text ==
-                                  _confirmpasswordController.text;
-                              if (passwordsMatch) {
-                                _register(context);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Passwords do not match!'),
-                                  ),
-                                );
-                              }
-                            },
-                      child: authenticationProvider.isAuthLoading
-                          ? const CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            )
-                          : const Text(
-                              'Sign Up',
-                              style: TextStyle(color: Colors.black),
-                            ),
-                    );
-                  },
-                ),
-              ),
-            ),
-
-// sign in with
-            const SizedBox(
-              height: 10,
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Or',
-                  style: AppTextStyles()
-                      .authLabelStyle
-                      .copyWith(color: AppColors.secondaryColor),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SizedBox(
-                height: 55,
-                child: Button(
-                  onPressed: () {
-                    authenticationProvider
-                        .signInWithGoogle(context)
-                        .then((user) {
-                      if (user != null) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomePage()),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Google Sign-In canceled or failed.'),
-                          ),
-                        );
-                      }
-                    });
-                  },
-                  text: 'Sign Up With',
-                  imagePath: 'assets/images/google.png',
-                ),
-              ),
-            ),
-
-// dont have an account
-            const SizedBox(
-              height: 25,
-            ),
-
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(
-                "Already have an account?",
-                style: AppTextStyles().secondaryStyle.copyWith(fontSize: 14),
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginScreen()));
-                },
-                child: Text(
-                  'LogIn',
-                  style: AppTextStyles().primaryStyle.copyWith(fontSize: 14),
-                ),
-              ),
-            ])
           ],
         ),
-        Consumer<LoadingProvider>(
-          builder: (context, loadingProvider, _) {
-            return loadingProvider.isLoading
-                ? Container(
-                    color: Colors.black
-                        .withOpacity(0.5), // Add background color with opacity
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : Container();
-          },
-        ),
-      ],
+      ),
     );
   }
+}
+
+Widget _buildNeomorphicDropdown(String label, Widget child) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label, style: AppTextStyles().authLabelStyle),
+      const SizedBox(height: 8),
+      Neumorphic(
+        style: NeumorphicStyle(
+          depth: 8,
+          intensity: 0.7,
+          surfaceIntensity: 0.5,
+          boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
+        ),
+        child: child,
+      ),
+    ],
+  );
 }

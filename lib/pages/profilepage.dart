@@ -913,8 +913,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ),
                                       itemCount: photo.length,
                                       itemBuilder: (context, index) {
-                                        
-
                                         return GestureDetector(
                                           onTap: () {
                                             _selectPhoto(index);

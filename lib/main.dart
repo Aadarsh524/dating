@@ -22,10 +22,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-//notifications initialization
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel', // id
-    'High Importance Notifications', // title// description
+    'High Importance Notifications',
     importance: Importance.high,
     playSound: true);
 String type = '';

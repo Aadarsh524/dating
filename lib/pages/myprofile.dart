@@ -261,11 +261,22 @@ class _MyProfilePageState extends State<MyProfilePage> {
               style: AppTextStyles().primaryStyle,
             ),
             const SizedBox(height: 10),
-            _buildInfoRow(Icons.location_on_outlined,
-                userProfileModel?.address ?? 'Add your address'),
-            _buildInfoRow(Icons.person,
-                userProfileModel?.gender ?? 'Specify Your Gender'),
-            _buildInfoRow(Icons.search, "Seeking Female 21-39"),
+            _buildInfoRow(
+                Icons.location_on_outlined,
+                userProfileModel?.address != ''
+                    ? "Address: ${userProfileModel?.address?.toUpperCase()}"
+                    : "Add your Address"),
+            _buildInfoRow(
+                Icons.person,
+                userProfileModel?.gender != ''
+                    ? "Gender ${userProfileModel?.gender!.toUpperCase()}"
+                    : "Specify your Gender"),
+            _buildInfoRow(
+                Icons.search,
+                userProfileModel?.seeking?.fromAge != '' &&
+                        userProfileModel?.seeking?.fromAge != ''
+                    ? "Seeking ${userProfileModel?.seeking?.gender!.toUpperCase()} ${userProfileModel?.seeking?.fromAge}-${userProfileModel?.seeking?.toAge}"
+                    : "Choose your age seeking range"),
           ],
         );
       },

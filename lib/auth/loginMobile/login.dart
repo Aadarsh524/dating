@@ -242,7 +242,12 @@ class _LoginMobileState extends State<LoginMobile> {
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         )
-                      : const Text('Login'),
+                      : Text(
+                          'Login',
+                          style: AppTextStyles()
+                              .primaryStyle
+                              .copyWith(fontSize: 14),
+                        ),
                 );
               },
             ),

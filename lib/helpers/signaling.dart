@@ -32,7 +32,6 @@ class Signaling {
         'credential': 'free',
         'username': 'free',
       },
-
       {
         "urls": "turn:global.relay.metered.ca:80",
         "username": "cbe44f80252683657daa1fe9",
@@ -76,16 +75,14 @@ class Signaling {
   late RTCDataChannel messageDataChannel;
   late RTCDataChannel fileDataChannel;
 
-
   //Creating a room
-  Future<String> createRoom(RTCVideoRenderer remoteRenderer, String roomIdd) async {
+  Future<String> createRoom(
+      RTCVideoRenderer remoteRenderer, String roomIdd) async {
     roomId = roomIdd;
     FirebaseFirestore db = FirebaseFirestore.instance;
     DocumentReference roomRef = db.collection('rooms').doc(roomId);
 
-
-
-   // print('Create PeerConnection with configuration: $configuration');
+    // print('Create PeerConnection with configuration: $configuration');
 
     peerConnection =
         await createPeerConnection(configuration, offerSdpConstraints);
@@ -134,18 +131,18 @@ class Signaling {
     roomRef.snapshots().listen((snapshot) async {
       print('Got updated room: ${snapshot.data()}');
 
-      if(snapshot.data()!=null){
-      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-      if (peerConnection?.getRemoteDescription() != null &&
-          data['answer'] != null) {
-        var answer = RTCSessionDescription(
-          data['answer']['sdp'],
-          data['answer']['type'],
-        );
+      if (snapshot.data() != null) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        if (peerConnection?.getRemoteDescription() != null &&
+            data['answer'] != null) {
+          var answer = RTCSessionDescription(
+            data['answer']['sdp'],
+            data['answer']['type'],
+          );
 
-        print("Someone tried to connect");
-        await peerConnection?.setRemoteDescription(answer);
-      }
+          print("Someone tried to connect");
+          await peerConnection?.setRemoteDescription(answer);
+        }
       }
     });
     // Listening for remote session description above
@@ -190,10 +187,6 @@ class Signaling {
       // Code for collecting ICE candidates below
       var calleeCandidatesCollection = roomRef.collection('calleeCandidates');
       peerConnection!.onIceCandidate = (RTCIceCandidate candidate) {
-        if (candidate == null) {
-          print('onIceCandidate: complete!');
-          return;
-        }
         print('onIceCandidate: ${candidate.toMap()}');
         calleeCandidatesCollection.add(candidate.toMap());
       };
@@ -206,7 +199,6 @@ class Signaling {
           remoteStream?.addTrack(track);
         });
       };
-
 
       // Code for creating SDP answer below
       var data = roomSnapshot.data() as Map<String, dynamic>;
@@ -224,10 +216,10 @@ class Signaling {
         'answer': {'type': answer.type, 'sdp': answer.sdp}
       };
 
-      peerConnection?.onDataChannel= (channel) {
-        if(channel.label == "data") {
+      peerConnection?.onDataChannel = (channel) {
+        if (channel.label == "data") {
           messageDataChannel = channel;
-        }else if(channel.label == "file"){
+        } else if (channel.label == "file") {
           fileDataChannel = channel;
         }
       };
@@ -255,10 +247,8 @@ class Signaling {
 
   //This function is used to provide access to camera/audio and screen
   Future<void> openUserMedia(
-      RTCVideoRenderer localVideo,
-      RTCVideoRenderer remoteVideo,
-  { bool screenSharing = false }
-      ) async {
+      RTCVideoRenderer localVideo, RTCVideoRenderer remoteVideo,
+      {bool screenSharing = false}) async {
     MediaStream stream;
 
     try {
@@ -267,26 +257,26 @@ class Signaling {
         print("Screen sharing is true");
         // Capture entire screen
 
-        if(WebRTC.platformIsWeb) {
+        if (WebRTC.platformIsWeb) {
           print("Remove screen level web");
           stream = await navigator.mediaDevices.getDisplayMedia({
             'video': {'cursor': 'always', 'mediaSource': 'screen'},
             'audio': true,
           });
-        }else if(WebRTC.platformIsMacOS){
-           stream = await navigator.mediaDevices.getDisplayMedia({
-             'audio': true,
-             'video': {
-               'mandatory': {
-                 'chromeMediaSource': 'desktop',
-                 'maxWidth': '1920',
-                 'maxHeight': '1080',
-                 'minWidth': '1024',
-                 'minHeight': '768',
-               },
-             },
+        } else if (WebRTC.platformIsMacOS) {
+          stream = await navigator.mediaDevices.getDisplayMedia({
+            'audio': true,
+            'video': {
+              'mandatory': {
+                'chromeMediaSource': 'desktop',
+                'maxWidth': '1920',
+                'maxHeight': '1080',
+                'minWidth': '1024',
+                'minHeight': '768',
+              },
+            },
           });
-        }else {
+        } else {
           print("Remove screen level app");
           FlutterBackgroundService().invoke("setAsBackground");
           stream = await navigator.mediaDevices.getDisplayMedia({
@@ -309,7 +299,7 @@ class Signaling {
           }
         }
       } else {
-        if(WebRTC.platformIsAndroid){
+        if (WebRTC.platformIsAndroid) {
           if (screenShared == true) {
             print("Remove screen level 1");
             FlutterBackgroundService().invoke("stopService");
@@ -317,12 +307,13 @@ class Signaling {
         }
 
         var mediaConstraints;
-        if(WebRTC.platformIsMacOS){
-           mediaConstraints = <String, dynamic>{
+        if (WebRTC.platformIsMacOS) {
+          mediaConstraints = <String, dynamic>{
             'audio': true,
             'video': {
               'mandatory': {
-                'minWidth': '640', // Provide your own width, height, and frame rate here
+                'minWidth':
+                    '640', // Provide your own width, height, and frame rate here
                 'minHeight': '480',
                 'minFrameRate': '30',
               },
@@ -330,11 +321,8 @@ class Signaling {
               'optional': [],
             }
           };
-        }else{
-           mediaConstraints = <String, dynamic>{
-            'audio': true,
-            'video': true
-          };
+        } else {
+          mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
         }
         // Capture camera
         stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
@@ -355,23 +343,20 @@ class Signaling {
         }
       }
 
-
-       if(screenSharing == false && screenShared == false) {
-         remoteVideo.srcObject = await createLocalMediaStream('key');
-       }
-        localVideo.srcObject = stream;
-        localStream = stream;
-
-
+      if (screenSharing == false && screenShared == false) {
+        remoteVideo.srcObject = await createLocalMediaStream('key');
+      }
+      localVideo.srcObject = stream;
+      localStream = stream;
     } catch (e) {
       print('Error opening user media: $e');
-  }
+    }
   }
 
-
-   Future<RTCDataChannel> initDataChannel(String channelname) async {
+  Future<RTCDataChannel> initDataChannel(String channelname) async {
     RTCDataChannelInit dataChannelDict = RTCDataChannelInit();
-    RTCDataChannel channel = await peerConnection!.createDataChannel(channelname, dataChannelDict);
+    RTCDataChannel channel =
+        await peerConnection!.createDataChannel(channelname, dataChannelDict);
 
     channel.onDataChannelState = (state) {
       if (state == RTCDataChannelState.RTCDataChannelOpen) {
@@ -385,71 +370,68 @@ class Signaling {
     return channel;
   }
 
-  void sendTextMessage( String message) {
+  void sendTextMessage(String message) {
     Uint8List messageBytes = Uint8List.fromList(message.codeUnits);
-    RTCDataChannelMessage rtcMessage = RTCDataChannelMessage.fromBinary(messageBytes);
+    RTCDataChannelMessage rtcMessage =
+        RTCDataChannelMessage.fromBinary(messageBytes);
     messageDataChannel.send(rtcMessage);
   }
-
 
   void sendFile(Uint8List img) async {
     Uint8List fileBytes = img;
 
     const chunkSize = 16384; // 16 KB chunks
     for (var i = 0; i < fileBytes.length; i += chunkSize) {
-      var end = (i + chunkSize < fileBytes.length) ? i + chunkSize : fileBytes.length;
-      fileDataChannel.send(RTCDataChannelMessage.fromBinary(fileBytes.sublist(i, end)));
+      var end =
+          (i + chunkSize < fileBytes.length) ? i + chunkSize : fileBytes.length;
+      fileDataChannel
+          .send(RTCDataChannelMessage.fromBinary(fileBytes.sublist(i, end)));
 
-      if (end == fileBytes.length) {
-      }
+      if (end == fileBytes.length) {}
     }
   }
 
-
   Future<void> startScreenSharing(
-      RTCVideoRenderer localVideo,
-      RTCVideoRenderer remoteVideo,
-      ) async {
+    RTCVideoRenderer localVideo,
+    RTCVideoRenderer remoteVideo,
+  ) async {
     await openUserMedia(localVideo, remoteVideo, screenSharing: true);
   }
 
   // Call this method for stopping screen sharing
   Future<void> stopScreenSharing(
-      RTCVideoRenderer localVideo,
-      RTCVideoRenderer remoteVideo,
-      ) async {
+    RTCVideoRenderer localVideo,
+    RTCVideoRenderer remoteVideo,
+  ) async {
     await openUserMedia(localVideo, remoteVideo, screenSharing: false);
   }
 
   Future<void> muteAudio(bool mute) async {
-    if(WebRTC.platformIsMacOS || WebRTC.platformIsWindows){
+    if (WebRTC.platformIsMacOS || WebRTC.platformIsWindows) {
       localStream!.getAudioTracks().first.enabled = mute;
-    }else {
+    } else {
       localStream!.getAudioTracks()[0].enabled = mute;
     }
   }
 
   Future<void> closeVideo(bool val) async {
-
     localStream!.getVideoTracks()[0].enabled = val;
   }
 
   Future<void> loudSpeaker(bool speaker) async {
-
-    if(WebRTC.platformIsWeb || WebRTC.platformIsMacOS){
+    if (WebRTC.platformIsWeb || WebRTC.platformIsMacOS) {
       remoteStream!.getAudioTracks().first.enabled = speaker;
       // localStream!.getAudioTracks().forEach((track) {
       //   track.enabled = speaker;
       // });
-    }else{
+    } else {
       localStream!.getAudioTracks()[0].enableSpeakerphone(speaker);
     }
   }
 
-
   Future<bool> hangUp(RTCVideoRenderer localVideo) async {
-    if(localStream!=null) {
-      if(!WebRTC.platformIsWeb) {
+    if (localStream != null) {
+      if (!WebRTC.platformIsWeb) {
         localStream!.getAudioTracks()[0].enabled = true;
         localStream!.getAudioTracks()[0].enableSpeakerphone(true);
       }
@@ -503,57 +485,48 @@ class Signaling {
     };
   }
 
-
   Future<void> initializeBackgroundService() async {
-
-
     if (WebRTC.platformIsAndroid) {
-
-      final androidConfig =  FlutterBackgroundAndroidConfig(
+      final androidConfig = FlutterBackgroundAndroidConfig(
         notificationTitle: "Webrtc App",
         notificationText: "Tap to go back",
         notificationImportance: AndroidNotificationImportance.Default,
       );
 
-
-
       await FlutterBackground.initialize(androidConfig: androidConfig).then(
-              (value) async {
-            // value is false
-            if (value) {
-              bool enabled = await FlutterBackground.enableBackgroundExecution();
-            }
-            return value;
-          }, onError: (e) {
+          (value) async {
+        // value is false
+        if (value) {
+          bool enabled = await FlutterBackground.enableBackgroundExecution();
+        }
+        return value;
+      }, onError: (e) {
         print('error>>>> $e');
       });
 
+      final service = FlutterBackgroundService();
 
+      await service.configure(
+        androidConfiguration: AndroidConfiguration(
+            // this will be executed when app is in foreground or background in separated isolate
+            onStart: onStart,
 
-    final service = FlutterBackgroundService();
-
-    await service.configure(
-      androidConfiguration: AndroidConfiguration(
-        // this will be executed when app is in foreground or background in separated isolate
-          onStart: onStart,
-
+            // auto start service
+            autoStart: true,
+            isForegroundMode: true,
+            foregroundServiceNotificationId: 888),
+        iosConfiguration: IosConfiguration(
           // auto start service
           autoStart: true,
-          isForegroundMode: true,
-          foregroundServiceNotificationId: 888),
-      iosConfiguration: IosConfiguration(
-        // auto start service
-        autoStart: true,
 
-        // this will be executed when app is in foreground in separated isolate
-        onForeground: onStart,
+          // this will be executed when app is in foreground in separated isolate
+          onForeground: onStart,
 
-        // you have to enable background fetch capability on xcode project
-        onBackground: onIosBackground,
-      ),
-    );
+          // you have to enable background fetch capability on xcode project
+          onBackground: onIosBackground,
+        ),
+      );
     }
-
   }
 
   @pragma('vm:entry-point')
@@ -582,14 +555,8 @@ class Signaling {
     service.on('stopService').listen((event) {
       service.stopSelf();
     });
-
-
   }
-
-
 }
-
-
 
 class CameraPlugin {
   static const MethodChannel _channel = MethodChannel('camera_plugin');
@@ -608,7 +575,8 @@ class PermissionsHandler {
 
   static Future<bool> requestCameraPermission() async {
     try {
-      final bool result = await _channel.invokeMethod('requestCameraPermission');
+      final bool result =
+          await _channel.invokeMethod('requestCameraPermission');
       return result;
     } on PlatformException catch (e) {
       print("Error: ${e.message}");
@@ -616,6 +584,3 @@ class PermissionsHandler {
     }
   }
 }
-
-
-

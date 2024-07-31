@@ -310,9 +310,11 @@ class _LoginDesktopState extends State<LoginDesktop> {
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                         Colors.white),
                                   )
-                                : const Text(
+                                : Text(
                                     'Login',
-                                    style: TextStyle(color: Colors.black),
+                                    style: AppTextStyles()
+                                        .primaryStyle
+                                        .copyWith(fontSize: 14),
                                   ),
                           );
                         },
