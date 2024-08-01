@@ -11,6 +11,7 @@ import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
+import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/like_button.dart';
@@ -884,7 +885,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                     child: Center(
                                       child: photo.isEmpty
-                                          ? CircularProgressIndicator()
+                                          ? ShimmerSkeleton(
+                                              count: 1,
+                                              height: 300,
+                                            )
                                           : Image.memory(
                                               base64ToImage(
                                                   photo[_selectedPhotoIndex]!),
@@ -1112,7 +1116,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                     width: 5,
                                   ),
                                   Text(
-                                    "${widget.dashboardresponsemodel.address}",
+                                    "${widget.dashboardresponsemodel.address}"
+                                            .isEmpty
+                                        ? 'N/A'
+                                        : "${widget.dashboardresponsemodel.address}",
                                     style: AppTextStyles().secondaryStyle,
                                   )
                                 ],
@@ -1158,7 +1165,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     width: 5,
                                   ),
                                   Text(
-                                    "Seeking Male 21-39",
+                                    "Seeking ${widget.dashboardresponsemodel.seeking!.gender} ${widget.dashboardresponsemodel.seeking!.fromAge}-${widget.dashboardresponsemodel.seeking!.toAge}",
                                     style: AppTextStyles().secondaryStyle,
                                   )
                                 ],
@@ -1202,38 +1209,9 @@ class _ProfilePageState extends State<ProfilePage> {
 // text about
 
                           Text(
-                            '${widget.dashboardresponsemodel.bio}',
-                            style: AppTextStyles().secondaryStyle,
-                          ),
-
-                          const SizedBox(
-                            height: 20,
-                          ),
-
-                          Text(
-                            'Overview',
-                            style: AppTextStyles().primaryStyle.copyWith(
-                                  color: AppColors.black.withOpacity(0.75),
-                                ),
-                          ),
-
-                          // seperator
-                          Container(
-                            decoration: const ShapeDecoration(
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  width: 0.50,
-                                  strokeAlign: BorderSide.strokeAlignCenter,
-                                  color: Color(0xFFAAAAAA),
-                                ),
-                              ),
-                            ),
-                          ),
-
-// text about
-
-                          Text(
-                            '${widget.dashboardresponsemodel.bio}',
+                            '${widget.dashboardresponsemodel.bio}'.isEmpty
+                                ? 'User yet to add.'
+                                : '${widget.dashboardresponsemodel.bio}',
                             style: AppTextStyles().secondaryStyle,
                           ),
                         ],

@@ -50,16 +50,21 @@ class _LikeButtonState extends State<LikeButton> {
                     widget.currentUserId, widget.likedUserId);
               },
               child: SizedBox(
-                height: 50,
+                height: 50, 
                 width: 50,
                 child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: SvgPicture.asset(
-                    isLiked ? AppIcons.heartfilled : AppIcons.heartoutline,
-                    height: 20,
-                    width: 20,
-                  ),
-                ),
+                    padding: const EdgeInsets.all(5.0),
+                    child: isLiked
+                        ? SvgPicture.asset(
+                            AppIcons.heartfilled,
+                            height: 20,
+                            width: 20,
+                          )
+                        : SvgPicture.asset(
+                            AppIcons.heartoutline,
+                            height: 20,
+                            width: 20,
+                          )),
               ),
             ),
           );
