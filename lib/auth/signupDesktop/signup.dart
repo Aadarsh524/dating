@@ -146,6 +146,8 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
@@ -451,120 +453,118 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
 
                         // age picker
                         const Spacer(),
-
-                        Row(
-                          children: [
-                            // Age Dropdown
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Age',
-                                          style: AppTextStyles().authLabelStyle,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Neumorphic(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 0),
-                                    child: DropdownButton<String>(
-                                      underline: Container(),
-                                      style: AppTextStyles().secondaryStyle,
-                                      value: _selectedAge,
-                                      icon: const Icon(Icons
-                                          .arrow_drop_down), // Dropdown icon
-                                      onChanged: (String? newValue) {
-                                        setState(() {
-                                          _selectedAge = newValue!;
-                                        });
-                                      },
-                                      items: <String>['18', '19', '20', '21']
-                                          .map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            style:
-                                                AppTextStyles().secondaryStyle,
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ],
+                      ],
+                    ),
+                    const SizedBox(width: 15),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildNeomorphicDropdown(
+                            'Age',
+                            DropdownButtonFormField<String>(
+                              value: _selectedAge,
+                              items: List.generate(
+                                83,
+                                (index) => DropdownMenuItem(
+                                  value: (index + 18).toString(),
+                                  child: Text((index + 18).toString(),
+                                      style: AppTextStyles().authLabelStyle),
+                                ),
                               ),
-                            ),
-
-                            // Country Dropdown
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Country',
-                                          style: AppTextStyles().authLabelStyle,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Neumorphic(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 0),
-                                    child: DropdownButton<String>(
-                                      underline: Container(),
-                                      style: AppTextStyles().secondaryStyle,
-                                      value: _selectedCountry,
-                                      icon: const Icon(Icons.arrow_drop_down),
-                                      items: countries.map((country) {
-                                        return DropdownMenuItem(
-                                          value: country,
-                                          child: Text(
-                                            country,
-                                            style:
-                                                AppTextStyles().secondaryStyle,
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _selectedCountry = value!;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ],
+                              onChanged: (value) =>
+                                  setState(() => _selectedAge = value!),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16),
                               ),
+                              style: AppTextStyles().authLabelStyle,
                             ),
-                          ],
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: _buildNeomorphicDropdown(
+                            'Country',
+                            DropdownButtonFormField<String>(
+                              value: _selectedCountry,
+                              items: countries
+                                  .map((country) => DropdownMenuItem(
+                                        value: country,
+                                        child: Text(country,
+                                            style:
+                                                AppTextStyles().authLabelStyle),
+                                      ))
+                                  .toList(),
+                              onChanged: (value) =>
+                                  setState(() => _selectedCountry = value!),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              style: AppTextStyles().authLabelStyle,
+                            ),
+                          ),
                         ),
                       ],
                     ),
 
                     const SizedBox(height: 15),
-
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildNeomorphicDropdown(
+                            'Seeking Age From',
+                            DropdownButtonFormField<String>(
+                              value: _seekingAgeFrom,
+                              items: List.generate(
+                                83,
+                                (index) => DropdownMenuItem(
+                                  value: (index + 18).toString(),
+                                  child: Text((index + 18).toString(),
+                                      style: AppTextStyles().authLabelStyle),
+                                ),
+                              ),
+                              onChanged: (value) =>
+                                  setState(() => _seekingAgeFrom = value!),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              style: AppTextStyles().authLabelStyle,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: _buildNeomorphicDropdown(
+                            'Seeking Age To',
+                            DropdownButtonFormField<String>(
+                              value: _seekingAgeTo,
+                              items: List.generate(
+                                83,
+                                (index) => DropdownMenuItem(
+                                  value: (index + 18).toString(),
+                                  child: Text((index + 18).toString(),
+                                      style: AppTextStyles().authLabelStyle),
+                                ),
+                              ),
+                              onChanged: (value) =>
+                                  setState(() => _seekingAgeTo = value!),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              style: AppTextStyles().authLabelStyle,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
@@ -834,4 +834,23 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
       ],
     );
   }
+}
+
+Widget _buildNeomorphicDropdown(String label, Widget child) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label, style: AppTextStyles().authLabelStyle),
+      const SizedBox(height: 8),
+      Neumorphic(
+        style: NeumorphicStyle(
+          depth: 8,
+          intensity: 0.7,
+          surfaceIntensity: 0.5,
+          boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
+        ),
+        child: child,
+      ),
+    ],
+  );
 }

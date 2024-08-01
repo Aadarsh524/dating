@@ -36,6 +36,7 @@ class _EditInfoState extends State<EditInfo> {
 
   String? fileName;
   PlatformFile? imagefile;
+  String seeking = 'SEEKING';
 
   // for name
   final TextEditingController _controllerName = TextEditingController();
@@ -223,7 +224,8 @@ class _EditInfoState extends State<EditInfo> {
         final imageFile = kIsWeb
             ? result!.files.single.bytes
             : File(result!.files.single.path!).readAsBytesSync();
-        log("File picked: ${result.files.single.path}");
+
+        // log("File picked: ${result.files.single.path}");
         final base64 = base64Encode(imageFile!);
         _imageBytes = base64Decode(base64);
 
@@ -233,7 +235,9 @@ class _EditInfoState extends State<EditInfo> {
       } else {
         print('No image selected.');
       }
-    } catch (e) {
+    } catch (e, stacktrace) {
+      log('Exception caught: ${e.toString()}');
+      log('Stacktrace: $stacktrace');
       throw Exception(e.toString());
     }
   }
@@ -247,7 +251,7 @@ class _EditInfoState extends State<EditInfo> {
       bool isEditing,
       Function(bool) setEditing) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      padding: const EdgeInsets.symmetric(horizontal: kIsWeb ? 0 : 25.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1109,84 +1113,84 @@ class _EditInfoState extends State<EditInfo> {
                             //     }).toList(),
                             //   ),
                             // ),
-                            const SizedBox(
-                              width: 50,
-                            ),
+                            // const SizedBox(
+                            //   width: 50,
+                            // ),
 
-                            // country
+                            // // country
 
-                            Neumorphic(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 2),
-                              child: DropdownButton<String>(
-                                underline: Container(),
-                                style: AppTextStyles().secondaryStyle,
-                                value: country,
-                                icon: const Icon(
-                                    Icons.arrow_drop_down), // Dropdown icon
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    country = newValue!;
-                                  });
-                                },
-                                items: <String>[
-                                  'COUNTRY',
-                                  'English',
-                                  'Spanish',
-                                  'French',
-                                  'German'
-                                ] // Language options
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      style: AppTextStyles().secondaryStyle,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 50,
-                            ),
+                            // Neumorphic(
+                            //   padding: const EdgeInsets.symmetric(
+                            //       horizontal: 20, vertical: 2),
+                            //   child: DropdownButton<String>(
+                            //     underline: Container(),
+                            //     style: AppTextStyles().secondaryStyle,
+                            //     value: country,
+                            //     icon: const Icon(
+                            //         Icons.arrow_drop_down), // Dropdown icon
+                            //     onChanged: (String? newValue) {
+                            //       setState(() {
+                            //         country = newValue!;
+                            //       });
+                            //     },
+                            //     items: <String>[
+                            //       'COUNTRY',
+                            //       'English',
+                            //       'Spanish',
+                            //       'French',
+                            //       'German'
+                            //     ] // Language options
+                            //         .map<DropdownMenuItem<String>>(
+                            //             (String value) {
+                            //       return DropdownMenuItem<String>(
+                            //         value: value,
+                            //         child: Text(
+                            //           value,
+                            //           style: AppTextStyles().secondaryStyle,
+                            //         ),
+                            //       );
+                            //     }).toList(),
+                            //   ),
+                            // ),
+                            // const SizedBox(
+                            //   width: 50,
+                            // ),
 
-                            // age
+                            // // age
 
-                            Neumorphic(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 2),
-                              child: DropdownButton<String>(
-                                underline: Container(),
-                                style: AppTextStyles().secondaryStyle,
-                                value: age,
-                                icon: const Icon(
-                                    Icons.arrow_drop_down), // Dropdown icon
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    age = newValue!;
-                                  });
-                                },
-                                items: <String>[
-                                  'AGE',
-                                  'English',
-                                  'Spanish',
-                                  'French',
-                                  'German'
-                                ] // Language options
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      style: AppTextStyles().secondaryStyle,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
+                            // Neumorphic(
+                            //   padding: const EdgeInsets.symmetric(
+                            //       horizontal: 20, vertical: 2),
+                            //   child: DropdownButton<String>(
+                            //     underline: Container(),
+                            //     style: AppTextStyles().secondaryStyle,
+                            //     value: age,
+                            //     icon: const Icon(
+                            //         Icons.arrow_drop_down), // Dropdown icon
+                            //     onChanged: (String? newValue) {
+                            //       setState(() {
+                            //         age = newValue!;
+                            //       });
+                            //     },
+                            //     items: <String>[
+                            //       'AGE',
+                            //       'English',
+                            //       'Spanish',
+                            //       'French',
+                            //       'German'
+                            //     ] // Language options
+                            //         .map<DropdownMenuItem<String>>(
+                            //             (String value) {
+                            //       return DropdownMenuItem<String>(
+                            //         value: value,
+                            //         child: Text(
+                            //           value,
+                            //           style: AppTextStyles().secondaryStyle,
+                            //         ),
+                            //       );
+                            //     }).toList(),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ],
@@ -1704,6 +1708,41 @@ class _EditInfoState extends State<EditInfo> {
                                                     ),
                                                   ],
                                                 ),
+
+                                                editableField(
+                                                    'Age',
+                                                    age,
+                                                    _controllerAge,
+                                                    _isEditingAge,
+                                                    (value) => setState(() =>
+                                                        _isEditingAge = value)),
+
+                                                editableField(
+                                                    'Country',
+                                                    country,
+                                                    _controllerCountry,
+                                                    _isEditingCountry,
+                                                    (value) => setState(() =>
+                                                        _isEditingCountry =
+                                                            value)),
+
+                                                editableField(
+                                                    'Seeking From Age',
+                                                    seekingFromAge,
+                                                    _controllerSeekingFromAge,
+                                                    _isEditingSeekingFromAge,
+                                                    (value) => setState(() =>
+                                                        _isEditingSeekingFromAge =
+                                                            value)),
+
+                                                editableField(
+                                                    'Seeking To Age',
+                                                    seekingToAge,
+                                                    _controllerSeekingToAge,
+                                                    _isEditingSeekingToAge,
+                                                    (value) => setState(() =>
+                                                        _isEditingSeekingToAge =
+                                                            value)),
                                               ],
                                             ),
                                           ),

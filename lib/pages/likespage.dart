@@ -40,8 +40,8 @@ class _LikePageState extends State<LikePage> {
     super.initState();
     Provider.of<UserInteractionProvider>(context, listen: false)
         .getUserInteraction(user!.uid);
-    Provider.of<UserInteractionProvider>(context, listen: false)
-        .getUserMatches(user!.uid);
+    // Provider.of<UserInteractionProvider>(context, listen: false)
+    //     .getUserMatches(user!.uid);
   }
 
   @override
@@ -529,8 +529,7 @@ class _LikePageState extends State<LikePage> {
   }
 
   Widget mutualLikesListDesktop(List<UserMatchesModel> userMatchesModel) {
-    List<UserMatchesModel>? mutualLikesUsers = userMatchesModel;
-    if (mutualLikesUsers.isEmpty) {
+    if (userMatchesModel.isEmpty) {
       return const Center(child: Text('No users have liked you yet.'));
     }
     return Padding(
@@ -546,9 +545,9 @@ class _LikePageState extends State<LikePage> {
             mainAxisSpacing: 15, // Vertical spacing between items
           ),
           itemCount:
-              mutualLikesUsers.length, // Total number of containers in the grid
+              userMatchesModel.length, // Total number of containers in the grid
           itemBuilder: (context, index) {
-            UserMatchesModel user = mutualLikesUsers[index];
+            UserMatchesModel user = userMatchesModel[index];
             return Container(
               height: 250,
               decoration: BoxDecoration(
@@ -873,7 +872,9 @@ class _LikePageState extends State<LikePage> {
                           // address
 
                           Text(
-                            '${user.userDetail!.address}',
+                            '${user.userDetail!.address}'.isEmpty
+                                ? 'N/A'
+                                : '${user.userDetail!.address}',
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
@@ -1351,6 +1352,7 @@ class _LikePageState extends State<LikePage> {
                                 builder: (context, provider, _) {
                               List<UserMatchesModel>? userMatchModel =
                                   provider.getUserMatchModel;
+
                               return ListView(
                                 scrollDirection: Axis.vertical,
                                 children: [
@@ -1359,9 +1361,17 @@ class _LikePageState extends State<LikePage> {
                                   IndexedStack(
                                     index: _selectedIndex,
                                     children: [
-                                      likedMeListDesktop(provider),
-                                      myLikesListDesktop(provider),
-                                      mutualLikesListDesktop(userMatchModel!),
+                                      provider.isInteractionLoading
+                                          ? CircularProgressIndicator()
+                                          : likedMeListDesktop(provider),
+                                      provider.isInteractionLoading
+                                          ? CircularProgressIndicator()
+                                          : myLikesListDesktop(provider),
+                                      userMatchModel != null
+                                          ? mutualLikesListDesktop(
+                                              userMatchModel)
+                                          : Center(
+                                              child: Text('No Matches yet.'))
                                     ],
                                   ),
                                   const SizedBox(
