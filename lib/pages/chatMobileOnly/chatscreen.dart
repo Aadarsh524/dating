@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/chat/chat_message_model.dart';
+import 'package:dating/datamodel/chat/chat_message_model.dart' as chatmessage;
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
@@ -273,7 +274,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
   Widget _buildChatContent() {
     return Consumer<ChatMessageProvider>(
       builder: (context, chatMessageProvider, child) {
-        ChatMessageModel? chatRoomModel =
+        chatmessage.ChatMessageModel? chatRoomModel =
             chatMessageProvider.userChatMessageModel;
         if (chatMessageProvider.isMessagesLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -322,7 +323,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
     );
   }
 
-  Widget _buildMessageContent(Messages message, bool isCurrentUser) {
+  Widget _buildMessageContent(
+      chatmessage.Messages message, bool isCurrentUser) {
     switch (message.type) {
       case 'Text':
         return Text(
