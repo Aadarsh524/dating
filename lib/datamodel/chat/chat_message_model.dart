@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class ChatMessageModel {
   String? id;
   String? chatId;
@@ -36,10 +38,10 @@ class Messages {
   String? messageContent;
   String? recieverId;
   List<String>? fileName;
-  String? file;
+  File? file;
   String? timeStamp;
   String? type;
-  String? callDetails;
+  CallDetails? callDetails;
   String? call;
 
   Messages(
@@ -63,7 +65,9 @@ class Messages {
     file = json['file'];
     timeStamp = json['timeStamp'];
     type = json['type'];
-    callDetails = json['callDetails'];
+    callDetails = json['callDetails'] != null
+        ? CallDetails.fromJson(json['callDetails'])
+        : null;
     call = json['call'];
   }
 
@@ -77,8 +81,29 @@ class Messages {
     data['file'] = file;
     data['timeStamp'] = timeStamp;
     data['type'] = type;
-    data['callDetails'] = callDetails;
+    if (callDetails != null) {
+      data['callDetails'] = callDetails!.toJson();
+    }
     data['call'] = call;
+    return data;
+  }
+}
+
+class CallDetails {
+  String? duration;
+  String? status;
+
+  CallDetails({this.duration, this.status});
+
+  CallDetails.fromJson(Map<String, dynamic> json) {
+    duration = json['duration'];
+    status = json['status'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['duration'] = duration;
+    data['status'] = status;
     return data;
   }
 }

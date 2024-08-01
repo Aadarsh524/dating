@@ -82,12 +82,25 @@ class ChatRoomProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          return null; // Return null if response body is empty
+        }
+
         final jsonData = json.decode(response.body);
+        if (jsonData == null) {
+          return null; // Return null if jsonData is null
+        }
 
         final chatRoomModel = ChatRoomModel.fromJson(jsonData);
 
+        // Check if the conversations list is empty
+        if (chatRoomModel.conversations == null ||
+            chatRoomModel.conversations!.isEmpty) {
+          return null; // Return null if there are no conversations
+        }
+
         Conversations? userConversation;
-        for (var conversation in chatRoomModel.conversations ?? []) {
+        for (var conversation in chatRoomModel.conversations!) {
           if (conversation.endUserId == ouid) {
             userConversation = conversation;
             break;

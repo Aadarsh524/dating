@@ -2,29 +2,22 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/chat/chat_room_model.dart';
-import 'package:dating/datamodel/chat/send_message_model.dart';
+import 'package:dating/datamodel/chat/chat_room_model.dart' as chatRoom;
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/helpers/signaling.dart';
-import 'package:dating/pages/call_screen.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
-import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 
 import 'package:dating/utils/colors.dart';
-import 'package:dating/utils/images.dart';
 import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
-import 'package:dating/widgets/textField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -52,7 +45,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _message = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
-  List<AllMessages> lastMessage = [];
+  List<chatRoom.Message> lastMessage = [];
   Signaling _signaling = Signaling();
 
   void _showPopupDialog(BuildContext context) {
@@ -62,13 +55,13 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Enter Information'),
+          title: const Text('Enter Information'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
                 controller: _textFieldController,
-                decoration: InputDecoration(hintText: "Enter something"),
+                decoration: const InputDecoration(hintText: "Enter something"),
               ),
             ],
           ),
@@ -81,7 +74,7 @@ class _ChatPageState extends State<ChatPage> {
 
                 log("Entered text: $enteredText");
               },
-              child: Text('Submit'),
+              child: const Text('Submit'),
             ),
           ],
         );
@@ -105,11 +98,12 @@ class _ChatPageState extends State<ChatPage> {
 
   bool doesChatExists = false;
 
-  EndUserDetails? chatRoomMode;
+  chatRoom.EndUserDetails? chatRoomMode;
   String? chat;
   String? reciever;
 
-  void getChat(EndUserDetails chatRoomModel, String chatId, String recieverId) {
+  void getChat(
+      chatRoom.EndUserDetails chatRoomModel, String chatId, String recieverId) {
     setState(() {
       chatRoomMode = chatRoomModel;
       chat = chatId;
@@ -238,7 +232,7 @@ class _ChatPageState extends State<ChatPage> {
                         ? const ShimmerSkeleton(count: 2, height: 100)
                         : Consumer<ChatRoomProvider>(
                             builder: (context, chatRoomProvider, _) {
-                              ChatRoomModel? chatRoomModel =
+                              chatRoom.ChatRoomModel? chatRoomModel =
                                   Provider.of<ChatRoomProvider>(
                                 context,
                                 listen: false,
@@ -364,7 +358,7 @@ class _ChatPageState extends State<ChatPage> {
                                                               color:
                                                                   Colors.green,
                                                             )
-                                                          : Icon(
+                                                          : const Icon(
                                                               Icons.circle,
                                                               size: 8,
                                                               color: AppColors
@@ -744,7 +738,8 @@ class _ChatPageState extends State<ChatPage> {
                                               count: 2, height: 100)
                                           : Consumer<ChatRoomProvider>(
                                               builder: (context, chatRoomP, _) {
-                                              ChatRoomModel? chatRoomModel =
+                                              chatRoom.ChatRoomModel?
+                                                  chatRoomModel =
                                                   Provider.of<ChatRoomProvider>(
                                                 context,
                                                 listen: false,
