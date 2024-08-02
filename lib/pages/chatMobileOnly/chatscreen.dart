@@ -334,7 +334,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                 fontSize: 14,
               ),
         );
-      case 'Image':
+      case 'Audio':
         return _buildImageContent(message.fileName!, isCurrentUser);
       // case 'Audio':
       //   return AudioPlayerWidget(audioUrl: message.audioUrl!);
@@ -346,6 +346,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
   }
 
   Widget _buildImageContent(List<dynamic> imageUrls, bool isCurrentUser) {
+    print(imageUrls);
     return SizedBox(
       height: 50,
       width: 50,
@@ -363,9 +364,29 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Image.network(
-                imageUrls[index],
-                fit: BoxFit.cover,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  'http://localhost:8001/api/Communication/File/${imageUrls.first}',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.error);
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  (loadingProgress.expectedTotalBytes!)
+                              : null,
+                        ),
+                      );
+                    }
+                  },
+                ),
               ),
             ),
           );
