@@ -94,8 +94,11 @@ class _UserPostState extends State<UserPost> {
                                 .copyWith(fontSize: 14)),
                         Row(
                           children: [
-                            const Icon(Icons.circle,
-                                size: 8, color: AppColors.secondaryColor),
+                            widget.post.userStatus == 'active'
+                                ? const Icon(Icons.circle,
+                                    size: 8, color: Colors.green)
+                                : const Icon(Icons.circle,
+                                    size: 8, color: AppColors.secondaryColor),
                             const SizedBox(width: 10),
                             Text(
                               '${widget.post.name}, ${widget.post.age}',

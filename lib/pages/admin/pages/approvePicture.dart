@@ -280,7 +280,32 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
         Provider.of<AdminDashboardProvider>(context, listen: false);
     final document = adminProvider.approvedocuments;
 
-    if (document == null) return;
+    if (document == null ||
+        document.documents == null ||
+        document.documents!.isEmpty) {
+      if (document == null ||
+          document.documents == null ||
+          document.documents!.isEmpty) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('No Document'),
+              content: Text('No document added.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+        return; // Ensure the function exits early if there's no document.
+      }
+    }
 
     showDialog(
       context: context,

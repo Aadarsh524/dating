@@ -16,11 +16,15 @@ import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
+import 'package:dating/widgets/textField.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../datamodel/chat/chat_message_model.dart';
@@ -47,6 +51,7 @@ class _ChatPageState extends State<ChatPage> {
 
   List<chatRoom.Message> lastMessage = [];
   Signaling _signaling = Signaling();
+  Uint8List? _imageBytes;
 
   void _showPopupDialog(BuildContext context) {
     TextEditingController _textFieldController = TextEditingController();
@@ -80,6 +85,52 @@ class _ChatPageState extends State<ChatPage> {
         );
       },
     );
+  }
+
+  void pickImage() async {
+    try {
+      log("pick image is tapped");
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        if (!await Permission.storage.request().isGranted) {
+          throw Exception(
+              'Storage permission is required to upload the image.');
+        }
+      }
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png', 'jpeg'],
+      );
+
+      if (result?.files.isNotEmpty ?? false) {
+        final imageFile = result!.files.single.bytes;
+
+        // log("File picked: ${result.files.single.path}");
+        final base64 = base64Encode(imageFile!);
+        _imageBytes = base64Decode(base64);
+        final tempDir = await getTemporaryDirectory();
+        final file =
+            await File('${tempDir.path}/tempImage').writeAsBytes(imageFile);
+
+        final chatProvider = context.read<ChatMessageProvider>();
+
+        await chatProvider.sendChat(
+          SendMessageModel(
+            file: file,
+            senderId: user!.uid,
+            receiverId: reciever,
+          ),
+          chat!,
+          user!.uid,
+        );
+      } else {
+        print('No image selected.');
+      }
+    } catch (e, stacktrace) {
+      log('Exception caught: ${e.toString()}');
+      log('Stacktrace: $stacktrace');
+      throw Exception(e.toString());
+    }
   }
 
   Uint8List base64ToImage(String? base64String) {
@@ -922,198 +973,199 @@ class _ChatPageState extends State<ChatPage> {
               ),
 
               doesChatExists
-                  ? Expanded(child: _buildChatContent())
-                  // ? Expanded(
-                  //     flex: 2,
-                  //     child: Column(
-                  //       children: [
-                  //         Expanded(
-                  //           child: Padding(
-                  //             padding: const EdgeInsets.only(right: 20),
-                  //             child: Neumorphic(
-                  //               child: Column(
-                  //                 children: [
-                  //                   Padding(
-                  //                     padding: const EdgeInsets.symmetric(
-                  //                         horizontal: 20, vertical: 20),
-                  //                     child: Neumorphic(
-                  //                       child: Padding(
-                  //                         padding: const EdgeInsets.symmetric(
-                  //                             horizontal: 20, vertical: 10),
-                  //                         child: Row(
-                  //                           mainAxisAlignment:
-                  //                               MainAxisAlignment.spaceBetween,
-                  //                           children: [
-                  //                             // Profile pic with name
-                  //                             Row(
-                  //                               children: [
-                  //                                 Container(
-                  //                                   height: 50,
-                  //                                   width: 50,
-                  //                                   decoration: BoxDecoration(
-                  //                                     shape: BoxShape.circle,
-                  //                                     image: DecorationImage(
-                  //                                       image: MemoryImage(
-                  //                                           base64ToImage(
-                  //                                               chatRoomMode!
-                  //                                                   .profileImage)),
-                  //                                       fit: BoxFit.cover,
-                  //                                     ),
-                  //                                   ),
-                  //                                 ),
-                  //                                 const SizedBox(width: 8),
-                  //                                 Column(
-                  //                                   crossAxisAlignment:
-                  //                                       CrossAxisAlignment
-                  //                                           .start,
-                  //                                   children: [
-                  //                                     Text(
-                  //                                       chatRoomMode!.name!,
-                  //                                       style: AppTextStyles()
-                  //                                           .primaryStyle
-                  //                                           .copyWith(
-                  //                                               fontSize: 14),
-                  //                                     ),
-                  //                                     Row(
-                  //                                       children: [
-                  //                                         const Icon(
-                  //                                           Icons
-                  //                                               .location_on_outlined,
-                  //                                           size: 12,
-                  //                                           color: AppColors
-                  //                                               .secondaryColor,
-                  //                                         ),
-                  //                                         const SizedBox(
-                  //                                             width: 6),
-                  //                                         Text(
-                  //                                           'Malang, Jawa Timur.....',
-                  //                                           style: AppTextStyles()
-                  //                                               .secondaryStyle
-                  //                                               .copyWith(
-                  //                                                 fontSize: 14,
-                  //                                                 fontWeight:
-                  //                                                     FontWeight
-                  //                                                         .w300,
-                  //                                                 color: AppColors
-                  //                                                     .secondaryColor,
-                  //                                               ),
-                  //                                         ),
-                  //                                       ],
-                  //                                     ),
-                  //                                   ],
-                  //                                 ),
-                  //                               ],
-                  //                             ),
-                  //                             // Video and audio call
-                  //                             Row(
-                  //                               children: [
-                  //                                 Icon(Icons.circle,
-                  //                                     color: Colors.green,
-                  //                                     size: 12),
-                  //                                 const SizedBox(width: 8),
-                  //                                 GestureDetector(
-                  //                                   onTap: () {
-                  //                                     Navigator.pushReplacement(
-                  //                                         context,
-                  //                                         MaterialPageRoute(
-                  //                                             builder:
-                  //                                                 (context) =>
-                  //                                                     RingScreen(
-                  //                                                       roomId:
-                  //                                                           '123',
-                  //                                                     )));
-                  //                                   },
-                  //                                   child: const Icon(
-                  //                                       Icons.call_outlined),
-                  //                                 ),
-                  //                                 const SizedBox(width: 8),
-                  //                                 GestureDetector(
-                  //                                   onTap: () {
-                  //                                     _showPopupDialog(context);
-                  //                                   },
-                  //                                   child: const Icon(
-                  //                                       Icons.video_call),
-                  //                                 ),
-                  //                               ],
-                  //                             ),
-                  //                           ],
-                  //                         ),
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                   Expanded(
-                  //                     flex: 2,
-                  //                     child: _buildChatContent(),
-                  //                   ),
-                  //                   const SizedBox(height: 10),
-                  //                   Padding(
-                  //                     padding: const EdgeInsets.only(
-                  //                         left: 10, right: 10),
-                  //                     child: Row(
-                  //                       crossAxisAlignment:
-                  //                           CrossAxisAlignment.center,
-                  //                       mainAxisAlignment:
-                  //                           MainAxisAlignment.spaceBetween,
-                  //                       children: [
-                  //                         ButtonWithLabel(
-                  //                           text: null,
-                  //                           labelText: null,
-                  //                           onPressed: () {},
-                  //                           icon: const Icon(Icons.add),
-                  //                         ),
-                  //                         Expanded(
-                  //                           child: AppTextField(
-                  //                             hintText: 'Type your message',
-                  //                             inputcontroller:
-                  //                                 _messageController,
-                  //                           ),
-                  //                         ),
-                  //                         ButtonWithLabel(
-                  //                           text: null,
-                  //                           labelText: null,
-                  //                           onPressed: () {},
-                  //                           icon: const Icon(Icons.mic),
-                  //                         ),
-                  //                         // Send button
-                  //                         ButtonWithLabel(
-                  //                           text: null,
-                  //                           labelText: null,
-                  //                           onPressed: () async {
-                  //                             if (_messageController
-                  //                                 .text.isNotEmpty) {
-                  //                               final chatProvider =
-                  //                                   context.read<
-                  //                                       ChatMessageProvider>();
+                  ? Expanded(
+                      flex: 2,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 20),
+                              child: Neumorphic(
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 20),
+                                      child: Neumorphic(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 10),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              // Profile pic with name
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    height: 50,
+                                                    width: 50,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                        image: MemoryImage(
+                                                            base64ToImage(
+                                                                chatRoomMode!
+                                                                    .profileImage)),
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        chatRoomMode!.name!,
+                                                        style: AppTextStyles()
+                                                            .primaryStyle
+                                                            .copyWith(
+                                                                fontSize: 14),
+                                                      ),
+                                                      // Row(
+                                                      //   children: [
+                                                      //     const Icon(
+                                                      //       Icons
+                                                      //           .location_on_outlined,
+                                                      //       size: 12,
+                                                      //       color: AppColors
+                                                      //           .secondaryColor,
+                                                      //     ),
+                                                      //     const SizedBox(
+                                                      //         width: 6),
+                                                      //     Text(
+                                                      //       'Malang, Jawa Timur.....',
+                                                      //       style: AppTextStyles()
+                                                      //           .secondaryStyle
+                                                      //           .copyWith(
+                                                      //             fontSize: 14,
+                                                      //             fontWeight:
+                                                      //                 FontWeight
+                                                      //                     .w300,
+                                                      //             color: AppColors
+                                                      //                 .secondaryColor,
+                                                      //           ),
+                                                      //     ),
+                                                      //   ],
+                                                      // ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              // Video and audio call
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.circle,
+                                                      color: Colors.green,
+                                                      size: 12),
+                                                  const SizedBox(width: 8),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      Navigator.pushReplacement(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder:
+                                                                  (context) =>
+                                                                      RingScreen(
+                                                                        roomId:
+                                                                            '123',
+                                                                      )));
+                                                    },
+                                                    child: const Icon(
+                                                        Icons.call_outlined),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      _showPopupDialog(context);
+                                                    },
+                                                    child: const Icon(
+                                                        Icons.video_call),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: _buildChatContent(),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 10, right: 10),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ButtonWithLabel(
+                                            text: null,
+                                            labelText: null,
+                                            onPressed: () {
+                                              pickImage();
+                                            },
+                                            icon: const Icon(Icons.add),
+                                          ),
+                                          Expanded(
+                                            child: AppTextField(
+                                              hintText: 'Type your message',
+                                              inputcontroller:
+                                                  _messageController,
+                                            ),
+                                          ),
+                                          ButtonWithLabel(
+                                            text: null,
+                                            labelText: null,
+                                            onPressed: () {},
+                                            icon: const Icon(Icons.mic),
+                                          ),
+                                          // Send button
+                                          ButtonWithLabel(
+                                            text: null,
+                                            labelText: null,
+                                            onPressed: () async {
+                                              if (_messageController
+                                                  .text.isNotEmpty) {
+                                                final chatProvider =
+                                                    context.read<
+                                                        ChatMessageProvider>();
 
-                  //                               await chatProvider.sendChat(
-                  //                                 SendMessageModel(
-                  //                                   senderId: user!.uid,
-                  //                                   messageContent:
-                  //                                       _messageController.text,
-                  //                                   type: "Text",
-                  //                                   receiverId: reciever,
-                  //                                 ),
-                  //                                 chat!,
-                  //                                 user!.uid,
-                  //                               );
-                  //                               _messageController.clear();
-                  //                               _scrollToBottom();
-                  //                             }
-                  //                           },
-                  //                           icon: const Icon(Icons.send),
-                  //                         ),
-                  //                       ],
-                  //                     ),
-                  //                   ),
-                  //                   const SizedBox(height: 25),
-                  //                 ],
-                  //               ),
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   )
+                                                await chatProvider.sendChat(
+                                                  SendMessageModel(
+                                                    senderId: user!.uid,
+                                                    messageContent:
+                                                        _messageController.text,
+                                                    type: "Text",
+                                                    receiverId: reciever,
+                                                  ),
+                                                  chat!,
+                                                  user!.uid,
+                                                );
+                                                _messageController.clear();
+                                                _scrollToBottom();
+                                              }
+                                            },
+                                            icon: const Icon(Icons.send),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 25),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   : Container()
             ],
           ),
