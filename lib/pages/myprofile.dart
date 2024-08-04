@@ -1207,6 +1207,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                         ),
                                       ),
                                     ),
+                                    Expanded(
+                                        child: _buildVerificationSection()),
+                                    SizedBox(
+                                      height: 40,
+                                    ),
 
                                     SizedBox(
                                       width: double.infinity,

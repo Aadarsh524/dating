@@ -66,6 +66,7 @@ dependencies:
   flutter_background: ^1.2.0
   flutter_local_notifications: ^17.2.1+2
   firebase_messaging: ^14.9.4
+  path_provider: ^2.1.4
   
 
 

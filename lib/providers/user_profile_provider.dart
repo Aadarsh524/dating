@@ -91,8 +91,10 @@ class UserProfileProvider extends ChangeNotifier {
         },
         body: jsonEncode(documentVerificationModel.toJson()),
       );
+      log(response.statusCode.toString());
       if (response.statusCode == 200) {
         getUserProfile(documentVerificationModel.uid);
+
         notifyListeners();
         return true;
       } else {
