@@ -1,12 +1,19 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/providers/interaction_provider/favourite_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class FavouritePage extends StatefulWidget {
   const FavouritePage({super.key});
@@ -21,6 +28,10 @@ class _FavouritePageState extends State<FavouritePage> {
   String age = 'AGE';
 
   int _selectedIndex = 1;
+  User? user = FirebaseAuth.instance.currentUser;
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -347,121 +358,120 @@ class _FavouritePageState extends State<FavouritePage> {
     );
   }
 
-  Padding favListCardDesktop() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        width: double.infinity,
-        height: 900,
-        child: GridView.builder(
-          clipBehavior: Clip.none,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4, // Number of columns in the grid
-            crossAxisSpacing: 15, // Horizontal spacing between items
-            mainAxisSpacing: 15, // Vertical spacing between items
-          ),
-          itemCount: 12, // Total number of containers in the grid
-          itemBuilder: (context, index) {
-            return Container(
-              height: 250,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: const DecorationImage(
-                  image: AssetImage(AppImages.profile), // Image asset path
-                  fit: BoxFit
-                      .cover, // Adjust how the image should fit inside the container
-                ), // Adjust how the image should fit inside the container
+  Widget favListCardDesktop() {
+    return ChangeNotifierProvider(
+      create: (_) => FavouritesProvider()..getFavourites(user!.uid, 1),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child:
+            Consumer<FavouritesProvider>(builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          final favourites = provider.favourites;
+
+          if (favourites == null || favourites.isEmpty) {
+            return Center(child: Text('No favourites found.'));
+          }
+          return Container(
+            width: double.infinity,
+            height: 900,
+            child: GridView.builder(
+              clipBehavior: Clip.none,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4, // Number of columns in the grid
+                crossAxisSpacing: 15, // Horizontal spacing between items
+                mainAxisSpacing: 15, // Vertical spacing between items
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black
-                          .withOpacity(0), // Transparent black at the top
-                      Colors.black
-                          .withOpacity(0.75), // Solid black at the bottom
-                    ],
+              itemCount:
+                  favourites.length, // Total number of containers in the grid
+              itemBuilder: (context, index) {
+                final favourite = favourites[index];
+                return Container(
+                  height: 250,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    image: DecorationImage(
+                      image: favourite.image!.isNotEmpty
+                          ? MemoryImage(base64ToImage(favourite.image!))
+                          : MemoryImage(base64ToImage(
+                              defaultBase64Avatar)), // Image asset path
+                      fit: BoxFit
+                          .cover, // Adjust how the image should fit inside the container
+                    ), // Adjust how the image should fit inside the container
                   ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // like and chat
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SvgPicture.asset(AppIcons.heartoutline),
-                          const SizedBox(
-                            width: 8,
-                          ),
-                          SvgPicture.asset(AppIcons.chatoutline),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black
+                              .withOpacity(0), // Transparent black at the top
+                          Colors.black
+                              .withOpacity(0.75), // Solid black at the bottom
                         ],
                       ),
                     ),
-
-// name address
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // name
-                          Row(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // name address
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // name
+                              Row(
+                                children: [
+                                  Text(
+                                    '${favourite.name ?? 'Unknown'}, ${favourite.age ?? 'N/A'}',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      height: 0,
+                                    ),
+                                  ),
+
+                                  // male female
+                                ],
+                              ),
+                              // address
+
                               Text(
-                                'John Doe, 25',
+                                favourite.address ?? 'Unknown location',
                                 style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
+                                  color: Colors.white.withOpacity(0.75),
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w400,
                                   height: 0,
                                 ),
                               ),
 
-                              // male female
-                              const Icon(
-                                Icons.male,
-                                color: Colors.white,
-                              ),
+                              // Text(
+                              //   'Added: 1 hour ago',
+                              //   style: GoogleFonts.poppins(
+                              //     color: Colors.white.withOpacity(0.75),
+                              //     fontSize: 12,
+                              //     fontWeight: FontWeight.w400,
+                              //     height: 0,
+                              //   ),
+                              // ),
                             ],
                           ),
-                          // address
-
-                          Text(
-                            'Malang, Jawa Timur..',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
-                          ),
-
-                          Text(
-                            'Added: 1 hour ago',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
       ),
     );
   }
@@ -778,126 +788,7 @@ class _FavouritePageState extends State<FavouritePage> {
                         ),
 
 // tab bar
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: NeumorphicToggle(
-                            padding: EdgeInsets.zero,
-                            style: NeumorphicToggleStyle(
-                              borderRadius: BorderRadius.circular(100),
-                              depth: 10,
-                              disableDepth: false,
-                              backgroundColor: AppColors.backgroundColor,
-                            ),
-                            height: 40,
-                            width: 300,
-                            selectedIndex: _selectedIndex,
-                            children: [
-                              // Billing
-
-                              ToggleElement(
-                                background: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(
-                                        255, 202, 215, 225),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                    'Favorite Me',
-                                    style:
-                                        AppTextStyles().secondaryStyle.copyWith(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                            ),
-                                  )),
-                                ),
-                                foreground: Center(
-                                  child: Text(
-                                    'Favorite Me',
-                                    style:
-                                        AppTextStyles().secondaryStyle.copyWith(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                            ),
-                                  ),
-                                ),
-                              ),
-
-                              // profile
-
-                              ToggleElement(
-                                background: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(
-                                        255, 202, 215, 225),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                    'My Fav',
-                                    style:
-                                        AppTextStyles().secondaryStyle.copyWith(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                            ),
-                                  )),
-                                ),
-                                foreground: Center(
-                                  child: Text(
-                                    'My Fav',
-                                    style:
-                                        AppTextStyles().secondaryStyle.copyWith(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                            ),
-                                  ),
-                                ),
-                              ),
-                              ToggleElement(
-                                background: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(
-                                        255, 202, 215, 225),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Mutual Fav',
-                                      style: AppTextStyles()
-                                          .secondaryStyle
-                                          .copyWith(
-                                            color: Colors.black,
-                                            fontSize: 12,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                                foreground: Center(
-                                  child: Text(
-                                    'Mutual Fav',
-                                    style:
-                                        AppTextStyles().secondaryStyle.copyWith(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                            ),
-                                  ),
-                                ),
-                              )
-                            ],
-                            onChanged: (index) {
-                              setState(() {
-                                _selectedIndex = index;
-                              });
-                            },
-                            thumb: const Text(''),
-                          ),
-                        ),
+                        //
                       ],
                     ),
                     const SizedBox(
@@ -909,31 +800,7 @@ class _FavouritePageState extends State<FavouritePage> {
                         verticalDirection: VerticalDirection.down,
                         children: [
                           Expanded(
-                            child: ListView(
-                              scrollDirection: Axis.vertical,
-                              children: [
-                                // profile pic
-
-                                IndexedStack(
-                                  index: _selectedIndex,
-                                  children: [
-                                    favListCardDesktop(),
-                                    favListCardDesktop(),
-                                    favListCardDesktop(),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 30,
-                                ),
-
-// details
-                                const SizedBox(
-                                  height: 15,
-                                ),
-
-// edit
-                              ],
-                            ),
+                            child: favListCardDesktop(),
                           ),
                         ],
                       ),
