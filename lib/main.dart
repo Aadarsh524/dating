@@ -8,6 +8,7 @@ import 'package:dating/providers/chat_provider/call_provider.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/dashboard_provider.dart';
+import 'package:dating/providers/interaction_provider/favourite_provider.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/providers/loading_provider.dart';
 import 'package:dating/providers/subscription_provider.dart';
@@ -185,6 +186,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
     ChangeNotifierProvider(create: (_) => CallProvider()),
     ChangeNotifierProvider(create: (_) => AdminDashboardProvider()),
+    ChangeNotifierProvider(create: (_) => FavouritesProvider()),
   ], child: const MyApp()));
 }
 

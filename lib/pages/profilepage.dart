@@ -8,12 +8,14 @@ import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
+import 'package:dating/providers/interaction_provider/favourite_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
+import 'package:dating/widgets/favourite_button.dart';
 import 'package:dating/widgets/like_button.dart';
 import 'package:dating/widgets/navbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -71,6 +73,11 @@ class _ProfilePageState extends State<ProfilePage> {
     // TODO: implement initState
     super.initState();
     _loadPhoto();
+    final favouritesProvider =
+        Provider.of<FavouritesProvider>(context, listen: false);
+
+    favouritesProvider
+        .checkIfCurrentProfileIsFavourite(widget.dashboardresponsemodel.uid!);
   }
 
   @override
@@ -514,27 +521,9 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
 
             // star
-            Neumorphic(
-              style: const NeumorphicStyle(
-                boxShape: NeumorphicBoxShape.circle(),
-                depth: 5,
-                intensity: 0.75,
-              ),
-              child: NeumorphicButton(
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: SvgPicture.asset(
-                      AppIcons.starfilled,
-                      height: 20,
-                      width: 20,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            FavouriteButton(
+                currentUserId: user!.uid,
+                favUser: widget.dashboardresponsemodel.uid!),
           ],
         ),
       ),
@@ -1007,27 +996,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
 
                               // star
-                              Neumorphic(
-                                style: const NeumorphicStyle(
-                                  boxShape: NeumorphicBoxShape.circle(),
-                                  depth: 5,
-                                  intensity: 0.75,
-                                ),
-                                child: NeumorphicButton(
-                                  child: SizedBox(
-                                    height: 40,
-                                    width: 40,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5.0),
-                                      child: SvgPicture.asset(
-                                        AppIcons.starfilled,
-                                        height: 20,
-                                        width: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              FavouriteButton(
+                                  currentUserId: user!.uid,
+                                  favUser: widget.dashboardresponsemodel.uid!)
                             ],
                           ),
 
