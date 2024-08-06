@@ -33,7 +33,7 @@ class _FavouriteButtonState extends State<FavouriteButton> {
   Widget build(BuildContext context) {
     return Consumer<FavouritesProvider>(
       builder: (context, favouriteProvider, child) {
-        if (favouriteProvider.isLoading) {
+        if (favouriteProvider.isFavoriteLoading) {
           return const CircularProgressIndicator();
         } else {
           bool isFav = favouriteProvider
@@ -57,7 +57,7 @@ class _FavouriteButtonState extends State<FavouriteButton> {
                     padding: const EdgeInsets.all(5.0),
                     child: isFav
                         ? SvgPicture.asset(
-                            AppIcons.heartfilled,
+                            AppIcons.starfilled,
                             height: 20,
                             width: 20,
                           )

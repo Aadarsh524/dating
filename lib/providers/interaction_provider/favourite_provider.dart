@@ -12,14 +12,14 @@ class FavouritesProvider extends ChangeNotifier {
 
   List<FavouriteModel>? get favourites => _favourites;
 
-  bool _isLoading = false;
+  bool _isFavoriteLoading = false;
 
-  bool get isLoading => _isLoading;
+  bool get isFavoriteLoading => _isFavoriteLoading;
   bool _isCurrentProfileFavourite = false;
   bool get isCurrentProfileFavourite => _isCurrentProfileFavourite;
 
-  void setLoading(bool value) {
-    _isLoading = value;
+  void setFavoriteLoading(bool value) {
+    _isFavoriteLoading = value;
     notifyListeners();
   }
 
@@ -29,7 +29,7 @@ class FavouritesProvider extends ChangeNotifier {
   }
 
   Future<void> addFavourites(String uid, String favoriteUser) async {
-    setLoading(true);
+    setFavoriteLoading(true);
     String api = getApiEndpoint();
     try {
       final token = await TokenManager.getToken();
@@ -58,12 +58,12 @@ class FavouritesProvider extends ChangeNotifier {
     } catch (e) {
       log(e.toString());
     } finally {
-      setLoading(false);
+      setFavoriteLoading(false);
     }
   }
 
   Future<List<FavouriteModel>> getFavourites(String userId, int page) async {
-    setLoading(true);
+    setFavoriteLoading(true);
     String api = getApiEndpoint();
     try {
       final token = await TokenManager.getToken();
@@ -98,12 +98,12 @@ class FavouritesProvider extends ChangeNotifier {
       log(e.toString());
       rethrow;
     } finally {
-      setLoading(false);
+      setFavoriteLoading(false);
     }
   }
 
   Future<void> removeFavourites(String uid, String favouriteUser) async {
-    setLoading(true);
+    setFavoriteLoading(true);
     String api = getApiEndpoint();
     try {
       final token = await TokenManager.getToken();
@@ -118,6 +118,7 @@ class FavouritesProvider extends ChangeNotifier {
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
       );
 
@@ -130,7 +131,7 @@ class FavouritesProvider extends ChangeNotifier {
     } catch (e) {
       log(e.toString());
     } finally {
-      setLoading(false);
+      setFavoriteLoading(false);
     }
   }
 

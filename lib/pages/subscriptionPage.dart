@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:dating/datamodel/subscription_model.dart';
 
@@ -45,13 +44,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     });
   }
 
-  Future<void> makePayment(String amount) async {
-    log("make payment");
+  Future<void> makePayment(BuildContext context, String amount) async {
     try {
       // Step 1: Create Payment Intent
       final paymentIntent = await createPaymentIntent(amount);
       final clientSecret = paymentIntent['client_secret'];
-      log(clientSecret);
 
       // Step 2: Initialize Payment Sheet
       await Stripe.instance.initPaymentSheet(
@@ -80,67 +77,73 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       );
 
       // Step 3: Display Payment Sheet
-      await displayPaymentSheet(clientSecret);
+      await displayPaymentSheet(context, clientSecret);
     } catch (e) {
-      log(e.toString());
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Payment failed: ${e.toString()}')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment failed: ${e.toString()}')),
+        );
+      }
     }
   }
 
-  Future<void> displayPaymentSheet(String paymentIntentToken) async {
+  Future<void> displayPaymentSheet(
+      BuildContext context, String paymentIntentToken) async {
     User? user = FirebaseAuth.instance.currentUser;
 
     try {
-      log("not executed");
       await Stripe.instance.presentPaymentSheet();
 
       final subscriptionProvider = context.read<SubscriptionProvider>();
 
       final subscriptionModel = SubscriptionModel(
-          userId: user!.uid,
-          duration: "weekly",
-          planType: 'basic',
-          paymentMethod: "stripe",
-          paymentId: paymentIntentToken);
+        userId: user!.uid,
+        duration: "weekly",
+        planType: 'basic',
+        paymentMethod: "stripe",
+        paymentId: paymentIntentToken,
+      );
       final result =
           await subscriptionProvider.buySubcription(subscriptionModel, context);
-      if (result == true) {
+      if (result == true && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Payment successful!')),
         );
       }
     } catch (e) {
-      log("executed");
       if (e is StripeException) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Error from Stripe: ${e.error.localizedMessage}')),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text('Error from Stripe: ${e.error.localizedMessage}')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unforeseen error: ${e.toString()}')),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Unforeseen error: ${e.toString()}')),
+          );
+        }
       }
     }
   }
 
-  createPaymentIntent(String amount) async {
+  Future<Map<String, dynamic>> createPaymentIntent(String amount) async {
     try {
       final body = {
-        "amount": '1000',
+        "amount": amount,
         "currency": "USD",
       };
       http.Response response = await http.post(
-          Uri.parse('https://api.stripe.com/v1/payment_intents'),
-          body: body,
-          headers: {
-            "Authorization":
-                "Bearer  sk_test_51PVaJmAL5L5DqNFSUgCjWSSbZXrwyoErFjgdCOQMIrK4FoDG5cz3IikJjnpZ6LOJm8u37JrjUjqDDcKQ9eRqXcO700J2wqRvgK",
-            "Content-Type": "application/x-www-form-urlencoded",
-          });
+        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        body: body,
+        headers: {
+          "Authorization":
+              "Bearer sk_test_51PVaJmAL5L5DqNFSUgCjWSSbZXrwyoErFjgdCOQMIrK4FoDG5cz3IikJjnpZ6LOJm8u37JrjUjqDDcKQ9eRqXcO700J2wqRvgK",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      );
       return json.decode(response.body);
     } catch (e) {
       throw Exception(e.toString());
@@ -237,7 +240,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     return SubscriptionCard(
                       subscription: subscriptions[index],
                       onTap: () {
-                        makePayment(subscriptions[index].pricePerWeek);
+                        makePayment(context,
+                            subscriptions[index].pricePerWeek.toString());
                       },
                     );
                   },
@@ -353,7 +357,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                   subscription: subscription,
                                   onTap: () {
                                     makePayment(
-                                        subscriptions[index].pricePerWeek);
+                                        context,
+                                        subscriptions[index]
+                                            .pricePerWeek
+                                            .toString());
                                   },
                                 );
                               },
