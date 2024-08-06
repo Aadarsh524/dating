@@ -354,6 +354,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
         scrollDirection: Axis.horizontal,
         itemCount: imageUrls.length,
         itemBuilder: (context, index) {
+          String imageUrl =
+              'http://localhost:8001/api/Communication/FilePathForView/552d829dc38c1aa644b2d4d2f45b034846a7eb4e6c4ffd56ecac1f1284a38482.jpg';
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Container(
@@ -367,7 +369,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  'http://localhost:8001/api/Communication/File/${imageUrls.first}',
+                  imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Icon(Icons.error);

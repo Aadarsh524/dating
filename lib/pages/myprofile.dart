@@ -79,14 +79,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
   Future<void> _uploadDocument(String base64) async {
     final document = DocumentVerificationModel(
         uid: user!.uid,
-        verificationStatus: 1,
+        documentType: "Citizenship",
         document: [
-          Document(
-              fileType: 'Verification',
-              file: base64.toString(),
-              fileName: selectedFileType,
-              timeStamp: DateTime.now().toString(),
-              documentType: selectedFileType)
+          base64,
         ]);
     await context
         .read<UserProfileProvider>()

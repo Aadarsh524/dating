@@ -2,17 +2,12 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dating/datamodel/subscription_model.dart';
-import 'package:dating/pages/myprofile.dart';
-import 'package:dating/pages/settingpage.dart';
 
 import 'package:dating/providers/subscription_provider.dart';
-import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
-import 'package:dating/widgets/buttons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -105,11 +100,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       final subscriptionProvider = context.read<SubscriptionProvider>();
 
       final subscriptionModel = SubscriptionModel(
-        userId: user!.uid,
-        productId: 'product1',
-        duration: "weekly",
-        planType: 'basic',
-      );
+          userId: user!.uid,
+          duration: "weekly",
+          planType: 'basic',
+          paymentMethod: "stripe",
+          paymentId: paymentIntentToken);
       final result =
           await subscriptionProvider.buySubcription(subscriptionModel, context);
       if (result == true) {
