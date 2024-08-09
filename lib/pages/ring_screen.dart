@@ -11,12 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-
-
 class RingScreen extends StatefulWidget {
   final String clientID;
   final String roomId;
-  const RingScreen({Key? key, this.clientID = "null", this.roomId = "null", }) : super(key: key);
+  const RingScreen({
+    Key? key,
+    this.clientID = "null",
+    this.roomId = "null",
+  }) : super(key: key);
 
   @override
   RingScreenState createState() => RingScreenState();
@@ -46,61 +48,64 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   bool ringingCall = false;
   bool hostNavigatedToCall = false;
 
-
   String? roomId;
   MediaStream? stream;
   bool? hangUpState;
   bool isRemoteConnected = false;
   bool endCallPressed = false;
   late DocumentReference calleeCandidate;
-  
+
   bool userIsconnected = false;
   late AudioPlayer player;
 
-
   //TextEditingController textEditingController = TextEditingController(text: '');
-
 
   @override
   void initState() {
     _uid = _auth.currentUser?.uid;
-    if(widget.roomId == "null") {
-
+    if (widget.roomId == "null") {
       hostUser = _uid;
-      // callSubscription =
-      //     UserProfileProvider().getUserProfile(widget.clientID).listen((
-      //         List<LoginUser> data) {
-      //       callSubscription.cancel();
-      //       clientID = data[0].uid!;
-      //       if (data[0].status == "Online") {
-      //         if (data[0].beingcalled == null || data[0].beingcalled == "false") {
-      //           // final docRef = db.collection("users").doc(data[0].uid).collection(
-      //           //     "token").doc(data[0].uid);
-      //           // docRef.get().then(
-      //           //       (DocumentSnapshot doc) {
-      //           calleeCandidate = db.collection('rooms').doc();
-      //           roomId = calleeCandidate.id;
 
-      //           // final data = doc.data() as Map<String, dynamic>;
-      //           // String token = data["token"];
+      // Asynchronously fetch the user's profile
+      UserProfileProvider()
+          .getUserProfile(widget.clientID)
+          .then((userProfile) async {
+        if (userProfile == null) {
+          Fluttertoast.showToast(
+              msg: "Sorry, could not retrieve user profile.");
+          return;
+        }
 
-      //           calleeCandidate.set({'calleeConected': "null",}).then((
-      //               value) async {
-      //             getStringFieldStream();
-      //             // sendNotificationToUser("You have a Call from Anonymous", "Join Now", token, roomId!, _uid);
-      //             await db.collection("users").doc(clientID).update(
-      //                 {"beingcalled": "true", "roomid": roomId});
-      //           },
-      //           );
-      //         }else{
-      //           Fluttertoast.showToast(msg: "Sorry the user is in another call");
-      //         }
-      //       }
-      //       else {
-      //         Fluttertoast.showToast(msg: "Sorry the user is not online");
-      //       }
-      //     });
+        clientID = widget.clientID;
 
+        // Check if the user is online and not in another call
+        if (userProfile.userStatus == "active") {
+          //make changes here (isCalled or beingCalled)
+          if (userProfile.isVerified == false) {
+            // Create a new room
+            calleeCandidate = db.collection('rooms').doc();
+            roomId = calleeCandidate.id;
+
+            calleeCandidate.set({'calleeConected': "null"}).then((value) async {
+              getStringFieldStream();
+              // Optionally, you can send a notification to the user here
+              // sendNotificationToUser("You have a Call from Anonymous", "Join Now", token, roomId, _uid);
+
+              await db.collection("users").doc(clientID).update({
+                "beingcalled": "true",
+                "roomid": roomId,
+              });
+            });
+          } else {
+            Fluttertoast.showToast(msg: "Sorry, the user is in another call.");
+          }
+        } else {
+          Fluttertoast.showToast(msg: "Sorry, the user is not online.");
+        }
+      }).catchError((error) {
+        // Handle any errors that occur during the fetching process
+        Fluttertoast.showToast(msg: "Error retrieving user profile: $error");
+      });
     }
     getStringFieldStream();
 
@@ -115,12 +120,12 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
         curve: Curves.easeInOut, // Change this curve as needed
       ),
     )..addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _controller.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        _controller.forward();
-      }
-    });
+        if (status == AnimationStatus.completed) {
+          _controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          _controller.forward();
+        }
+      });
 
     _joinController = AnimationController(
       duration: Duration(milliseconds: 700),
@@ -129,16 +134,16 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
     _controller.forward();
 
-    if(widget.roomId != "null" && widget.clientID == "null" ) {
+    if (widget.roomId != "null" && widget.clientID == "null") {
       player = AudioPlayer();
       playAudio();
     }
     super.initState();
   }
 
-  playAudio()async{
+  playAudio() async {
     //await player.setSource(AssetSource('/sounds/ringtone.mp3'));
-    if(!ringingCall) {
+    if (!ringingCall) {
       ringingCall = true;
       await player.play(AssetSource('sounds/ringtone.mp3')).then((value) async {
         await player.play(AssetSource('sounds/ringtone.mp3'));
@@ -146,20 +151,18 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     }
   }
 
-
   @override
   void dispose() {
     getUserSignals.cancel();
     _joinController.dispose();
     _controller.dispose();
 
-    if(connected) {
+    if (connected) {
       connected = false;
     }
 
     super.dispose();
   }
-
 
   getStringFieldStream() {
     if (hostUser == "") {
@@ -167,12 +170,11 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
       roomId = hostUser;
     }
 
-
     calleeCandidate = db.collection('rooms').doc('$roomId');
     final userDoc = db.collection('users').doc(_uid);
 
     userDoc.get().then(
-          (DocumentSnapshot doc) {
+      (DocumentSnapshot doc) {
         final data = doc.data() as Map<String, dynamic>;
       },
       onError: (e) => print("Error getting document: $e"),
@@ -180,44 +182,45 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
     getUserSignals =
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
-          if (snapshot.exists) {
-            String callStatus = snapshot.get('calleeConected') ?? "";
-            if(callStatus!= "") {
-              if (callStatus == "done") {
-                connected = false;
-              } else if (callStatus != "done" && callStatus != "null" &&
-                  callStatus != "left") {
-                if (widget.roomId == "null") {
-                  if(!hostNavigatedToCall) {
-                    getUserSignals.cancel();
-                    hostNavigatedToCall = true;
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) =>
-                            CallScreen(userType: "H", roomId: roomId!)));
-                  }
-                }else{
-                  if (!iAcceptedCall) {
-                    if(widget.roomId != "null") {
-                      player.stop();
-                    }
-                    Navigator.pop(context);
-                  }
-                }
-              } else if (callStatus == "left") {
-                if(widget.roomId != "null") {
+      if (snapshot.exists) {
+        String callStatus = snapshot.get('calleeConected') ?? "";
+        if (callStatus != "") {
+          if (callStatus == "done") {
+            connected = false;
+          } else if (callStatus != "done" &&
+              callStatus != "null" &&
+              callStatus != "left") {
+            if (widget.roomId == "null") {
+              if (!hostNavigatedToCall) {
+                getUserSignals.cancel();
+                hostNavigatedToCall = true;
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) =>
+                        CallScreen(userType: "H", roomId: roomId!)));
+              }
+            } else {
+              if (!iAcceptedCall) {
+                if (widget.roomId != "null") {
                   player.stop();
                 }
                 Navigator.pop(context);
               }
             }
-          } else {
-            print("Not document existts");
+          } else if (callStatus == "left") {
+            if (widget.roomId != "null") {
+              player.stop();
+            }
+            Navigator.pop(context);
           }
-        });
+        }
+      } else {
+        print("Not document existts");
+      }
+    });
   }
 
-
-  void sendNotificationToUser(String title, String message, String userToken,String roomID, String hostUserID) async {
+  void sendNotificationToUser(String title, String message, String userToken,
+      String roomID, String hostUserID) async {
     final data = {
       "message": {
         "token": "token_1",
@@ -233,13 +236,13 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
       }
     };
 
-
     try {
       http.Response response = await http.post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'Authorization': ' key=AAAAjjzunNg:APA91bHcobq3RAB3hFadQ65oTFZgdvxc2CTUw1-Pa6N28Y1EKgx67v368K52qwLjuBXUnYtXMRjZxRm8mgq57tdTzZQwAvfRN7EDQg3Ah5a9dTuqkXrIz6MZzaizNJQvGxO0cMP36ePA',
+          'Authorization':
+              ' key=AAAAjjzunNg:APA91bHcobq3RAB3hFadQ65oTFZgdvxc2CTUw1-Pa6N28Y1EKgx67v368K52qwLjuBXUnYtXMRjZxRm8mgq57tdTzZQwAvfRN7EDQg3Ah5a9dTuqkXrIz6MZzaizNJQvGxO0cMP36ePA',
         },
         body: jsonEncode(
           <String, dynamic>{
@@ -264,263 +267,263 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:AppColors. white,
-      body:
-      connected == false && userType == 'H' ?
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 25,),
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Stack(
-              alignment: Alignment.center,
+      backgroundColor: AppColors.white,
+      body: connected == false && userType == 'H'
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SizedBox(
+                  height: 25,
+                ),
                 Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.transparent,
-                      border: Border.all(color: AppColors.green.withOpacity(0.3))
+                  padding: const EdgeInsets.all(16.0),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.transparent,
+                            border: Border.all(
+                                color: AppColors.green.withOpacity(0.3))),
+                      ),
+                      Container(
+                        width: 245,
+                        height: 245,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.transparent,
+                            border: Border.all(
+                                color: AppColors.green.withOpacity(0.2))),
+                      ),
+                      Container(
+                        width: 290,
+                        height: 290,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.transparent,
+                            border: Border.all(
+                                color: AppColors.green.withOpacity(0.1))),
+                      ),
+                      AnimatedBuilder(
+                          animation: _animation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _animation.value,
+                              child: CircleAvatar(
+                                radius: 80.0,
+                                backgroundImage: AssetImage(
+                                    'assets/images/man.png'), // Replace with the actual user's avatar
+                              ),
+                            );
+                          }),
+                    ],
                   ),
                 ),
-
-                Container(
-                  width: 245,
-                  height: 245,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.transparent,
-                      border: Border.all(color:AppColors. green.withOpacity(0.2))
-                  ),
+                SizedBox(height: 32.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {},
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: AppColors.grey2,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15.0,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-
-                Container(
-                  width: 290,
-                  height: 290,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.transparent,
-                      border: Border.all(color: AppColors.green.withOpacity(0.1))
-                  ),
-                ),
-
-                AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return  Transform.scale(
-                        scale: _animation.value,
-                        child: CircleAvatar(
+              ],
+            )
+          : Container(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(widget.roomId != "null" ? "Join a Call" : "Calling..",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 45,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.green)),
+                    SizedBox(
+                      height: 40,
+                    ),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.transparent,
+                              border: Border.all(
+                                  color: AppColors.green.withOpacity(0.2))),
+                        ),
+                        Container(
+                          width: 245,
+                          height: 245,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.transparent,
+                              border: Border.all(
+                                  color: AppColors.green.withOpacity(0.15))),
+                        ),
+                        Container(
+                          width: 290,
+                          height: 290,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.transparent,
+                              border: Border.all(
+                                  color: AppColors.green.withOpacity(0.1))),
+                        ),
+                        CircleAvatar(
                           radius: 80.0,
                           backgroundImage: AssetImage(
                               'assets/images/man.png'), // Replace with the actual user's avatar
                         ),
-                      );
-                    }
-                ),
-              ],
-            ),
-          ),
-
-          SizedBox(height: 32.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: (){
-                },
-                child: Text(
-                  "Cancel",
-                  style: TextStyle(
-                    color:AppColors. grey2,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ):
-
-      Container(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 10,),
-              Text(widget.roomId != "null" ? "Join a Call": "Calling..",textAlign:TextAlign.center,style: TextStyle( fontSize: 45, fontWeight: FontWeight.w900, color: AppColors.green)),
-              SizedBox(height: 40,),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.transparent,
-                        border: Border.all(color:AppColors. green.withOpacity(0.2))
+                      ],
                     ),
-                  ),
-
-                  Container(
-                    width: 245,
-                    height: 245,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.transparent,
-                        border: Border.all(color:AppColors. green.withOpacity(0.15))
+                    SizedBox(
+                      height: 50,
                     ),
-                  ),
+                    if (widget.roomId != "null")
+                      GestureDetector(
+                        onTap: () async {
+                          await db.runTransaction((transaction) async {
+                            final userDoc = db.collection('users').doc(_uid);
 
-                  Container(
-                    width: 290,
-                    height: 290,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.transparent,
-                        border: Border.all(color:AppColors. green.withOpacity(0.1))
-                    ),
-                  ),
-                  CircleAvatar(
-                    radius: 80.0,
-                    backgroundImage: AssetImage(
-                        'assets/images/man.png'), // Replace with the actual user's avatar
-                  ),
-                ],
-              ),
+                            final roomRef =
+                                await transaction.get(calleeCandidate);
 
-              SizedBox(height: 50,),
+                            if (roomRef.exists) {
+                              final data =
+                                  roomRef.data() as Map<String, dynamic>;
+                              String calleeConnected = data["calleeConected"];
 
-              if(widget.roomId != "null")
-                GestureDetector(
-                  onTap: ()async{
+                              Map<String, dynamic> updateCalleeVal = {
+                                'calleeConected': _uid,
+                              };
 
-                    await db.runTransaction((transaction) async {
+                              Map<String, dynamic> updateUserVal = {
+                                'callstatus': "oncall",
+                              };
 
-                      final userDoc = db.collection('users').doc(_uid);
+                              print("step 2");
 
-                      final roomRef = await transaction.get(calleeCandidate);
+                              if (calleeConnected == "null") {
+                                // Check for null instead of "null"
+                                try {
+                                  print("step 3");
+                                  transaction.update(
+                                      calleeCandidate, updateCalleeVal);
 
-                      if (roomRef.exists) {
-                        final data = roomRef.data() as Map<String, dynamic>;
-                        String calleeConnected = data["calleeConected"];
-
-                        Map<String, dynamic> updateCalleeVal = {
-                          'calleeConected': _uid,
-                        };
-
-                        Map<String, dynamic> updateUserVal = {
-                          'callstatus': "oncall",
-                        };
-
-                        print("step 2");
-
-                        if (calleeConnected == "null") { // Check for null instead of "null"
-                          try {
-                            print("step 3");
-                            transaction.update(calleeCandidate, updateCalleeVal);
-
-                            print("step 4");
-
-                          } catch (e) {
-                            print("Error joining room: $e");
-                            // Handle error, optionally rethrow or return a specific value
-                          }
-                        }
-                      }
-                    }).then((value)async{
-                      iAcceptedCall = true;
-                      //await db.collection("users").doc(clientID).update({"beingcalled": "false",});
-                        player.stop();
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => CallScreen(userType: "V", roomId: roomId!)));
-                    });
-                  },
-                  child: RotationTransition(
-                    turns: Tween(begin: 0.0, end: 0.1).animate(
-                      CurvedAnimation(
-                        parent: _joinController,
-                        curve: Curves.elasticIn,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      backgroundColor:AppColors. green,
-                      radius: 45,
-                      child: Icon(
-                        Icons.phone,
-                        size: 45.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-
-              SizedBox(height: 25,),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: (){
-                      endCallPressed = true;
-                      if(roomId != null) {
-                        getUserSignals.cancel();
-                        if(clientID != "") {
-                          db.collection("users").doc(clientID).update(
-                              {"beingcalled": "false", "roomid": ""});
-                        }
-
-                        db.collection('users').doc(_uid).update(
-                            clientID == "" ? {"callstatus":"","beingcalled": "false", "roomid": "" } : {"callstatus": "" }).then((value) {
-
-                          db.collection('rooms').doc('$roomId').update(
-                              {"calleeConected": "left"}).then((value) {
-                            if(widget.roomId != "null") {
-                              player.stop();
+                                  print("step 4");
+                                } catch (e) {
+                                  print("Error joining room: $e");
+                                  // Handle error, optionally rethrow or return a specific value
+                                }
+                              }
                             }
-                            Navigator.pop(context);
+                          }).then((value) async {
+                            iAcceptedCall = true;
+                            //await db.collection("users").doc(clientID).update({"beingcalled": "false",});
+                            player.stop();
+                            Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (context) => CallScreen(
+                                        userType: "V", roomId: roomId!)));
                           });
-                        });
-
-                      }else{
-                        if(widget.roomId != "null") {
-                          player.stop();
-                        }
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: Colors.red,
-                      radius: 40,
-                      child: Icon(
-                        Icons.call_end,
-                        size: 40.0,
-                        color: Colors.white,
+                        },
+                        child: RotationTransition(
+                          turns: Tween(begin: 0.0, end: 0.1).animate(
+                            CurvedAnimation(
+                              parent: _joinController,
+                              curve: Curves.elasticIn,
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            backgroundColor: AppColors.green,
+                            radius: 45,
+                            child: Icon(
+                              Icons.phone,
+                              size: 45.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
+                    SizedBox(
+                      height: 25,
                     ),
-                  ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            endCallPressed = true;
+                            if (roomId != null) {
+                              getUserSignals.cancel();
+                              if (clientID != "") {
+                                db.collection("users").doc(clientID).update(
+                                    {"beingcalled": "false", "roomid": ""});
+                              }
 
-                ],
+                              db
+                                  .collection('users')
+                                  .doc(_uid)
+                                  .update(clientID == ""
+                                      ? {
+                                          "callstatus": "",
+                                          "beingcalled": "false",
+                                          "roomid": ""
+                                        }
+                                      : {"callstatus": ""})
+                                  .then((value) {
+                                db.collection('rooms').doc('$roomId').update(
+                                    {"calleeConected": "left"}).then((value) {
+                                  if (widget.roomId != "null") {
+                                    player.stop();
+                                  }
+                                  Navigator.pop(context);
+                                });
+                              });
+                            } else {
+                              if (widget.roomId != "null") {
+                                player.stop();
+                              }
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.red,
+                            radius: 40,
+                            child: Icon(
+                              Icons.call_end,
+                              size: 40.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
-
-
-
-
+            ),
     );
   }
-
-
-
 }
-
-
-
-

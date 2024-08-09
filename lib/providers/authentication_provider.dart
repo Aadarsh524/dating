@@ -196,7 +196,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }) async {
     try {
       // Validate token and save it
-      String? token = await ApiClient().validateToken();
+      String? token = "thisistoken";
       if (token != null) {
         await TokenManager.saveToken(token);
       } else {

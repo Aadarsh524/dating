@@ -1071,8 +1071,8 @@ class _ChatPageState extends State<ChatPage> {
                                                               builder:
                                                                   (context) =>
                                                                       RingScreen(
-                                                                        roomId:
-                                                                            '123',
+                                                                        clientID:
+                                                                            user!.uid,
                                                                       )));
                                                     },
                                                     child: const Icon(
@@ -1240,9 +1240,9 @@ class _ChatPageState extends State<ChatPage> {
                 fontSize: 14,
               ),
         );
-      case 'Image':
-        return _buildImageContent(message.file as List<File>, isCurrentUser);
-      // case 'Audio':
+      case 'Audio':
+        return _buildImageContent(message.fileName!, isCurrentUser);
+      // case 'Audio':  
       //   return AudioPlayerWidget(audioUrl: message.audioUrl!);
       // case 'Call':
       //   return CallInfoWidget(callInfo: message.callInfo!);
@@ -1251,14 +1251,17 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  Widget _buildImageContent(List<File> imageFiles, bool isCurrentUser) {
+  Widget _buildImageContent(List<dynamic> imageUrls, bool isCurrentUser) {
+    print(imageUrls);
     return SizedBox(
       height: 50,
       width: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: imageFiles.length,
+        itemCount: imageUrls.length,
         itemBuilder: (context, index) {
+          String imageUrl =
+              'http://localhost:8001/api/Communication/FilePathForView/552d829dc38c1aa644b2d4d2f45b034846a7eb4e6c4ffd56ecac1f1284a38482.jpg';
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Container(
@@ -1269,9 +1272,29 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Image.file(
-                imageFiles[index],
-                fit: BoxFit.cover,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.error);
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  (loadingProgress.expectedTotalBytes!)
+                              : null,
+                        ),
+                      );
+                    }
+                  },
+                ),
               ),
             ),
           );

@@ -1000,7 +1000,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                             width: 5,
                                                           ),
                                                           Text(
-                                                            "Seeking Female 21-39",
+                                                            "Seeking ${userProfileModel.seeking!.gender} ${userProfileModel.seeking!.fromAge}-${userProfileModel.seeking!.toAge}",
                                                             style: AppTextStyles()
                                                                 .secondaryStyle,
                                                           )

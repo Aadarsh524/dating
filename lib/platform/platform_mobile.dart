@@ -10,10 +10,10 @@ String getApiEndpoint() {
     } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       return 'http://localhost:8001/api';
     } else {
-      return 'http://localhost:8001/api';
+      return 'http://testdeploy.runasp.net';
     }
   } catch (e) {
     // If Platform is not available, return a default value
-    return 'http://localhost:8001/api';
+    return 'http://testdeploy.runasp.net';
   }
 }
