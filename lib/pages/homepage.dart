@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:dating/backend/MongoDB/apis.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 
 import 'package:dating/datamodel/dashboard_response_model.dart' as d;
@@ -47,8 +46,6 @@ class _HomePageState extends State<HomePage> {
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
   }
-
-  ApiClient apiClient = ApiClient();
 
   @override
   void initState() {

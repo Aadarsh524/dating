@@ -9,6 +9,8 @@ class ShimmerSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Column(
       children: [
         for (int a = 1; a <= count; a++)
@@ -17,8 +19,8 @@ class ShimmerSkeleton extends StatelessWidget {
             highlightColor: Colors.grey.shade200,
             child: Container(
               margin:
-                  const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
-              width: double.infinity,
+                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+              width: screenWidth * 0.9, // Responsive width
               height: height,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -28,7 +30,7 @@ class ShimmerSkeleton extends StatelessWidget {
           ),
         const SizedBox(
           height: 40,
-        )
+        ),
       ],
     );
   }

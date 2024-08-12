@@ -1006,6 +1006,27 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                           )
                                                         ],
                                                       ),
+                                                      Row(
+                                                        children: [
+                                                          const Icon(
+                                                            Icons.verified_user,
+                                                            color: AppColors
+                                                                .secondaryColor,
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                          Text(
+                                                            userProfileModel
+                                                                        .isVerified !=
+                                                                    null
+                                                                ? "Verified"
+                                                                : "Unverified",
+                                                            style: AppTextStyles()
+                                                                .secondaryStyle,
+                                                          )
+                                                        ],
+                                                      ),
                                                     ],
                                                   )
                                                 ],
@@ -1313,50 +1334,43 @@ class _MyProfilePageState extends State<MyProfilePage> {
 }
 
 // profile button
-class profileButton extends StatelessWidget {
-  const profileButton({
-    super.key,
-  });
+class ProfileButton extends StatelessWidget {
+  const ProfileButton({Key? key}) : super(key: key);
 
-  Uint8List base64ToImage(String? base64String) {
-    return base64Decode(base64String!);
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      width: 40,
-      child: Consumer<UserProfileProvider>(
-        builder: (context, imageProvider, _) {
-          UserProfileModel? userProfileModel =
-              Provider.of<UserProfileProvider>(context, listen: false)
-                  .currentUserProfile;
+    return Consumer<UserProfileProvider>(
+      builder: (context, userProfileProvider, _) {
+        if (userProfileProvider.isProfileLoading) {
+          return const CircularProgressIndicator();
+        }
 
-          return Neumorphic(
-            style: NeumorphicStyle(
-              boxShape: NeumorphicBoxShape.roundRect(
-                BorderRadius.circular(1000),
-              ),
-              depth: 10,
-              intensity: 0.5,
+        UserProfileModel? userProfileModel =
+            userProfileProvider.currentUserProfile;
+
+        Uint8List imageBytes = userProfileModel!.image != null &&
+                userProfileModel.image!.isNotEmpty
+            ? base64ToImage(userProfileModel.image!)
+            : base64ToImage(defaultBase64Avatar);
+
+        return Neumorphic(
+          style: const NeumorphicStyle(
+            boxShape: NeumorphicBoxShape.circle(),
+          ),
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(1000),
-              child: userProfileModel!.image != null &&
-                      userProfileModel.image != ''
-                  ? Image.memory(
-                      base64ToImage(userProfileModel.image),
-                      fit: BoxFit.cover,
-                    )
-                  : Image.memory(
-                      base64ToImage(defaultBase64Avatar),
-                      fit: BoxFit.cover,
-                    ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

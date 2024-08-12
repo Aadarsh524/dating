@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 import 'package:dating/datamodel/interaction/user_match_model.dart';
 import 'package:dating/platform/platform_mobile.dart';
@@ -286,5 +284,32 @@ class UserInteractionProvider extends ChangeNotifier {
       await likeUser(currentUserId, likedUserId);
     }
     await getUserInteraction(currentUserId); // Refresh the liked users list
+  }
+
+  // Other methods and properties...
+
+  Future<bool> checkMutualLikes(String userId, String likedUserId) async {
+    // Fetch user interaction data for the current user
+    final UserInteractionModel? userInteraction =
+        await getUserInteraction(userId);
+
+    if (userInteraction == null) {
+      return false; // No user interaction data found
+    }
+
+    // Get the mutual likes list from the user interaction model
+    final List<MutualLikes>? mutualLikes = userInteraction.mutualLikes;
+
+    if (mutualLikes == null || mutualLikes.isEmpty) {
+      return false; // No mutual likes found
+    }
+
+    try {
+      // Check if the likedUserId exists in the mutual likes list
+      mutualLikes.firstWhere((mutualLike) => mutualLike.uid == likedUserId);
+      return true; // User found in mutual likes
+    } catch (e) {
+      return false; // User not found in mutual likes
+    }
   }
 }
