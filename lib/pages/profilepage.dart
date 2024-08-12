@@ -3,15 +3,16 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
-import 'package:dating/datamodel/dashboard_response_model.dart';
+import 'package:dating/datamodel/dashboard_response_model.dart' as d;
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/interaction_provider/favourite_provider.dart';
+import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
-import 'package:dating/utils/images.dart';
 import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
@@ -26,9 +27,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:insta_image_viewer/insta_image_viewer.dart';
 import 'package:provider/provider.dart';
 
+import '../datamodel/user_profile_model.dart';
+import '../providers/user_profile_provider.dart';
+
 // ignore: must_be_immutable
 class ProfilePage extends StatefulWidget {
-  DashboardResponseModel dashboardresponsemodel;
+  d.DashboardResponseModel dashboardresponsemodel;
   ProfilePage({super.key, required this.dashboardresponsemodel});
 
   @override
@@ -56,9 +60,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _loadPhoto() async {
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     final allUploads = widget.dashboardresponsemodel.uploads;
-    List<Uploads> reversedUploads = allUploads!.reversed.toList();
+    List<d.Uploads> reversedUploads = allUploads!.reversed.toList();
 
     setState(() {
       photo.clear(); // Clear existing photos if needed
@@ -102,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget MobileProfile() {
     final alluploads = widget.dashboardresponsemodel.uploads;
 
-    List<Uploads> reversedUploads = alluploads!.reversed.toList();
+    List<d.Uploads> reversedUploads = alluploads!.reversed.toList();
 
     return Scaffold(
       body: Column(children: [
@@ -461,43 +465,78 @@ class _ProfilePageState extends State<ProfilePage> {
                 intensity: 0.75,
               ),
               child: NeumorphicButton(
-                onPressed: () {
+                onPressed: () async {
+                  final userInteractionProvider =
+                      context.read<UserInteractionProvider>();
                   final chatRoomProvider = context.read<ChatRoomProvider>();
 
-                  chatRoomProvider
-                      .fetchChatRoomToCheckUser(context, user!.uid,
-                          widget.dashboardresponsemodel.uid!)
-                      .then((value) {
-                    if (value != null) {
+                  // Check for mutual likes
+                  final hasMutualLikes =
+                      await userInteractionProvider.checkMutualLikes(
+                    user!.uid,
+                    widget.dashboardresponsemodel.uid!,
+                  );
+
+                  if (hasMutualLikes) {
+                    // Fetch or create chat room
+                    final chatRoomId =
+                        await chatRoomProvider.fetchChatRoomToCheckUser(
+                      context,
+                      user!.uid,
+                      widget.dashboardresponsemodel.uid!,
+                    );
+
+                    // Check if chat room exists
+                    if (chatRoomId != null) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => ChatScreemMobile(
-                                  chatID: value,
-                                  chatRoomModel: EndUserDetails(
-                                      name: widget.dashboardresponsemodel.name,
-                                      profileImage:
-                                          widget.dashboardresponsemodel.image),
-                                  recieverId:
-                                      widget.dashboardresponsemodel.uid!,
-                                )),
+                          builder: (_) => ChatScreemMobile(
+                            chatID: chatRoomId,
+                            chatRoomModel: EndUserDetails(
+                              name: widget.dashboardresponsemodel.name,
+                              profileImage: widget.dashboardresponsemodel.image,
+                            ),
+                            recieverId: widget.dashboardresponsemodel.uid!,
+                          ),
+                        ),
                       );
                     } else {
+                      // Handle the case where no chat room was created
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => ChatScreemMobile(
-                                  chatID: '',
-                                  chatRoomModel: EndUserDetails(
-                                      name: widget.dashboardresponsemodel.name,
-                                      profileImage:
-                                          widget.dashboardresponsemodel.image),
-                                  recieverId:
-                                      widget.dashboardresponsemodel.uid!,
-                                )),
+                          builder: (_) => ChatScreemMobile(
+                            chatID: '',
+                            chatRoomModel: EndUserDetails(
+                              name: widget.dashboardresponsemodel.name,
+                              profileImage: widget.dashboardresponsemodel.image,
+                            ),
+                            recieverId: widget.dashboardresponsemodel.uid!,
+                          ),
+                        ),
                       );
                     }
-                  });
+                  } else {
+                    // Handle the case where there are no mutual likes
+                    // For example, show a message to the user
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('No Mutual Likes'),
+                        content: const Text(
+                            'You need mutual likes to start a chat.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                 },
                 child: Consumer<ChatRoomProvider>(
                   builder: (context, chatRoomProvider, child) {
@@ -533,7 +572,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget DesktopProfile() {
     final alluploads = widget.dashboardresponsemodel.uploads;
 
-    List<Uploads> reversedUploads = alluploads!.reversed.toList();
+    List<d.Uploads> reversedUploads = alluploads!.reversed.toList();
 
     return Scaffold(
       body: Column(children: [
@@ -548,7 +587,7 @@ class _ProfilePageState extends State<ProfilePage> {
               // profile
               Row(
                 children: [
-                  const profileButton(),
+                  const ProfileButton(),
                   const SizedBox(
                     width: 20,
                   ),
@@ -874,7 +913,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                     child: Center(
                                       child: photo.isEmpty
-                                          ? ShimmerSkeleton(
+                                          ? const ShimmerSkeleton(
                                               count: 1,
                                               height: 300,
                                             )
@@ -1041,8 +1080,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   const SizedBox(width: 5),
                                   widget.dashboardresponsemodel.gender ==
                                           "female"
-                                      ? Icon(Icons.female)
-                                      : Icon(Icons.male)
+                                      ? const Icon(Icons.female)
+                                      : const Icon(Icons.male)
                                 ],
                               ),
 
@@ -1065,7 +1104,40 @@ class _ProfilePageState extends State<ProfilePage> {
                                     style: AppTextStyles().secondaryStyle,
                                   )
                                 ],
-                              )
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.flag,
+                                    color: AppColors.secondaryColor,
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    "Country Risk Code: ${widget.dashboardresponsemodel.countryRiskCode}", // Added this line
+                                    style: AppTextStyles().secondaryStyle,
+                                  )
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.verified_user,
+                                    color: AppColors.secondaryColor,
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    widget.dashboardresponsemodel.isVerified !=
+                                            null
+                                        ? "Verified"
+                                        : "Unverified",
+                                    style: AppTextStyles().secondaryStyle,
+                                  )
+                                ],
+                              ),
                             ],
                           ),
 
@@ -1205,25 +1277,43 @@ class _ProfilePageState extends State<ProfilePage> {
 }
 
 // profile button
-class profileButton extends StatelessWidget {
-  const profileButton({
-    super.key,
-  });
+class ProfileButton extends StatelessWidget {
+  const ProfileButton({Key? key}) : super(key: key);
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Neumorphic(
-      style: const NeumorphicStyle(
-        boxShape: NeumorphicBoxShape.circle(),
-      ),
-      child: SizedBox(
-        height: 50,
-        width: 50,
-        child: Image.asset(
-          AppImages.loginimage,
-          fit: BoxFit.cover,
-        ),
-      ),
+    return Consumer<UserProfileProvider>(
+      builder: (context, userProfileProvider, _) {
+        if (userProfileProvider.isProfileLoading) {
+          return const CircularProgressIndicator();
+        }
+
+        UserProfileModel? userProfileModel =
+            userProfileProvider.currentUserProfile;
+
+        Uint8List imageBytes = userProfileModel!.image != null &&
+                userProfileModel.image!.isNotEmpty
+            ? base64ToImage(userProfileModel.image!)
+            : base64ToImage(defaultBase64Avatar);
+
+        return Neumorphic(
+          style: const NeumorphicStyle(
+            boxShape: NeumorphicBoxShape.circle(),
+          ),
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
     );
   }
 }

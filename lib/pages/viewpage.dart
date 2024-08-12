@@ -1,12 +1,21 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/providers/interaction_provider/favourite_provider.dart';
+import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ViewPage extends StatefulWidget {
   const ViewPage({super.key});
@@ -21,6 +30,11 @@ class _ViewPageState extends State<ViewPage> {
   String age = 'AGE';
 
   int _selectedIndex = 1;
+  User? user = FirebaseAuth.instance.currentUser;
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +58,11 @@ class _ViewPageState extends State<ViewPage> {
   Widget MobileViewPage() {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -60,7 +74,7 @@ class _ViewPageState extends State<ViewPage> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back,
                 ),
                 labelText: null,
@@ -83,7 +97,7 @@ class _ViewPageState extends State<ViewPage> {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -170,11 +184,11 @@ class _ViewPageState extends State<ViewPage> {
                 _selectedIndex = index;
               });
             },
-            thumb: Text(''),
+            thumb: const Text(''),
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -196,244 +210,230 @@ class _ViewPageState extends State<ViewPage> {
 
         // details edit
       ]),
-      bottomSheet: NavBar(),
+      bottomSheet: const NavBar(),
     );
   }
 
-  Padding viewListMobile() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        width: double.infinity,
-        height: 900,
-        child: GridView.builder(
-          clipBehavior: Clip.none,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Number of columns in the grid
-            crossAxisSpacing: 15, // Horizontal spacing between items
-            mainAxisSpacing: 15, // Vertical spacing between items
-          ),
-          itemCount: 12, // Total number of containers in the grid
-          itemBuilder: (context, index) {
-            return Container(
-              height: 250,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: AssetImage(AppImages.profile), // Image asset path
-                  fit: BoxFit
-                      .cover, // Adjust how the image should fit inside the container
-                ), // Adjust how the image should fit inside the container
+  ChangeNotifierProvider<FavouritesProvider> viewListMobile() {
+    return ChangeNotifierProvider(
+      create: (_) => FavouritesProvider()..getFavourites(user!.uid, 1),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child:
+            Consumer<FavouritesProvider>(builder: (context, provider, child) {
+          if (provider.isFavoriteLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final favourites = provider.favourites;
+
+          if (favourites == null || favourites.isEmpty) {
+            return const Center(child: Text('No favourites found.'));
+          }
+          return SizedBox(
+            width: double.infinity,
+            height: 900,
+            child: GridView.builder(
+              clipBehavior: Clip.none,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Number of columns in the grid
+                crossAxisSpacing: 15, // Horizontal spacing between items
+                mainAxisSpacing: 15, // Vertical spacing between items
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black
-                          .withOpacity(0), // Transparent black at the top
-                      Colors.black
-                          .withOpacity(0.75), // Solid black at the bottom
-                    ],
+              itemCount:
+                  favourites.length, // Total number of containers in the grid
+              itemBuilder: (context, index) {
+                final favourite = favourites[index];
+                return Container(
+                  height: 250,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    image: DecorationImage(
+                      image: favourite.image!.isNotEmpty
+                          ? MemoryImage(base64ToImage(favourite.image!))
+                          : MemoryImage(base64ToImage(
+                              defaultBase64Avatar)), // Image asset path
+                      fit: BoxFit
+                          .cover, // Adjust how the image should fit inside the container
+                    ),
                   ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // like and chat
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SvgPicture.asset(AppIcons.heartoutline),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          SvgPicture.asset(AppIcons.chatoutline),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black
+                              .withOpacity(0), // Transparent black at the top
+                          Colors.black
+                              .withOpacity(0.75), // Solid black at the bottom
                         ],
                       ),
                     ),
-
-// name address
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // name
-                          Row(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // name address
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // name
+                              Row(
+                                children: [
+                                  Text(
+                                    '${favourite.name ?? 'Unknown'}, ${favourite.age ?? 'N/A'}',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      height: 0,
+                                    ),
+                                  ),
+                                  // male female
+                                ],
+                              ),
+                              // address
                               Text(
-                                'John Doe, 25',
+                                favourite.address ?? 'Unknown location',
                                 style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
+                                  color: Colors.white.withOpacity(0.75),
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w400,
                                   height: 0,
                                 ),
                               ),
-
-                              // male female
-                              Icon(
-                                Icons.male,
-                                color: Colors.white,
-                              ),
                             ],
                           ),
-                          // address
-
-                          Text(
-                            'Malang, Jawa Timur..',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
-                          ),
-
-                          Text(
-                            'Viewed: 13 hour ago',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
       ),
     );
   }
 
-  Padding viewListDesktop() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        width: double.infinity,
-        height: 900,
-        child: GridView.builder(
-          clipBehavior: Clip.none,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4, // Number of columns in the grid
-            crossAxisSpacing: 15, // Horizontal spacing between items
-            mainAxisSpacing: 15, // Vertical spacing between items
-          ),
-          itemCount: 12, // Total number of containers in the grid
-          itemBuilder: (context, index) {
-            return Container(
-              height: 250,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: AssetImage(AppImages.profile), // Image asset path
-                  fit: BoxFit
-                      .cover, // Adjust how the image should fit inside the container
-                ), // Adjust how the image should fit inside the container
+  ChangeNotifierProvider<FavouritesProvider> viewListDesktop() {
+    return ChangeNotifierProvider(
+      create: (_) => FavouritesProvider()..getFavourites(user!.uid, 1),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child:
+            Consumer<FavouritesProvider>(builder: (context, provider, child) {
+          if (provider.isFavoriteLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final favourites = provider.favourites;
+
+          if (favourites == null || favourites.isEmpty) {
+            return const Center(child: Text('No favourites found.'));
+          }
+          return SizedBox(
+            width: double.infinity,
+            height: 900,
+            child: GridView.builder(
+              clipBehavior: Clip.none,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4, // Number of columns in the grid
+                crossAxisSpacing: 15, // Horizontal spacing between items
+                mainAxisSpacing: 15, // Vertical spacing between items
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black
-                          .withOpacity(0), // Transparent black at the top
-                      Colors.black
-                          .withOpacity(0.75), // Solid black at the bottom
-                    ],
+              itemCount:
+                  favourites.length, // Total number of containers in the grid
+              itemBuilder: (context, index) {
+                final favourite = favourites[index];
+                return Container(
+                  height: 250,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    image: DecorationImage(
+                      image: favourite.image!.isNotEmpty
+                          ? MemoryImage(base64ToImage(favourite.image!))
+                          : MemoryImage(base64ToImage(
+                              defaultBase64Avatar)), // Image asset path
+                      fit: BoxFit
+                          .cover, // Adjust how the image should fit inside the container
+                    ), // Adjust how the image should fit inside the container
                   ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // like and chat
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SvgPicture.asset(AppIcons.heartoutline),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          SvgPicture.asset(AppIcons.chatoutline),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black
+                              .withOpacity(0), // Transparent black at the top
+                          Colors.black
+                              .withOpacity(0.75), // Solid black at the bottom
                         ],
                       ),
                     ),
-
-// name address
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // name
-                          Row(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // name address
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // name
+                              Row(
+                                children: [
+                                  Text(
+                                    '${favourite.name ?? 'Unknown'}, ${favourite.age ?? 'N/A'}',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      height: 0,
+                                    ),
+                                  ),
+
+                                  // male female
+                                ],
+                              ),
+                              // address
+
                               Text(
-                                'John Doe, 25',
+                                favourite.address ?? 'Unknown location',
                                 style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
+                                  color: Colors.white.withOpacity(0.75),
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w400,
                                   height: 0,
                                 ),
                               ),
 
-                              // male female
-                              Icon(
-                                Icons.male,
-                                color: Colors.white,
-                              ),
+                              // Text(
+                              //   'Added: 1 hour ago',
+                              //   style: GoogleFonts.poppins(
+                              //     color: Colors.white.withOpacity(0.75),
+                              //     fontSize: 12,
+                              //     fontWeight: FontWeight.w400,
+                              //     height: 0,
+                              //   ),
+                              // ),
                             ],
                           ),
-                          // address
-
-                          Text(
-                            'Malang, Jawa Timur..',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
-                          ),
-
-                          Text(
-                            'Viewed: 19 hour ago',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
       ),
     );
   }
@@ -441,11 +441,11 @@ class _ViewPageState extends State<ViewPage> {
   Widget DesktopViewPage() {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -459,8 +459,8 @@ class _ViewPageState extends State<ViewPage> {
                         //     CupertinoPageRoute(
                         //         builder: (context) => ProfilePage()));
                       },
-                      child: profileButton()),
-                  SizedBox(
+                      child: const ProfileButton()),
+                  const SizedBox(
                     width: 20,
                   ),
                   Text(
@@ -480,7 +480,7 @@ class _ViewPageState extends State<ViewPage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {},
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.search,
                     ),
                     labelText: null,
@@ -493,7 +493,7 @@ class _ViewPageState extends State<ViewPage> {
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 40,
         ),
 
@@ -507,12 +507,12 @@ class _ViewPageState extends State<ViewPage> {
                 color: Colors.grey.withOpacity(0.25),
                 // spreadRadius: 5,
                 blurRadius: 20,
-                offset: Offset(0, 25), // horizontal and vertical offset
+                offset: const Offset(0, 25), // horizontal and vertical offset
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView(
               // physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -527,9 +527,9 @@ class _ViewPageState extends State<ViewPage> {
                           text: null,
                           labelText: 'Matches',
                           onPressed: () {},
-                          icon: Icon(Icons.people),
+                          icon: const Icon(Icons.people),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // messages
@@ -537,10 +537,10 @@ class _ViewPageState extends State<ViewPage> {
                           text: null,
                           labelText: 'Messages',
                           onPressed: () {},
-                          icon: Icon(Icons.messenger_outline),
+                          icon: const Icon(Icons.messenger_outline),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // popular
@@ -548,9 +548,9 @@ class _ViewPageState extends State<ViewPage> {
                           text: null,
                           labelText: 'Popular',
                           onPressed: () {},
-                          icon: Icon(Icons.star),
+                          icon: const Icon(Icons.star),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // photos
@@ -558,10 +558,10 @@ class _ViewPageState extends State<ViewPage> {
                           text: null,
                           labelText: 'Photos',
                           onPressed: () {},
-                          icon: Icon(Icons.photo_library_sharp),
+                          icon: const Icon(Icons.photo_library_sharp),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // add friemd
@@ -569,10 +569,10 @@ class _ViewPageState extends State<ViewPage> {
                           text: null,
                           labelText: 'Add Friend',
                           onPressed: () {},
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           width: 15,
                         ),
                         // online
@@ -580,7 +580,7 @@ class _ViewPageState extends State<ViewPage> {
                           text: null,
                           labelText: 'Online',
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.circle_outlined,
                             color: Colors.green,
                           ),
@@ -588,7 +588,7 @@ class _ViewPageState extends State<ViewPage> {
                       ],
                     ),
 
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
 
@@ -599,13 +599,14 @@ class _ViewPageState extends State<ViewPage> {
                         // seeking
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: seeking,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 seeking = newValue!;
@@ -629,20 +630,21 @@ class _ViewPageState extends State<ViewPage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // country
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: country,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 country = newValue!;
@@ -666,20 +668,21 @@ class _ViewPageState extends State<ViewPage> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
 
                         // age
 
                         Neumorphic(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 2),
                           child: DropdownButton<String>(
                             underline: Container(),
                             style: AppTextStyles().secondaryStyle,
                             value: age,
-                            icon: Icon(Icons.arrow_drop_down), // Dropdown icon
+                            icon: const Icon(
+                                Icons.arrow_drop_down), // Dropdown icon
                             onChanged: (String? newValue) {
                               setState(() {
                                 age = newValue!;
@@ -715,7 +718,7 @@ class _ViewPageState extends State<ViewPage> {
         //
 
         // post
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
 
@@ -723,10 +726,10 @@ class _ViewPageState extends State<ViewPage> {
           child: Row(
             children: [
 // side bar
-              NavBarDesktop(),
+              const NavBarDesktop(),
 
 // posts
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Expanded(
@@ -834,12 +837,12 @@ class _ViewPageState extends State<ViewPage> {
                                 _selectedIndex = index;
                               });
                             },
-                            thumb: Text(''),
+                            thumb: const Text(''),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 25,
                     ),
                     Expanded(
@@ -860,12 +863,12 @@ class _ViewPageState extends State<ViewPage> {
                                     viewListDesktop(),
                                   ],
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 30,
                                 ),
 
 // details
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
 
@@ -887,26 +890,43 @@ class _ViewPageState extends State<ViewPage> {
   }
 }
 
-// profile button
-class profileButton extends StatelessWidget {
-  const profileButton({
-    super.key,
-  });
+class ProfileButton extends StatelessWidget {
+  const ProfileButton({Key? key}) : super(key: key);
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Neumorphic(
-      style: NeumorphicStyle(
-        boxShape: NeumorphicBoxShape.circle(),
-      ),
-      child: Container(
-        height: 50,
-        width: 50,
-        child: Image.asset(
-          AppImages.loginimage,
-          fit: BoxFit.cover,
-        ),
-      ),
+    return Consumer<UserProfileProvider>(
+      builder: (context, userProfileProvider, _) {
+        if (userProfileProvider.isProfileLoading) {
+          return const CircularProgressIndicator();
+        }
+
+        UserProfileModel? userProfileModel =
+            userProfileProvider.currentUserProfile;
+
+        Uint8List imageBytes = userProfileModel!.image != null &&
+                userProfileModel.image!.isNotEmpty
+            ? base64ToImage(userProfileModel.image!)
+            : base64ToImage(defaultBase64Avatar);
+
+        return Neumorphic(
+          style: const NeumorphicStyle(
+            boxShape: NeumorphicBoxShape.circle(),
+          ),
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
     );
   }
 }

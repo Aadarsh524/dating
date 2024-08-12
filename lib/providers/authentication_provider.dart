@@ -52,7 +52,7 @@ class AuthenticationProvider extends ChangeNotifier {
           .signInWithEmailAndPassword(email: email, password: password);
 
       if (userCredential.user != null) {
-        String token = await ApiClient().validateToken() ?? '';
+        String token = 'demo';
         await TokenManager.saveToken(token);
 
         return userCredential.user!.uid;
@@ -88,12 +88,9 @@ class AuthenticationProvider extends ChangeNotifier {
       );
 
       if (userCredential.user != null) {
-        String? token = await ApiClient().validateToken();
-        if (token != null) {
-          await TokenManager.saveToken(token);
-        } else {
-          throw Exception('Token validation failed');
-        }
+        String token = 'demo';
+
+        await TokenManager.saveToken(token);
 
         bool profileCreated = await _createNewUserProfile(
           userCredential.user!.uid,
@@ -197,12 +194,7 @@ class AuthenticationProvider extends ChangeNotifier {
     try {
       // Validate token and save it
       String? token = "thisistoken";
-      if (token != null) {
-        await TokenManager.saveToken(token);
-      } else {
-        print('Token validation failed');
-        return false; // Token validation failed
-      }
+      await TokenManager.saveToken(token);
 
       final newUser = UserProfileModel(
         uid: uid,
