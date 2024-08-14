@@ -66,10 +66,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
         File imageFile = File(result.files.single.path!);
 
-        //  final verificationFile = kIsWeb
-        // ? result.files.single
-        // : File(result.files.single.path!);
-
         final base64 = base64Encode(file!);
 
         if (isDocument) {
@@ -84,11 +80,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
     }
   }
 
-  Future<void> _uploadDocument(File base64) async {
+  Future<void> _uploadDocument(File file) async {
     final document = DocumentVerificationModel(
       uid: user!.uid,
       documentType: "Citizenship",
-      file: [base64], // Wrap the base64 string in a list
+      file: [file], // Wrap the base64 string in a list
     );
     await context
         .read<UserProfileProvider>()

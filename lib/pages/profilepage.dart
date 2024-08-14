@@ -42,7 +42,11 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   User? user = FirebaseAuth.instance.currentUser;
   Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
+    try {
+      return base64Decode(base64String);
+    } catch (e) {
+      return Uint8List(0);
+    }
   }
 
   String seeking = 'SEEKING';
@@ -74,7 +78,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _loadPhoto();
     final favouritesProvider =
