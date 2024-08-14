@@ -350,16 +350,19 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
     }
   }
 
-  Widget _buildImageContent(List<dynamic> imageUrls, bool isCurrentUser) {
-    print(imageUrls);
-
+  Widget _buildImageContent(List<String> imageName, bool isCurrentUser) {
+    print(imageName);
     return SizedBox(
       height: 50,
       width: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: imageUrls.length,
+        itemCount: imageName.length,
         itemBuilder: (context, index) {
+          String imageUrl =
+              'http://localhost:8001/api/Communication/FileView/${imageName[index]}';
+
+          print(imageUrl);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Container(
@@ -373,7 +376,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  imageUrl.toString(),
+                  imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Icon(Icons.error);

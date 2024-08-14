@@ -84,25 +84,24 @@ class UserProfileProvider extends ChangeNotifier {
     setProfileLoading(true);
     try {
       String api = getApiEndpoint();
+      final uri = Uri.parse("$api/UserDocument");
 
-      // Create a MultipartRequest
-      var request =
-          http.MultipartRequest('POST', Uri.parse("$api/UserDocument"));
+      // Prepare the multipart request
+      var request = http.MultipartRequest('POST', uri)
+        ..headers['Accept'] = 'application/json'
+        ..headers['Content-Type'] = 'multipart/form-data'
+        ..fields['uid'] = documentVerificationModel.uid ?? ''
+        ..fields['documentType'] = documentVerificationModel.documentType ?? '';
 
-      // Add fields
-      request.fields['uid'] = documentVerificationModel.uid ?? '';
-      request.fields['documentType'] =
-          documentVerificationModel.documentType ?? '';
-
+      // Attach the file
       final file = await http.MultipartFile.fromPath(
-        'File', // Treating the file as an array with 'File[]'
+        'file',
         documentVerificationModel.file![0].path,
       );
       request.files.add(file);
 
-      // Send the request
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
+      // Send the request and get the response
+      var response = await http.Response.fromStream(await request.send());
 
       if (response.statusCode == 200) {
         getUserProfile(documentVerificationModel.uid ?? '');
