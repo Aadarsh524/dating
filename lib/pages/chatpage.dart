@@ -110,9 +110,8 @@ class _ChatPageState extends State<ChatPage> {
         // log("File picked: ${result.files.single.path}");
         final base64 = base64Encode(imageFile!);
         _imageBytes = base64Decode(base64);
-        final tempDir = await getTemporaryDirectory();
-        final file =
-            await File('${tempDir.path}/tempImage').writeAsBytes(imageFile);
+        final file = File('${DateTime.now().millisecondsSinceEpoch}.jpg')
+          ..writeAsBytesSync(imageFile);
 
         final chatProvider = context.read<ChatMessageProvider>();
 
@@ -1242,7 +1241,7 @@ class _ChatPageState extends State<ChatPage> {
         );
       case 'Audio':
         return _buildImageContent(message.fileName!, isCurrentUser);
-      // case 'Audio':  
+      // case 'Audio':
       //   return AudioPlayerWidget(audioUrl: message.audioUrl!);
       // case 'Call':
       //   return CallInfoWidget(callInfo: message.callInfo!);
@@ -1251,17 +1250,17 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  Widget _buildImageContent(List<dynamic> imageUrls, bool isCurrentUser) {
-    print(imageUrls);
+  Widget _buildImageContent(List<String> imageName, bool isCurrentUser) {
+    print(imageName);
     return SizedBox(
       height: 50,
       width: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: imageUrls.length,
+        itemCount: imageName.length,
         itemBuilder: (context, index) {
           String imageUrl =
-              'http://localhost:8001/api/Communication/FilePathForView/552d829dc38c1aa644b2d4d2f45b034846a7eb4e6c4ffd56ecac1f1284a38482.jpg';
+              'http://localhost:8001/api/Communication/FileView/${imageName[index]}';
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Container(

@@ -63,10 +63,17 @@ class _MyProfilePageState extends State<MyProfilePage> {
         final file = kIsWeb
             ? result!.files.single.bytes
             : File(result!.files.single.path!).readAsBytesSync();
+
+        File imageFile = File(result.files.single.path!);
+
+        //  final verificationFile = kIsWeb
+        // ? result.files.single
+        // : File(result.files.single.path!);
+
         final base64 = base64Encode(file!);
 
         if (isDocument) {
-          await _uploadDocument(base64);
+          await _uploadDocument(imageFile);
         } else {
           await _uploadPost(
               base64); // Assuming you have a separate method for posts
@@ -77,7 +84,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
     }
   }
 
-  Future<void> _uploadDocument(String base64) async {
+  Future<void> _uploadDocument(File base64) async {
     final document = DocumentVerificationModel(
       uid: user!.uid,
       documentType: "Citizenship",

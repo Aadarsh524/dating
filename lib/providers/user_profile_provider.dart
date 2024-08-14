@@ -94,15 +94,11 @@ class UserProfileProvider extends ChangeNotifier {
       request.fields['documentType'] =
           documentVerificationModel.documentType ?? '';
 
-      // Add the file as Multipart
-      if (documentVerificationModel.file != null &&
-          documentVerificationModel.file!.isNotEmpty) {
-        request.files.add(http.MultipartFile.fromBytes(
-          'file',
-          base64Decode(documentVerificationModel.file!.first),
-          filename: 'upload.jpg', // Optional: provide a filename
-        ));
-      }
+      final file = await http.MultipartFile.fromPath(
+        'File', // Treating the file as an array with 'File[]'
+        documentVerificationModel.file![0].path,
+      );
+      request.files.add(file);
 
       // Send the request
       var streamedResponse = await request.send();

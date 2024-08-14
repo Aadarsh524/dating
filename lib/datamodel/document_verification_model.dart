@@ -1,7 +1,9 @@
+import 'dart:io';
+
 class DocumentVerificationModel {
   String? uid;
   String? documentType;
-  List<String>? file;
+  List<File>? file;
 
   DocumentVerificationModel({this.uid, this.documentType, this.file});
 
