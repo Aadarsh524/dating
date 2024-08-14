@@ -41,7 +41,7 @@ class ChatMessageProvider extends ChangeNotifier {
       }
 
       // Set params in uri
-      final uri = Uri.parse("$api/communication");
+      final uri = Uri.parse("$api/Communication");
 
       // Create a multipart request
       var request = http.MultipartRequest('POST', uri)
@@ -78,6 +78,18 @@ class ChatMessageProvider extends ChangeNotifier {
       print(e.toString());
     } finally {
       setMessagesLoading(false);
+    }
+  }
+
+   Future<String> fetchImage() async {
+    final url =
+        'http://localhost:8001/api/Communication/FileView/2234ca44679f324108ae9ae4ae87d2fde9ec7c167572a07e3234f3991ca0b17c.jpeg';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Failed to load image');
     }
   }
 

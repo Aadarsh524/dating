@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_message_model.dart' as chatmessage;
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/pages/chatpage.dart';
@@ -48,6 +49,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
     return base64Decode(base64String);
   }
 
+  Future<String>? imageUrl;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +60,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
       final chatMessageProvider = context.read<ChatMessageProvider>();
       chatMessageProvider.getMessage(widget.chatID, 1, user!.uid);
     }
+    imageUrl =
+        Provider.of<ChatMessageProvider>(context, listen: false).fetchImage();
   }
 
   void _scrollToBottom() {
@@ -347,6 +352,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
 
   Widget _buildImageContent(List<dynamic> imageUrls, bool isCurrentUser) {
     print(imageUrls);
+
     return SizedBox(
       height: 50,
       width: 50,
@@ -354,8 +360,6 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
         scrollDirection: Axis.horizontal,
         itemCount: imageUrls.length,
         itemBuilder: (context, index) {
-          String imageUrl =
-              'http://localhost:8001/api/Communication/FilePathForView/552d829dc38c1aa644b2d4d2f45b034846a7eb4e6c4ffd56ecac1f1284a38482.jpg';
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Container(
@@ -369,7 +373,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  imageUrl,
+                  imageUrl.toString(),
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Icon(Icons.error);
