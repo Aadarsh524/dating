@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:http/http.dart';
 import '../../platform/platform.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
@@ -80,25 +82,38 @@ class UserProfileProvider extends ChangeNotifier {
   Future<bool> uploadDocumentsForVerification(
       DocumentVerificationModel documentVerificationModel) async {
     setProfileLoading(true);
-    log(documentVerificationModel.toJson().toString());
     try {
       String api = getApiEndpoint();
-      final response = await http.post(
-        Uri.parse("$api/UserDocument"),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(documentVerificationModel.toJson()),
-      );
-      log(response.statusCode.toString());
-      if (response.statusCode == 200) {
-        getUserProfile(documentVerificationModel.uid);
 
+      // Create a MultipartRequest
+      var request =
+          http.MultipartRequest('POST', Uri.parse("$api/UserDocument"));
+
+      // Add fields
+      request.fields['uid'] = documentVerificationModel.uid ?? '';
+      request.fields['documentType'] =
+          documentVerificationModel.documentType ?? '';
+
+      // Add the file as Multipart
+      if (documentVerificationModel.file != null &&
+          documentVerificationModel.file!.isNotEmpty) {
+        request.files.add(http.MultipartFile.fromBytes(
+          'file',
+          base64Decode(documentVerificationModel.file!.first),
+          filename: 'upload.jpg', // Optional: provide a filename
+        ));
+      }
+
+      // Send the request
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        getUserProfile(documentVerificationModel.uid ?? '');
         notifyListeners();
         return true;
       } else {
-        throw Exception('Cant upload data');
+        throw Exception('Failed to upload document: ${response.body}');
       }
     } catch (e) {
       rethrow;

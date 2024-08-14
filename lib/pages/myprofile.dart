@@ -68,7 +68,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
         if (isDocument) {
           await _uploadDocument(base64);
         } else {
-          await _uploadPost(base64);
+          await _uploadPost(
+              base64); // Assuming you have a separate method for posts
         }
       }
     } catch (e) {
@@ -78,11 +79,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Future<void> _uploadDocument(String base64) async {
     final document = DocumentVerificationModel(
-        uid: user!.uid,
-        documentType: "Citizenship",
-        document: [
-          base64,
-        ]);
+      uid: user!.uid,
+      documentType: "Citizenship",
+      file: [base64], // Wrap the base64 string in a list
+    );
     await context
         .read<UserProfileProvider>()
         .uploadDocumentsForVerification(document);
