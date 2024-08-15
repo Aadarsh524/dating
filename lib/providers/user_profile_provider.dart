@@ -84,27 +84,40 @@ class UserProfileProvider extends ChangeNotifier {
     setProfileLoading(true);
     try {
       String api = getApiEndpoint();
-      final uri = Uri.parse("$api/UserDocument");
+
+      // Get bearer token
+      final token = await TokenManager.getToken();
+
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final uri = Uri.parse(
+          "$api/UserDocument/${documentVerificationModel.uid}/${documentVerificationModel.documentType}");
 
       // Prepare the multipart request
       var request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $token'
         ..headers['Accept'] = 'application/json'
-        ..headers['Content-Type'] = 'multipart/form-data'
-        ..fields['uid'] = documentVerificationModel.uid ?? ''
-        ..fields['documentType'] = documentVerificationModel.documentType ?? '';
+        ..headers['Content-Type'] = 'multipart/form-data';
 
       // Attach the file
-      final file = await http.MultipartFile.fromPath(
-        'file',
-        documentVerificationModel.file![0].path,
-      );
-      request.files.add(file);
+      if (documentVerificationModel.file != null &&
+          documentVerificationModel.file!.isNotEmpty) {
+        final file = await http.MultipartFile.fromPath(
+          'File',
+          documentVerificationModel.file![0].path,
+        );
+        request.files.add(file);
+      } else {
+        throw Exception('No file provided for upload');
+      }
 
       // Send the request and get the response
       var response = await http.Response.fromStream(await request.send());
 
       if (response.statusCode == 200) {
-        getUserProfile(documentVerificationModel.uid ?? '');
+        getUserProfile(documentVerificationModel.uid);
         notifyListeners();
         return true;
       } else {
