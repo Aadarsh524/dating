@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import '../../platform/platform.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -85,32 +86,44 @@ class UserProfileProvider extends ChangeNotifier {
     try {
       String api = getApiEndpoint();
 
-      // Get bearer token
       final token = await TokenManager.getToken();
 
       if (token == null) {
         throw Exception('No token found');
       }
 
-      final uri = Uri.parse(
-          "$api/UserDocument/${documentVerificationModel.uid}/${documentVerificationModel.documentType}");
+      final uri = Uri.parse("$api/UserDocument");
 
-      // Prepare the multipart request
       var request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
         ..headers['Accept'] = 'application/json'
-        ..headers['Content-Type'] = 'multipart/form-data';
+        ..fields['uid'] = documentVerificationModel.uid!
+        ..fields['documenttype'] = documentVerificationModel.documentType!;
 
-      // Attach the file
-      if (documentVerificationModel.file != null &&
-          documentVerificationModel.file!.isNotEmpty) {
-        final file = await http.MultipartFile.fromPath(
-          'File',
-          documentVerificationModel.file![0].path,
-        );
-        request.files.add(file);
-      } else {
-        throw Exception('No file provided for upload');
+      // Handle web platforms
+      if (kIsWeb) {
+        if (documentVerificationModel.fileBytes != null &&
+            documentVerificationModel.fileBytes!.isNotEmpty) {
+          final file = http.MultipartFile.fromBytes(
+            'File',
+            documentVerificationModel.fileBytes!,
+            filename: documentVerificationModel.fileName,
+          );
+          request.files.add(file);
+        }
+      }
+      // Handle non-web platforms
+      else {
+        if (documentVerificationModel.file != null &&
+            documentVerificationModel.file!.isNotEmpty) {
+          final file = await http.MultipartFile.fromPath(
+            'File',
+            documentVerificationModel.file![0].path,
+          );
+          request.files.add(file);
+        } else {
+          throw Exception('No file provided for upload');
+        }
       }
 
       // Send the request and get the response
