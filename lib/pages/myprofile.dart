@@ -1265,6 +1265,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                         context,
                                                         listen: false)
                                                     .currentUserProfile;
+
                                             final alluploads =
                                                 userProfileModel!.uploads;
                                             if (alluploads != null) {
