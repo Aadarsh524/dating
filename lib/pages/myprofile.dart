@@ -47,6 +47,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   Future<void> _pickAndUploadFile({bool isDocument = false}) async {
     try {
+      // Permission check for mobile
       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
         if (!await Permission.storage.request().isGranted) {
           throw Exception(
@@ -54,30 +55,48 @@ class _MyProfilePageState extends State<MyProfilePage> {
         }
       }
 
+      // File picker to pick files
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png', 'jpeg'],
       );
 
       if (result?.files.isNotEmpty ?? false) {
-        final file = kIsWeb
-            ? result!.files.single.bytes
-            : File(result!.files.single.path!).readAsBytesSync();
-
-        File imageFile = File(result.files.single.path!);
-
-        final base64 = base64Encode(file!);
-
         if (isDocument) {
-          await _uploadDocument(imageFile);
+          // Web
+          if (kIsWeb) {
+            final fileBytes = result!.files.single.bytes;
+            final fileName = result.files.single.name;
+            await _uploadDocumentWeb(fileBytes!, fileName);
+          }
+          // Mobile/Desktop
+          else {
+            File file = File(result!.files.single.path!);
+            await _uploadDocument(file);
+          }
         } else {
-          await _uploadPost(
-              base64); // Assuming you have a separate method for posts
+          final base64 = kIsWeb
+              ? base64Encode(result!.files.single.bytes!)
+              : base64Encode(
+                  File(result!.files.single.path!).readAsBytesSync());
+          await _uploadPost(base64);
         }
       }
     } catch (e) {
       _showErrorSnackBar(e.toString());
     }
+  }
+
+  Future<void> _uploadDocumentWeb(List<int> fileBytes, String fileName) async {
+    final document = DocumentVerificationModel(
+      uid: user!.uid,
+      documentType: "Citizenship",
+      fileBytes: fileBytes,
+      fileName: fileName,
+    );
+    await context
+        .read<UserProfileProvider>()
+        .uploadDocumentsForVerification(document);
   }
 
   Future<void> _uploadDocument(File file) async {
