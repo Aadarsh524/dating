@@ -10,10 +10,10 @@ String getApiEndpoint() {
     } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       return 'http://localhost:8001/api';
     } else {
-      return 'http://10.0.2.2:8001/api';
+      return 'http://localhost:8001/api';
     }
   } catch (e) {
     // If Platform is not available, return a default value
-    return 'http://10.0.2.2:8001/api';
+    return 'http://localhost:8001/api';
   }
 }

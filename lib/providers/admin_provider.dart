@@ -52,10 +52,10 @@ class AdminDashboardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  ApproveDocumentModel? _approveDocumentListProvider;
-  ApproveDocumentModel? get approvedocuments => _approveDocumentListProvider;
+  ApproveDocumentModel? _approveDocumentProvider;
+  ApproveDocumentModel? get approvedocuments => _approveDocumentProvider;
   void setApproveDocument(ApproveDocumentModel documentsList) {
-    _approveDocumentListProvider = documentsList;
+    _approveDocumentProvider = documentsList;
     notifyListeners();
   }
 
@@ -345,8 +345,7 @@ class AdminDashboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<ApproveDocumentModel?> fetchDocumentById(
-      String userId, String id) async {
+  Future<ApproveDocumentModel?> fetchDocumentById(String userId) async {
     setAdminLoading(true);
 
     String api = getApiEndpoint();
@@ -357,7 +356,7 @@ class AdminDashboardProvider extends ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse('$api/admin/ApproveDocument/$id?userId=$userId'),
+        Uri.parse('$api/admin/ApproveDocument/$userId'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -366,16 +365,20 @@ class AdminDashboardProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Response Data: $responseData'); // Log the response data
+
         final approveDocumentModel =
-            ApproveDocumentModel.fromJson(json.decode(response.body));
-        setApproveDocument(approveDocumentModel); // Add this line
+            ApproveDocumentModel.fromJson(responseData);
+        setApproveDocument(approveDocumentModel);
         notifyListeners();
         return approveDocumentModel;
       } else {
+        print('Failed to fetch document: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print(e.toString());
+      print('Error fetching document: $e');
       rethrow;
     } finally {
       setAdminLoading(false);

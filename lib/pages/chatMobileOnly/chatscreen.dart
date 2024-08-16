@@ -360,7 +360,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
         itemCount: imageName.length,
         itemBuilder: (context, index) {
           String imageUrl =
-              'http://localhost:8001/api/Communication/FileView/${imageName[index]}';
+              'http://10.0.2.2:8001/api/Communication/FileView/${imageName[index]}';
 
           print(imageUrl);
           return Padding(
