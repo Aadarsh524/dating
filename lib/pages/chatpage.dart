@@ -1262,40 +1262,35 @@ class _ChatPageState extends State<ChatPage> {
         itemBuilder: (context, index) {
           String imageUrl =
               'http://localhost:8001/api/Communication/FileView/${imageName[index]}';
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: isCurrentUser ? Colors.blue : Colors.grey,
-                  width: 2,
-                ),
-                borderRadius: BorderRadius.circular(10),
+          print(imageUrl);
+          return Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isCurrentUser ? Colors.blue : Colors.grey,
+                width: 1,
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.error);
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    } else {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  (loadingProgress.expectedTotalBytes!)
-                              : null,
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(Icons.error);
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes!)
+                          : null,
+                    ),
+                  );
+                }
+              },
             ),
           );
         },

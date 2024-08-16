@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dating/datamodel/admin/approve_document_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -95,11 +96,12 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                   children: [
                     Container(
                       height: 50,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 2, color: Color(0xFFE5E5E5)),
+                          side: const BorderSide(
+                              width: 2, color: Color(0xFFE5E5E5)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -107,7 +109,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                         child: DropdownButton<String>(
                           padding: EdgeInsets.zero,
                           style: GoogleFonts.poppins(
-                            color: Color(0xFF7879F1),
+                            color: const Color(0xFF7879F1),
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                           ),
@@ -115,7 +117,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                           icon: SvgPicture.asset(
                             AppIcons.chevronoutline,
                             height: 14,
-                            color: Color.fromARGB(255, 120, 120, 241),
+                            color: const Color.fromARGB(255, 120, 120, 241),
                           ),
                           elevation: 0,
                           onChanged: (String? newValue) {
@@ -142,11 +144,12 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                     const SizedBox(width: 10),
                     Container(
                       height: 50,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 2, color: Color(0xFFE5E5E5)),
+                          side: const BorderSide(
+                              width: 2, color: Color(0xFFE5E5E5)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -158,7 +161,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                             Text(
                               _fromDate,
                               style: GoogleFonts.poppins(
-                                color: Color(0xFF868690),
+                                color: const Color(0xFF868690),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                                 letterSpacing: 0.20,
@@ -173,11 +176,12 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                     SvgPicture.asset(AppIcons.swap),
                     Container(
                       height: 50,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
-                          side: BorderSide(width: 2, color: Color(0xFFE5E5E5)),
+                          side: const BorderSide(
+                              width: 2, color: Color(0xFFE5E5E5)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -189,7 +193,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                             Text(
                               _toDate,
                               style: GoogleFonts.poppins(
-                                color: Color(0xFF868690),
+                                color: const Color(0xFF868690),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                                 letterSpacing: 0.20,
@@ -204,7 +208,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                   ],
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   height: 50,
                   decoration: BoxDecoration(
                     color: AppColors.blue,
@@ -236,6 +240,9 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Consumer<AdminDashboardProvider>(
                 builder: (context, adminProvider, _) {
+                  if (adminProvider.isAdminDataLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                   List<UserProfileModel>? users =
                       _isFilterApplied ? filteredData : adminProvider.usersList;
 
@@ -260,8 +267,9 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                                   'Status: ${user.isVerified == true ? "Verified" : "Not Verified"}'),
                               trailing: IconButton(
                                 icon: const Icon(Icons.more_vert),
-                                onPressed: () =>
-                                    _showImageDialog(context, user.uid!),
+                                onPressed: () async {
+                                  _showImageDialog(context, user.uid!);
+                                },
                               ),
                             );
                           },
@@ -276,69 +284,72 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
   }
 
   void _showImageDialog(BuildContext context, String uid) {
-    final adminProvider =
-        Provider.of<AdminDashboardProvider>(context, listen: false);
-    final document = adminProvider.approvedocuments;
-
-    if (document == null ||
-        document.documents == null ||
-        document.documents!.isEmpty) {
-      if (document == null ||
-          document.documents == null ||
-          document.documents!.isEmpty) {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('No Document'),
-              content: Text('No document added.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        return; // Ensure the function exits early if there's no document.
-      }
-    }
-
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('User Image'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.memory(base64Decode(document.documents![0].file!)),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      adminProvider.sendApprovalStatus(uid, 2);
-                      Navigator.pop(context);
+            title: const Text('User Document'),
+            content: FutureBuilder<ApproveDocumentModel?>(
+              future:
+                  Provider.of<AdminDashboardProvider>(context, listen: false)
+                      .fetchDocumentById(uid),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Text('Error loading document');
+                } else if (!snapshot.hasData ||
+                    snapshot.data == null ||
+                    snapshot.data!.documents == null ||
+                    snapshot.data!.documents!.isEmpty) {
+                  return const Text('No document available');
+                } else {
+                  final document = snapshot.data!;
+                  String imageUrl =
+                      'http://localhost:8001/api/Communication/FileView/${document.documents!.first.fileName}';
+
+                  return Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.error);
                     },
-                    child: Text('Approve'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      adminProvider.sendApprovalStatus(uid, 3);
-                      Navigator.pop(context);
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    (loadingProgress.expectedTotalBytes!)
+                                : null,
+                          ),
+                        );
+                      }
                     },
-                    child: Text('Reject'),
-                  ),
-                ],
+                  );
+                }
+              },
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Provider.of<AdminDashboardProvider>(context, listen: false)
+                      .sendApprovalStatus(uid, 2); // Approve
+                  Navigator.pop(context);
+                },
+                child: const Text('Approve'),
               ),
-            ],
-          ),
-        );
+              ElevatedButton(
+                onPressed: () {
+                  Provider.of<AdminDashboardProvider>(context, listen: false)
+                      .sendApprovalStatus(uid, 3); // Reject
+                  Navigator.pop(context);
+                },
+                child: const Text('Reject'),
+              ),
+            ]);
       },
     );
   }

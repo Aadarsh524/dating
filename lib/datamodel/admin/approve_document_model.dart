@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class ApproveDocumentModel {
   String? id;
   String? uid;
@@ -14,25 +16,25 @@ class ApproveDocumentModel {
     if (json['documents'] != null) {
       documents = <Documents>[];
       json['documents'].forEach((v) {
-        documents!.add(new Documents.fromJson(v));
+        documents!.add(Documents.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['uid'] = this.uid;
-    data['verificationStatus'] = this.verificationStatus;
-    if (this.documents != null) {
-      data['documents'] = this.documents!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['id'] = id;
+    data['uid'] = uid;
+    data['verificationStatus'] = verificationStatus;
+    if (documents != null) {
+      data['documents'] = documents!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class Documents {
-  String? file;
+  File? file;
   String? fileName;
   String? documentType;
   String? fileType;
@@ -54,12 +56,12 @@ class Documents {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['file'] = this.file;
-    data['fileName'] = this.fileName;
-    data['documentType'] = this.documentType;
-    data['fileType'] = this.fileType;
-    data['timeStamp'] = this.timeStamp;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['file'] = file;
+    data['fileName'] = fileName;
+    data['documentType'] = documentType;
+    data['fileType'] = fileType;
+    data['timeStamp'] = timeStamp;
     return data;
   }
 }

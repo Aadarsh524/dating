@@ -1117,10 +1117,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                   const SizedBox(
                                     width: 5,
                                   ),
-                                  Text(
-                                    "Country Risk Code: ${widget.dashboardresponsemodel.countryRiskCode}", // Added this line
-                                    style: AppTextStyles().secondaryStyle,
-                                  )
+                                  // Text(
+                                  //   "Country Risk Code: ${widget.dashboardresponsemodel.countryRiskCode}", // Added this line
+                                  //   style: AppTextStyles().secondaryStyle,
+                                  // )
                                 ],
                               ),
                               Row(
