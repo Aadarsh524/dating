@@ -89,7 +89,23 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  void pickImage() async {
+  Future<void> addImage(List<int> fileBytes, List<String> fileName) async {
+    final chatProvider = context.read<ChatMessageProvider>();
+    final sendMessage = SendMessageModel(
+      fileBytes: fileBytes,
+      fileName: fileName,
+      senderId: user!.uid,
+      receiverId: reciever,
+    );
+
+    await chatProvider.sendChat(
+      sendMessage,
+      chat!,
+      user!.uid,
+    );
+  }
+
+  void pickImage(BuildContext context) async {
     try {
       log("pick image is tapped");
       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
@@ -105,25 +121,10 @@ class _ChatPageState extends State<ChatPage> {
       );
 
       if (result?.files.isNotEmpty ?? false) {
-        final imageFile = result!.files.single.bytes;
-
-        // log("File picked: ${result.files.single.path}");
-        final base64 = base64Encode(imageFile!);
-        _imageBytes = base64Decode(base64);
-        final file = File('${DateTime.now().millisecondsSinceEpoch}.jpg')
-          ..writeAsBytesSync(imageFile);
-
-        final chatProvider = context.read<ChatMessageProvider>();
-
-        await chatProvider.sendChat(
-          SendMessageModel(
-            file: file,
-            senderId: user!.uid,
-            receiverId: reciever,
-          ),
-          chat!,
-          user!.uid,
-        );
+        final pickedFile = result!.files.single;
+        final imageBytes = pickedFile.bytes;
+        final fileName = pickedFile.name;
+        addImage(imageBytes!, [fileName]);
       } else {
         print('No image selected.');
       }
@@ -1110,7 +1111,7 @@ class _ChatPageState extends State<ChatPage> {
                                             text: null,
                                             labelText: null,
                                             onPressed: () {
-                                              pickImage();
+                                              pickImage(context);
                                             },
                                             icon: const Icon(Icons.add),
                                           ),

@@ -58,7 +58,19 @@ class ChatMessageProvider extends ChangeNotifier {
       request.fields['SenderId'] = sendMessageModel.senderId.toString();
       request.fields['RecieverId'] = sendMessageModel.receiverId.toString();
 
-      // Add the file if it exists and is not null
+      // handle for web 
+      if (kIsWeb) {
+        if (sendMessageModel.fileBytes != null &&
+            sendMessageModel.fileName != null) {
+          final file =  http.MultipartFile.fromBytes(
+              'File', // Treating the file as an array with 'File[]'
+              sendMessageModel.fileBytes!,
+              filename: sendMessageModel.fileName![0]);
+          request.files.add(file);
+        }
+      }
+
+      //this for other platforms
       if (sendMessageModel.file != null &&
           sendMessageModel.file!.path.isNotEmpty) {
         final file = await http.MultipartFile.fromPath(
@@ -81,7 +93,7 @@ class ChatMessageProvider extends ChangeNotifier {
     }
   }
 
-   Future<String> fetchImage() async {
+  Future<String> fetchImage() async {
     final url =
         'http://localhost:8001/api/Communication/FileView/2234ca44679f324108ae9ae4ae87d2fde9ec7c167572a07e3234f3991ca0b17c.jpeg';
     final response = await http.get(Uri.parse(url));
