@@ -33,7 +33,11 @@ import '../providers/user_profile_provider.dart';
 // ignore: must_be_immutable
 class ProfilePage extends StatefulWidget {
   d.DashboardResponseModel dashboardresponsemodel;
-  ProfilePage({super.key, required this.dashboardresponsemodel});
+
+  ProfilePage({
+    super.key,
+    required this.dashboardresponsemodel,
+  });
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -54,6 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String age = 'AGE';
   bool isProfileLiked = false;
   List<String?> photo = [];
+  bool isUserverified = false;
 
   int _selectedPhotoIndex = 0;
 
@@ -85,6 +90,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
     favouritesProvider
         .checkIfCurrentProfileIsFavourite(widget.dashboardresponsemodel.uid!);
+
+    final userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
+    isUserverified = userProfileProvider.currentUserProfile!.isVerified!;
   }
 
   @override
@@ -456,9 +465,9 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             // heart
             LikeButton(
-              currentUserId: user!.uid,
-              likedUserId: widget.dashboardresponsemodel.uid!,
-            ),
+                currentUserId: user!.uid,
+                likedUserId: widget.dashboardresponsemodel.uid!,
+                isCurrentUserVerified: isUserverified),
 
             // chat
             Neumorphic(
@@ -564,8 +573,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
             // star
             FavouriteButton(
-                currentUserId: user!.uid,
-                favUser: widget.dashboardresponsemodel.uid!),
+              currentUserId: user!.uid,
+              favUser: widget.dashboardresponsemodel.uid!,
+              isCurrentUserVerified: isUserverified,
+            ),
           ],
         ),
       ),
@@ -1010,9 +1021,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             children: [
                               // heart
                               LikeButton(
-                                currentUserId: user!.uid,
-                                likedUserId: widget.dashboardresponsemodel.uid!,
-                              ),
+                                  currentUserId: user!.uid,
+                                  likedUserId:
+                                      widget.dashboardresponsemodel.uid!,
+                                  isCurrentUserVerified: isUserverified),
 
                               // chat
                               Neumorphic(
@@ -1039,8 +1051,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
                               // star
                               FavouriteButton(
-                                  currentUserId: user!.uid,
-                                  favUser: widget.dashboardresponsemodel.uid!)
+                                currentUserId: user!.uid,
+                                favUser: widget.dashboardresponsemodel.uid!,
+                                isCurrentUserVerified: isUserverified,
+                              )
                             ],
                           ),
 
@@ -1117,10 +1131,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                   const SizedBox(
                                     width: 5,
                                   ),
-                                  // Text(
-                                  //   "Country Risk Code: ${widget.dashboardresponsemodel.countryRiskCode}", // Added this line
-                                  //   style: AppTextStyles().secondaryStyle,
-                                  // )
+                                  Text(
+                                    "Country Risk Code: ${widget.dashboardresponsemodel.countryRiskCode}", // Added this line
+                                    style: AppTextStyles().secondaryStyle,
+                                  )
                                 ],
                               ),
                               Row(

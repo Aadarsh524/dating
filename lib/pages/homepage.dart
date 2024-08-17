@@ -38,6 +38,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
   User? user = FirebaseAuth.instance.currentUser;
+  bool isUserVerified = false;
 
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
@@ -93,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                         CupertinoPageRoute(
                             builder: (context) => const MyProfilePage()));
                   },
-                  child: const ProfileButton()),
+                  child: _buildProfileImage()),
 
               // search icon
               Row(
@@ -280,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                             MaterialPageRoute(
                                 builder: (context) => const MyProfilePage()));
                       },
-                      child: const ProfileButton(),
+                      child: _buildProfileImage(),
                     ),
                     const SizedBox(
                       width: 20,
@@ -682,47 +683,40 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// profile button
-// ignore: must_be_immutable
-class ProfileButton extends StatelessWidget {
-  const ProfileButton({Key? key}) : super(key: key);
-
+Widget _buildProfileImage() {
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<UserProfileProvider>(
-      builder: (context, userProfileProvider, _) {
-        if (userProfileProvider.isProfileLoading) {
-          return const CircularProgressIndicator();
-        }
+  return Consumer<UserProfileProvider>(
+    builder: (context, userProfileProvider, _) {
+      if (userProfileProvider.isProfileLoading) {
+        return const CircularProgressIndicator();
+      }
 
-        UserProfileModel? userProfileModel =
-            userProfileProvider.currentUserProfile;
+      UserProfileModel? userProfileModel =
+          userProfileProvider.currentUserProfile;
 
-        Uint8List imageBytes = userProfileModel!.image != null &&
-                userProfileModel.image!.isNotEmpty
-            ? base64ToImage(userProfileModel.image!)
-            : base64ToImage(defaultBase64Avatar);
+      Uint8List imageBytes =
+          userProfileModel!.image != null && userProfileModel.image!.isNotEmpty
+              ? base64ToImage(userProfileModel.image!)
+              : base64ToImage(defaultBase64Avatar);
 
-        return Neumorphic(
-          style: const NeumorphicStyle(
-            boxShape: NeumorphicBoxShape.circle(),
+      return Neumorphic(
+        style: const NeumorphicStyle(
+          boxShape: NeumorphicBoxShape.circle(),
+        ),
+        child: SizedBox(
+          height: 50,
+          width: 50,
+          child: Image.memory(
+            imageBytes,
+            fit: BoxFit.cover,
           ),
-          child: SizedBox(
-            height: 50,
-            width: 50,
-            child: Image.memory(
-              imageBytes,
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
 }
 
 extension UserInteractionModelExtension on UserInteractionModel {

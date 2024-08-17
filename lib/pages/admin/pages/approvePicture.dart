@@ -336,7 +336,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
               ElevatedButton(
                 onPressed: () {
                   Provider.of<AdminDashboardProvider>(context, listen: false)
-                      .sendApprovalStatus(uid, 2); // Approve
+                      .sendApprovalStatus(context, uid, 2); // Approve
                   Navigator.pop(context);
                 },
                 child: const Text('Approve'),
@@ -344,7 +344,7 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
               ElevatedButton(
                 onPressed: () {
                   Provider.of<AdminDashboardProvider>(context, listen: false)
-                      .sendApprovalStatus(uid, 3); // Reject
+                      .sendApprovalStatus(context, uid, 3); // Reject
                   Navigator.pop(context);
                 },
                 child: const Text('Reject'),
