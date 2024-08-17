@@ -313,7 +313,8 @@ class AdminDashboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> sendApprovalStatus(String userId, int approvalStatus) async {
+  Future<bool> sendApprovalStatus(
+      BuildContext context, userId, int approvalStatus) async {
     setAdminLoading(true);
 
     String api = getApiEndpoint();
@@ -334,6 +335,7 @@ class AdminDashboardProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        fetchUsers(1, context);
         return true;
       }
       return false;
