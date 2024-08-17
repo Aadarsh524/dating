@@ -5,22 +5,24 @@ import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/pages/profilepage.dart';
 import 'package:dating/providers/dashboard_provider.dart';
+
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class UserPost extends StatefulWidget {
   final DashboardResponseModel post;
   final String currentUserId;
   final Function(String postId) onLike;
 
-  const UserPost({
+  UserPost({
     required this.post,
     required this.currentUserId,
     required this.onLike,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _UserPostState createState() => _UserPostState();
@@ -32,6 +34,7 @@ class _UserPostState extends State<UserPost> {
   @override
   void initState() {
     super.initState();
+
     hasLiked = true;
   }
 
@@ -55,7 +58,9 @@ class _UserPostState extends State<UserPost> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ProfilePage(dashboardresponsemodel: widget.post),
+            builder: (_) => ProfilePage(
+              dashboardresponsemodel: widget.post,
+            ),
           ),
         );
       },

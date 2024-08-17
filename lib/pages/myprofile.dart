@@ -45,9 +45,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
     return base64Decode(base64String!);
   }
 
+  bool isUserVerified = false;
+
   Future<void> _pickAndUploadFile({bool isDocument = false}) async {
     try {
-      // Permission check for mobile
       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
         if (!await Permission.storage.request().isGranted) {
           throw Exception(
@@ -55,33 +56,39 @@ class _MyProfilePageState extends State<MyProfilePage> {
         }
       }
 
-      // File picker to pick files
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'png', 'jpeg'],
-      );
+      if (isUserVerified) {
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'png', 'jpeg'],
+        );
 
-      if (result?.files.isNotEmpty ?? false) {
-        if (isDocument) {
-          // Web
-          if (kIsWeb) {
-            final fileBytes = result!.files.single.bytes;
-            final fileName = result.files.single.name;
-            await _uploadDocumentWeb(fileBytes!, fileName);
+        if (result?.files.isNotEmpty ?? false) {
+          if (isDocument) {
+            // Web
+            if (kIsWeb) {
+              final fileBytes = result!.files.single.bytes;
+              final fileName = result.files.single.name;
+              await _uploadDocumentWeb(fileBytes!, fileName);
+            }
+            // Mobile/Desktop
+            else {
+              File file = File(result!.files.single.path!);
+              await _uploadDocument(file);
+            }
+          } else {
+            final base64 = kIsWeb
+                ? base64Encode(result!.files.single.bytes!)
+                : base64Encode(
+                    File(result!.files.single.path!).readAsBytesSync());
+            await _uploadPost(base64);
           }
-          // Mobile/Desktop
-          else {
-            File file = File(result!.files.single.path!);
-            await _uploadDocument(file);
-          }
-        } else {
-          final base64 = kIsWeb
-              ? base64Encode(result!.files.single.bytes!)
-              : base64Encode(
-                  File(result!.files.single.path!).readAsBytesSync());
-          await _uploadPost(base64);
         }
+      } else {
+        _showErrorSnackBar("you must be verified to upload post");
       }
+      // Permission check for mobile
+
+      // File picker to pick files
     } catch (e) {
       _showErrorSnackBar(e.toString());
     }
@@ -229,36 +236,34 @@ class _MyProfilePageState extends State<MyProfilePage> {
   }
 
   Widget _buildProfileImage() {
+    Uint8List base64ToImage(String base64String) {
+      return base64Decode(base64String);
+    }
+
     return Consumer<UserProfileProvider>(
-      builder: (context, imageProvider, _) {
-        UserProfileModel? userProfileModel = imageProvider.currentUserProfile;
-        return Hero(
-          tag: 'profileImage',
-          child: GestureDetector(
-            onTap: () {
-              // Implement image view/edit functionality
-            },
-            child: Neumorphic(
-              style: const NeumorphicStyle(
-                shape: NeumorphicShape.concave,
-                boxShape: NeumorphicBoxShape.circle(),
-                depth: 10,
-                intensity: 0.5,
-              ),
-              child: Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: MemoryImage(
-                      base64ToImage(
-                          userProfileModel?.image ?? defaultBase64Avatar),
-                    ),
-                  ),
-                ),
-              ),
+      builder: (context, userProfileProvider, _) {
+        if (userProfileProvider.isProfileLoading) {
+          return const CircularProgressIndicator();
+        }
+
+        UserProfileModel? userProfileModel =
+            userProfileProvider.currentUserProfile;
+
+        Uint8List imageBytes = userProfileModel!.image != null &&
+                userProfileModel.image!.isNotEmpty
+            ? base64ToImage(userProfileModel.image!)
+            : base64ToImage(defaultBase64Avatar);
+
+        return Neumorphic(
+          style: const NeumorphicStyle(
+            boxShape: NeumorphicBoxShape.circle(),
+          ),
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
             ),
           ),
         );
@@ -271,29 +276,42 @@ class _MyProfilePageState extends State<MyProfilePage> {
       builder: (context, userDataProvider, _) {
         UserProfileModel? userProfileModel =
             userDataProvider.currentUserProfile;
+
+        if (userProfileModel!.isVerified == true) {
+          setState(() {
+            isUserVerified == true;
+          });
+        }
         return Column(
           children: [
             Text(
-              userProfileModel?.name ?? 'Add your Name',
+              userProfileModel.name ?? 'Add your Name',
               style: AppTextStyles().primaryStyle,
             ),
             const SizedBox(height: 10),
             _buildInfoRow(
                 Icons.location_on_outlined,
-                userProfileModel?.address != ''
-                    ? "Address: ${userProfileModel?.address?.toUpperCase()}"
+                userProfileModel.address != ''
+                    ? "Address: ${userProfileModel.address?.toUpperCase()}"
                     : "Add your Address"),
             _buildInfoRow(
                 Icons.person,
-                userProfileModel?.gender != ''
-                    ? "Gender ${userProfileModel?.gender!.toUpperCase()}"
+                userProfileModel.gender != ''
+                    ? "Gender ${userProfileModel.gender!.toUpperCase()}"
                     : "Specify your Gender"),
             _buildInfoRow(
                 Icons.search,
-                userProfileModel?.seeking?.fromAge != '' &&
-                        userProfileModel?.seeking?.fromAge != ''
-                    ? "Seeking ${userProfileModel?.seeking?.gender!.toUpperCase()} ${userProfileModel?.seeking?.fromAge}-${userProfileModel?.seeking?.toAge}"
+                userProfileModel.seeking?.fromAge != '' &&
+                        userProfileModel.seeking?.fromAge != ''
+                    ? "Seeking ${userProfileModel.seeking?.gender!.toUpperCase()} ${userProfileModel.seeking?.fromAge}-${userProfileModel.seeking?.toAge}"
                     : "Choose your age seeking range"),
+            _buildInfoRow(
+                userProfileModel.isVerified == true
+                    ? Icons.verified
+                    : Icons.not_interested,
+                userProfileModel.isVerified == true
+                    ? "Verified"
+                    : "Not Verified"),
           ],
         );
       },
@@ -509,7 +527,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                   // profile
                   Row(
                     children: [
-                      const profileButton(),
+                      const ProfileButton(),
                       const SizedBox(
                         width: 20,
                       ),
@@ -1030,8 +1048,14 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                       ),
                                                       Row(
                                                         children: [
-                                                          const Icon(
-                                                            Icons.verified_user,
+                                                          Icon(
+                                                            userProfileModel
+                                                                        .isVerified ==
+                                                                    true
+                                                                ? Icons
+                                                                    .verified_user
+                                                                : Icons
+                                                                    .not_accessible,
                                                             color: AppColors
                                                                 .secondaryColor,
                                                           ),
@@ -1040,8 +1064,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                           ),
                                                           Text(
                                                             userProfileModel
-                                                                        .isVerified !=
-                                                                    null
+                                                                        .isVerified ==
+                                                                    true
                                                                 ? "Verified"
                                                                 : "Unverified",
                                                             style: AppTextStyles()

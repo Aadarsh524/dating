@@ -1,5 +1,5 @@
 import 'package:dating/providers/interaction_provider/favourite_provider.dart';
-import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
+
 import 'package:dating/utils/icons.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -9,11 +9,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 class FavouriteButton extends StatefulWidget {
   final String currentUserId;
   final String favUser;
+  final bool isCurrentUserVerified;
 
   const FavouriteButton({
     Key? key,
     required this.currentUserId,
     required this.favUser,
+    required this.isCurrentUserVerified,
   }) : super(key: key);
 
   @override
@@ -24,9 +26,14 @@ class _FavouriteButtonState extends State<FavouriteButton> {
   @override
   void initState() {
     super.initState();
-    // Load the liked users when the button is initialized
+
     Provider.of<FavouritesProvider>(context, listen: false)
         .getFavourites(widget.currentUserId, 1);
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Error: $message')));
   }
 
   @override
@@ -47,8 +54,12 @@ class _FavouriteButtonState extends State<FavouriteButton> {
             ),
             child: NeumorphicButton(
               onPressed: () async {
-                await favouriteProvider.toggleFavStatus(
-                    widget.currentUserId, widget.favUser);
+                if (widget.isCurrentUserVerified == true) {
+                  await favouriteProvider.toggleFavStatus(
+                      widget.currentUserId, widget.favUser);
+                } else {
+                  _showErrorSnackBar("you must be verified to do interaction");
+                }
               },
               child: SizedBox(
                 height: 50,

@@ -8,11 +8,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 class LikeButton extends StatefulWidget {
   final String currentUserId;
   final String likedUserId;
+  final bool isCurrentUserVerified;
 
   const LikeButton({
     Key? key,
     required this.currentUserId,
     required this.likedUserId,
+    required this.isCurrentUserVerified,
   }) : super(key: key);
 
   @override
@@ -26,6 +28,11 @@ class _LikeButtonState extends State<LikeButton> {
     // Load the liked users when the button is initialized
     Provider.of<UserInteractionProvider>(context, listen: false)
         .getUserInteraction(widget.currentUserId);
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Error: $message')));
   }
 
   @override
@@ -46,11 +53,15 @@ class _LikeButtonState extends State<LikeButton> {
             ),
             child: NeumorphicButton(
               onPressed: () async {
-                await userInteractionProvider.toggleLikeStatus(
-                    widget.currentUserId, widget.likedUserId);
+                if (widget.isCurrentUserVerified == true) {
+                  await userInteractionProvider.toggleLikeStatus(
+                      widget.currentUserId, widget.likedUserId);
+                } else {
+                  _showErrorSnackBar("you must be verified to do interaction");
+                }
               },
               child: SizedBox(
-                height: 50, 
+                height: 50,
                 width: 50,
                 child: Padding(
                     padding: const EdgeInsets.all(5.0),
