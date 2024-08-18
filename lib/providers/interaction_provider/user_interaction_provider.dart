@@ -312,4 +312,10 @@ class UserInteractionProvider extends ChangeNotifier {
       return false; // User not found in mutual likes
     }
   }
+
+  void clearUserData() {
+    userInteractionModel = null;
+    userMatchesModel = null;
+    notifyListeners();
+  }
 }

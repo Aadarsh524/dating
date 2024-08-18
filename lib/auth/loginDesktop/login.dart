@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:dating/auth/signupScreen.dart';
+import 'package:dating/pages/admin/adminPage.dart';
 import 'package:dating/pages/state_loader.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -10,6 +9,7 @@ import 'package:dating/widgets/textField.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginDesktop extends StatefulWidget {
   const LoginDesktop({super.key});
@@ -21,8 +21,15 @@ class LoginDesktop extends StatefulWidget {
 class _LoginDesktopState extends State<LoginDesktop> {
   String _selectedLanguage = 'English'; // Initial selected language
   bool _isChecked = false;
+  bool isAdmin = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // Function to save login state
+  void _saveLoginState(bool isSavedToLoggedIn) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isSavedToLoggedIn', isSavedToLoggedIn);
+  }
 
   Future<void> _login(BuildContext context) async {
     final authenticationProvider =
@@ -31,17 +38,29 @@ class _LoginDesktopState extends State<LoginDesktop> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
+    if (email == "admin@gmail.com" && password == 'password') {
+      setState(() {
+        isAdmin = true;
+      });
+    }
+
     try {
       String? result = await authenticationProvider.signInWithEmailAndPassword(
           email, password, context);
 
       if (result != null) {
-        log('login successfull');
-        log(result);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const StateLoaderPage()),
-        );
+        if (isAdmin == true) {
+          _saveLoginState(false);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminPage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const StateLoaderPage()),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login failed: User not found')),
@@ -299,23 +318,36 @@ class _LoginDesktopState extends State<LoginDesktop> {
                       height: 55,
                       child: Consumer<AuthenticationProvider>(
                         builder: (context, authenticationProvider, _) {
-                          return ElevatedButton(
+                          return NeumorphicButton(
                             onPressed: authenticationProvider.isAuthLoading
                                 ? null
                                 : () {
+                                    _saveLoginState(_isChecked);
                                     _login(context);
                                   },
-                            child: authenticationProvider.isAuthLoading
-                                ? const CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  )
-                                : Text(
-                                    'Login',
-                                    style: AppTextStyles()
-                                        .primaryStyle
-                                        .copyWith(fontSize: 14),
-                                  ),
+                            style: NeumorphicStyle(
+                              depth: 4,
+                              color: authenticationProvider.isAuthLoading
+                                  ? Colors.grey
+                                  : Theme.of(context).primaryColor,
+                              boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(12)),
+                            ),
+                            child: Center(
+                              child: authenticationProvider.isAuthLoading
+                                  ? const CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    )
+                                  : Text(
+                                      'Login',
+                                      style:
+                                          AppTextStyles().primaryStyle.copyWith(
+                                                fontSize: 14,
+                                                color: Colors.white,
+                                              ),
+                                    ),
+                            ),
                           );
                         },
                       ),

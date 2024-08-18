@@ -354,7 +354,7 @@ class _SignUpMobileState extends State<SignUpMobile> {
                             const SizedBox(height: 20),
                             Consumer<AuthenticationProvider>(
                               builder: (context, authProvider, _) {
-                                return ElevatedButton(
+                                return NeumorphicButton(
                                   onPressed: authProvider.isAuthLoading
                                       ? null
                                       : () {
@@ -370,21 +370,30 @@ class _SignUpMobileState extends State<SignUpMobile> {
                                             );
                                           }
                                         },
-                                  style: ElevatedButton.styleFrom(
-                                    minimumSize:
-                                        const Size(double.infinity, 55),
+                                  style: NeumorphicStyle(
+                                    depth: 4,
+                                    color: Colors.grey[300], // Background color
+                                    boxShape: NeumorphicBoxShape.roundRect(
+                                        BorderRadius.circular(12)),
                                   ),
-                                  child: authProvider.isAuthLoading
-                                      ? const CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white))
-                                      : Text(
-                                          'Sign Up',
-                                          style: AppTextStyles()
-                                              .primaryStyle
-                                              .copyWith(fontSize: 14),
-                                        ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 15),
+                                  child: Center(
+                                    child: authProvider.isAuthLoading
+                                        ? const CircularProgressIndicator(
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
+                                          )
+                                        : Text(
+                                            'Sign Up',
+                                            style: AppTextStyles()
+                                                .primaryStyle
+                                                .copyWith(
+                                                    fontSize: 14,
+                                                    color: Colors.black),
+                                          ),
+                                  ),
                                 );
                               },
                             ),

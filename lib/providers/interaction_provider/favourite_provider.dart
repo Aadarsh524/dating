@@ -152,4 +152,9 @@ class FavouritesProvider extends ChangeNotifier {
       await addFavourites(currentUser, favUserId);
     }
   }
+
+  void clearUserData() {
+    _favourites = null;
+    notifyListeners();
+  }
 }

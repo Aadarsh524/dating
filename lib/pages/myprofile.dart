@@ -137,6 +137,17 @@ class _MyProfilePageState extends State<MyProfilePage> {
   Future<void> pickImage() => _pickAndUploadFile();
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProfileProvider =
+          Provider.of<UserProfileProvider>(context, listen: false);
+      isUserVerified = userProfileProvider.currentUserProfile!.isVerified!;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
@@ -196,13 +207,18 @@ class _MyProfilePageState extends State<MyProfilePage> {
                         boxShape: NeumorphicBoxShape.circle(),
                       ),
                       onPressed: () async {
-                        await authenticationProvider.signOut(context);
-                        await DbClient().clearAllData();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const LoginScreen()),
-                        );
+                        authenticationProvider.signOut().then((value) {
+                          // Navigate to the login page first
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const LoginScreen()),
+                          ).then((_) {
+                            // Once navigation is done, clear the data
+                            authenticationProvider.clearData(context);
+                            DbClient().clearAllData();
+                          });
+                        });
                       },
                       child: SvgPicture.asset(AppIcons.threedots),
                     ),
@@ -277,15 +293,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
         UserProfileModel? userProfileModel =
             userDataProvider.currentUserProfile;
 
-        if (userProfileModel!.isVerified == true) {
-          setState(() {
-            isUserVerified == true;
-          });
-        }
         return Column(
           children: [
             Text(
-              userProfileModel.name ?? 'Add your Name',
+              userProfileModel!.name ?? 'Add your Name',
               style: AppTextStyles().primaryStyle,
             ),
             const SizedBox(height: 10),
@@ -548,13 +559,17 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       ButtonWithLabel(
                         text: null,
                         onPressed: () {
-                          authenticationProvider.signOut(context).then((value) {
-                            DbClient().clearAllData();
+                          authenticationProvider.signOut().then((value) {
+                            // Navigate to the login page first
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => const LoginScreen()),
-                            );
+                            ).then((_) {
+                              // Once navigation is done, clear the data
+                              authenticationProvider.clearData(context);
+                              DbClient().clearAllData();
+                            });
                           });
                         },
                         icon: const Icon(

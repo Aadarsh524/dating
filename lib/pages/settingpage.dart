@@ -985,10 +985,10 @@ class _SettingPageState extends State<SettingPage> {
               ),
               child: NeumorphicButton(
                 onPressed: () {
-                  authenticationProvider.signOut(context);
+                  authenticationProvider.signOut();
                   DbClient().clearAllData();
+                  authenticationProvider.clearData(context);
                   Navigator.pushReplacement(
-                    // ignore: use_build_context_synchronously
                     context,
                     MaterialPageRoute(
                         builder: (context) => const LoginScreen()),

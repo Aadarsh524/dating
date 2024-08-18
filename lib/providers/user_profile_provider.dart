@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart';
+
 import '../../platform/platform.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
