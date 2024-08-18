@@ -13,6 +13,7 @@ import 'package:dating/widgets/textField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginMobile extends StatefulWidget {
   const LoginMobile({super.key});
@@ -27,6 +28,12 @@ class _LoginMobileState extends State<LoginMobile> {
   bool _isChecked = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // Function to save login state
+  void _saveLoginState(bool isSavedToLoggedIn) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isSavedToLoggedIn', isSavedToLoggedIn);
+  }
 
   Future<void> _login(BuildContext context) async {
     final authenticationProvider =
@@ -231,28 +238,52 @@ class _LoginMobileState extends State<LoginMobile> {
             height: 55,
             child: Consumer<AuthenticationProvider>(
               builder: (context, authenticationProvider, _) {
-                return ElevatedButton(
-                  onPressed: authenticationProvider.isAuthLoading
+                return GestureDetector(
+                  onTap: authenticationProvider.isAuthLoading
                       ? null
                       : () {
+                          _saveLoginState(_isChecked);
                           _login(context);
                         },
-                  child: authenticationProvider.isAuthLoading
-                      ? const CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        )
-                      : Text(
-                          'Login',
-                          style: AppTextStyles()
-                              .primaryStyle
-                              .copyWith(fontSize: 14),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300], // Background color
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade500,
+                          offset: const Offset(4, 4),
+                          blurRadius: 15,
+                          spreadRadius: 1,
                         ),
+                        const BoxShadow(
+                          color: Colors.white,
+                          offset: Offset(-4, -4),
+                          blurRadius: 15,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: authenticationProvider.isAuthLoading
+                          ? const CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            )
+                          : Text(
+                              'Login',
+                              style: AppTextStyles()
+                                  .primaryStyle
+                                  .copyWith(fontSize: 14, color: Colors.black),
+                            ),
+                    ),
+                  ),
                 );
               },
             ),
           ),
         ),
+
         const SizedBox(
           height: 10,
         ),
@@ -280,6 +311,8 @@ class _LoginMobileState extends State<LoginMobile> {
             height: 55,
             child: Button(
               onPressed: () {
+                _saveLoginState(_isChecked);
+
                 authenticationProvider.signInWithGoogle(context).then((user) {
                   if (user != null) {
                     Navigator.pushReplacement(

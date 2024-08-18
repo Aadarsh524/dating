@@ -25,7 +25,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path_provider/path_provider.dart';
+
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -329,7 +329,7 @@ class _ChatPageState extends State<ChatPage> {
                                             horizontal: 20.0),
                                         child: GestureDetector(
                                           onTap: () {
-                                            Navigator.pushReplacement(
+                                            Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: (_) =>

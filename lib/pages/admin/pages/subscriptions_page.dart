@@ -37,7 +37,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
 
   // for status
   String? _selectedStatus = 'Status';
-  final List<String> _statuses = ['Status', '+Basic', '+Plus', '+Gold'];
+  final List<String> _statuses = ['Status', 'Basic', 'Plus', 'Gold'];
 
   @override
   void initState() {
@@ -85,7 +85,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           children: [
             const SizedBox(height: 20),
@@ -119,9 +119,9 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                               fontWeight: FontWeight.w400,
                             ),
                             value: _selectedStatus,
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.arrow_drop_down,
-                              color: const Color.fromARGB(255, 120, 120, 241),
+                              color: Color.fromARGB(255, 120, 120, 241),
                             ),
                             elevation: 0,
                             onChanged: (String? newValue) {
@@ -173,13 +173,13 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              Icon(Icons.calendar_today, size: 14),
+                              const Icon(Icons.calendar_today, size: 14),
                             ],
                           ),
                         ),
                       ),
                       // swap icon
-                      Icon(Icons.swap_horiz),
+                      const Icon(Icons.swap_horiz),
                       // to date picker
                       Container(
                         height: 50,
@@ -207,7 +207,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              Icon(Icons.calendar_today, size: 14),
+                              const Icon(Icons.calendar_today, size: 14),
                             ],
                           ),
                         ),
@@ -226,7 +226,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.filter_list, color: Colors.white),
+                          const Icon(Icons.filter_list, color: Colors.white),
                           Text(
                             'Filter',
                             style: GoogleFonts.poppins(
@@ -300,11 +300,11 @@ class SubscriptionCard extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: ShapeDecoration(
         color: Colors.white,
         shape: RoundedRectangleBorder(
-          side: BorderSide(width: 2, color: Color(0xFFE5E5E5)),
+          side: const BorderSide(width: 2, color: Color(0xFFE5E5E5)),
           borderRadius: BorderRadius.circular(10),
         ),
       ),
@@ -331,7 +331,7 @@ class SubscriptionCard extends StatelessWidget {
             Text(
               'Start Date: ${subscription.userSubscription!.subscriptionDate.toString().split(' ')[0]}',
               style: GoogleFonts.poppins(
-                color: Color(0xFF514F6E),
+                color: const Color(0xFF514F6E),
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
               ),
@@ -339,7 +339,7 @@ class SubscriptionCard extends StatelessWidget {
             Text(
               'End Date: ${subscription.userSubscription!.expirationDate.toString().split(' ')[0]}',
               style: GoogleFonts.poppins(
-                color: Color(0xFF514F6E),
+                color: const Color(0xFF514F6E),
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
               ),

@@ -1,19 +1,32 @@
+import 'dart:convert';
+
 import 'package:dating/auth/db_client.dart';
-import 'package:dating/backend/MongoDB/apis.dart';
+
 import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/dashboard_provider.dart';
+import 'package:dating/providers/interaction_provider/favourite_provider.dart';
+import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class AuthenticationProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  // Initialize Google Sign-In and Firebase Auth
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
 
   bool _isAuthLoading = false;
 
@@ -107,7 +120,8 @@ class AuthenticationProvider extends ChangeNotifier {
         if (profileCreated) {
           return userCredential.user;
         } else {
-          await signOut(context);
+          await signOut();
+          clearData(context);
           return null;
         }
       } else {
@@ -123,6 +137,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
+// Function to sign in with Google and fetch user gender
   Future<User?> signInWithGoogle(BuildContext context) async {
     setAuthLoading(true);
     try {
@@ -143,39 +158,109 @@ class AuthenticationProvider extends ChangeNotifier {
 
         if (userCredential.credential != null) {
           if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-            await _createNewUserProfile(userCredential.user!.uid, context,
-                    email: userCredential.user!.email)
-                .then((value) {
-              if (value == true) {
-                return userCredential.user;
-              } else {
-                signOut(context);
-                notifyListeners();
-                return false;
-              }
-            });
+            // Fetch user gender from Google People API
+
+            await _fetchUserGender(googleSignInAuthentication.accessToken);
+
+            // await _createNewUserProfile(
+            //   userCredential.user!.uid,
+            //   context,
+            //   email: userCredential.user!.email,
+            //   gender: gender,
+            // ).then((value) {
+            //   if (value == true) {
+            //     return userCredential.user;
+            //   } else {
+            //     signOut();
+            //     clearData(context);
+            //     notifyListeners();
+            //     return null;
+            //   }
+            // });
+          } else {
+            // Handle case if the user is not new
+            return userCredential.user;
           }
         }
-
-        return userCredential.user;
       }
       return null;
     } catch (e) {
       print("Google Sign-In Error: $e");
-      return null; // Return null if sign-in fails
+      return null;
     } finally {
       setAuthLoading(false);
     }
   }
 
-  Future<void> signOut(BuildContext context) async {
+  // Function to fetch user gender from Google People API
+  Future<String> _fetchUserGender(String? accessToken) async {
+    if (accessToken == null) return 'Unknown';
+
+    try {
+      // Create an authenticated HTTP client
+      final client = http.Client();
+
+      // Use the access token to create an authenticated client
+      final authHeaders = {'Authorization': 'Bearer $accessToken'};
+
+      final response = await client.get(
+        Uri.parse(
+            'https://people.googleapis.com/v1/people/me?personFields=genders'),
+        headers: authHeaders,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
+        // Parse gender information
+        final gender = responseData['genders']?.isNotEmpty ?? false
+            ? responseData['genders'][0]['value']
+            : 'Unknown';
+
+        return gender;
+      } else {
+        // Handle errors
+        print('Failed to fetch user profile: ${response.statusCode}');
+        return 'Unknown';
+      }
+    } catch (e) {
+      print('Error fetching user gender: $e');
+      return 'Unknown';
+    } finally {}
+  }
+
+  Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
     await _auth.signOut();
-    Provider.of<UserProfileProvider>(context, listen: false).clearUserData();
-    Provider.of<DashboardProvider>(context, listen: false).clearUserData();
-    Provider.of<ChatRoomProvider>(context, listen: false).clearUserData();
-    Provider.of<SubscriptionProvider>(context, listen: false).clearUserData();
+  }
+
+  Future<void> clearData(BuildContext context) async {
+    var userProfileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false);
+    var dashboardProvider =
+        Provider.of<DashboardProvider>(context, listen: false);
+    var chatRoomProvider =
+        Provider.of<ChatRoomProvider>(context, listen: false);
+    var subscriptionProvider =
+        Provider.of<SubscriptionProvider>(context, listen: false);
+
+    var favoritesProvider =
+        Provider.of<FavouritesProvider>(context, listen: false);
+    var userInteractionProvider =
+        Provider.of<UserInteractionProvider>(context, listen: false);
+
+    var adminProvider =
+        Provider.of<AdminDashboardProvider>(context, listen: false);
+
+    userProfileProvider.clearUserData();
+    dashboardProvider.clearUserData();
+    chatRoomProvider.clearUserData();
+    subscriptionProvider.clearUserData();
+
+    favoritesProvider.clearUserData();
+    userInteractionProvider.clearUserData();
+    adminProvider.clearUserData();
 
     notifyListeners();
   }

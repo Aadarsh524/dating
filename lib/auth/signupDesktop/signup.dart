@@ -699,46 +699,65 @@ class _SignUpDesktopState extends State<SignUpDesktop> {
                       height: 55,
                       child: Consumer<AuthenticationProvider>(
                         builder: (context, authenticationProvider, _) {
-                          return ElevatedButton(
+                          return NeumorphicButton(
                             onPressed: authenticationProvider.isAuthLoading
                                 ? null
                                 : () {
                                     bool passwordsMatch =
                                         _passwordController.text ==
                                             _confirmpasswordController.text;
-                                    if (passwordsMatch && _isChecked) {
-                                      _register(context);
-                                    } else {
-                                      String message = '';
-                                      if (!passwordsMatch) {
-                                        message = 'Passwords do not match!';
-                                      } else if (!_isChecked) {
-                                        message =
-                                            'You must agree to the terms and conditions!';
+
+                                    if (_isChecked) {
+                                      if (passwordsMatch) {
+                                        _register(context);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content:
+                                                Text('Passwords do not match!'),
+                                          ),
+                                        );
                                       }
+                                    } else {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
-                                        SnackBar(
-                                          content: Text(message),
+                                        const SnackBar(
+                                          content: Text(
+                                              'You must agree to the terms and conditions!'),
                                         ),
                                       );
                                     }
                                   },
-                            child: authenticationProvider.isAuthLoading
-                                ? const CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  )
-                                : Text(
-                                    'Sign Up',
-                                    style: AppTextStyles()
-                                        .primaryStyle
-                                        .copyWith(fontSize: 14),
-                                  ),
+                            style: NeumorphicStyle(
+                              depth: 4,
+                              color: authenticationProvider.isAuthLoading
+                                  ? Colors.grey
+                                  : Theme.of(context).primaryColor,
+                              boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(12)),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: Center(
+                              child: authenticationProvider.isAuthLoading
+                                  ? const CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    )
+                                  : Text(
+                                      'Sign Up',
+                                      style: AppTextStyles()
+                                          .primaryStyle
+                                          .copyWith(
+                                              fontSize: 14,
+                                              color: Colors.white),
+                                    ),
+                            ),
                           );
                         },
                       ),
                     ),
+
                     // or
                     const SizedBox(
                       height: 10,

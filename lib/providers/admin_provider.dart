@@ -386,4 +386,13 @@ class AdminDashboardProvider extends ChangeNotifier {
       setAdminLoading(false);
     }
   }
+
+  void clearUserData() {
+    _usersListProvider = null;
+    _userSubscriptionList = null;
+    _documentsVerificationListProvider = null;
+    _usersComplaintProvider = null;
+    _approveDocumentProvider = null;
+    notifyListeners();
+  }
 }

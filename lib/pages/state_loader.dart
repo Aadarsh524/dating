@@ -8,20 +8,21 @@ class StateLoaderPage extends StatelessWidget {
   const StateLoaderPage({Key? key}) : super(key: key);
 
   Future<void> _fetchData(BuildContext context) async {
-    final userprofileProvider =
-        Provider.of<UserProfileProvider>(context, listen: false);
-    firebase.User? user = firebase.FirebaseAuth.instance.currentUser;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userprofileProvider =
+          Provider.of<UserProfileProvider>(context, listen: false);
+      firebase.User? user = firebase.FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
-      try {
-        userprofileProvider.getUserProfile(user.uid);
-      } catch (e, stacktrace) {
-        print("Error fetching user profile: $e");
-        print("Stacktrace: $stacktrace");
+      if (user != null) {
+        try {
+          userprofileProvider.getUserProfile(user.uid);
+        } catch (e) {
+          print("Error fetching user profile: $e");
+        }
+      } else {
+        print("No user is currently logged in");
       }
-    } else {
-      print("No user is currently logged in");
-    }
+    });
   }
 
   @override
