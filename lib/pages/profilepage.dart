@@ -10,6 +10,7 @@ import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/interaction_provider/favourite_provider.dart';
+import 'package:dating/providers/interaction_provider/profile_view_provider.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
@@ -85,6 +86,13 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _loadPhoto();
+
+    final profileviewProvider =
+        Provider.of<ProfileViewProvider>(context, listen: false);
+
+    profileviewProvider.addProfileView(
+        user!.uid, widget.dashboardresponsemodel.uid!);
+
     final favouritesProvider =
         Provider.of<FavouritesProvider>(context, listen: false);
 

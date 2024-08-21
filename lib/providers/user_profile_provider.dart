@@ -7,7 +7,6 @@ import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../platform/platform.dart';
-import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:http/http.dart' as http;
 
 class UserProfileProvider extends ChangeNotifier {
@@ -155,7 +154,7 @@ class UserProfileProvider extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
+          // 'Authorization': 'Bearer $token',
         },
       );
       if (response.statusCode == 200) {
