@@ -3,11 +3,11 @@ import 'dart:typed_data';
 
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
-import 'package:dating/providers/interaction_provider/favourite_provider.dart';
+import 'package:dating/providers/interaction_provider/profile_view_provider.dart'; // Import ProfileViewProvider
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
-import 'package:dating/utils/images.dart';
+
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
@@ -29,7 +29,7 @@ class _ViewPageState extends State<ViewPage> {
   String country = 'COUNTRY';
   String age = 'AGE';
 
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   User? user = FirebaseAuth.instance.currentUser;
 
   Uint8List base64ToImage(String base64String) {
@@ -101,8 +101,6 @@ class _ViewPageState extends State<ViewPage> {
           height: 30,
         ),
 
-        // details
-
         // tabbar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -118,7 +116,7 @@ class _ViewPageState extends State<ViewPage> {
             width: 900,
             selectedIndex: _selectedIndex,
             children: [
-              // Billing
+              // Viewed My Profile
 
               ToggleElement(
                 background: Container(
@@ -148,7 +146,7 @@ class _ViewPageState extends State<ViewPage> {
                 ),
               ),
 
-              // profile
+              // Profiles I Viewed
 
               ToggleElement(
                 background: Container(
@@ -199,35 +197,33 @@ class _ViewPageState extends State<ViewPage> {
               IndexedStack(
                 index: _selectedIndex,
                 children: [
-                  // fav tab
-                  viewListMobile(),
-                  viewListMobile(),
+                  getWhoVisitedMyProfile(userId: user!.uid),
+                  getProfileWhomIViewed(userId: user!.uid),
                 ],
               ),
             ],
           ),
         ),
-
-        // details edit
       ]),
       bottomSheet: const NavBar(),
     );
   }
 
-  ChangeNotifierProvider<FavouritesProvider> viewListMobile() {
+  ChangeNotifierProvider<ProfileViewProvider> getWhoVisitedMyProfile(
+      {required String userId}) {
     return ChangeNotifierProvider(
-      create: (_) => FavouritesProvider()..getFavourites(user!.uid, 1),
+      create: (_) => ProfileViewProvider()..getWhoVisitedMyProfile(userId, 1),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child:
-            Consumer<FavouritesProvider>(builder: (context, provider, child) {
-          if (provider.isFavoriteLoading) {
+            Consumer<ProfileViewProvider>(builder: (context, provider, child) {
+          if (provider.isProfileViewLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          final favourites = provider.favourites;
+          final profiles = provider.visitedMyProfiles;
 
-          if (favourites == null || favourites.isEmpty) {
-            return const Center(child: Text('No favourites found.'));
+          if (profiles == null || profiles.isEmpty) {
+            return const Center(child: Text('No profiles found.'));
           }
           return SizedBox(
             width: double.infinity,
@@ -240,16 +236,16 @@ class _ViewPageState extends State<ViewPage> {
                 mainAxisSpacing: 15, // Vertical spacing between items
               ),
               itemCount:
-                  favourites.length, // Total number of containers in the grid
+                  profiles.length, // Total number of containers in the grid
               itemBuilder: (context, index) {
-                final favourite = favourites[index];
+                final profile = profiles[index];
                 return Container(
                   height: 250,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     image: DecorationImage(
-                      image: favourite.image!.isNotEmpty
-                          ? MemoryImage(base64ToImage(favourite.image!))
+                      image: profile.image!.isNotEmpty
+                          ? MemoryImage(base64ToImage(profile.image!))
                           : MemoryImage(base64ToImage(
                               defaultBase64Avatar)), // Image asset path
                       fit: BoxFit
@@ -273,7 +269,7 @@ class _ViewPageState extends State<ViewPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // name address
+                        // name and address
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 10),
@@ -284,7 +280,7 @@ class _ViewPageState extends State<ViewPage> {
                               Row(
                                 children: [
                                   Text(
-                                    '${favourite.name ?? 'Unknown'}, ${favourite.age ?? 'N/A'}',
+                                    '${profile.name ?? 'Unknown'}, ${profile.age ?? 'N/A'}',
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -292,12 +288,12 @@ class _ViewPageState extends State<ViewPage> {
                                       height: 0,
                                     ),
                                   ),
-                                  // male female
+                                  // male/female icon
                                 ],
                               ),
                               // address
                               Text(
-                                favourite.address ?? 'Unknown location',
+                                profile.address ?? 'Unknown location',
                                 style: GoogleFonts.poppins(
                                   color: Colors.white.withOpacity(0.75),
                                   fontSize: 12,
@@ -320,20 +316,21 @@ class _ViewPageState extends State<ViewPage> {
     );
   }
 
-  ChangeNotifierProvider<FavouritesProvider> viewListDesktop() {
+  ChangeNotifierProvider<ProfileViewProvider> getProfileWhomIViewed(
+      {required String userId}) {
     return ChangeNotifierProvider(
-      create: (_) => FavouritesProvider()..getFavourites(user!.uid, 1),
+      create: (_) => ProfileViewProvider()..getProfileWhomIViewed(userId, 1),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child:
-            Consumer<FavouritesProvider>(builder: (context, provider, child) {
-          if (provider.isFavoriteLoading) {
+            Consumer<ProfileViewProvider>(builder: (context, provider, child) {
+          if (provider.isProfileViewLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          final favourites = provider.favourites;
+          final profiles = provider.viewedProfiles;
 
-          if (favourites == null || favourites.isEmpty) {
-            return const Center(child: Text('No favourites found.'));
+          if (profiles == null || profiles.isEmpty) {
+            return const Center(child: Text('No profiles found.'));
           }
           return SizedBox(
             width: double.infinity,
@@ -341,26 +338,26 @@ class _ViewPageState extends State<ViewPage> {
             child: GridView.builder(
               clipBehavior: Clip.none,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4, // Number of columns in the grid
+                crossAxisCount: 2, // Number of columns in the grid
                 crossAxisSpacing: 15, // Horizontal spacing between items
                 mainAxisSpacing: 15, // Vertical spacing between items
               ),
               itemCount:
-                  favourites.length, // Total number of containers in the grid
+                  profiles.length, // Total number of containers in the grid
               itemBuilder: (context, index) {
-                final favourite = favourites[index];
+                final profile = profiles[index];
                 return Container(
                   height: 250,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     image: DecorationImage(
-                      image: favourite.image!.isNotEmpty
-                          ? MemoryImage(base64ToImage(favourite.image!))
+                      image: profile.image!.isNotEmpty
+                          ? MemoryImage(base64ToImage(profile.image!))
                           : MemoryImage(base64ToImage(
                               defaultBase64Avatar)), // Image asset path
                       fit: BoxFit
                           .cover, // Adjust how the image should fit inside the container
-                    ), // Adjust how the image should fit inside the container
+                    ),
                   ),
                   child: Container(
                     decoration: BoxDecoration(
@@ -379,7 +376,7 @@ class _ViewPageState extends State<ViewPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // name address
+                        // name and address
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 10),
@@ -390,7 +387,7 @@ class _ViewPageState extends State<ViewPage> {
                               Row(
                                 children: [
                                   Text(
-                                    '${favourite.name ?? 'Unknown'}, ${favourite.age ?? 'N/A'}',
+                                    '${profile.name ?? 'Unknown'}, ${profile.age ?? 'N/A'}',
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -398,14 +395,12 @@ class _ViewPageState extends State<ViewPage> {
                                       height: 0,
                                     ),
                                   ),
-
-                                  // male female
+                                  // male/female icon
                                 ],
                               ),
                               // address
-
                               Text(
-                                favourite.address ?? 'Unknown location',
+                                profile.address ?? 'Unknown location',
                                 style: GoogleFonts.poppins(
                                   color: Colors.white.withOpacity(0.75),
                                   fontSize: 12,
@@ -413,16 +408,6 @@ class _ViewPageState extends State<ViewPage> {
                                   height: 0,
                                 ),
                               ),
-
-                              // Text(
-                              //   'Added: 1 hour ago',
-                              //   style: GoogleFonts.poppins(
-                              //     color: Colors.white.withOpacity(0.75),
-                              //     fontSize: 12,
-                              //     fontWeight: FontWeight.w400,
-                              //     height: 0,
-                              //   ),
-                              // ),
                             ],
                           ),
                         )
@@ -434,6 +419,196 @@ class _ViewPageState extends State<ViewPage> {
             ),
           );
         }),
+      ),
+    );
+  }
+
+  ChangeNotifierProvider<ProfileViewProvider> getWhoVisitedMyProfileDesktop({
+    required String userId,
+  }) {
+    return ChangeNotifierProvider(
+      create: (_) => ProfileViewProvider()..getWhoVisitedMyProfile(userId, 1),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Consumer<ProfileViewProvider>(
+          builder: (context, provider, child) {
+            if (provider.isProfileViewLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final profiles = provider.visitedMyProfiles;
+
+            if (profiles == null || profiles.isEmpty) {
+              return const Center(child: Text('No profiles found.'));
+            }
+            return SizedBox(
+              width: double.infinity,
+              height: 900,
+              child: GridView.builder(
+                clipBehavior: Clip.none,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                ),
+                itemCount: profiles.length,
+                itemBuilder: (context, index) {
+                  final profile = profiles[index];
+                  return Container(
+                    height: 250,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      image: DecorationImage(
+                        image: profile.image!.isNotEmpty
+                            ? MemoryImage(base64ToImage(profile.image!))
+                            : MemoryImage(base64ToImage(defaultBase64Avatar)),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0),
+                            Colors.black.withOpacity(0.75),
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '${profile.name ?? 'Unknown'}, ${profile.age ?? 'N/A'}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w400,
+                                    height: 0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              profile.address ?? 'Unknown location',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white.withOpacity(0.75),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                height: 0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  ChangeNotifierProvider<ProfileViewProvider> getProfileWhomIViewedDesktop({
+    required String userId,
+  }) {
+    return ChangeNotifierProvider(
+      create: (_) => ProfileViewProvider()..getProfileWhomIViewed(userId, 1),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Consumer<ProfileViewProvider>(
+          builder: (context, provider, child) {
+            if (provider.isProfileViewLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final profiles = provider.viewedProfiles;
+
+            if (profiles == null || profiles.isEmpty) {
+              return const Center(child: Text('No profiles found.'));
+            }
+            return SizedBox(
+              width: double.infinity,
+              height: 900,
+              child: GridView.builder(
+                clipBehavior: Clip.none,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                ),
+                itemCount: profiles.length,
+                itemBuilder: (context, index) {
+                  final profile = profiles[index];
+                  return Container(
+                    height: 250,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      image: DecorationImage(
+                        image: profile.image!.isNotEmpty
+                            ? MemoryImage(base64ToImage(profile.image!))
+                            : MemoryImage(base64ToImage(defaultBase64Avatar)),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0),
+                            Colors.black.withOpacity(0.75),
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '${profile.name ?? 'Unknown'}, ${profile.age ?? 'N/A'}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w400,
+                                    height: 0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              profile.address ?? 'Unknown location',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white.withOpacity(0.75),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                height: 0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -766,37 +941,6 @@ class _ViewPageState extends State<ViewPage> {
                             children: [
                               // Billing
 
-                              ToggleElement(
-                                background: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(
-                                        255, 202, 215, 225),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                    'Profile I Viewed',
-                                    style:
-                                        AppTextStyles().secondaryStyle.copyWith(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                            ),
-                                  )),
-                                ),
-                                foreground: Center(
-                                  child: Text(
-                                    'Profile I Viewed',
-                                    style:
-                                        AppTextStyles().secondaryStyle.copyWith(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                            ),
-                                  ),
-                                ),
-                              ),
-
                               // profile
 
                               ToggleElement(
@@ -830,7 +974,37 @@ class _ViewPageState extends State<ViewPage> {
                                             ),
                                   ),
                                 ),
-                              )
+                              ),
+                              ToggleElement(
+                                background: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                        255, 202, 215, 225),
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  child: Center(
+                                      child: Text(
+                                    'Profile I Viewed',
+                                    style:
+                                        AppTextStyles().secondaryStyle.copyWith(
+                                              color: Colors.black,
+                                              fontSize: 12,
+                                            ),
+                                  )),
+                                ),
+                                foreground: Center(
+                                  child: Text(
+                                    'Profile I Viewed',
+                                    style:
+                                        AppTextStyles().secondaryStyle.copyWith(
+                                              color: Colors.black,
+                                              fontSize: 12,
+                                            ),
+                                  ),
+                                ),
+                              ),
                             ],
                             onChanged: (index) {
                               setState(() {
@@ -859,8 +1033,10 @@ class _ViewPageState extends State<ViewPage> {
                                 IndexedStack(
                                   index: _selectedIndex,
                                   children: [
-                                    viewListDesktop(),
-                                    viewListDesktop(),
+                                    getWhoVisitedMyProfileDesktop(
+                                        userId: user!.uid),
+                                    getProfileWhomIViewedDesktop(
+                                        userId: user!.uid),
                                   ],
                                 ),
                                 const SizedBox(
