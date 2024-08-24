@@ -17,41 +17,12 @@ class Signaling {
     'iceServers': [
       {
         'urls': [
-          'stun:stun1.l.google.com:19302',
-          'stun:stun2.l.google.com:19302',
-          'stun:stun.relay.metered.ca:80',
+          'stun:stun3.l.google.com:19302',
+          'stun:stun4.l.google.com:19302',
+         
         ]
       },
-      {
-        'urls': 'turn:turn.anyfirewall.com:443?transport=tcp',
-        'credential': 'webrtc',
-        'username': 'webrtc',
-      },
-      {
-        'urls': 'turn:freeturn.net:3478',
-        'credential': 'free',
-        'username': 'free',
-      },
-      {
-        "urls": "turn:global.relay.metered.ca:80",
-        "username": "cbe44f80252683657daa1fe9",
-        "credential": "S9W+VClSnYV3Ykmy",
-      },
-      {
-        "urls": "turn:global.relay.metered.ca:80?transport=tcp",
-        "username": "cbe44f80252683657daa1fe9",
-        "credential": "S9W+VClSnYV3Ykmy",
-      },
-      {
-        "urls": "turn:global.relay.metered.ca:443",
-        "username": "cbe44f80252683657daa1fe9",
-        "credential": "S9W+VClSnYV3Ykmy",
-      },
-      {
-        "urls": "turns:global.relay.metered.ca:443?transport=tcp",
-        "username": "cbe44f80252683657daa1fe9",
-        "credential": "S9W+VClSnYV3Ykmy",
-      },
+     
     ]
   };
 

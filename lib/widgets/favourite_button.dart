@@ -72,11 +72,13 @@ class _FavouriteButtonState extends State<FavouriteButton> {
                             height: 20,
                             width: 20,
                           )
-                        : SvgPicture.asset(
-                            AppIcons.heartoutline,
-                            height: 20,
-                            width: 20,
-                          )),
+                        : Center(
+                          child: Icon(
+                              Icons.star_border_outlined,
+                              size: 50,
+                              color: Colors.white,
+                            ),
+                        )),
               ),
             ),
           );
