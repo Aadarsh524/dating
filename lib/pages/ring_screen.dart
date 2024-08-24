@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/pages/call_screen.dart';
+import 'package:dating/pages/chatpage.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -14,10 +19,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 class RingScreen extends StatefulWidget {
   final String clientID;
   final String roomId;
+  final EndUserDetails? endUserDetails;
   const RingScreen({
     Key? key,
     this.clientID = "null",
     this.roomId = "null",
+    required this.endUserDetails,
   }) : super(key: key);
 
   @override
@@ -58,6 +65,8 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   bool userIsconnected = false;
   late AudioPlayer player;
 
+  String? token;
+
   //TextEditingController textEditingController = TextEditingController(text: '');
 
   @override
@@ -66,7 +75,6 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     if (widget.roomId == "null") {
       hostUser = _uid;
 
-      // Asynchronously fetch the user's profile
       UserProfileProvider()
           .getUserProfile(widget.clientID)
           .then((userProfile) async {
@@ -81,7 +89,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
         // Check if the user is online and not in another call
         if (userProfile.userStatus == "active") {
           //make changes here (isCalled or beingCalled)
-          if (userProfile.isVerified == false) {
+          if (userProfile.isVerified == true) {
             // Create a new room
             calleeCandidate = db.collection('rooms').doc();
             roomId = calleeCandidate.id;
@@ -89,12 +97,9 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
             calleeCandidate.set({'calleeConected': "null"}).then((value) async {
               getStringFieldStream();
               // Optionally, you can send a notification to the user here
-              // sendNotificationToUser("You have a Call from Anonymous", "Join Now", token, roomId, _uid);
-
-              await db.collection("users").doc(clientID).update({
-                "beingcalled": "true",
-                "roomid": roomId,
-              });
+              sendNotificationToUser("You have a Call from Anonymous",
+                  "Join Now", token!, roomId!, _uid);
+              //update the call status of the users here
             });
           } else {
             Fluttertoast.showToast(msg: "Sorry, the user is in another call.");
@@ -141,8 +146,12 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     super.initState();
   }
 
+  Uint8List base64ToImage(String? base64String) {
+    return base64Decode(base64String!);
+  }
+
   playAudio() async {
-    //await player.setSource(AssetSource('/sounds/ringtone.mp3'));
+    await player.setSource(AssetSource('/sounds/ringtone.mp3'));
     if (!ringingCall) {
       ringingCall = true;
       await player.play(AssetSource('sounds/ringtone.mp3')).then((value) async {
@@ -184,26 +193,30 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
       if (snapshot.exists) {
         String callStatus = snapshot.get('calleeConected') ?? "";
-        if (callStatus != "") {
+        log(callStatus);
+
+        if (callStatus.isNotEmpty) {
           if (callStatus == "done") {
             connected = false;
-          } else if (callStatus != "done" &&
-              callStatus != "null" &&
-              callStatus != "left") {
+            // Handle disconnection or completion logic if needed
+          } else if (callStatus == "null") {
             if (widget.roomId == "null") {
               if (!hostNavigatedToCall) {
-                getUserSignals.cancel();
+                getUserSignals?.cancel(); // Cancel the listener
                 hostNavigatedToCall = true;
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
                     builder: (context) =>
-                        CallScreen(userType: "H", roomId: roomId!)));
+                        CallScreen(userType: "H", roomId: roomId!),
+                  ),
+                );
               }
             } else {
               if (!iAcceptedCall) {
                 if (widget.roomId != "null") {
                   player.stop();
                 }
-                Navigator.pop(context);
+                Navigator.pop(context); // Close the current screen
               }
             }
           } else if (callStatus == "left") {
@@ -214,7 +227,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
           }
         }
       } else {
-        print("Not document existts");
+        print("Document does not exist");
       }
     });
   }
@@ -262,6 +275,15 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     } catch (e) {
       print("Exception: $e");
     }
+  }
+
+  void getFCMToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    token = await messaging.getToken();
+    print("FCM Token: $token");
+
+    // Save or send this token to your server
   }
 
   @override
@@ -313,10 +335,17 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                           builder: (context, child) {
                             return Transform.scale(
                               scale: _animation.value,
-                              child: CircleAvatar(
-                                radius: 80.0,
-                                backgroundImage: AssetImage(
-                                    'assets/images/man.png'), // Replace with the actual user's avatar
+                              child: Container(
+                                height: 100,
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    image: MemoryImage(base64ToImage(
+                                        widget.endUserDetails!.profileImage)),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             );
                           }),
@@ -390,10 +419,17 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                               border: Border.all(
                                   color: AppColors.green.withOpacity(0.1))),
                         ),
-                        CircleAvatar(
-                          radius: 80.0,
-                          backgroundImage: AssetImage(
-                              'assets/images/man.png'), // Replace with the actual user's avatar
+                        Container(
+                          height: 100,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: MemoryImage(base64ToImage(
+                                  widget.endUserDetails!.profileImage)),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -507,6 +543,10 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                               }
                               Navigator.pop(context);
                             }
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (builder) => ChatPage()));
                           },
                           child: CircleAvatar(
                             backgroundColor: Colors.red,

@@ -986,6 +986,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                                   ),
 
                                                   Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
                                                     children: [
                                                       // location
                                                       Row(
@@ -1284,8 +1289,19 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                         ),
                                       ),
                                     ),
-                                    Expanded(
-                                        child: _buildVerificationSection()),
+                                    Consumer<UserProfileProvider>(
+                                        builder: (context, userProfile, _) {
+                                      UserProfileModel? userProfileModel =
+                                          Provider.of<UserProfileProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .currentUserProfile;
+                                      return Expanded(
+                                          child: userProfileModel!.isVerified ==
+                                                  true
+                                              ? Container()
+                                              : _buildVerificationSection());
+                                    }),
                                     SizedBox(
                                       height: 40,
                                     ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_message_model.dart' as chatmessage;
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+import 'package:dating/pages/ring_screen.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:dating/datamodel/chat/send_message_model.dart';
@@ -175,7 +176,14 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {
-                      //Signaling().createRoom(remoteRenderer, roomIdd)
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RingScreen(
+                                roomId: "null",
+                                    endUserDetails: widget.chatRoomModel,
+                                    clientID: user!.uid,
+                                  )));
                     },
                     icon: const Icon(Icons.call),
                     labelText: null,

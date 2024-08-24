@@ -1071,6 +1071,9 @@ class _ChatPageState extends State<ChatPage> {
                                                               builder:
                                                                   (context) =>
                                                                       RingScreen(
+                                                                        
+                                                                        endUserDetails:
+                                                                            chatRoomMode,
                                                                         clientID:
                                                                             user!.uid,
                                                                       )));

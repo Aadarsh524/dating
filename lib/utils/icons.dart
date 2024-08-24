@@ -23,4 +23,5 @@ class AppIcons {
   static const dots = "assets/icons/dots.svg";
   static const send = "assets/icons/send.svg";
   static const check = "assets/icons/check.svg";
+  static const star_nofill = "assets/icons/star_not_filled.svg";
 }
