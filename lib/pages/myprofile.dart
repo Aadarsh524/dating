@@ -1289,20 +1289,20 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                         ),
                                       ),
                                     ),
-                                    Consumer<UserProfileProvider>(
-                                        builder: (context, userProfile, _) {
-                                      UserProfileModel? userProfileModel =
-                                          Provider.of<UserProfileProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .currentUserProfile;
-                                      return Expanded(
-                                          child: userProfileModel!.isVerified ==
-                                                  true
-                                              ? Container()
-                                              : _buildVerificationSection());
-                                    }),
-                                    SizedBox(
+                                    // Consumer<UserProfileProvider>(
+                                    //     builder: (context, userProfile, _) {
+                                    //   UserProfileModel? userProfileModel =
+                                    //       Provider.of<UserProfileProvider>(
+                                    //               context,
+                                    //               listen: false)
+                                    //           .currentUserProfile;
+                                    //   return Expanded(
+                                    //       child: userProfileModel!.isVerified ==
+                                    //               true
+                                    //           ? Container()
+                                    //           : _buildVerificationSection());
+                                    // }),
+                                    const SizedBox(
                                       height: 40,
                                     ),
 
