@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+import 'package:dating/helpers/get_server_key.dart';
 import 'package:dating/pages/call_screen.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/providers/user_profile_provider.dart';
@@ -65,12 +66,13 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   bool userIsconnected = false;
   late AudioPlayer player;
 
-  String? token;
+  String? devicetoken;
 
   //TextEditingController textEditingController = TextEditingController(text: '');
 
   @override
   void initState() {
+    getFCMToken();
     _uid = _auth.currentUser?.uid;
     if (widget.roomId == "null") {
       hostUser = _uid;
@@ -96,9 +98,10 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
             calleeCandidate.set({'calleeConected': "null"}).then((value) async {
               getStringFieldStream();
-              // Optionally, you can send a notification to the user here
               sendNotificationToUser("You have a Call from Anonymous",
-                  "Join Now", token!, roomId!, _uid);
+                  "Join Now", devicetoken!, roomId!, _uid);
+              // Optionally, you can send a notification to the user here
+
               //update the call status of the users here
             });
           } else {
@@ -250,12 +253,15 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     };
 
     try {
+      GetServieKey server = GetServieKey();
+      String serverKey = await server.getServerKeyToken();
+      print("this is sever key $serverKey");
       http.Response response = await http.post(
-        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        Uri.parse(
+            'https://fcm.googleapis.com/v1/projects/dating-e74fa/messages:send'),
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'Authorization':
-              ' key=AAAAjjzunNg:APA91bHcobq3RAB3hFadQ65oTFZgdvxc2CTUw1-Pa6N28Y1EKgx67v368K52qwLjuBXUnYtXMRjZxRm8mgq57tdTzZQwAvfRN7EDQg3Ah5a9dTuqkXrIz6MZzaizNJQvGxO0cMP36ePA',
+          'Authorization': 'Bearer $serverKey'
         },
         body: jsonEncode(
           <String, dynamic>{
@@ -280,8 +286,8 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   void getFCMToken() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-    token = await messaging.getToken();
-    print("FCM Token: $token");
+    devicetoken = await messaging.getToken();
+    print("FCM Token: $devicetoken");
 
     // Save or send this token to your server
   }
