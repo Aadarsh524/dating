@@ -15,11 +15,11 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-
 class CallScreen extends StatefulWidget {
   final String userType;
   final String roomId;
-  const CallScreen({Key? key, required this.userType, required this.roomId}) : super(key: key);
+  const CallScreen({Key? key, required this.userType, required this.roomId})
+      : super(key: key);
   @override
   CallScreenState createState() => CallScreenState();
 }
@@ -38,7 +38,6 @@ class CallScreenState extends State<CallScreen> {
   bool greenColorSelected = true;
   bool cameraPermissionGranted = true;
 
-
   //HomePageState(this.userType);
   Signaling signaling = Signaling();
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
@@ -50,7 +49,7 @@ class CallScreenState extends State<CallScreen> {
   //TextEditingController textEditingController = TextEditingController(text: '');
   final db = FirebaseFirestore.instance;
   List<Messages> chatMessages = [];
- // List<Files> receivedFiles = [];
+  // List<Files> receivedFiles = [];
   TextEditingController sendText = new TextEditingController();
 
 // Initialize your RTCPeerConnection
@@ -59,7 +58,7 @@ class CallScreenState extends State<CallScreen> {
   List<Uint8List> _receivedData = [];
 
   ScrollController _controller = ScrollController();
-  
+
   List<Offset?> points = [];
   double strokeWidth = 5;
   Color paintColor = AppColors.green;
@@ -84,24 +83,21 @@ class CallScreenState extends State<CallScreen> {
     userType = widget.userType;
     _localRenderer.initialize();
     _remoteRenderer.initialize();
-     if (userType == 'H') {
+    if (userType == 'H') {
       signaling
           .openUserMedia(_localRenderer, _remoteRenderer)
           .then((value) async {
+        await signaling.createRoom(_localRenderer, widget.roomId!);
+        // textEditingController.text = roomId!;
 
-          await signaling.createRoom(_localRenderer, widget.roomId!);
-          // textEditingController.text = roomId!;
-
-          //initializeDataTransfer();
-
+        //initializeDataTransfer();
       });
     } else if (userType == 'V') {
       signaling.openUserMedia(_localRenderer, _remoteRenderer);
 
-      Future.delayed(const Duration(seconds: 7)).then((val)async{
-        await signaling.joinRoom(
-            widget.roomId, _remoteRenderer);
-       // initializeDataTransfer();
+      Future.delayed(const Duration(seconds: 7)).then((val) async {
+        await signaling.joinRoom(widget.roomId, _remoteRenderer);
+        // initializeDataTransfer();
       });
       //signaling.getData();
     }
@@ -113,26 +109,27 @@ class CallScreenState extends State<CallScreen> {
     });
     // final tsToMillis = DateTime.now().millisecond;
     // final compareDate = DateTime(tsToMillis - (24 * 60 * 60 * 1000));
-    roomId  = widget.roomId;
+    roomId = widget.roomId;
     signaling.initializeBackgroundService();
     getStringFieldStream();
     super.initState();
   }
-    void endCall() async{
+
+  void endCall() async {
+    Navigator.pop(context);
     if (!endCallPressed) {
-      if(userType == "H") {
-      }
+      if (userType == "H") {}
 
       setState(() {
         endCallPressed = true;
       });
 
-       await signaling.hangUp(_localRenderer);
+      await signaling.hangUp(_localRenderer);
 
       final batch = db.batch();
       String _uid = FirebaseAuth.instance.currentUser!.uid;
       final calleCandidate = db.collection('rooms').doc('$roomId');
-       final userDoc = db.collection('users').doc(_uid);
+      final userDoc = db.collection('users').doc(_uid);
 
       Map<String, dynamic> updateUserVal = {
         "callstatus": "",
@@ -140,7 +137,7 @@ class CallScreenState extends State<CallScreen> {
         "roomid": "",
       };
 
-      if(roomId != null) {
+      if (roomId != null) {
         batch.update(calleCandidate, {"calleeConected": "done"});
       }
 
@@ -149,14 +146,14 @@ class CallScreenState extends State<CallScreen> {
 // Commit the batch
       batch.commit().then((_) {
         Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) =>
-                LoginScreen()), (Route<dynamic> route) => false);
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false);
       }).catchError((error) {
         // Commit failed with an error
         print("Error during batch commit: $error");
         // You can handle the error here, e.g., show a message to the user
       });
-    }else{
+    } else {
       Fluttertoast.showToast(msg: "Please wait");
     }
   }
@@ -166,14 +163,14 @@ class CallScreenState extends State<CallScreen> {
     var calleeCandidate = db.collection('rooms').doc('${widget.roomId}');
     getUserSignals =
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
-          if (snapshot.exists) {
-            String callStatus = snapshot.get('calleeConected');
-            if (callStatus == "done") {
-                endCall();
-               // getUserSignals.cancel();
-            }
-          }
-        });
+      if (snapshot.exists) {
+        String callStatus = snapshot.get('calleeConected');
+        if (callStatus == "done") {
+          endCall();
+          // getUserSignals.cancel();
+        }
+      }
+    });
   }
 
   //Transferring data. We are delaying the function for 6 seconds because I noticed it not working properly when the
@@ -241,7 +238,6 @@ class CallScreenState extends State<CallScreen> {
 
   //   });
 
-
   // }
 
   //We are using special keys for example x&*S% to share valuable information like file size, etc through
@@ -275,7 +271,6 @@ class CallScreenState extends State<CallScreen> {
   //   });
   // }
 
-
   @override
   void dispose() {
     _localRenderer.dispose();
@@ -283,268 +278,273 @@ class CallScreenState extends State<CallScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    if(chatMessages.length>3)
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _controller.animateTo(
-        _controller.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOut,
-      );
-    });
+    if (chatMessages.length > 3)
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _controller.animateTo(
+          _controller.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOut,
+        );
+      });
     return SafeArea(
       child: Scaffold(
         body: Stack(
           children: [
             SizedBox(
                 height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width ,
-                child: RTCVideoView(_remoteRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,)),
+                width: MediaQuery.of(context).size.width,
+                child: RTCVideoView(
+                  _remoteRenderer,
+                  objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                )),
 
-            if(!videoClosed)
-            Positioned(
-              right: 5,
-              top: 5,
-              child: Container(
-                  height: 195,
-                  width: 110,
-                  child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: RTCVideoView(_localRenderer, mirror: true, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,))),
-            ),
-
-
+            if (!videoClosed)
+              Positioned(
+                right: 5,
+                top: 5,
+                child: Container(
+                    height: 195,
+                    width: 110,
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: RTCVideoView(
+                          _localRenderer,
+                          mirror: true,
+                          objectFit: RTCVideoViewObjectFit
+                              .RTCVideoViewObjectFitContain,
+                        ))),
+              ),
 
             // if(imageReceived)
             //   Image.memory(image, width: MediaQuery.of(context).size.width-100,),
-
 
             Positioned(
               bottom: 10,
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15),
                 width: MediaQuery.of(context).size.width,
-                child:
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                      children: [
-
-                        GestureDetector(
-                          onTap: (){
-                            if(muted){
-                              muted = false;
-                            }else{
-                              muted = true;
-                            }
-                            setState(() {});
-                            signaling.muteAudio(!muted);
-
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: Colors.black54,
-                            radius: 25,
-                            child: Icon(
-                              muted ? Icons.mic_off : Icons.mic,
-                              size: 30.0,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ),
-
-
-                        GestureDetector(
-                          onTap: (){
-                            if(videoClosed){
-                              videoClosed = false;
-                            }else{
-                              videoClosed = true;
-                            }
-                            setState(() {});
-                            signaling.closeVideo(!videoClosed);
-                          },
-
-                          child: CircleAvatar(
-                            backgroundColor: Colors.black54,
-                            radius: 25,
-                            child: Icon(
-                              videoClosed ? Icons.videocam_off_rounded : Icons.videocam_rounded,
-                              size: 38.0,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ),
-
-
-                        GestureDetector(
-                          onTap: (){
-                            endCall();
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: Colors.red,
-                            radius: 32,
-                            child: Icon(
-                              Icons.call_end_rounded,
-                              size: 32.0,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-
-                        GestureDetector(
-                          onTap: ()async{
-                            if(shareScreen){
-                              shareScreen = false;
-                              print("Screen sharing is false home");
-                              signaling.stopScreenSharing(_localRenderer, _remoteRenderer);
-                            }else{
-                              print("Screen sharing is true home");
-                              shareScreen = true;
-                              signaling.startScreenSharing(_localRenderer, _remoteRenderer);
-                            }
-                            setState(() {});
-
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: Colors.black54,
-                            radius: 25,
-                            child: Icon(
-                              !shareScreen ? Icons.screen_share_rounded : Icons.stop_screen_share_rounded,
-                              size: 30.0,
-                              color:AppColors. white,
-                            ),
-                          ),
-                        ),
-
-
-                        GestureDetector(
-                          onTap: ()async{
-                            if(loudspeaker){
-                              loudspeaker = false;
-                            }else{
-                              loudspeaker = true;
-                            }
-                            setState(() {});
-                            signaling.loudSpeaker(loudspeaker);
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: Colors.black54,
-                            radius: 25,
-                            child: Icon(
-                              loudspeaker ? Icons.volume_up : Icons.volume_off,
-                              size: 25.0,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ),
-
-
-                      ],
-                    ),
-
-              ),
-            ),
-
-            if(viewImage)
-            Positioned(
-              top: 70,
-              child: Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    InteractiveViewer(
-                      maxScale: 3,
-                      child:  Container(
-                               height:MediaQuery.of(context).size.height - 190,
-                             alignment: Alignment.topCenter,
-                             child: Image.memory(currentImage, width: MediaQuery.of(context).size.width,)),
+                    GestureDetector(
+                      onTap: () {
+                        if (muted) {
+                          muted = false;
+                        } else {
+                          muted = true;
+                        }
+                        setState(() {});
+                        signaling.muteAudio(!muted);
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black54,
+                        radius: 25,
+                        child: Icon(
+                          muted ? Icons.mic_off : Icons.mic,
+                          size: 30.0,
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        if (videoClosed) {
+                          videoClosed = false;
+                        } else {
+                          videoClosed = true;
+                        }
+                        setState(() {});
+                        signaling.closeVideo(!videoClosed);
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black54,
+                        radius: 25,
+                        child: Icon(
+                          videoClosed
+                              ? Icons.videocam_off_rounded
+                              : Icons.videocam_rounded,
+                          size: 38.0,
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        endCall();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.red,
+                        radius: 32,
+                        child: Icon(
+                          Icons.call_end_rounded,
+                          size: 32.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        if (shareScreen) {
+                          shareScreen = false;
+                          print("Screen sharing is false home");
+                          signaling.stopScreenSharing(
+                              _localRenderer, _remoteRenderer);
+                        } else {
+                          print("Screen sharing is true home");
+                          shareScreen = true;
+                          signaling.startScreenSharing(
+                              _localRenderer, _remoteRenderer);
+                        }
+                        setState(() {});
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black54,
+                        radius: 25,
+                        child: Icon(
+                          !shareScreen
+                              ? Icons.screen_share_rounded
+                              : Icons.stop_screen_share_rounded,
+                          size: 30.0,
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        if (loudspeaker) {
+                          loudspeaker = false;
+                        } else {
+                          loudspeaker = true;
+                        }
+                        setState(() {});
+                        signaling.loudSpeaker(loudspeaker);
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black54,
+                        radius: 25,
+                        child: Icon(
+                          loudspeaker ? Icons.volume_up : Icons.volume_off,
+                          size: 25.0,
+                          color: AppColors.white,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
 
-
-
-            if(shareScreen && !moveImage)
-            GestureDetector(
-                  onPanStart: (details) {
-                  setState(() {
-                  points = List.from(points)..add(details.globalPosition);
-                  });
-              },
-
-              onPanUpdate: (details) {
-                setState(() {
-                  points = List.from(points)..add(details.globalPosition);
-                });
-              },
-              onPanEnd: (details) => points.add(null),
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height:MediaQuery.of(context).size.height,
-                child: CustomPaint(
-                  painter: MyPainter(points,paintColor,strokeWidth),
+            if (viewImage)
+              Positioned(
+                top: 70,
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      InteractiveViewer(
+                        maxScale: 3,
+                        child: Container(
+                            height: MediaQuery.of(context).size.height - 190,
+                            alignment: Alignment.topCenter,
+                            child: Image.memory(
+                              currentImage,
+                              width: MediaQuery.of(context).size.width,
+                            )),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            if(viewImage )
+            if (shareScreen && !moveImage)
+              GestureDetector(
+                onPanStart: (details) {
+                  setState(() {
+                    points = List.from(points)..add(details.globalPosition);
+                  });
+                },
+                onPanUpdate: (details) {
+                  setState(() {
+                    points = List.from(points)..add(details.globalPosition);
+                  });
+                },
+                onPanEnd: (details) => points.add(null),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  child: CustomPaint(
+                    painter: MyPainter(points, paintColor, strokeWidth),
+                  ),
+                ),
+              ),
+
+            if (viewImage)
               Positioned(
                 top: 70,
                 left: 10,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical:5),
-                  decoration:BoxDecoration(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
                     color: AppColors.white,
-                    borderRadius:
-                    BorderRadius.only(bottomRight:Radius.circular(15), bottomLeft:Radius.circular(15)),
+                    borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(15),
+                        bottomLeft: Radius.circular(15)),
                   ),
-                  child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap:(){
-                            setState((){
-                              if(moveImage){
-                                moveImage = false;
-                              }else {
-                                moveImage = true;
-                              }
-                              points.clear();
-                            });
-                          },
-                          child: Container(
-                            child: Row(
-                              children: [
-                                Icon(Icons.control_camera_rounded, color: moveImage ? AppColors.green :AppColors.grey2),
-                                Text(" Move", style: TextStyle(color: moveImage ?AppColors. green : AppColors.grey2, fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ),
+                  child: Row(children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (moveImage) {
+                            moveImage = false;
+                          } else {
+                            moveImage = true;
+                          }
+                          points.clear();
+                        });
+                      },
+                      child: Container(
+                        child: Row(
+                          children: [
+                            Icon(Icons.control_camera_rounded,
+                                color: moveImage
+                                    ? AppColors.green
+                                    : AppColors.grey2),
+                            Text(" Move",
+                                style: TextStyle(
+                                    color: moveImage
+                                        ? AppColors.green
+                                        : AppColors.grey2,
+                                    fontWeight: FontWeight.bold)),
+                          ],
                         ),
-                        SizedBox(width: 10,),
-                        GestureDetector(
-                          onTap: (){
-                            viewImage = false;
-                            setState(() {});
-                          },
-                          child: Container(
-                            child: Row(
-                              children: [
-                                Icon(Icons.close, color: AppColors.grey2),
-                                Text(" Hide", style: TextStyle(color:AppColors.grey2, fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ),
-                        )
-                      ]
-                  ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        viewImage = false;
+                        setState(() {});
+                      },
+                      child: Container(
+                        child: Row(
+                          children: [
+                            Icon(Icons.close, color: AppColors.grey2),
+                            Text(" Hide",
+                                style: TextStyle(
+                                    color: AppColors.grey2,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    )
+                  ]),
                 ),
               ),
-
 
             // if(imagesTapped)
             //   Positioned(
@@ -620,7 +620,6 @@ class CallScreenState extends State<CallScreen> {
             //     ),
             //   ),
 
-
             // if(messageTapped)
             //   Positioned(
             //     top:50,
@@ -637,7 +636,6 @@ class CallScreenState extends State<CallScreen> {
             //       child: Column(
             //         children: [
             //           Text("Chat Messages", style: TextStyle(color: AppColors.white.withOpacity(0.5), fontSize: 19), ),
-
 
             //           Container(
             //             height: 195,
@@ -701,48 +699,54 @@ class CallScreenState extends State<CallScreen> {
             //     ),
             //   ),
 
-
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: (){
-                    if(!messageTapped) {
+                  onTap: () {
+                    if (!messageTapped) {
                       newMessagecount = 0;
                       messageTapped = true;
-                    }else{
+                    } else {
                       messageTapped = false;
                     }
                     setState(() {});
                   },
                   child: Container(
-                    margin: EdgeInsets.only(left: 10,top:5),
+                    margin: EdgeInsets.only(left: 10, top: 5),
                     child: Stack(
                       children: [
-
                         Container(
                           width: 90,
                           height: 35,
-                          margin: EdgeInsets.only(right:4, bottom:5),
-                          decoration:BoxDecoration(
+                          margin: EdgeInsets.only(right: 4, bottom: 5),
+                          decoration: BoxDecoration(
                             color: AppColors.black2,
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(10)),
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(messageTapped ? Icons.close : Icons.chat_rounded,color: AppColors.white,),
-                              SizedBox(width: 4,),
-                              Text(messageTapped ? "Close" : "Chat", style: TextStyle(color: AppColors.white), ),
+                              Icon(
+                                messageTapped
+                                    ? Icons.close
+                                    : Icons.chat_rounded,
+                                color: AppColors.white,
+                              ),
+                              SizedBox(
+                                width: 4,
+                              ),
+                              Text(
+                                messageTapped ? "Close" : "Chat",
+                                style: TextStyle(color: AppColors.white),
+                              ),
                             ],
                           ),
                         ),
-                        if(newMessagecount > 0 && !messageTapped)
+                        if (newMessagecount > 0 && !messageTapped)
                           Positioned(
                             bottom: 0,
                             right: 0,
-
                             child: Container(
                               width: 18.0, // Adjust the size as needed
                               height: 18.0, // Adjust the size as needed
@@ -750,77 +754,116 @@ class CallScreenState extends State<CallScreen> {
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: AppColors.white,
-                                  width: 1.4, // Adjust the border width as needed
+                                  width:
+                                      1.4, // Adjust the border width as needed
                                 ),
-                                color:AppColors. green, // Adjust the background color as needed
+                                color: AppColors
+                                    .green, // Adjust the background color as needed
                               ),
-                              child: Text("$newMessagecount", style: TextStyle(fontSize: 11.5, height: 1.35, fontWeight: FontWeight.bold, color:AppColors.white),textAlign: TextAlign.center,),
+                              child: Text(
+                                "$newMessagecount",
+                                style: TextStyle(
+                                    fontSize: 11.5,
+                                    height: 1.35,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.white),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                       ],
                     ),
                   ),
                 ),
-
-
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-
                     GestureDetector(
-                      onTap: ()async{
-                        if(!imagesTapped) {
+                      onTap: () async {
+                        if (!imagesTapped) {
                           imagesTapped = true;
-                        }else{
+                        } else {
                           imagesTapped = false;
                         }
                         setState(() {});
                       },
                       child: Container(
-                        margin: EdgeInsets.only(left: 5,top:5),
-                        width:  150,
+                        margin: EdgeInsets.only(left: 5, top: 5),
+                        width: 150,
                         height: 35,
-                        decoration:BoxDecoration(
-                          color:AppColors. black2,
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(10)),
+                        decoration: BoxDecoration(
+                          color: AppColors.black2,
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(imagesTapped ? Icons.close : Icons.image, color:AppColors.white),
-                            SizedBox(width: 4,),
-                            Text( imagesTapped ?"Cancel" : "Transfer Image",  style: TextStyle(color: AppColors.white), ),
+                            Icon(imagesTapped ? Icons.close : Icons.image,
+                                color: AppColors.white),
+                            SizedBox(
+                              width: 4,
+                            ),
+                            Text(
+                              imagesTapped ? "Cancel" : "Transfer Image",
+                              style: TextStyle(color: AppColors.white),
+                            ),
                           ],
                         ),
                       ),
                     ),
-
-                    SizedBox(height: 2,),
-                    if(sendingFile || receivingFile || imageReceived)
+                    SizedBox(
+                      height: 2,
+                    ),
+                    if (sendingFile || receivingFile || imageReceived)
                       Stack(
                         alignment: Alignment.center,
                         children: [
-                          if(!imagesTapped)
+                          if (!imagesTapped)
                             Positioned(
                                 top: 0,
-                                child: Image.asset("assets/images/arrow-up.png", width: 15,color: AppColors.black2.withOpacity(0.7),)),
-
+                                child: Image.asset(
+                                  "assets/images/arrow-up.png",
+                                  width: 15,
+                                  color: AppColors.black2.withOpacity(0.7),
+                                )),
                           Container(
-                            margin: EdgeInsets.only(left: 5,top: imagesTapped ? 13  :9.5),
-                            width: imageReceived ? 125 : receivingFile ? 115 : 100,
+                            margin: EdgeInsets.only(
+                                left: 5, top: imagesTapped ? 13 : 9.5),
+                            width: imageReceived
+                                ? 125
+                                : receivingFile
+                                    ? 115
+                                    : 100,
                             height: 35,
-                            decoration:BoxDecoration(
+                            decoration: BoxDecoration(
                               color: AppColors.black3,
                               borderRadius:
-                              BorderRadius.all(Radius.circular(10)),
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(sendingFile? Icons.cloud_upload : receivingFile  ? Icons.downloading_outlined :  Icons.check_circle_rounded, color: AppColors.white, size: 18,),
-                                SizedBox(width: 4,),
-                                Text(sendingFile? sendingFileUpdate : receivingFile  ? "Receiving ${receivingPercentage.toInt()}%"  : "Image Received", style: TextStyle(color:AppColors. white, fontSize: 11), ),
+                                Icon(
+                                  sendingFile
+                                      ? Icons.cloud_upload
+                                      : receivingFile
+                                          ? Icons.downloading_outlined
+                                          : Icons.check_circle_rounded,
+                                  color: AppColors.white,
+                                  size: 18,
+                                ),
+                                SizedBox(
+                                  width: 4,
+                                ),
+                                Text(
+                                  sendingFile
+                                      ? sendingFileUpdate
+                                      : receivingFile
+                                          ? "Receiving ${receivingPercentage.toInt()}%"
+                                          : "Image Received",
+                                  style: TextStyle(
+                                      color: AppColors.white, fontSize: 11),
+                                ),
                               ],
                             ),
                           ),
@@ -831,203 +874,224 @@ class CallScreenState extends State<CallScreen> {
               ],
             ),
 
-            if(!cameraPermissionGranted)
-             Positioned(
-               top: 70,
-               left: 10,
-               child: Column(
-                 children: [
-                   Text("Camera Permission is not granted!", style: TextStyle(fontSize: 12, color:  Colors.red, fontWeight: FontWeight.bold),),
-                 ],
-               )) ,
+            if (!cameraPermissionGranted)
+              Positioned(
+                  top: 70,
+                  left: 10,
+                  child: Column(
+                    children: [
+                      Text(
+                        "Camera Permission is not granted!",
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  )),
 
-            if(shareScreen)
-            Positioned(
-              bottom:0,
-              child: Container(
-                height: 120,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  color:AppColors. black2,
-                  borderRadius:
-                  BorderRadius.only(topLeft:Radius.circular(40),topRight:Radius.circular(40)),
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(height: 5,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Opacity(
-                          opacity: greenColorSelected ? 1 : 0.6,
-                          child: GestureDetector(
-                            onTap: (){
-                              greenColorSelected = true;
-                              paintColor = AppColors.green;
-                              points.clear();
+            if (shareScreen)
+              Positioned(
+                bottom: 0,
+                child: Container(
+                  height: 120,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    color: AppColors.black2,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40)),
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Opacity(
+                            opacity: greenColorSelected ? 1 : 0.6,
+                            child: GestureDetector(
+                              onTap: () {
+                                greenColorSelected = true;
+                                paintColor = AppColors.green;
+                                points.clear();
+                                moveImage = false;
+                                setState(() {});
+                              },
+                              child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.black.withOpacity(0.5),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                  child: Center(
+                                    child: CircleAvatar(
+                                      radius: 10,
+                                      backgroundColor: AppColors.green,
+                                    ),
+                                  )),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Opacity(
+                            opacity: !greenColorSelected ? 1 : 0.6,
+                            child: GestureDetector(
+                              onTap: () {
+                                greenColorSelected = false;
+                                paintColor = Colors.red;
+                                points.clear();
+                                moveImage = false;
+                                setState(() {});
+                              },
+                              child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.black.withOpacity(0.5),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 10,
+                                    backgroundColor: Colors.red,
+                                  )),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 150,
+                            child: Slider(
+                              activeColor: AppColors.grey3,
+                              inactiveColor: AppColors.white.withOpacity(0.3),
+                              min: 0,
+                              max: 10,
+                              value: strokeWidth,
+                              onChanged: (val) {
+                                moveImage = false;
+                                setState(() => strokeWidth = val);
+                              },
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
                               moveImage = false;
-                              setState(() {});
+                              setState(() {
+                                points.clear();
+                              });
                             },
                             child: Container(
-                              padding:EdgeInsets.all(3),
+                              height: 40,
+                              width: 90,
                               decoration: BoxDecoration(
-                                color:AppColors. black.withOpacity(0.5),
+                                color: AppColors.black.withOpacity(0.5),
                                 borderRadius:
-                                BorderRadius.all(Radius.circular(10)),
+                                    BorderRadius.all(Radius.circular(10)),
                               ),
-                              child: Center(
-                                child: CircleAvatar(
-                                  radius: 10,
-                                  backgroundColor:AppColors. green,
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.remove_circle,
+                                      color: AppColors.white, size: 22),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    "Clear",
+                                    style: TextStyle(
+                                        color: AppColors.white, fontSize: 14),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          shareScreen = false;
+                          print("Screen sharing is false home");
+                          signaling.stopScreenSharing(
+                              _localRenderer, _remoteRenderer);
+                          setState(() {});
+                        },
+                        child: Container(
+                          height: 50,
+                          width: MediaQuery.of(context).size.width - 50,
+                          decoration: BoxDecoration(
+                            color: AppColors.black.withOpacity(0.2),
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.close,
+                                  color: AppColors.white, size: 28),
+                              SizedBox(width: 10),
+                              Text(
+                                "Cancel Screen Sharing",
+                                style: TextStyle(
+                                    color: AppColors.white, fontSize: 17),
                               )
-                            ),
+                            ],
                           ),
                         ),
-                        SizedBox(width: 10,),
+                      )
+                    ],
+                  ),
+                ),
+              ),
 
-                        Opacity(
-                          opacity: !greenColorSelected ? 1 : 0.6,
-                          child: GestureDetector(
-                            onTap: (){
-                              greenColorSelected = false;
-                              paintColor = Colors.red;
-                              points.clear();
-                              moveImage = false;
-                              setState(() {});
-                            },
-                            child: Container(
-                                padding:EdgeInsets.all(3),
-                                decoration: BoxDecoration(
-                                  color:AppColors. black.withOpacity(0.5),
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                                ),
-                                child: CircleAvatar(
-                                  radius: 10,
-                                  backgroundColor: Colors.red,
-                                )
-                            ),
-                          ),
+            if (endCallPressed)
+              Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.black.withOpacity(0.3),
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.black2,
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
+                    height: 180,
+                    width: 180,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          color: AppColors.white,
                         ),
-
                         SizedBox(
-                          width:150,
-                          child: Slider(
-                            activeColor:AppColors.grey3,
-                            inactiveColor: AppColors.white.withOpacity(0.3),
-                            min: 0,
-                            max: 10,
-                            value: strokeWidth,
-                            onChanged: (val){
-                              moveImage = false;
-                              setState(() => strokeWidth = val);
-                            },
-                          ),
+                          height: 10,
                         ),
-
-                        GestureDetector(
-                          onTap: (){
-                            moveImage = false;
-                            setState(() {
-                              points.clear();
-                            });
-                          },
-                          child: Container(
-                            height: 40,
-                            width: 90,
-                            decoration: BoxDecoration(
-                              color:AppColors. black.withOpacity(0.5),
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(10)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.remove_circle, color: AppColors.white, size:22),
-                                SizedBox(width:10),
-                                Text("Clear", style: TextStyle(color:AppColors.white, fontSize: 14),)
-                              ],
-                            ),
-                          ),
+                        Text(
+                          "Closing Call..",
+                          style: TextStyle(color: AppColors.white),
                         ),
                       ],
                     ),
-
-                    SizedBox(height: 5,),
-
-                    GestureDetector(
-                      onTap: (){
-                        shareScreen = false;
-                        print("Screen sharing is false home");
-                        signaling.stopScreenSharing(_localRenderer, _remoteRenderer);
-                        setState(() {});
-                      },
-                      child: Container(
-                        height: 50,
-                        width: MediaQuery.of(context).size.width-50,
-                        decoration: BoxDecoration(
-                          color: AppColors.black.withOpacity(0.2),
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(20)),
-                        ),
-                        child:
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.close, color:AppColors. white, size:28),
-                            SizedBox(width:10),
-                            Text("Cancel Screen Sharing", style: TextStyle(color:AppColors.white, fontSize: 17),)
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
+                  ),
                 ),
               ),
-            ),
-
-           if(endCallPressed)
-           Container(
-             height: MediaQuery.of(context).size.height,
-             width: MediaQuery.of(context).size.width,
-             color: Colors.black.withOpacity(0.3),
-             child: Center(
-               child: Container(
-                 decoration:BoxDecoration(
-                   color:AppColors. black2,
-                   borderRadius:
-                   BorderRadius.all(Radius.circular(15)),
-                 ),
-                 height: 180,
-                 width: 180,
-                 child: Column(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   crossAxisAlignment: CrossAxisAlignment.center,
-                   children: [
-                     CircularProgressIndicator(color: AppColors.white,),
-                     SizedBox(height: 10,),
-                     Text("Closing Call..",style: TextStyle(color: AppColors.white),),
-                   ],
-                 ),
-               ),
-             ),
-           ),
           ],
         ),
       ),
     );
   }
 
-  Widget ChatBubble(bool sent, String text){
+  Widget ChatBubble(bool sent, String text) {
     return Padding(
       padding: EdgeInsets.all(4.0),
       child: Align(
-        alignment:  !sent ? Alignment.centerLeft : Alignment.centerRight,
+        alignment: !sent ? Alignment.centerLeft : Alignment.centerRight,
         child: Container(
           padding: EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color:  !sent? AppColors.green : Colors.grey,
+            color: !sent ? AppColors.green : Colors.grey,
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
@@ -1039,36 +1103,41 @@ class CallScreenState extends State<CallScreen> {
     );
   }
 
-
-  Widget fileBubble(String filename, String size){
+  Widget fileBubble(String filename, String size) {
     return Padding(
       padding: EdgeInsets.all(4.0),
       child: Container(
         width: 220,
         padding: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-          color:  AppColors.black.withOpacity(0.3),
+          color: AppColors.black.withOpacity(0.3),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
           children: [
-            Icon(Icons.image, color: AppColors.white,size: 44,),
-            SizedBox(width:6),
+            Icon(
+              Icons.image,
+              color: AppColors.white,
+              size: 44,
+            ),
+            SizedBox(width: 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width:130,
+                  width: 130,
                   child: Text(
                     filename,
                     maxLines: 1,
-                    style:TextStyle(color: Colors.white,),
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Text(
                   size,
-                  style: TextStyle(color:AppColors. grey2),
+                  style: TextStyle(color: AppColors.grey2),
                 ),
               ],
             ),
@@ -1080,16 +1149,18 @@ class CallScreenState extends State<CallScreen> {
 
   void sendFile(Uint8List img) async {
     Uint8List fileBytes = img;
-    const chunkSize = 16384;// 16 KB chunks
+    const chunkSize = 16384; // 16 KB chunks
     double totalSize = fileBytes.length.toDouble();
     double sentSize = 0.0;
     signaling.sendTextMessage("x&*S% $totalSize");
     for (var i = 0; i < fileBytes.length; i += chunkSize) {
-      var end = (i + chunkSize < fileBytes.length) ? i + chunkSize : fileBytes.length;
-      signaling.fileDataChannel.send(RTCDataChannelMessage.fromBinary(fileBytes.sublist(i, end)));
-      sendingFile =  true;
+      var end =
+          (i + chunkSize < fileBytes.length) ? i + chunkSize : fileBytes.length;
+      signaling.fileDataChannel
+          .send(RTCDataChannelMessage.fromBinary(fileBytes.sublist(i, end)));
+      sendingFile = true;
       sentSize += (end - i).toDouble();
-      sendingPercentage  = (sentSize / totalSize) * 100.0;
+      sendingPercentage = (sentSize / totalSize) * 100.0;
       if (end == fileBytes.length) {
         sendingFile = false;
       }
