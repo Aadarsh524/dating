@@ -14,7 +14,7 @@ class DashboardProvider with ChangeNotifier {
   bool get isDashboardLoading => _isDashboardLoading;
   List<DashboardResponseModel> get dashboardList => _dashboardListProvider;
 
-  Future<void> dashboard(int page, BuildContext context) async {
+  Future<void> dashboard(int page, BuildContext context, String gender) async {
     _isDashboardLoading = true;
     notifyListeners();
 
@@ -32,7 +32,7 @@ class DashboardProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse('$api/Dashboard/$uid&page=$page'),
+        Uri.parse('$api/Dashboard/$uid&page=$page&gender=$gender'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

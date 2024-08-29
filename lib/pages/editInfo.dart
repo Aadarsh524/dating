@@ -931,7 +931,7 @@ class _EditInfoState extends State<EditInfo> {
                   // profile
                   Row(
                     children: [
-                      const profileButton(),
+                      const ProfileButton(),
                       const SizedBox(
                         width: 20,
                       ),
@@ -1860,26 +1860,43 @@ class _EditInfoState extends State<EditInfo> {
   }
 }
 
-// profile button
-class profileButton extends StatelessWidget {
-  const profileButton({
-    super.key,
-  });
+class ProfileButton extends StatelessWidget {
+  const ProfileButton({Key? key}) : super(key: key);
+
+  Uint8List base64ToImage(String base64String) {
+    return base64Decode(base64String);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Neumorphic(
-      style: const NeumorphicStyle(
-        boxShape: NeumorphicBoxShape.circle(),
-      ),
-      child: SizedBox(
-        height: 50,
-        width: 50,
-        child: Image.asset(
-          AppImages.loginimage,
-          fit: BoxFit.cover,
-        ),
-      ),
+    return Consumer<UserProfileProvider>(
+      builder: (context, userProfileProvider, _) {
+        if (userProfileProvider.isProfileLoading) {
+          return const CircularProgressIndicator();
+        }
+
+        UserProfileModel? userProfileModel =
+            userProfileProvider.currentUserProfile;
+
+        Uint8List imageBytes = userProfileModel!.image != null &&
+                userProfileModel.image!.isNotEmpty
+            ? base64ToImage(userProfileModel.image!)
+            : base64ToImage(defaultBase64Avatar);
+
+        return Neumorphic(
+          style: const NeumorphicStyle(
+            boxShape: NeumorphicBoxShape.circle(),
+          ),
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
     );
   }
 }

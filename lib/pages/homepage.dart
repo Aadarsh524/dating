@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:dating/backend/MongoDB/constants.dart';
 
 import 'package:dating/datamodel/dashboard_response_model.dart' as d;
@@ -41,8 +40,6 @@ class _HomePageState extends State<HomePage> {
   bool isUserVerified = false;
 
   String seeking = 'SEEKING';
-  String country = 'COUNTRY';
-  String age = 'AGE';
 
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
@@ -52,9 +49,20 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DashboardProvider>().dashboard(1, context);
-    });
+    final userprofileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .currentUserProfile;
+
+    if (userprofileProvider!.gender.toString() == 'female') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<DashboardProvider>().dashboard(1, context, 'male');
+      });
+    }
+    if (userprofileProvider.gender.toString() == 'male') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<DashboardProvider>().dashboard(1, context, 'female');
+      });
+    }
   }
 
   @override
@@ -262,6 +270,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget DesktopHome() {
+    final userprofileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .currentUserProfile;
     return Scaffold(
       body: Column(
         children: [
@@ -409,26 +420,6 @@ class _HomePageState extends State<HomePage> {
                             width: 15,
                           ),
                           // add friemd
-                          ButtonWithLabel(
-                            text: null,
-                            labelText: 'Add Friend',
-                            onPressed: () {},
-                            icon: const Icon(Icons.add),
-                          ),
-
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          // online
-                          ButtonWithLabel(
-                            text: null,
-                            labelText: 'Online',
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.circle_outlined,
-                              color: Colors.green,
-                            ),
-                          ),
                         ],
                       ),
 
@@ -455,13 +446,28 @@ class _HomePageState extends State<HomePage> {
                                 setState(() {
                                   seeking = newValue!;
                                 });
+
+                                // Call the dashboard method with different parameters based on the selection
+                                if (newValue == 'male' ||
+                                    newValue == 'female') {
+                                  context.read<DashboardProvider>().dashboard(
+                                        1,
+                                        context,
+                                        newValue!, // Pass the selected value (male/female)
+                                      );
+                                } else {
+                                  context.read<DashboardProvider>().dashboard(
+                                        1,
+                                        context,
+                                        userprofileProvider!.gender
+                                            .toString(), // Default to user's gender if 'SEEKING' is selected
+                                      );
+                                }
                               },
                               items: <String>[
                                 'SEEKING',
-                                'English',
-                                'Spanish',
-                                'French',
-                                'German'
+                                'Male',
+                                'Female',
                               ] // Language options
                                   .map<DropdownMenuItem<String>>(
                                       (String value) {
@@ -480,79 +486,6 @@ class _HomePageState extends State<HomePage> {
                           ),
 
                           // country
-
-                          Neumorphic(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 2),
-                            child: DropdownButton<String>(
-                              underline: Container(),
-                              style: AppTextStyles().secondaryStyle,
-                              value: country,
-                              icon: const Icon(
-                                  Icons.arrow_drop_down), // Dropdown icon
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  country = newValue!;
-                                });
-                              },
-                              items: <String>[
-                                'COUNTRY',
-                                'English',
-                                'Spanish',
-                                'French',
-                                'German'
-                              ] // Language options
-                                  .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(
-                                    value,
-                                    style: AppTextStyles().secondaryStyle,
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 50,
-                          ),
-
-                          // age
-
-                          Neumorphic(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 2),
-                            child: DropdownButton<String>(
-                              underline: Container(),
-                              style: AppTextStyles().secondaryStyle,
-                              value: age,
-                              icon: const Icon(
-                                  Icons.arrow_drop_down), // Dropdown icon
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  age = newValue!;
-                                });
-                              },
-                              items: <String>[
-                                'AGE',
-                                'English',
-                                'Spanish',
-                                'French',
-                                'German'
-                              ] // Language options
-                                  .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(
-                                    value,
-                                    style: AppTextStyles().secondaryStyle,
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
                         ],
                       ),
                     ],

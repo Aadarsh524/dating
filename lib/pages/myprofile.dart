@@ -523,6 +523,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
   Widget DesktopProfile() {
     final authenticationProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
+    final userprofileProvider =
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .currentUserProfile;
     return Scaffold(
       body: Stack(
         children: [
@@ -1289,19 +1292,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                         ),
                                       ),
                                     ),
-                                    // Consumer<UserProfileProvider>(
-                                    //     builder: (context, userProfile, _) {
-                                    //   UserProfileModel? userProfileModel =
-                                    //       Provider.of<UserProfileProvider>(
-                                    //               context,
-                                    //               listen: false)
-                                    //           .currentUserProfile;
-                                    //   return Expanded(
-                                    //       child: userProfileModel!.isVerified ==
-                                    //               true
-                                    //           ? Container()
-                                    //           : _buildVerificationSection());
-                                    // }),
+                                    userprofileProvider!.isVerified == true
+                                        ? Container()
+                                        : _buildVerificationSection(),
+
                                     const SizedBox(
                                       height: 40,
                                     ),
