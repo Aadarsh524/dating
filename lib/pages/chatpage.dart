@@ -566,47 +566,47 @@ class _ChatPageState extends State<ChatPage> {
                           width: 15,
                         ),
                         // popular
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Popular',
-                          onPressed: () {},
-                          icon: const Icon(Icons.star),
-                        ),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        // photos
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Photos',
-                          onPressed: () {},
-                          icon: const Icon(Icons.photo_library_sharp),
-                        ),
+                        // ButtonWithLabel(
+                        //   text: null,
+                        //   labelText: 'Popular',
+                        //   onPressed: () {},
+                        //   icon: const Icon(Icons.star),
+                        // ),
+                        // const SizedBox(
+                        //   width: 15,
+                        // ),
+                        // // photos
+                        // ButtonWithLabel(
+                        //   text: null,
+                        //   labelText: 'Photos',
+                        //   onPressed: () {},
+                        //   icon: const Icon(Icons.photo_library_sharp),
+                        // ),
 
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        // add friemd
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Add Friend',
-                          onPressed: () {},
-                          icon: const Icon(Icons.add),
-                        ),
+                        // const SizedBox(
+                        //   width: 15,
+                        // ),
+                        // // add friemd
+                        // ButtonWithLabel(
+                        //   text: null,
+                        //   labelText: 'Add Friend',
+                        //   onPressed: () {},
+                        //   icon: const Icon(Icons.add),
+                        // ),
 
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        // online
-                        ButtonWithLabel(
-                          text: null,
-                          labelText: 'Online',
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.circle_outlined,
-                            color: Colors.green,
-                          ),
-                        ),
+                        // const SizedBox(
+                        //   width: 15,
+                        // ),
+                        // // online
+                        // ButtonWithLabel(
+                        //   text: null,
+                        //   labelText: 'Online',
+                        //   onPressed: () {},
+                        //   icon: const Icon(
+                        //     Icons.circle_outlined,
+                        //     color: Colors.green,
+                        //   ),
+                        // ),
                       ],
                     ),
 
@@ -620,114 +620,114 @@ class _ChatPageState extends State<ChatPage> {
                       children: [
                         // seeking
 
-                        Neumorphic(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 2),
-                          child: DropdownButton<String>(
-                            underline: Container(),
-                            style: AppTextStyles().secondaryStyle,
-                            value: seeking,
-                            icon: const Icon(
-                                Icons.arrow_drop_down), // Dropdown icon
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                seeking = newValue!;
-                              });
-                            },
-                            items: <String>[
-                              'SEEKING',
-                              'English',
-                              'Spanish',
-                              'French',
-                              'German'
-                            ] // Language options
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: AppTextStyles().secondaryStyle,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 50,
-                        ),
+                        // Neumorphic(
+                        //   padding: const EdgeInsets.symmetric(
+                        //       horizontal: 20, vertical: 2),
+                        //   child: DropdownButton<String>(
+                        //     underline: Container(),
+                        //     style: AppTextStyles().secondaryStyle,
+                        //     value: seeking,
+                        //     icon: const Icon(
+                        //         Icons.arrow_drop_down), // Dropdown icon
+                        //     onChanged: (String? newValue) {
+                        //       setState(() {
+                        //         seeking = newValue!;
+                        //       });
+                        //     },
+                        //     items: <String>[
+                        //       'SEEKING',
+                        //       'English',
+                        //       'Spanish',
+                        //       'French',
+                        //       'German'
+                        //     ] // Language options
+                        //         .map<DropdownMenuItem<String>>((String value) {
+                        //       return DropdownMenuItem<String>(
+                        //         value: value,
+                        //         child: Text(
+                        //           value,
+                        //           style: AppTextStyles().secondaryStyle,
+                        //         ),
+                        //       );
+                        //     }).toList(),
+                        //   ),
+                        // ),
+                        // const SizedBox(
+                        //   width: 50,
+                        // ),
 
                         // country
 
-                        Neumorphic(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 2),
-                          child: DropdownButton<String>(
-                            underline: Container(),
-                            style: AppTextStyles().secondaryStyle,
-                            value: country,
-                            icon: const Icon(
-                                Icons.arrow_drop_down), // Dropdown icon
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                country = newValue!;
-                              });
-                            },
-                            items: <String>[
-                              'COUNTRY',
-                              'English',
-                              'Spanish',
-                              'French',
-                              'German'
-                            ] // Language options
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: AppTextStyles().secondaryStyle,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 50,
-                        ),
+                        // Neumorphic(
+                        //   padding: const EdgeInsets.symmetric(
+                        //       horizontal: 20, vertical: 2),
+                        //   child: DropdownButton<String>(
+                        //     underline: Container(),
+                        //     style: AppTextStyles().secondaryStyle,
+                        //     value: country,
+                        //     icon: const Icon(
+                        //         Icons.arrow_drop_down), // Dropdown icon
+                        //     onChanged: (String? newValue) {
+                        //       setState(() {
+                        //         country = newValue!;
+                        //       });
+                        //     },
+                        //     items: <String>[
+                        //       'COUNTRY',
+                        //       'English',
+                        //       'Spanish',
+                        //       'French',
+                        //       'German'
+                        //     ] // Language options
+                        //         .map<DropdownMenuItem<String>>((String value) {
+                        //       return DropdownMenuItem<String>(
+                        //         value: value,
+                        //         child: Text(
+                        //           value,
+                        //           style: AppTextStyles().secondaryStyle,
+                        //         ),
+                        //       );
+                        //     }).toList(),
+                        //   ),
+                        // ),
+                        // const SizedBox(
+                        //   width: 50,
+                        // ),
 
                         // age
 
-                        Neumorphic(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 2),
-                          child: DropdownButton<String>(
-                            underline: Container(),
-                            style: AppTextStyles().secondaryStyle,
-                            value: age,
-                            icon: const Icon(
-                                Icons.arrow_drop_down), // Dropdown icon
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                age = newValue!;
-                              });
-                            },
-                            items: <String>[
-                              'AGE',
-                              'English',
-                              'Spanish',
-                              'French',
-                              'German'
-                            ] // Language options
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: AppTextStyles().secondaryStyle,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
+                        // Neumorphic(
+                        //   padding: const EdgeInsets.symmetric(
+                        //       horizontal: 20, vertical: 2),
+                        //   child: DropdownButton<String>(
+                        //     underline: Container(),
+                        //     style: AppTextStyles().secondaryStyle,
+                        //     value: age,
+                        //     icon: const Icon(
+                        //         Icons.arrow_drop_down), // Dropdown icon
+                        //     onChanged: (String? newValue) {
+                        //       setState(() {
+                        //         age = newValue!;
+                        //       });
+                        //     },
+                        //     items: <String>[
+                        //       'AGE',
+                        //       'English',
+                        //       'Spanish',
+                        //       'French',
+                        //       'German'
+                        //     ] // Language options
+                        //         .map<DropdownMenuItem<String>>((String value) {
+                        //       return DropdownMenuItem<String>(
+                        //         value: value,
+                        //         child: Text(
+                        //           value,
+                        //           style: AppTextStyles().secondaryStyle,
+                        //         ),
+                        //       );
+                        //     }).toList(),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ],
@@ -1071,7 +1071,6 @@ class _ChatPageState extends State<ChatPage> {
                                                               builder:
                                                                   (context) =>
                                                                       RingScreen(
-                                                                        
                                                                         endUserDetails:
                                                                             chatRoomMode,
                                                                         clientID:

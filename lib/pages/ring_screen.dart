@@ -97,9 +97,13 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
             roomId = calleeCandidate.id;
 
             calleeCandidate.set({'calleeConected': "null"}).then((value) async {
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                await sendNotificationToUser("You have a Call from Anonymous",
+                    "Join Now", devicetoken!, roomId!, _uid);
+              });
+
               getStringFieldStream();
-              sendNotificationToUser("You have a Call from Anonymous",
-                  "Join Now", devicetoken!, roomId!, _uid);
+
               // Optionally, you can send a notification to the user here
 
               //update the call status of the users here
@@ -235,8 +239,8 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     });
   }
 
-  void sendNotificationToUser(String title, String message, String userToken,
-      String roomID, String hostUserID) async {
+  Future<void> sendNotificationToUser(String title, String message,
+      String userToken, String roomID, String hostUserID) async {
     final data = {
       "message": {
         "token": "token_1",
@@ -254,7 +258,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
     try {
       GetServieKey server = GetServieKey();
-      String serverKey = await server.getServerKeyToken();
+      final String serverKey = await server.getServerKeyToken();
       print("this is sever key $serverKey");
       http.Response response = await http.post(
         Uri.parse(
