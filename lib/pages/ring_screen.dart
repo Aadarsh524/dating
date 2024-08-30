@@ -6,6 +6,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/helpers/get_server_key.dart';
+import 'package:dating/helpers/notification_services.dart';
 import 'package:dating/pages/call_screen.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/providers/user_profile_provider.dart';
@@ -55,6 +56,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   bool notificationSent = false;
   bool ringingCall = false;
   bool hostNavigatedToCall = false;
+  NotificationServices notificationServices = NotificationServices();
 
   String? roomId;
   MediaStream? stream;
@@ -66,13 +68,12 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   bool userIsconnected = false;
   late AudioPlayer player;
 
-  String? devicetoken;
+  String? deviceToken;
 
   //TextEditingController textEditingController = TextEditingController(text: '');
 
   @override
   void initState() {
-    getFCMToken();
     _uid = _auth.currentUser?.uid;
     if (widget.roomId == "null") {
       hostUser = _uid;
@@ -98,8 +99,12 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
             calleeCandidate.set({'calleeConected': "null"}).then((value) async {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
+                deviceToken = await notificationServices.getDeviceToken();
+
+                print("FCM token ::::::> $deviceToken");
+
                 await sendNotificationToUser("You have a Call from Anonymous",
-                    "Join Now", devicetoken!, roomId!, _uid);
+                    "Join Now", deviceToken!, roomId!, _uid);
               });
 
               getStringFieldStream();
@@ -285,15 +290,6 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     } catch (e) {
       print("Exception: $e");
     }
-  }
-
-  void getFCMToken() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-    devicetoken = await messaging.getToken();
-    print("FCM Token: $devicetoken");
-
-    // Save or send this token to your server
   }
 
   @override
