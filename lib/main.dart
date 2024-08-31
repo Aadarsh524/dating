@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dating/auth/loginScreen.dart';
@@ -40,8 +39,13 @@ bool isMacOs = false;
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 int routeCode = -1;
 
-@pragma("vm:entry-point")
-
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await pre.Firebase.initializeApp();
+  log(message.notification!.title.toString());
+  log(message.notification!.body.toString());
+  log(message.data.toString());
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,12 +60,14 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await Permission.notification.isDenied.then((value) {
-    if (value){
-      Permission.notification.request();
-    }
-  },);
- 
+  await Permission.notification.isDenied.then(
+    (value) {
+      if (value) {
+        Permission.notification.request();
+      }
+    },
+  );
+
   //runApp(const MyApp());
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => UserProfileProvider()),
@@ -77,13 +83,6 @@ void main() async {
     ChangeNotifierProvider(create: (_) => FavouritesProvider()),
     ChangeNotifierProvider(create: (_) => ProfileViewProvider()),
   ], child: const MyApp()));
-}
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await pre.Firebase.initializeApp();
-  log(message.notification!.title.toString());
-  log(message.notification!.body.toString());
-  log(message.data.toString());
 }
 
 class MyApp extends StatelessWidget {

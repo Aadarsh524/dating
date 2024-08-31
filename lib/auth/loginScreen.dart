@@ -1,5 +1,6 @@
 import 'package:dating/auth/loginDesktop/login.dart';
 import 'package:dating/auth/loginMobile/login.dart';
+import 'package:dating/helpers/notification_services.dart';
 import 'package:dating/pages/state_loader.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    NotificationServices notificationServices = NotificationServices();
+    notificationServices.firebaseInit(context);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkLoginStatus();
     });

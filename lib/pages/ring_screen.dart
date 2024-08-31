@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
-import 'package:dating/helpers/get_server_key.dart';
+import 'package:dating/helpers/get_service_key.dart';
 import 'package:dating/helpers/notification_services.dart';
 import 'package:dating/pages/call_screen.dart';
 import 'package:dating/pages/chatpage.dart';
@@ -247,24 +247,22 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   Future<void> sendNotificationToUser(String title, String message,
       String userToken, String roomID, String hostUserID) async {
     final data = {
-      "message": {
-        "token": "token_1",
-        "data": {
-          "roomid": roomID,
-          "hostid": "",
-          "route": "/call",
-        },
-        "notification": {
-          "title": title,
-          "body": message,
-        }
+      "data": {
+        "roomid": roomID,
+        "hostid": "",
+        "route": "/call",
+      },
+      "notification": {
+        "title": title,
+        "body": message,
       }
     };
 
     try {
       GetServieKey server = GetServieKey();
       final String serverKey = await server.getServerKeyToken();
-      print("this is sever key $serverKey");
+      print("this is server key $serverKey");
+
       http.Response response = await http.post(
         Uri.parse(
             'https://fcm.googleapis.com/v1/projects/dating-e74fa/messages:send'),
@@ -272,20 +270,30 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $serverKey'
         },
-        body: jsonEncode(
-          <String, dynamic>{
-            'notification': <String, dynamic>{'title': title, 'body': message},
-            'priority': 'high',
-            'data': data,
-            'to': userToken,
-          },
-        ),
+        body: jsonEncode({
+          "message": {
+            "token":
+                "fJnmbfovRaKchtppem7pkA:APA91bHALn9Pe53XlMb5jYcctu3NpK82699biqB1uwU-sdKS3tHebJI6KnXHlx3w-htZCLv7bd-jgSs2-3UFINt-NEC7iQDExBu5RHS1oGpeL_FvdtlrokmE5hWs6WIqmi0MM5xLTZSx",
+            "notification": {
+              "body": "This is an FCM notification message!",
+              "title": "FCM Message"
+            }
+          }
+        }
+            //   'data': data,
+            //   'notification': {'title': title, 'body': message},
+            //   'priority': 'high',
+            //   'to': userToken,
+            // }
+
+            ),
       );
 
       if (response.statusCode == 200) {
         print("Notification sent successfully");
       } else {
         print("Error sending notification ${response.statusCode}");
+        print(response.body); // Print response body for debugging
       }
     } catch (e) {
       print("Exception: $e");
@@ -301,7 +309,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 25,
                 ),
                 Container(
