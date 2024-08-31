@@ -7,6 +7,7 @@ import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/helpers/get_service_key.dart';
 import 'package:dating/helpers/notification_services.dart';
 
 import 'package:dating/pages/chatpage.dart';
@@ -27,6 +28,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -90,6 +92,50 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> sendNotificationToUser(String title, String message,
+      String userToken, String roomID, String hostUserID) async {
+    final data = {
+      "roomid": roomID,
+      "hostid": hostUserID, // Populate this field if needed
+      "route": "/call",
+    };
+
+    try {
+      GetServieKey server = GetServieKey();
+      final String serverKey = await server.getServerKeyToken();
+      print("This is server key: $serverKey");
+
+      final response = await http.post(
+        Uri.parse(
+            'https://fcm.googleapis.com/v1/projects/dating-e74fa/messages:send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $serverKey',
+        },
+        body: jsonEncode({
+          "message": {
+            "token": userToken,
+            "notification": {
+              "title": title,
+              "body": message,
+            },
+            "data": data,
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Notification sent successfully");
+      } else {
+        print("Error sending notification: ${response.statusCode}");
+        print(
+            "Response body: ${response.body}"); // Print response body for debugging
+      }
+    } catch (e) {
+      print("Exception: $e");
+    }
+  }
+
   Widget MobileHome() {
     return Scaffold(
       body: Column(children: [
@@ -127,11 +173,17 @@ class _HomePageState extends State<HomePage> {
 
                   ButtonWithLabel(
                     text: null,
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SettingPage()));
+                    onPressed: () async {
+                      await sendNotificationToUser(
+                          "You have a Call from Anonymous",
+                          "Join Now",
+                          "d-3wmG6HTiOEIE8H2DqkTX:APA91bFixwG_F85q-Ukp_AYQ7NYXN-X75p1XKiUM5NyoOjYRMos3OBn2dALhzLwHyMWZ6mKLp41tBBThWYw9PdG_U56AFSky7SyJpZELscqRJObMEvyQL3g_mevZLbXE_XvzTLcMaAQk",
+                          "jfkajia9w390eiohr",
+                          user!.uid);
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => const SettingPage()));
                     },
                     icon: const Icon(
                       Icons.settings,
