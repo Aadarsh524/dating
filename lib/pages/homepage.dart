@@ -7,6 +7,7 @@ import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/helpers/notification_services.dart';
 
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
@@ -48,6 +49,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    NotificationServices notificationServices = NotificationServices();
+    notificationServices.requestNotificationPermission(context);
+    notificationServices.getDeviceToken();
+    notificationServices.setUpInteractMessage(context);
 
     final userprofileProvider =
         Provider.of<UserProfileProvider>(context, listen: false)

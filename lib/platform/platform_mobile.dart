@@ -4,9 +4,9 @@ import 'dart:io' show Platform;
 String getApiEndpoint() {
   try {
     if (Platform.isAndroid) {
-      return 'http://10.0.0.1:8001/api';
+      return 'http://10.0.2.2:8001/api';
     } else if (Platform.isIOS) {
-      return 'http://testdeploy.runasp.net/api';
+      return 'http://10.0.2.2:8001/api';
     } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       return 'http://localhost:8001/api';
     } else {

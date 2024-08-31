@@ -1,20 +1,20 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' as re;
 import 'dart:io';
+import 'package:app_settings/app_settings.dart';
+import 'package:dating/pages/homepage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationServices {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  void requestNotificationPermission() async {
+  void requestNotificationPermission(BuildContext context) async {
     NotificationSettings setting = await messaging.requestPermission(
         alert: true,
         announcement: true,
@@ -24,38 +24,59 @@ class NotificationServices {
         provisional: true,
         sound: true);
     if (setting.authorizationStatus == AuthorizationStatus.authorized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User Granted Permission'),
+        ),
+      );
       log('User Granted Permission');
     } else if (setting.authorizationStatus == AuthorizationStatus.provisional) {
-      log('User Granted provission Permission');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User Granted provission Permission'),
+        ),
+      );
     } else {
-      log('User Denied permission');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User Denied permission'),
+        ),
+      );
+
+      Future.delayed(Duration(seconds: 2), () {
+        AppSettings.openAppSettings(type: AppSettingsType.notification);
+      });
     }
   }
 
   void initLocalNotifications(
       BuildContext context, RemoteMessage message) async {
     var androidInitializationSettings =
-        const AndroidInitializationSettings('@mipmap/launcher_icon');
+        const AndroidInitializationSettings('@mipmap/ic_launcher');
     var iosInitializationSettings = const DarwinInitializationSettings();
+
     var initializationSettings = InitializationSettings(
         android: androidInitializationSettings, iOS: iosInitializationSettings);
+
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onDidReceiveNotificationResponse: (payload) {});
   }
 
   void firebaseInit(BuildContext context) async {
     FirebaseMessaging.onMessage.listen((message) {
+      RemoteNotification? remoteNotification = message.notification;
+      AndroidNotification? androidNotification = message.notification!.android;
+
       if (kDebugMode) {
         log(message.notification!.title.toString());
         log(message.notification!.body.toString());
-        //log(message.data.toString());
-        // log(message.data["type"]);
       }
       if (Platform.isIOS) {
-        foregroundMessage();
+        iosForegroundMessage();
       }
       if (Platform.isAndroid) {
         initLocalNotifications(context, message);
+
         showNotification(message);
       } else {
         showNotification(message);
@@ -63,17 +84,41 @@ class NotificationServices {
     });
   }
 
-  Future foregroundMessage() async {
+  Future iosForegroundMessage() async {
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
             alert: true, sound: true, badge: true);
   }
 
+  Future<void> setUpInteractMessage(BuildContext context) async {
+    //background
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      handleMessage(context, message);
+    });
+
+    //terminated
+    FirebaseMessaging.instance.getInitialMessage().then(
+      (RemoteMessage? message) {
+        if (message != null && message.data.isNotEmpty) {
+          handleMessage(context, message);
+        }
+      },
+    );
+  }
+
+  Future<void> handleMessage(
+      BuildContext context, RemoteMessage message) async {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const HomePage()));
+  }
+
   Future<void> showNotification(RemoteMessage message) async {
     AndroidNotificationChannel channel = AndroidNotificationChannel(
-        re.Random.secure().nextInt(100000).toString(),
-        'High Importance Notifications',
-        importance: Importance.max);
+        message.notification!.android!.channelId.toString(),
+        message.notification!.android!.channelId.toString(),
+        importance: Importance.max,
+        showBadge: true,
+        playSound: true);
 
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
@@ -81,12 +126,13 @@ class NotificationServices {
             channelDescription: 'your channel description',
             importance: Importance.high,
             priority: Priority.high,
-            icon: '@mipmap/launcher_icon',
+            icon: '@mipmap/ic_launcher',
             ticker: 'ticker');
 
     const DarwinNotificationDetails darwinNotificationDetails =
         DarwinNotificationDetails(
             presentAlert: true, presentBadge: true, presentSound: true);
+
     NotificationDetails notificationDetails = NotificationDetails(
         android: androidNotificationDetails, iOS: darwinNotificationDetails);
 
@@ -95,18 +141,22 @@ class NotificationServices {
           8,
           message.notification!.title.toString(),
           message.notification!.body.toString(),
-          notificationDetails);
+          notificationDetails,
+          payload: 'data');
     });
   }
 
   Future<String?> getDeviceToken() async {
+    // ignore: unused_local_variable
+    NotificationSettings settings = await messaging.requestPermission(
+        alert: true, badge: true, sound: true);
     String? token;
     try {
       if (kIsWeb) {
-        token = await FirebaseMessaging.instance.getToken(
+        token = await messaging.getToken(
             vapidKey: 'BMPINEPL03mORAE60pV7_PadxxkwgCsrlgwPXeXDDSwp_x');
       } else {
-        token = await FirebaseMessaging.instance.getToken();
+        token = await messaging.getToken();
       }
 
       if (token != null) {
@@ -115,7 +165,7 @@ class NotificationServices {
     } catch (e) {
       print('Failed to get or save token: $e');
     }
-    return token;
+    return token!;
   }
 
   void onTokenRefresh() {

@@ -1,4 +1,4 @@
-import 'package:dating/helpers/get_server_key.dart';
+import 'package:dating/helpers/get_service_key.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
