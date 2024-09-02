@@ -54,6 +54,7 @@ class _HomePageState extends State<HomePage> {
     NotificationServices notificationServices = NotificationServices();
     notificationServices.requestNotificationPermission(context);
     notificationServices.getDeviceToken();
+    notificationServices.firebaseInit(context);
     notificationServices.setUpInteractMessage(context);
 
     final userprofileProvider =
@@ -92,49 +93,49 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> sendNotificationToUser(String title, String message,
-      String userToken, String roomID, String hostUserID) async {
-    final data = {
-      "roomid": roomID,
-      "hostid": hostUserID, // Populate this field if needed
-      "route": "/call",
-    };
+  // Future<void> sendNotificationToUser(String title, String message,
+  //     String userToken, String roomID, String hostUserID) async {
+  //   final data = {
+  //     "roomid": roomID,
+  //     "hostid": hostUserID, // Populate this field if needed
+  //     "route": "/call",
+  //   };
 
-    try {
-      GetServieKey server = GetServieKey();
-      final String serverKey = await server.getServerKeyToken();
-      print("This is server key: $serverKey");
+  //   try {
+  //     GetServieKey server = GetServieKey();
+  //     final String serverKey = await server.getServerKeyToken();
+  //     print("This is server key: $serverKey");
 
-      final response = await http.post(
-        Uri.parse(
-            'https://fcm.googleapis.com/v1/projects/dating-e74fa/messages:send'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $serverKey',
-        },
-        body: jsonEncode({
-          "message": {
-            "token": userToken,
-            "notification": {
-              "title": title,
-              "body": message,
-            },
-            "data": data,
-          }
-        }),
-      );
+  //     final response = await http.post(
+  //       Uri.parse(
+  //           'https://fcm.googleapis.com/v1/projects/dating-e74fa/messages:send'),
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $serverKey',
+  //       },
+  //       body: jsonEncode({
+  //         "message": {
+  //           "token": userToken,
+  //           "notification": {
+  //             "title": title,
+  //             "body": message,
+  //           },
+  //           "data": data,
+  //         }
+  //       }),
+  //     );
 
-      if (response.statusCode == 200) {
-        print("Notification sent successfully");
-      } else {
-        print("Error sending notification: ${response.statusCode}");
-        print(
-            "Response body: ${response.body}"); // Print response body for debugging
-      }
-    } catch (e) {
-      print("Exception: $e");
-    }
-  }
+  //     if (response.statusCode == 200) {
+  //       print("Notification sent successfully");
+  //     } else {
+  //       print("Error sending notification: ${response.statusCode}");
+  //       print(
+  //           "Response body: ${response.body}"); // Print response body for debugging
+  //     }
+  //   } catch (e) {
+  //     print("Exception: $e");
+  //   }
+  // }
 
   Widget MobileHome() {
     return Scaffold(
@@ -174,12 +175,12 @@ class _HomePageState extends State<HomePage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () async {
-                      await sendNotificationToUser(
-                          "You have a Call from Anonymous",
-                          "Join Now",
-                          "d-3wmG6HTiOEIE8H2DqkTX:APA91bFixwG_F85q-Ukp_AYQ7NYXN-X75p1XKiUM5NyoOjYRMos3OBn2dALhzLwHyMWZ6mKLp41tBBThWYw9PdG_U56AFSky7SyJpZELscqRJObMEvyQL3g_mevZLbXE_XvzTLcMaAQk",
-                          "jfkajia9w390eiohr",
-                          user!.uid);
+                      // await sendNotificationToUser(
+                      //     "You have a Call from Anonymous",
+                      //     "Join Now",
+                      //     "d-3wmG6HTiOEIE8H2DqkTX:APA91bFixwG_F85q-Ukp_AYQ7NYXN-X75p1XKiUM5NyoOjYRMos3OBn2dALhzLwHyMWZ6mKLp41tBBThWYw9PdG_U56AFSky7SyJpZELscqRJObMEvyQL3g_mevZLbXE_XvzTLcMaAQk",
+                      //     "jfkajia9w390eiohr",
+                      //     user!.uid);
                       // Navigator.push(
                       //     context,
                       //     MaterialPageRoute(

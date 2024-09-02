@@ -1,12 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
 
 class NotificationScreen extends StatefulWidget {
-  final String? title;
-  final String? body;
+  final String? roomId;
 
-  const NotificationScreen({Key? key, required this.title, required this.body})
-      : super(key: key);
+  const NotificationScreen({Key? key, required this.roomId}) : super(key: key);
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -15,9 +16,12 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   @override
   void initState() {
-    print(
-        "NotificationScreen initialized with title: ${widget.title} and body: ${widget.body}");
+    print("NotificationScreen initialized with title: ${widget.roomId} ");
     super.initState();
+  }
+
+  Uint8List base64ToImage(String? base64String) {
+    return base64Decode(base64String!);
   }
 
   @override
@@ -51,31 +55,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     child: Center(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.title!.isNotEmpty
-                                ? widget.title!
-                                : 'No Title',
-                            style: GoogleFonts.montserrat(
-                              textStyle: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            widget.body!.isNotEmpty ? widget.body! : 'No Body',
-                            style: GoogleFonts.montserrat(
-                              textStyle: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                        ],
+                        children: [Text(widget.roomId!)],
                       ),
                     ),
                   ),

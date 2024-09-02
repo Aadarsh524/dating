@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/pages/notification_screen.dart';
+import 'package:dating/pages/ring_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -114,9 +115,8 @@ class NotificationServices {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => NotificationScreen(
-                  title: message.notification!.title,
-                  body: message.notification!.title,
+            builder: (context) => RingScreen(
+                  roomId: message.data['roomid'],
                 )));
   }
 
