@@ -105,7 +105,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                 await sendNotificationToUser(
                     "You have a Call from Anonymous",
                     "Join Now",
-                    deviceToken!,
+                    "d-3wmG6HTiOEIE8H2DqkTX:APA91bFixwG_F85q-Ukp_AYQ7NYXN-X75p1XKiUM5NyoOjYRMos3OBn2dALhzLwHyMWZ6mKLp41tBBThWYw9PdG_U56AFSky7SyJpZELscqRJObMEvyQL3g_mevZLbXE_XvzTLcMaAQk",
                     roomId!,
                     _uid,
                     widget.endUserDetails!.name!);
@@ -296,281 +296,86 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
-      body: connected == false && userType == 'H'
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(
-                  height: 25,
-                ),
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.transparent,
-                            border: Border.all(
-                                color: AppColors.green.withOpacity(0.3))),
-                      ),
-                      Container(
-                        width: 245,
-                        height: 245,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.transparent,
-                            border: Border.all(
-                                color: AppColors.green.withOpacity(0.2))),
-                      ),
-                      Container(
-                        width: 290,
-                        height: 290,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.transparent,
-                            border: Border.all(
-                                color: AppColors.green.withOpacity(0.1))),
-                      ),
-                      AnimatedBuilder(
-                          animation: _animation,
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: _animation.value,
-                              child: Container(
-                                height: 100,
-                                width: 100,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    image: MemoryImage(base64ToImage(
-                                        widget.endUserDetails!.profileImage)),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                    ],
+        backgroundColor: AppColors.white,
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(
+              height: 25,
+            ),
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.transparent,
+                        border: Border.all(
+                            color: AppColors.green.withOpacity(0.3))),
                   ),
-                ),
-                const SizedBox(height: 32.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {},
-                      child: const Text(
-                        "Cancel",
-                        style: TextStyle(
-                          color: AppColors.grey2,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15.0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            )
-          : Container(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text(widget.roomId != "null" ? "Join a Call" : "Calling..",
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 45,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.green)),
-                    const SizedBox(
-                      height: 40,
-                    ),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
+                  Container(
+                    width: 245,
+                    height: 245,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.transparent,
+                        border: Border.all(
+                            color: AppColors.green.withOpacity(0.2))),
+                  ),
+                  Container(
+                    width: 290,
+                    height: 290,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.transparent,
+                        border: Border.all(
+                            color: AppColors.green.withOpacity(0.1))),
+                  ),
+                  AnimatedBuilder(
+                      animation: _animation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _animation.value,
+                          child: Container(
+                            height: 100,
+                            width: 100,
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.transparent,
-                              border: Border.all(
-                                  color: AppColors.green.withOpacity(0.2))),
-                        ),
-                        Container(
-                          width: 245,
-                          height: 245,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.transparent,
-                              border: Border.all(
-                                  color: AppColors.green.withOpacity(0.15))),
-                        ),
-                        Container(
-                          width: 290,
-                          height: 290,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.transparent,
-                              border: Border.all(
-                                  color: AppColors.green.withOpacity(0.1))),
-                        ),
-                        Container(
-                          height: 100,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: MemoryImage(base64ToImage(
-                                  widget.endUserDetails!.profileImage)),
-                              fit: BoxFit.cover,
+                              image: DecorationImage(
+                                image: MemoryImage(base64ToImage(
+                                    widget.endUserDetails!.profileImage)),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 50,
-                    ),
-                    if (widget.roomId != "null")
-                      GestureDetector(
-                        onTap: () async {
-                          await db.runTransaction((transaction) async {
-                            final userDoc = db.collection('users').doc(_uid);
-
-                            final roomRef =
-                                await transaction.get(calleeCandidate);
-
-                            if (roomRef.exists) {
-                              final data =
-                                  roomRef.data() as Map<String, dynamic>;
-                              String calleeConnected = data["calleeConected"];
-
-                              Map<String, dynamic> updateCalleeVal = {
-                                'calleeConected': _uid,
-                              };
-
-                              Map<String, dynamic> updateUserVal = {
-                                'callstatus': "oncall",
-                              };
-
-                              print("step 2");
-
-                              if (calleeConnected == "null") {
-                                // Check for null instead of "null"
-                                try {
-                                  print("step 3");
-                                  transaction.update(
-                                      calleeCandidate, updateCalleeVal);
-
-                                  print("step 4");
-                                } catch (e) {
-                                  print("Error joining room: $e");
-                                  // Handle error, optionally rethrow or return a specific value
-                                }
-                              }
-                            }
-                          }).then((value) async {
-                            iAcceptedCall = true;
-                            //await db.collection("users").doc(clientID).update({"beingcalled": "false",});
-                            player.stop();
-                            Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) => CallScreen(
-                                        userType: "V", roomId: roomId!)));
-                          });
-                        },
-                        child: RotationTransition(
-                          turns: Tween(begin: 0.0, end: 0.1).animate(
-                            CurvedAnimation(
-                              parent: _joinController,
-                              curve: Curves.elasticIn,
-                            ),
-                          ),
-                          child: const CircleAvatar(
-                            backgroundColor: AppColors.green,
-                            radius: 45,
-                            child: Icon(
-                              Icons.phone,
-                              size: 45.0,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    const SizedBox(
-                      height: 25,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            endCallPressed = true;
-                            if (roomId != null) {
-                              getUserSignals.cancel();
-                              if (clientID != "") {
-                                db.collection("users").doc(clientID).update(
-                                    {"beingcalled": "false", "roomid": ""});
-                              }
-
-                              db
-                                  .collection('users')
-                                  .doc(_uid)
-                                  .update(clientID == ""
-                                      ? {
-                                          "callstatus": "",
-                                          "beingcalled": "false",
-                                          "roomid": ""
-                                        }
-                                      : {"callstatus": ""})
-                                  .then((value) {
-                                db.collection('rooms').doc('$roomId').update(
-                                    {"calleeConected": "left"}).then((value) {
-                                  if (widget.roomId != "null") {
-                                    player.stop();
-                                  }
-                                  Navigator.pop(context);
-                                });
-                              });
-                            } else {
-                              if (widget.roomId != "null") {
-                                player.stop();
-                              }
-                              Navigator.pop(context);
-                            }
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (builder) => const ChatPage()));
-                          },
-                          child: const CircleAvatar(
-                            backgroundColor: Colors.red,
-                            radius: 40,
-                            child: Icon(
-                              Icons.call_end,
-                              size: 40.0,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                        );
+                      }),
+                ],
               ),
             ),
-    );
+            const SizedBox(height: 32.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {},
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(
+                      color: AppColors.grey2,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15.0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ));
   }
 }

@@ -9,6 +9,7 @@ import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/helpers/get_service_key.dart';
 import 'package:dating/helpers/notification_services.dart';
+import 'package:dating/pages/call_recieve_screen.dart';
 
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/myprofile.dart';
@@ -174,17 +175,14 @@ class _HomePageState extends State<HomePage> {
 
                   ButtonWithLabel(
                     text: null,
-                    onPressed: () async {
-                      // await sendNotificationToUser(
-                      //     "You have a Call from Anonymous",
-                      //     "Join Now",
-                      //     "d-3wmG6HTiOEIE8H2DqkTX:APA91bFixwG_F85q-Ukp_AYQ7NYXN-X75p1XKiUM5NyoOjYRMos3OBn2dALhzLwHyMWZ6mKLp41tBBThWYw9PdG_U56AFSky7SyJpZELscqRJObMEvyQL3g_mevZLbXE_XvzTLcMaAQk",
-                      //     "jfkajia9w390eiohr",
-                      //     user!.uid);
+                    onPressed: () {
                       // Navigator.push(
                       //     context,
                       //     MaterialPageRoute(
-                      //         builder: (context) => const SettingPage()));
+                      //         builder: (_) => CallRecieveScreen(
+                      //             roomId: "123",
+                      //             name: "name",
+                      //             clientId: "clientId")));
                     },
                     icon: const Icon(
                       Icons.settings,
