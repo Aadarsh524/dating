@@ -3,6 +3,8 @@ import 'dart:math' as re;
 import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:dating/pages/homepage.dart';
+import 'package:dating/pages/notification_screen.dart';
+import 'package:dating/pages/ring_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +61,9 @@ class NotificationServices {
         android: androidInitializationSettings, iOS: iosInitializationSettings);
 
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: (payload) {});
+        onDidReceiveNotificationResponse: (payload) {
+      handleMessage(context, message);
+    });
   }
 
   void firebaseInit(BuildContext context) async {
@@ -109,7 +113,11 @@ class NotificationServices {
   Future<void> handleMessage(
       BuildContext context, RemoteMessage message) async {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const HomePage()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => RingScreen(
+                  roomId: message.data['roomid'],
+                )));
   }
 
   Future<void> showNotification(RemoteMessage message) async {

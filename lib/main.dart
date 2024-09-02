@@ -48,6 +48,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
+  // In a file like main.dart or a dedicated file for global keys
+
   WidgetsFlutterBinding.ensureInitialized();
 
   if (kIsWeb) {
@@ -82,11 +84,12 @@ void main() async {
     ChangeNotifierProvider(create: (_) => AdminDashboardProvider()),
     ChangeNotifierProvider(create: (_) => FavouritesProvider()),
     ChangeNotifierProvider(create: (_) => ProfileViewProvider()),
-  ], child: const MyApp()));
+  ], child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   // This widget is the root of your application.
   @override
@@ -99,9 +102,10 @@ class MyApp extends StatelessWidget {
       systemNavigationBarIconBrightness: Brightness.dark,
     ));
 
-    return const NeumorphicApp(
+    return NeumorphicApp(
+      navigatorKey: navigatorKey,
       themeMode: ThemeMode.light,
-      theme: NeumorphicThemeData(
+      theme: const NeumorphicThemeData(
         baseColor: AppColors.backgroundColor,
         lightSource: LightSource.topLeft,
         depth: 10,
@@ -109,7 +113,7 @@ class MyApp extends StatelessWidget {
             NeumorphicAppBarThemeData(), // Use NeumorphicAppBarThemeData Explicitly define the AppBarTheme from Flutter
         // Explicitly define the AppBarTheme from Flutter
       ),
-      darkTheme: NeumorphicThemeData(
+      darkTheme: const NeumorphicThemeData(
         baseColor: Color(0xFF3E3E3E),
         lightSource: LightSource.topLeft,
         depth: 6,
@@ -117,7 +121,7 @@ class MyApp extends StatelessWidget {
             NeumorphicAppBarThemeData(), // Use NeumorphicAppBarThemeData Explicitly define the AppBarTheme from Flutter
       ),
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      home: const LoginScreen(),
     );
   }
 }

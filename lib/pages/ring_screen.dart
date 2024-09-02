@@ -12,7 +12,6 @@ import 'package:dating/pages/chatpage.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -26,7 +25,7 @@ class RingScreen extends StatefulWidget {
     Key? key,
     this.clientID = "null",
     this.roomId = "null",
-    required this.endUserDetails,
+    this.endUserDetails,
   }) : super(key: key);
 
   @override
@@ -103,8 +102,13 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
                 print("FCM token ::::::> $deviceToken");
 
-                await sendNotificationToUser("You have a Call from Anonymous",
-                    "Join Now", deviceToken!, roomId!, _uid);
+                await sendNotificationToUser(
+                    "You have a Call from Anonymous",
+                    "Join Now",
+                    deviceToken!,
+                    roomId!,
+                    _uid,
+                    widget.endUserDetails!.name!);
               });
 
               getStringFieldStream();
@@ -127,7 +131,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     getStringFieldStream();
 
     _controller = AnimationController(
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
       vsync: this,
     );
 
@@ -145,7 +149,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
       });
 
     _joinController = AnimationController(
-      duration: Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 700),
       vsync: this,
     )..repeat(reverse: true);
 
@@ -245,55 +249,44 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   }
 
   Future<void> sendNotificationToUser(String title, String message,
-      String userToken, String roomID, String hostUserID) async {
+      String userToken, String roomID, String hostUserID, String name) async {
     final data = {
-      "data": {
-        "roomid": roomID,
-        "hostid": "",
-        "route": "/call",
-      },
-      "notification": {
-        "title": title,
-        "body": message,
-      }
+      "roomid": roomID,
+      "hostid": hostUserID, // Populate this field if needed
+      "route": "/call",
+      "name": name
     };
 
     try {
       GetServieKey server = GetServieKey();
       final String serverKey = await server.getServerKeyToken();
-      print("this is server key $serverKey");
+      print("This is server key: $serverKey");
 
-      http.Response response = await http.post(
+      final response = await http.post(
         Uri.parse(
             'https://fcm.googleapis.com/v1/projects/dating-e74fa/messages:send'),
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $serverKey'
+          'Authorization': 'Bearer $serverKey',
         },
         body: jsonEncode({
           "message": {
-            "token":
-                "fJnmbfovRaKchtppem7pkA:APA91bHALn9Pe53XlMb5jYcctu3NpK82699biqB1uwU-sdKS3tHebJI6KnXHlx3w-htZCLv7bd-jgSs2-3UFINt-NEC7iQDExBu5RHS1oGpeL_FvdtlrokmE5hWs6WIqmi0MM5xLTZSx",
+            "token": userToken,
             "notification": {
-              "body": "This is an FCM notification message!",
-              "title": "FCM Message"
-            }
+              "title": title,
+              "body": message,
+            },
+            "data": data,
           }
-        }
-            //   'data': data,
-            //   'notification': {'title': title, 'body': message},
-            //   'priority': 'high',
-            //   'to': userToken,
-            // }
-
-            ),
+        }),
       );
 
       if (response.statusCode == 200) {
         print("Notification sent successfully");
       } else {
-        print("Error sending notification ${response.statusCode}");
-        print(response.body); // Print response body for debugging
+        print("Error sending notification: ${response.statusCode}");
+        print(
+            "Response body: ${response.body}"); // Print response body for debugging
       }
     } catch (e) {
       print("Exception: $e");
@@ -366,13 +359,13 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                     ],
                   ),
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     GestureDetector(
                       onTap: () {},
-                      child: Text(
+                      child: const Text(
                         "Cancel",
                         style: TextStyle(
                           color: AppColors.grey2,
@@ -391,16 +384,16 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Text(widget.roomId != "null" ? "Join a Call" : "Calling..",
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 45,
                             fontWeight: FontWeight.w900,
                             color: AppColors.green)),
-                    SizedBox(
+                    const SizedBox(
                       height: 40,
                     ),
                     Stack(
@@ -447,7 +440,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 50,
                     ),
                     if (widget.roomId != "null")
@@ -505,7 +498,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                               curve: Curves.elasticIn,
                             ),
                           ),
-                          child: CircleAvatar(
+                          child: const CircleAvatar(
                             backgroundColor: AppColors.green,
                             radius: 45,
                             child: Icon(
@@ -516,7 +509,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                           ),
                         ),
                       ),
-                    SizedBox(
+                    const SizedBox(
                       height: 25,
                     ),
                     Row(
@@ -560,9 +553,9 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (builder) => ChatPage()));
+                                    builder: (builder) => const ChatPage()));
                           },
-                          child: CircleAvatar(
+                          child: const CircleAvatar(
                             backgroundColor: Colors.red,
                             radius: 40,
                             child: Icon(
