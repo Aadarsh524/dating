@@ -4,6 +4,7 @@ import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/datamodel/chat/chat_message_model.dart';
 import 'package:dating/helpers/mypainter.dart';
 import 'package:dating/helpers/signaling.dart';
+import 'package:dating/pages/chatpage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,7 +19,9 @@ import 'package:permission_handler/permission_handler.dart';
 class CallScreen extends StatefulWidget {
   final String userType;
   final String roomId;
-  const CallScreen({Key? key, required this.userType, required this.roomId})
+  final String? callerName;
+  const CallScreen(
+      {Key? key, required this.userType, required this.roomId, this.callerName})
       : super(key: key);
   @override
   CallScreenState createState() => CallScreenState();
@@ -129,24 +132,15 @@ class CallScreenState extends State<CallScreen> {
       final batch = db.batch();
       String _uid = FirebaseAuth.instance.currentUser!.uid;
       final calleCandidate = db.collection('rooms').doc('$roomId');
-      final userDoc = db.collection('users').doc(_uid);
-
-      Map<String, dynamic> updateUserVal = {
-        "callstatus": "",
-        "beingcalled": "false",
-        "roomid": "",
-      };
 
       if (roomId != null) {
         batch.update(calleCandidate, {"calleeConected": "done"});
       }
 
-      batch.update(userDoc, updateUserVal);
-
 // Commit the batch
       batch.commit().then((_) {
         Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => LoginScreen()),
+            MaterialPageRoute(builder: (context) => ChatPage()),
             (Route<dynamic> route) => false);
       }).catchError((error) {
         // Commit failed with an error
@@ -173,104 +167,6 @@ class CallScreenState extends State<CallScreen> {
     });
   }
 
-  //Transferring data. We are delaying the function for 6 seconds because I noticed it not working properly when the
-  //function runs directly at load.
-  // initializeDataTransfer()async{
-  //  cameraPermissionGranted = await  Permission.camera.isGranted;
-
-  //   Future.delayed(const Duration(seconds: 6)).then((val)async {
-  //     if(!cameraPermissionGranted){
-  //       setState(() {});
-  //     }
-  //     messageChannel = await signaling.messageDataChannel;
-  //     fileChannel = await signaling.fileDataChannel;
-  //     messageChannel.onMessage = (RTCDataChannelMessage data) {
-  //       print("received a message");
-  //       onReceiveTextMessage(data.binary);
-  //       setState(() {});
-  //     };
-
-  //     _receivedData.clear();
-
-  //       fileChannel.onMessage = (RTCDataChannelMessage message) {
-  //         // Handle incoming data
-  //         _receivedData.add(message.binary);
-
-  //         receivingFile = true;
-  //         // Calculate and print progress percentage
-  //         if(totalFileSize != 0) {
-
-  //           var currentfilesize = _receivedData.isEmpty ? 0 : (_receivedData
-  //               .length.toDouble() * 16384);
-  //           receivingPercentage =
-  //             ((currentfilesize / totalFileSize) * 100);
-  //        //   print("x&*% $receivingPercentage && $totalFileSize && $currentfilesize");
-  //         }
-
-  //         //The progress percentage is accessed from remote device and sent to the file sender.
-  //         // This is because the sender device immediately shows the file sending completed.
-  //         signaling.sendTextMessage("x&*% Sending ${receivingPercentage.toInt()}%");
-
-  //         // Check if the file is fully received
-  //         if (receivingPercentage > 100 || message.binary.length < 16384) {
-  //           if (receivingFile) {
-  //             signaling.sendTextMessage("x&*% File Sent");
-  //             receivingFile = false;
-
-  //             imageReceived = true;
-  //             Uint8List currentImg = Uint8List.fromList(
-  //                 _receivedData.expand((chunk) => chunk).toList());
-  //             receivedFiles.add(Files(name: receivedFileName,
-  //                 size: "${(totalFileSize) / 1000} kb",
-  //                 image: currentImg));
-  //             _receivedData.clear();
-  //             totalFileSize = 0;
-  //             Future.delayed(const Duration(seconds: 5)).then((val) async {
-  //               setState(() {
-  //                 imageReceived = false;
-  //               });
-  //             });
-  //           }
-  //         }
-
-  //         setState(() {});
-  //       };
-
-  //   });
-
-  // }
-
-  //We are using special keys for example x&*S% to share valuable information like file size, etc through
-  //text because receiver doesnot have all this details
-  // void onReceiveTextMessage(Uint8List data) {
-  //   String receivedMessage = String.fromCharCodes(data);
-  //   if(receivedMessage.startsWith("x&*S%")){
-  //     totalFileSize =  double.parse(receivedMessage.replaceAll("x&*S%", "").trim());
-  //     print("Receingin files $totalFileSize");
-  //   }else if(receivedMessage.startsWith("x&*%")){
-  //     print("Sending files");
-  //     sendingFile = true;
-  //     sendingFileUpdate  = receivedMessage.replaceAll("x&*%", "").trim();
-  //     if(sendingFileUpdate.contains("File Sent")){
-  //       Future.delayed(const Duration(seconds: 5)).then((val)async {
-  //         setState(() {
-  //           sendingFile = false;
-  //         });
-  //       });
-  //     }
-  //   }else if(receivedMessage.startsWith("x&*N%")){
-  //     receivedFileName =  receivedMessage.replaceAll("x&*N%", "").trim();
-  //   }
-  //   else{
-  //     chatMessages.add(Messages(message: receivedMessage, sent: false));
-  //     if (!messageTapped) {
-  //       newMessagecount = newMessagecount + 1;
-  //     }
-  //   }
-  //   setState(() {
-  //   });
-  // }
-
   @override
   void dispose() {
     _localRenderer.dispose();
@@ -292,6 +188,7 @@ class CallScreenState extends State<CallScreen> {
       child: Scaffold(
         body: Stack(
           children: [
+            Positioned(child: Text(widget.callerName!)),
             SizedBox(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
@@ -382,33 +279,6 @@ class CallScreenState extends State<CallScreen> {
                           Icons.call_end_rounded,
                           size: 32.0,
                           color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        if (shareScreen) {
-                          shareScreen = false;
-                          print("Screen sharing is false home");
-                          signaling.stopScreenSharing(
-                              _localRenderer, _remoteRenderer);
-                        } else {
-                          print("Screen sharing is true home");
-                          shareScreen = true;
-                          signaling.startScreenSharing(
-                              _localRenderer, _remoteRenderer);
-                        }
-                        setState(() {});
-                      },
-                      child: CircleAvatar(
-                        backgroundColor: Colors.black54,
-                        radius: 25,
-                        child: Icon(
-                          !shareScreen
-                              ? Icons.screen_share_rounded
-                              : Icons.stop_screen_share_rounded,
-                          size: 30.0,
-                          color: AppColors.white,
                         ),
                       ),
                     ),
@@ -545,159 +415,6 @@ class CallScreenState extends State<CallScreen> {
                   ]),
                 ),
               ),
-
-            // if(imagesTapped)
-            //   Positioned(
-            //     top:50,
-            //     left: 10,
-            //     child: Container(
-            //       width: 250,
-            //       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-            //       decoration:BoxDecoration(
-            //         color: AppColors.black2,
-            //         borderRadius:
-            //         BorderRadius.all(Radius.circular(15)),
-            //       ),
-            //       child: Column(
-            //         crossAxisAlignment: CrossAxisAlignment.start,
-            //         children: [
-            //           Row(
-            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //             children: [
-            //               Text("Images", style: TextStyle(color:AppColors. white, fontSize: 19), ),
-            //               GestureDetector(
-            //                 onTap: ()async{
-            //                   final ImagePicker picker = ImagePicker();
-            //                   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-            //                   Uint8List imagebyte = await image!.readAsBytes();
-            //                   if(imagebyte.length.toDouble() < 4000000) {
-            //                     signaling.sendTextMessage("x&*N% ${image!.name}");
-            //                     sendFile(imagebyte);
-            //                   }else{
-            //                     Fluttertoast.showToast(msg: "Sorry, the file size is large. Please try an image below 4 MB.", toastLength: Toast.LENGTH_LONG);
-            //                   }
-            //                 },
-            //                 child: Row(
-            //                   children: [
-            //                     Icon(Icons.cloud_upload_outlined, color:AppColors.white, size:18),
-            //                     Text(" Send File   ", style: TextStyle(color: AppColors.white, fontSize: 12), ),
-            //                   ],
-            //                 ),
-            //               ),
-            //             ],
-            //           ),
-
-            //           Container(
-            //             child:
-            //             receivedFiles.isNotEmpty?
-            //             ListView.builder(
-            //               shrinkWrap: true,
-            //               itemCount: receivedFiles.length,
-            //               itemBuilder: (context, i) {
-            //                 return  GestureDetector(
-            //                     onTap: (){
-            //                       imagesTapped = false;
-            //                       currentImage = receivedFiles[i].image;
-            //                       viewImage = true;
-            //                       setState(() {});
-            //                     },
-            //                     child: fileBubble(receivedFiles[i].name, receivedFiles[i].size));
-            //               },
-            //             ) : SizedBox(
-            //               height: 100,
-            //               width: 270,
-            //               child: Column(
-            //                 mainAxisAlignment: MainAxisAlignment.center,
-            //                 children: [
-            //                   Icon(Icons.file_download_off, color:AppColors.white),
-            //                   Text("No Images Received", style: TextStyle(color: AppColors.white.withOpacity(0.5)),),
-            //                 ],
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-
-            // if(messageTapped)
-            //   Positioned(
-            //     top:50,
-            //     left: 10,
-            //     child: Container(
-            //       width: 270,
-            //       padding: EdgeInsets.all(8),
-            //       constraints: BoxConstraints(maxHeight: 300),
-            //       decoration:BoxDecoration(
-            //         color: AppColors.black2,
-            //         borderRadius:
-            //         BorderRadius.all(Radius.circular(15)),
-            //       ),
-            //       child: Column(
-            //         children: [
-            //           Text("Chat Messages", style: TextStyle(color: AppColors.white.withOpacity(0.5), fontSize: 19), ),
-
-            //           Container(
-            //             height: 195,
-            //             child: ListView.builder(
-            //               shrinkWrap: true,
-            //               controller: _controller,
-            //               itemCount: chatMessages.length,
-            //               itemBuilder: (context, i) {
-            //                 return  ChatBubble(chatMessages[i].sent, chatMessages[i].message);
-            //               },
-            //             ),
-            //           ),
-
-            //           Row(
-            //             children: [
-            //               Expanded(
-            //                 child: TextField(
-            //                   maxLines: 2,
-            //                   controller: sendText,
-            //                   decoration: InputDecoration(
-            //                     hintText: 'Type your message...',
-            //                     filled: true,
-            //                     fillColor: Colors.grey[300],
-            //                     labelStyle: TextStyle(fontSize: 15),
-            //                     hintStyle: TextStyle(fontSize: 15),
-            //                     contentPadding: EdgeInsets.all(3),  // Remove padding around the border
-            //                     border: OutlineInputBorder(
-            //                       borderSide: BorderSide.none,
-            //                       borderRadius: BorderRadius.circular(8.0),
-            //                     ),
-            //                   ),
-            //                 ),
-            //               ),
-            //               SizedBox(width: 4.0),
-            //               Container(
-            //                 padding:EdgeInsets.symmetric(vertical: 4),
-            //                 decoration:BoxDecoration(
-            //                   color: Colors.black.withOpacity(0.6),
-            //                   borderRadius:
-            //                   BorderRadius.all(Radius.circular(10)),
-            //                 ),
-            //                 child: IconButton(
-            //                   color: Colors.white,
-            //                   icon: Icon(Icons.send, size:29, ),
-            //                   onPressed: () {
-            //                     String textMessage = sendText.text;
-            //                     if(textMessage != ""){
-            //                       sendText.text = "";
-            //                       chatMessages.add(Messages(message: textMessage, sent: true));
-            //                       signaling.sendTextMessage(textMessage);
-            //                       setState(() {
-            //                       });
-            //                     }
-            //                   },
-            //                 ),
-            //               ),
-            //             ],
-            //           ),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
 
             if (!cameraPermissionGranted)
               Positioned(

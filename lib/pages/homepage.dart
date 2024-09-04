@@ -504,8 +504,8 @@ class _HomePageState extends State<HomePage> {
                                 });
 
                                 // Call the dashboard method with different parameters based on the selection
-                                if (newValue == 'male' ||
-                                    newValue == 'female') {
+                                if (newValue == 'Male' ||
+                                    newValue == 'Female') {
                                   context.read<DashboardProvider>().dashboard(
                                         1,
                                         context,
