@@ -215,7 +215,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
           if (callStatus == "done") {
             connected = false;
             // Handle disconnection or completion logic if needed
-          } else if (callStatus == "null") {
+          } else if (callStatus != "null") {
             if (widget.roomId == "null") {
               if (!hostNavigatedToCall) {
                 getUserSignals?.cancel(); // Cancel the listener
@@ -363,7 +363,9 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                   child: const Text(
                     "Cancel",
                     style: TextStyle(

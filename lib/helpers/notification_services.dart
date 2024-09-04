@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:math' as re;
 import 'dart:io';
 import 'package:app_settings/app_settings.dart';
+import 'package:dating/pages/call_recieve_screen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/pages/notification_screen.dart';
 import 'package:dating/pages/ring_screen.dart';
@@ -115,8 +116,10 @@ class NotificationServices {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => RingScreen(
+            builder: (context) => CallRecieveScreen(
                   roomId: message.data['roomid'],
+                  name: 'Caller',
+                  clientId: '',
                 )));
   }
 

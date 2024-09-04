@@ -37,6 +37,7 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
   bool iAcceptedCall = false;
   late AnimationController _joinController;
   bool hostNavigatedToCall = false;
+  bool ringingCall = false;
 
   @override
   void initState() {
@@ -48,8 +49,31 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
       duration: const Duration(milliseconds: 700),
       vsync: this,
     )..repeat(reverse: true);
+    if (widget.roomId != "null") {
+      player = AudioPlayer();
+      //playAudio();
+    }
     super.initState();
   }
+
+  @override
+  void dispose() {
+    getUserSignals.cancel();
+    _joinController.dispose();
+
+    super.dispose();
+  }
+
+  // playAudio() async {
+  //   //await player.setSource(AssetSource('/sounds/ringtone.mp3'));
+
+  //   if (!ringingCall) {
+  //     ringingCall = true;
+  //     await player.play(AssetSource('sounds/ringtone.mp3')).then((value) async {
+  //       await player.play(AssetSource('sounds/ringtone.mp3'));
+  //     });
+  //   }
+  // }
 
   getStringFieldStream() {
     calleeCandidate = db.collection('rooms').doc('${widget.roomId}');
@@ -57,6 +81,7 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
       if (snapshot.exists) {
         String callStatus = snapshot.get('calleeConected') ?? "";
+        callStatus = 'true';
         log(callStatus);
 
         if (callStatus.isNotEmpty) {
@@ -163,6 +188,7 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
               if (widget.roomId != "null")
                 GestureDetector(
                   onTap: () async {
+                    print('join call');
                     await db.runTransaction((transaction) async {
                       final roomRef = await transaction.get(calleeCandidate);
 
@@ -196,7 +222,10 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
                       player.stop();
                       Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (context) => CallScreen(
-                              userType: "V", roomId: widget.roomId!)));
+                                userType: "V",
+                                roomId: widget.roomId!,
+                                callerName: 'Aonymous',
+                              )));
                     });
                   },
                   child: RotationTransition(
