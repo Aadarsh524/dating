@@ -94,50 +94,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Future<void> sendNotificationToUser(String title, String message,
-  //     String userToken, String roomID, String hostUserID) async {
-  //   final data = {
-  //     "roomid": roomID,
-  //     "hostid": hostUserID, // Populate this field if needed
-  //     "route": "/call",
-  //   };
-
-  //   try {
-  //     GetServieKey server = GetServieKey();
-  //     final String serverKey = await server.getServerKeyToken();
-  //     print("This is server key: $serverKey");
-
-  //     final response = await http.post(
-  //       Uri.parse(
-  //           'https://fcm.googleapis.com/v1/projects/dating-e74fa/messages:send'),
-  //       headers: <String, String>{
-  //         'Content-Type': 'application/json',
-  //         'Authorization': 'Bearer $serverKey',
-  //       },
-  //       body: jsonEncode({
-  //         "message": {
-  //           "token": userToken,
-  //           "notification": {
-  //             "title": title,
-  //             "body": message,
-  //           },
-  //           "data": data,
-  //         }
-  //       }),
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       print("Notification sent successfully");
-  //     } else {
-  //       print("Error sending notification: ${response.statusCode}");
-  //       print(
-  //           "Response body: ${response.body}"); // Print response body for debugging
-  //     }
-  //   } catch (e) {
-  //     print("Exception: $e");
-  //   }
-  // }
-
   Widget MobileHome() {
     return Scaffold(
       body: Column(children: [
@@ -176,13 +132,8 @@ class _HomePageState extends State<HomePage> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (_) => CallRecieveScreen(
-                      //             roomId: "123",
-                      //             name: "name",
-                      //             clientId: "clientId")));
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => SettingPage()));
                     },
                     icon: const Icon(
                       Icons.settings,
@@ -251,13 +202,6 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(
                   width: 15,
                 ),
-                // add friemd
-                // ButtonWithLabel(
-                //   text: null,
-                //   labelText: 'Add Friend',
-                //   onPressed: () {},
-                //   icon: const Icon(Icons.add),
-                // ),
 
                 const SizedBox(
                   width: 15,
@@ -598,14 +542,6 @@ class _HomePageState extends State<HomePage> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    SizedBox(
-                                        width: 300,
-                                        child: ShimmerSkeleton(
-                                            count: 1, height: 350)),
-                                    SizedBox(
-                                        width: 300,
-                                        child: ShimmerSkeleton(
-                                            count: 1, height: 350)),
                                     SizedBox(
                                         width: 300,
                                         child: ShimmerSkeleton(

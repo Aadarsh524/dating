@@ -1,4 +1,5 @@
 import 'package:dating/helpers/get_service_key.dart';
+import 'package:dating/helpers/notification_services.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
@@ -17,6 +18,9 @@ class StateLoaderPage extends StatelessWidget {
       try {
         GetServieKey key = GetServieKey();
         final String token = await key.getServerKeyToken();
+
+        NotificationServices notificationServices = NotificationServices();
+        notificationServices.onTokenRefresh(user.uid);
 
         print(token);
 

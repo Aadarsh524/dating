@@ -1,11 +1,10 @@
 import 'dart:developer';
-import 'dart:math' as re;
 import 'dart:io';
 import 'package:app_settings/app_settings.dart';
+import 'package:dating/helpers/device_token.dart';
 import 'package:dating/pages/call_recieve_screen.dart';
-import 'package:dating/pages/homepage.dart';
-import 'package:dating/pages/notification_screen.dart';
-import 'package:dating/pages/ring_screen.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationServices {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-
+  User? user = FirebaseAuth.instance.currentUser;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -179,9 +178,13 @@ class NotificationServices {
     return token!;
   }
 
-  void onTokenRefresh() {
-    messaging.onTokenRefresh.listen((event) {
+  void onTokenRefresh(String uid) {
+    messaging.onTokenRefresh.listen((event) async {
       event.toString();
+
+      String? deviceToken = await getDeviceToken();
+
+      postDeviceToken(uid, deviceToken!);
     });
   }
 }
