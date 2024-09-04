@@ -1,6 +1,8 @@
 // import 'package:dating/auth/signupMobile/signup.dart';
 
 import 'package:dating/auth/signupScreen.dart';
+import 'package:dating/helpers/device_token.dart';
+import 'package:dating/helpers/notification_services.dart';
 import 'package:dating/pages/state_loader.dart';
 import 'package:dating/providers/authentication_provider.dart';
 
@@ -48,6 +50,11 @@ class _LoginMobileState extends State<LoginMobile> {
 
       if (result != null) {
         // If result is not null, it's a valid UID
+
+        NotificationServices notificationServices = NotificationServices();
+        String? deviceToken = await notificationServices.getDeviceToken();
+
+        postDeviceToken(result, deviceToken!);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const StateLoaderPage()),

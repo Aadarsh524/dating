@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+import 'package:dating/helpers/device_token.dart';
 import 'package:dating/helpers/get_service_key.dart';
 import 'package:dating/helpers/notification_services.dart';
 import 'package:dating/pages/call_screen.dart';
@@ -98,14 +99,19 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
             calleeCandidate.set({'calleeConected': "null"}).then((value) async {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
-                deviceToken = await notificationServices.getDeviceToken();
+                deviceToken = await getDeviceTokenFromDb(clientID);
 
-                print("FCM token ::::::> $deviceToken");
+                // Check if the device token is not null and print it
+                if (deviceToken != null) {
+                  print("FCM token ::::::> $deviceToken");
+                } else {
+                  print("Failed to retrieve the device token.");
+                }
 
                 await sendNotificationToUser(
                     "You have a Call from Anonymous",
                     "Join Now",
-                    "d-3wmG6HTiOEIE8H2DqkTX:APA91bFixwG_F85q-Ukp_AYQ7NYXN-X75p1XKiUM5NyoOjYRMos3OBn2dALhzLwHyMWZ6mKLp41tBBThWYw9PdG_U56AFSky7SyJpZELscqRJObMEvyQL3g_mevZLbXE_XvzTLcMaAQk",
+                    deviceToken!,
                     roomId!,
                     _uid,
                     widget.endUserDetails!.name!);
