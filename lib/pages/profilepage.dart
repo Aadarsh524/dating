@@ -5,9 +5,12 @@ import 'dart:typed_data';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
+import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart' as d;
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
+import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/settingpage.dart';
+import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/interaction_provider/favourite_provider.dart';
 import 'package:dating/providers/interaction_provider/profile_view_provider.dart';
@@ -1042,17 +1045,119 @@ class _ProfilePageState extends State<ProfilePage> {
                                   intensity: 0.75,
                                 ),
                                 child: NeumorphicButton(
-                                  child: SizedBox(
-                                    height: 55,
-                                    width: 55,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5.0),
-                                      child: SvgPicture.asset(
-                                        AppIcons.chatfilled,
-                                        height: 20,
-                                        width: 20,
-                                      ),
-                                    ),
+                                  onPressed: () async {
+                                    final userInteractionProvider =
+                                        context.read<UserInteractionProvider>();
+                                    final chatRoomProvider =
+                                        context.read<ChatRoomProvider>();
+
+                                    // Check for mutual likes
+                                    final hasMutualLikes =
+                                        await userInteractionProvider
+                                            .checkMutualLikes(
+                                      user!.uid,
+                                      widget.dashboardresponsemodel.uid!,
+                                    );
+
+                                    if (hasMutualLikes) {
+                                      // Fetch or create chat room
+                                      final chatRoomId = await chatRoomProvider
+                                          .fetchChatRoomToCheckUser(
+                                        context,
+                                        user!.uid,
+                                        widget.dashboardresponsemodel.uid!,
+                                      );
+
+                                      // Check if chat room exists
+                                      if (chatRoomId == null) {
+                                        final chatProvider =
+                                            context.read<ChatMessageProvider>();
+                                        showDialog(
+                                          context: context,
+                                          builder: (_) => AlertDialog(
+                                            title: const Text(
+                                                'Send a wave to start chat'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () async {
+                                                  await chatProvider.sendChat(
+                                                    SendMessageModel(
+                                                      senderId: user!.uid,
+                                                      messageContent: "👋",
+                                                      type: "Text",
+                                                      receiverId: widget
+                                                          .dashboardresponsemodel
+                                                          .uid!,
+                                                    ),
+                                                    '',
+                                                    user!.uid,
+                                                  );
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            ChatPage()),
+                                                  );
+                                                },
+                                                child: const Text('OK'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('Cancel'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      } else {
+                                        // Handle the case where no chat room was created
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) => ChatPage()),
+                                        );
+                                      }
+                                    } else {
+                                      // Handle the case where there are no mutual likes
+                                      // For example, show a message to the user
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) => AlertDialog(
+                                          title: const Text('No Mutual Likes'),
+                                          content: const Text(
+                                              'You need mutual likes to start a chat.'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Consumer<ChatRoomProvider>(
+                                    builder:
+                                        (context, chatRoomProvider, child) {
+                                      return SizedBox(
+                                        height: 65,
+                                        width: 65,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(5.0),
+                                          child: chatRoomProvider
+                                                  .isChatRoomLoading
+                                              ? const CircularProgressIndicator()
+                                              : SvgPicture.asset(
+                                                  AppIcons.chatfilled,
+                                                  height: 20,
+                                                  width: 20,
+                                                ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ),

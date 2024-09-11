@@ -42,8 +42,8 @@ class _LikePageState extends State<LikePage> {
     super.initState();
     Provider.of<UserInteractionProvider>(context, listen: false)
         .getUserInteraction(user!.uid);
-    // Provider.of<UserInteractionProvider>(context, listen: false)
-    //     .getUserMatches(user!.uid);
+    Provider.of<UserInteractionProvider>(context, listen: false)
+        .getUserMatches(user!.uid);
   }
 
   @override
@@ -1352,8 +1352,7 @@ class _LikePageState extends State<LikePage> {
                           Expanded(
                             child: Consumer<UserInteractionProvider>(
                                 builder: (context, provider, _) {
-                              List<UserMatchesModel>? userMatchModel =
-                                  provider.getUserMatchModel;
+                              final userMatchModel = provider.getUserMatchModel;
 
                               return ListView(
                                 scrollDirection: Axis.vertical,
