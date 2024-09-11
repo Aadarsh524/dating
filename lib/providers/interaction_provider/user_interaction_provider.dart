@@ -20,8 +20,15 @@ class UserInteractionProvider extends ChangeNotifier {
   List<UserMatchesModel>? get getUserMatchModel => userMatchesModel;
 
   bool _isInteractionLoading = false;
+  bool _matchesLoading = false;
 
+  bool get matchesLoading => _matchesLoading;
   bool get isInteractionLoading => _isInteractionLoading;
+
+  Future<void> setMatchesProvider(bool value) async {
+    _matchesLoading = value;
+    notifyListeners();
+  }
 
   Future<void> setInteractionLoading(bool value) async {
     _isInteractionLoading = value;
@@ -81,7 +88,7 @@ class UserInteractionProvider extends ChangeNotifier {
   }
 
   Future<List<UserMatchesModel>?> getUserMatches(String userId) async {
-    setInteractionLoading(true);
+    setMatchesProvider(true);
     try {
       String api = getApiEndpoint();
       final token = await TokenManager.getToken();
@@ -109,7 +116,7 @@ class UserInteractionProvider extends ChangeNotifier {
       print(e.toString());
       return null;
     } finally {
-      setInteractionLoading(false);
+      setMatchesProvider(false);
     }
   }
 
@@ -290,23 +297,17 @@ class UserInteractionProvider extends ChangeNotifier {
 
   Future<bool> checkMutualLikes(String userId, String likedUserId) async {
     // Fetch user interaction data for the current user
-    final UserInteractionModel? userInteraction =
-        await getUserInteraction(userId);
+    final List<UserMatchesModel>? userMatchesModel =
+        await getUserMatches(userId);
 
-    if (userInteraction == null) {
-      return false; // No user interaction data found
-    }
-
-    // Get the mutual likes list from the user interaction model
-    final List<MutualLikes>? mutualLikes = userInteraction.mutualLikes;
-
-    if (mutualLikes == null || mutualLikes.isEmpty) {
+    if (userMatchesModel == null || userMatchesModel.isEmpty) {
       return false; // No mutual likes found
     }
 
     try {
       // Check if the likedUserId exists in the mutual likes list
-      mutualLikes.firstWhere((mutualLike) => mutualLike.uid == likedUserId);
+      userMatchesModel
+          .firstWhere((mutualLike) => mutualLike.uid == likedUserId);
       return true; // User found in mutual likes
     } catch (e) {
       return false; // User not found in mutual likes
