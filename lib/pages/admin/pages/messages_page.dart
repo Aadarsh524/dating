@@ -125,7 +125,7 @@ class _MessagesPageState extends State<MessagesPage> {
                               _selectedStatus = newValue!;
                             });
                           },
-                          items: <String>['Status', ..._statuses]
+                          items: _statuses
                               .map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,

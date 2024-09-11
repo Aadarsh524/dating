@@ -4,6 +4,7 @@ import 'package:dating/utils/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class SubscriptionsPage extends StatefulWidget {
   @override
@@ -286,13 +287,13 @@ class SubscriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Color subscriptionColor;
     switch (subscription.userSubscription!.planType) {
-      case '+Basic':
+      case 'Basic':
         subscriptionColor = Colors.green;
         break;
-      case '+Gold':
+      case 'Gold':
         subscriptionColor = Colors.amber;
         break;
-      case '+Plus':
+      case 'Plus':
         subscriptionColor = Colors.blue;
         break;
       default:
@@ -320,24 +321,32 @@ class SubscriptionCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Plan Type with Color Based on Expiration Date
             Text(
               subscription.userSubscription!.planType.toString(),
               style: GoogleFonts.poppins(
-                color: subscriptionColor,
+                color: DateTime.now().isBefore(DateTime.parse(
+                        subscription.userSubscription!.expirationDate!))
+                    ? subscriptionColor // Use normal color if not expired
+                    : Colors.grey, // Use grey color if expired
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
+
+            // Format and display the start date
             Text(
-              'Start Date: ${subscription.userSubscription!.subscriptionDate.toString().split(' ')[0]}',
+              'Start Date: ${DateFormat('yy-MM-dd').format(DateTime.parse(subscription.userSubscription!.subscriptionDate!))}',
               style: GoogleFonts.poppins(
                 color: const Color(0xFF514F6E),
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
               ),
             ),
+
+            // Format and display the end date
             Text(
-              'End Date: ${subscription.userSubscription!.expirationDate.toString().split(' ')[0]}',
+              'End Date: ${DateFormat('yy-MM-dd').format(DateTime.parse(subscription.userSubscription!.expirationDate!))}',
               style: GoogleFonts.poppins(
                 color: const Color(0xFF514F6E),
                 fontSize: 14,
