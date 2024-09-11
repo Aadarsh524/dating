@@ -13,6 +13,7 @@ import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -183,7 +184,111 @@ class _SettingPageState extends State<SettingPage> {
             child: IndexedStack(
               index: _selectedIndex,
               children: [
-                const SubscriptionPage(),
+                Consumer<UserProfileProvider>(builder: (context, provider, _) {
+                  // Check if userProfileModel or userSubscription is null
+                  if (provider.currentUserProfileModel == null ||
+                      provider.currentUserProfileModel!.userSubscription ==
+                          null) {
+                    // If userSubscription is null, show the SubscriptionPage
+                    return SubscriptionPage();
+                  } else {
+                    // If userSubscription exists, display the subscription details
+                    return Center(
+                      child: Container(
+                        padding: EdgeInsets.all(16.0),
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Your Current Subscription',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                            Divider(
+                                color: Colors.grey), // Divider for separation
+                            SizedBox(height: 10.0),
+                            Row(
+                              children: [
+                                Icon(Icons.subscriptions,
+                                    color: Colors.greenAccent),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Plan Type:',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Spacer(),
+                                Text(
+                                  provider.currentUserProfileModel!
+                                      .userSubscription!.planType
+                                      .toString(),
+                                  style: TextStyle(
+                                      color: Colors.black87, fontSize: 16),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10.0),
+                            Row(
+                              children: [
+                                Icon(Icons.timer, color: Colors.orangeAccent),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Duration:',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Spacer(),
+                                Text(
+                                  provider.currentUserProfileModel!
+                                      .userSubscription!.duration
+                                      .toString(),
+                                  style: TextStyle(
+                                      color: Colors.black87, fontSize: 16),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10.0),
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today,
+                                    color: Colors.redAccent),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Expiration Date:',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Spacer(),
+                                Text(
+                                  provider.currentUserProfileModel!
+                                      .userSubscription!.expirationDate
+                                      .toString(),
+                                  style: TextStyle(
+                                      color: Colors.black87, fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                }),
                 profileTab(),
                 Container(
                   color: Colors.orange,
@@ -191,7 +296,7 @@ class _SettingPageState extends State<SettingPage> {
                 ),
               ],
             ),
-          ),
+          )
         ],
       ),
       bottomSheet: Container(
@@ -438,7 +543,7 @@ class _SettingPageState extends State<SettingPage> {
                         //       CupertinoPageRoute(
                         //           builder: (context) => const ProfilePage()));
                       },
-                      child: const profileButton()),
+                      child: const ProfileButton()),
                   const SizedBox(
                     width: 20,
                   ),
@@ -863,7 +968,145 @@ class _SettingPageState extends State<SettingPage> {
                                     index: _selectedIndex,
                                     children: [
                                       //for billing
-                                      const SubscriptionPage(),
+                                      Consumer<UserProfileProvider>(
+                                          builder: (context, provider, _) {
+                                        // Check if userProfileModel or userSubscription is null
+                                        if (provider.currentUserProfileModel ==
+                                                null ||
+                                            provider.currentUserProfileModel!
+                                                    .userSubscription ==
+                                                null) {
+                                          // If userSubscription is null, show the SubscriptionPage
+                                          return SubscriptionPage();
+                                        } else {
+                                          // If userSubscription exists, display the subscription details
+                                          return Center(
+                                            child: Container(
+                                              padding: EdgeInsets.all(16.0),
+                                              margin: EdgeInsets.symmetric(
+                                                  horizontal: 16.0,
+                                                  vertical: 20.0),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.grey
+                                                        .withOpacity(0.5),
+                                                    spreadRadius: 2,
+                                                    blurRadius: 5,
+                                                    offset: Offset(0, 3),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Your Current Subscription',
+                                                    style: TextStyle(
+                                                      fontSize: 20.0,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.blueAccent,
+                                                    ),
+                                                  ),
+                                                  Divider(
+                                                      color: Colors
+                                                          .grey), // Divider for separation
+                                                  SizedBox(height: 10.0),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.subscriptions,
+                                                          color: Colors
+                                                              .greenAccent),
+                                                      SizedBox(width: 8),
+                                                      Text(
+                                                        'Plan Type:',
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      Spacer(),
+                                                      Text(
+                                                        provider
+                                                            .currentUserProfileModel!
+                                                            .userSubscription!
+                                                            .planType
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black87,
+                                                            fontSize: 16),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 10.0),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.timer,
+                                                          color: Colors
+                                                              .orangeAccent),
+                                                      SizedBox(width: 8),
+                                                      Text(
+                                                        'Duration:',
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      Spacer(),
+                                                      Text(
+                                                        provider
+                                                            .currentUserProfileModel!
+                                                            .userSubscription!
+                                                            .duration
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black87,
+                                                            fontSize: 16),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 10.0),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.calendar_today,
+                                                          color:
+                                                              Colors.redAccent),
+                                                      SizedBox(width: 8),
+                                                      Text(
+                                                        'Expiration Date:',
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      Spacer(),
+                                                      Text(
+                                                        provider
+                                                            .currentUserProfileModel!
+                                                            .userSubscription!
+                                                            .expirationDate
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black87,
+                                                            fontSize: 16),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }),
 
                                       // Container(
                                       //     color: Colors.green,

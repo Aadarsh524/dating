@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dating/datamodel/subscription_model.dart';
+import 'package:dating/main.dart';
 
 import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/utils/icons.dart';
@@ -43,11 +44,72 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       _isSearchFieldVisible = false;
     });
   }
+ 
+  
 
-  Future<void> makePayment(BuildContext context, String amount) async {
+  Future<void> makePayment(
+      BuildContext context, Subscription subscription) async {
     try {
       // Step 1: Create Payment Intent
-      final paymentIntent = await createPaymentIntent(amount);
+      String? amount;
+
+      switch (duration) {
+        case 'Weekly':
+          switch (subscription.type) {
+            case 'Basic':
+              amount = subscription.weeklyPrice.toString();
+              break;
+            case 'Plus':
+              amount = subscription.weeklyPrice.toString();
+              break;
+            case 'Gold':
+              amount = subscription.weeklyPrice.toString();
+              break;
+            default:
+              amount = null; // Handle unexpected plan type
+              break;
+          }
+          break;
+
+        case 'Monthly':
+          switch (subscription.type) {
+            case 'Basic':
+              amount = subscription.monthlyPrice.toString();
+              break;
+            case 'Plus':
+              amount = subscription.monthlyPrice.toString();
+              break;
+            case 'Gold':
+              amount = subscription.monthlyPrice.toString();
+              break;
+            default:
+              amount = null; // Handle unexpected plan type
+              break;
+          }
+          break;
+
+        case 'Yearly':
+          switch (subscription.type) {
+            case 'Basic':
+              amount = subscription.yearlyPrice.toString();
+              break;
+            case 'Plus':
+              amount = subscription.yearlyPrice.toString();
+              break;
+            case 'Gold':
+              amount = subscription.yearlyPrice.toString();
+              break;
+            default:
+              amount = null; // Handle unexpected plan type
+              break;
+          }
+          break;
+
+        default:
+          amount = null; // Handle unexpected duration values
+          break;
+      }
+      final paymentIntent = await createPaymentIntent(amount!);
       final clientSecret = paymentIntent['client_secret'];
 
       // Step 2: Initialize Payment Sheet
@@ -77,7 +139,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       );
 
       // Step 3: Display Payment Sheet
-      await displayPaymentSheet(context, clientSecret);
+      await displayPaymentSheet(subscription, context, clientSecret);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +149,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
   }
 
-  Future<void> displayPaymentSheet(
+  Future<void> displayPaymentSheet(Subscription subscription,
       BuildContext context, String paymentIntentToken) async {
     User? user = FirebaseAuth.instance.currentUser;
 
@@ -98,8 +160,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
       final subscriptionModel = SubscriptionModel(
         userId: user!.uid,
-        duration: "weekly",
-        planType: 'basic',
+        duration: duration,
+        planType: subscription.type,
         paymentMethod: "stripe",
         paymentId: paymentIntentToken,
       );
@@ -153,35 +215,30 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   final List<Subscription> subscriptions = [
     Subscription(
       type: 'Basic',
-      pricePerWeek: '\$5',
-      description: '.',
+      weeklyPrice: 3,
+      monthlyPrice: 6,
+      yearlyPrice: 50,
+      description: 'Basic plan with essential features.',
       subTitle: 'Get started with basic features',
-      features: [
-        'Feature 1',
-      ],
+      features: ['Feature 1', 'Feature 2'],
     ),
     Subscription(
       type: 'Plus',
-      pricePerWeek: '\$10',
-      description: 'An intermediate plan for regular users.',
+      weeklyPrice: 3,
+      monthlyPrice: 9,
+      yearlyPrice: 75,
+      description: 'Intermediate plan for regular users.',
       subTitle: 'Enjoy more features and flexibility',
-      features: [
-        'Feature 1',
-        'Feature 2',
-        'Feature 3',
-      ],
+      features: ['Feature 1', 'Feature 2', 'Feature 3'],
     ),
     Subscription(
       type: 'Gold',
-      pricePerWeek: '\$20',
-      description: 'A premium plan for professionals.',
+      weeklyPrice: 5,
+      monthlyPrice: 15,
+      yearlyPrice: 120,
+      description: 'Premium plan for professionals.',
       subTitle: 'Unlock all features and priority support',
-      features: [
-        'Feature 1',
-        'Feature 2',
-        'Feature 3',
-        'Feature 4',
-      ],
+      features: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4'],
     ),
   ];
 
@@ -238,10 +295,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   itemCount: subscriptions.length,
                   itemBuilder: (context, index) {
                     return SubscriptionCard(
+                      duration: duration,
                       subscription: subscriptions[index],
                       onTap: () {
-                        makePayment(context,
-                            subscriptions[index].pricePerWeek.toString());
+                        makePayment(context, subscriptions[index]);
                       },
                     );
                   },
@@ -312,7 +369,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                 items: <String>[
                                   'Weekly',
                                   'Monthly',
-                                  'Daily',
                                   'Yearly',
                                 ] // Language options
                                     .map<DropdownMenuItem<String>>(
@@ -354,13 +410,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                               itemBuilder: (context, index) {
                                 final subscription = subscriptions[index];
                                 return SubscriptionCard(
+                                  duration: duration,
                                   subscription: subscription,
                                   onTap: () {
-                                    makePayment(
-                                        context,
-                                        subscriptions[index]
-                                            .pricePerWeek
-                                            .toString());
+                                    makePayment(context, subscriptions[index]);
                                   },
                                 );
                               },
@@ -408,14 +461,18 @@ class profileButton extends StatelessWidget {
 
 class Subscription {
   final String type;
-  final String pricePerWeek;
+  final double weeklyPrice;
+  final double monthlyPrice;
+  final double yearlyPrice;
   final String description;
   final String subTitle;
   final List<String> features;
 
   Subscription({
     required this.type,
-    required this.pricePerWeek,
+    required this.weeklyPrice,
+    required this.monthlyPrice,
+    required this.yearlyPrice,
     required this.description,
     required this.subTitle,
     required this.features,
@@ -425,28 +482,56 @@ class Subscription {
 // ignore: must_be_immutable
 class SubscriptionCard extends StatelessWidget {
   final Subscription subscription;
+  final String duration; // Add a duration parameter to display correct price
   final VoidCallback? onTap;
 
-  SubscriptionCard({required this.subscription, this.onTap});
+  SubscriptionCard(
+      {required this.subscription, required this.duration, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Neumorphic(
-          style: NeumorphicStyle(
-            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)),
-            depth: 5,
-            intensity: 0.75,
-            color: Colors.white,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    String price = '';
+
+    // Set the price based on the selected duration
+    switch (duration) {
+      case 'Weekly':
+        price = '\$${subscription.weeklyPrice.toString()} / week';
+        break;
+      case 'Monthly':
+        price = '\$${subscription.monthlyPrice.toString()} / month';
+        break;
+      case 'Yearly':
+        price = '\$${subscription.yearlyPrice.toString()} / year';
+        break;
+    }
+
+    return Neumorphic(
+      style: NeumorphicStyle(
+        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)),
+        depth: 5,
+        intensity: 0.75,
+        color: Colors.white,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              subscription.type,
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF1A1A1A),
+                fontSize: 27,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.54,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  subscription.type,
+                  price, // Display the price based on the selected duration
                   style: GoogleFonts.poppins(
                     color: const Color(0xFF1A1A1A),
                     fontSize: 27,
@@ -454,107 +539,83 @@ class SubscriptionCard extends StatelessWidget {
                     letterSpacing: -0.54,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      subscription.pricePerWeek,
-                      style: GoogleFonts.poppins(
-                        color: const Color(0xFF1A1A1A),
-                        fontSize: 27,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.54,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      '/ week',
-                      style: GoogleFonts.poppins(
-                        color: const Color(0xFF1A1A1A),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  subscription.description,
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFF667085),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Container(
-                  height: 1,
-                  color: const Color(0xFFD9D9D9),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  subscription.subTitle,
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFF667085),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Column(
-                  children: subscription.features
-                      .map((feature) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Row(
-                              children: [
-                                SvgPicture.asset(AppIcons.check),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    feature,
-                                    style: GoogleFonts.poppins(
-                                      color: const Color(0xFF1A1A1A),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ))
-                      .toList(),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: onTap,
-                  child: Container(
-                    width: double.infinity,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                    decoration: ShapeDecoration(
-                      color: const Color(0xFF5400FF),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Subscribe Now',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
               ],
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 8),
+            Text(
+              subscription.description,
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF667085),
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            const SizedBox(height: 15),
+            Container(
+              height: 1,
+              color: const Color(0xFFD9D9D9),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              subscription.subTitle,
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF667085),
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Column(
+              children: subscription.features
+                  .map((feature) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(AppIcons.check),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                feature,
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFF1A1A1A),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: onTap,
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                decoration: ShapeDecoration(
+                  color: const Color(0xFF5400FF),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'Subscribe Now',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

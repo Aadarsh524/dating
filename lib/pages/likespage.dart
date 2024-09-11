@@ -758,7 +758,7 @@ class _LikePageState extends State<LikePage> {
                           ),
 
                           Text(
-                            'Sent: 19 hour ago',
+                            'Sent: ${user.likedDate}',
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
@@ -886,7 +886,7 @@ class _LikePageState extends State<LikePage> {
                           ),
 
                           Text(
-                            'Sent: 19 hour ago',
+                            'Sent: ${user.likedDate}',
                             style: GoogleFonts.poppins(
                               color: Colors.white.withOpacity(0.75),
                               fontSize: 12,
