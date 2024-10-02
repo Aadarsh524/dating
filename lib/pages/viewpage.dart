@@ -7,6 +7,7 @@ import 'package:dating/providers/interaction_provider/profile_view_provider.dart
 import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
+import 'package:dating/utils/shimmer.dart';
 
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
@@ -218,7 +219,37 @@ class _ViewPageState extends State<ViewPage> {
         child:
             Consumer<ProfileViewProvider>(builder: (context, provider, child) {
           if (provider.isProfileViewLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Row(
+              children: [
+                SizedBox(
+                  width: 350,
+                  child: ShimmerSkeleton(
+                    height: 300,
+                    count: 1,
+                  ),
+                ),
+                SizedBox(
+                  width: 15,
+                ),
+                SizedBox(
+                  width: 350,
+                  child: ShimmerSkeleton(
+                    height: 300,
+                    count: 1,
+                  ),
+                ),
+                SizedBox(
+                  width: 15,
+                ),
+                SizedBox(
+                  width: 350,
+                  child: ShimmerSkeleton(
+                    height: 300,
+                    count: 1,
+                  ),
+                ),
+              ],
+            );
           }
           final profiles = provider.visitedMyProfiles;
 
@@ -325,7 +356,37 @@ class _ViewPageState extends State<ViewPage> {
         child:
             Consumer<ProfileViewProvider>(builder: (context, provider, child) {
           if (provider.isProfileViewLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Row(
+              children: [
+                SizedBox(
+                  width: 350,
+                  child: ShimmerSkeleton(
+                    height: 300,
+                    count: 1,
+                  ),
+                ),
+                SizedBox(
+                  width: 15,
+                ),
+                SizedBox(
+                  width: 350,
+                  child: ShimmerSkeleton(
+                    height: 300,
+                    count: 1,
+                  ),
+                ),
+                SizedBox(
+                  width: 15,
+                ),
+                SizedBox(
+                  width: 350,
+                  child: ShimmerSkeleton(
+                    height: 300,
+                    count: 1,
+                  ),
+                ),
+              ],
+            );
           }
           final profiles = provider.viewedProfiles;
 
@@ -433,7 +494,37 @@ class _ViewPageState extends State<ViewPage> {
         child: Consumer<ProfileViewProvider>(
           builder: (context, provider, child) {
             if (provider.isProfileViewLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Row(
+                children: [
+                  SizedBox(
+                    width: 350,
+                    child: ShimmerSkeleton(
+                      height: 300,
+                      count: 1,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15,
+                  ),
+                  SizedBox(
+                    width: 350,
+                    child: ShimmerSkeleton(
+                      height: 300,
+                      count: 1,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15,
+                  ),
+                  SizedBox(
+                    width: 350,
+                    child: ShimmerSkeleton(
+                      height: 300,
+                      count: 1,
+                    ),
+                  ),
+                ],
+              );
             }
             final profiles = provider.visitedMyProfiles;
 
@@ -528,7 +619,37 @@ class _ViewPageState extends State<ViewPage> {
         child: Consumer<ProfileViewProvider>(
           builder: (context, provider, child) {
             if (provider.isProfileViewLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Row(
+                children: [
+                  SizedBox(
+                    width: 350,
+                    child: ShimmerSkeleton(
+                      height: 300,
+                      count: 1,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15,
+                  ),
+                  SizedBox(
+                    width: 350,
+                    child: ShimmerSkeleton(
+                      height: 300,
+                      count: 1,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15,
+                  ),
+                  SizedBox(
+                    width: 350,
+                    child: ShimmerSkeleton(
+                      height: 300,
+                      count: 1,
+                    ),
+                  ),
+                ],
+              );
             }
             final profiles = provider.viewedProfiles;
 

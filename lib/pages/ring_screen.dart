@@ -124,7 +124,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
               //update the call status of the users here
             });
           } else {
-            Fluttertoast.showToast(msg: "Sorry, the user is in another call.");
+            Fluttertoast.showToast(msg: "You need to be verified");
           }
         } else {
           Fluttertoast.showToast(msg: "Sorry, the user is not online.");

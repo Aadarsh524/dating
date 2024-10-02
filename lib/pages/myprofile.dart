@@ -7,6 +7,7 @@ import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/pages/editInfo.dart';
+import 'package:dating/pages/likespage.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/utils/colors.dart';
@@ -51,44 +52,41 @@ class _MyProfilePageState extends State<MyProfilePage> {
     try {
       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
         if (!await Permission.storage.request().isGranted) {
-          throw Exception(
-              'Storage permission is required to upload the image.');
+          throw Exception('Storage permission is required to upload the file.');
         }
       }
 
-      if (isUserVerified) {
-        final result = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['jpg', 'png', 'jpeg'],
-        );
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions:
+            isDocument ? ['pdf', 'doc', 'docx'] : ['jpg', 'png', 'jpeg'],
+      );
 
-        if (result?.files.isNotEmpty ?? false) {
-          if (isDocument) {
-            // Web
-            if (kIsWeb) {
-              final fileBytes = result!.files.single.bytes;
-              final fileName = result.files.single.name;
-              await _uploadDocumentWeb(fileBytes!, fileName);
-            }
-            // Mobile/Desktop
-            else {
-              File file = File(result!.files.single.path!);
-              await _uploadDocument(file);
-            }
-          } else {
+      if (result?.files.isNotEmpty ?? false) {
+        if (isDocument) {
+          // Web
+          if (kIsWeb) {
+            final fileBytes = result!.files.single.bytes;
+            final fileName = result.files.single.name;
+            await _uploadDocumentWeb(fileBytes!, fileName);
+          }
+          // Mobile/Desktop
+          else {
+            File file = File(result!.files.single.path!);
+            await _uploadDocument(file);
+          }
+        } else {
+          if (isUserVerified) {
             final base64 = kIsWeb
                 ? base64Encode(result!.files.single.bytes!)
                 : base64Encode(
                     File(result!.files.single.path!).readAsBytesSync());
             await _uploadPost(base64);
+          } else {
+            _showErrorSnackBar("You must be verified to upload a post");
           }
         }
-      } else {
-        _showErrorSnackBar("you must be verified to upload post");
       }
-      // Permission check for mobile
-
-      // File picker to pick files
     } catch (e) {
       _showErrorSnackBar(e.toString());
     }
@@ -134,7 +132,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
 // Usage:
   Future<void> uploadDocument() => _pickAndUploadFile(isDocument: true);
-  Future<void> pickImage() => _pickAndUploadFile();
+  Future<void> pickImage() => _pickAndUploadFile(isDocument: false);
 
   @override
   void initState() {
@@ -636,7 +634,13 @@ class _MyProfilePageState extends State<MyProfilePage> {
                             ButtonWithLabel(
                               text: null,
                               labelText: 'Matches',
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LikePage()));
+                              },
                               icon: const Icon(Icons.people),
                             ),
                             const SizedBox(
@@ -653,48 +657,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
                             const SizedBox(
                               width: 15,
                             ),
-                            // popular
-                            ButtonWithLabel(
-                              text: null,
-                              labelText: 'Popular',
-                              onPressed: () {},
-                              icon: const Icon(Icons.star),
-                            ),
-                            const SizedBox(
-                              width: 15,
-                            ),
-                            // photos
-                            ButtonWithLabel(
-                              text: null,
-                              labelText: 'Photos',
-                              onPressed: () {},
-                              icon: const Icon(Icons.photo_library_sharp),
-                            ),
-
-                            const SizedBox(
-                              width: 15,
-                            ),
-                            // add friemd
-                            ButtonWithLabel(
-                              text: null,
-                              labelText: 'Add Friend',
-                              onPressed: () {},
-                              icon: const Icon(Icons.add),
-                            ),
-
-                            const SizedBox(
-                              width: 15,
-                            ),
-                            // online
-                            ButtonWithLabel(
-                              text: null,
-                              labelText: 'Online',
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.circle_outlined,
-                                color: Colors.green,
-                              ),
-                            ),
                           ],
                         ),
 
@@ -704,123 +666,123 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
                         // age seeking
 
-                        Row(
-                          children: [
-                            // seeking
+                        //     Row(
+                        //       children: [
+                        //         // seeking
 
-                            Neumorphic(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 2),
-                              child: DropdownButton<String>(
-                                underline: Container(),
-                                style: AppTextStyles().secondaryStyle,
-                                value: seeking,
-                                icon: const Icon(
-                                    Icons.arrow_drop_down), // Dropdown icon
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    seeking = newValue!;
-                                  });
-                                },
-                                items: <String>[
-                                  'SEEKING',
-                                  'English',
-                                  'Spanish',
-                                  'French',
-                                  'German'
-                                ] // Language options
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      style: AppTextStyles().secondaryStyle,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 50,
-                            ),
+                        //         Neumorphic(
+                        //           padding: const EdgeInsets.symmetric(
+                        //               horizontal: 20, vertical: 2),
+                        //           child: DropdownButton<String>(
+                        //             underline: Container(),
+                        //             style: AppTextStyles().secondaryStyle,
+                        //             value: seeking,
+                        //             icon: const Icon(
+                        //                 Icons.arrow_drop_down), // Dropdown icon
+                        //             onChanged: (String? newValue) {
+                        //               setState(() {
+                        //                 seeking = newValue!;
+                        //               });
+                        //             },
+                        //             items: <String>[
+                        //               'SEEKING',
+                        //               'English',
+                        //               'Spanish',
+                        //               'French',
+                        //               'German'
+                        //             ] // Language options
+                        //                 .map<DropdownMenuItem<String>>(
+                        //                     (String value) {
+                        //               return DropdownMenuItem<String>(
+                        //                 value: value,
+                        //                 child: Text(
+                        //                   value,
+                        //                   style: AppTextStyles().secondaryStyle,
+                        //                 ),
+                        //               );
+                        //             }).toList(),
+                        //           ),
+                        //         ),
+                        //         const SizedBox(
+                        //           width: 50,
+                        //         ),
 
-                            // country
+                        //         // country
 
-                            Neumorphic(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 2),
-                              child: DropdownButton<String>(
-                                underline: Container(),
-                                style: AppTextStyles().secondaryStyle,
-                                value: country,
-                                icon: const Icon(
-                                    Icons.arrow_drop_down), // Dropdown icon
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    country = newValue!;
-                                  });
-                                },
-                                items: <String>[
-                                  'COUNTRY',
-                                  'English',
-                                  'Spanish',
-                                  'French',
-                                  'German'
-                                ] // Language options
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      style: AppTextStyles().secondaryStyle,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 50,
-                            ),
+                        //         Neumorphic(
+                        //           padding: const EdgeInsets.symmetric(
+                        //               horizontal: 20, vertical: 2),
+                        //           child: DropdownButton<String>(
+                        //             underline: Container(),
+                        //             style: AppTextStyles().secondaryStyle,
+                        //             value: country,
+                        //             icon: const Icon(
+                        //                 Icons.arrow_drop_down), // Dropdown icon
+                        //             onChanged: (String? newValue) {
+                        //               setState(() {
+                        //                 country = newValue!;
+                        //               });
+                        //             },
+                        //             items: <String>[
+                        //               'COUNTRY',
+                        //               'English',
+                        //               'Spanish',
+                        //               'French',
+                        //               'German'
+                        //             ] // Language options
+                        //                 .map<DropdownMenuItem<String>>(
+                        //                     (String value) {
+                        //               return DropdownMenuItem<String>(
+                        //                 value: value,
+                        //                 child: Text(
+                        //                   value,
+                        //                   style: AppTextStyles().secondaryStyle,
+                        //                 ),
+                        //               );
+                        //             }).toList(),
+                        //           ),
+                        //         ),
+                        //         const SizedBox(
+                        //           width: 50,
+                        //         ),
 
-                            // age
+                        //         // age
 
-                            Neumorphic(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 2),
-                              child: DropdownButton<String>(
-                                underline: Container(),
-                                style: AppTextStyles().secondaryStyle,
-                                value: age,
-                                icon: const Icon(
-                                    Icons.arrow_drop_down), // Dropdown icon
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    age = newValue!;
-                                  });
-                                },
-                                items: <String>[
-                                  'AGE',
-                                  'English',
-                                  'Spanish',
-                                  'French',
-                                  'German'
-                                ] // Language options
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      value,
-                                      style: AppTextStyles().secondaryStyle,
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ],
-                        ),
+                        //         Neumorphic(
+                        //           padding: const EdgeInsets.symmetric(
+                        //               horizontal: 20, vertical: 2),
+                        //           child: DropdownButton<String>(
+                        //             underline: Container(),
+                        //             style: AppTextStyles().secondaryStyle,
+                        //             value: age,
+                        //             icon: const Icon(
+                        //                 Icons.arrow_drop_down), // Dropdown icon
+                        //             onChanged: (String? newValue) {
+                        //               setState(() {
+                        //                 age = newValue!;
+                        //               });
+                        //             },
+                        //             items: <String>[
+                        //               'AGE',
+                        //               'English',
+                        //               'Spanish',
+                        //               'French',
+                        //               'German'
+                        //             ] // Language options
+                        //                 .map<DropdownMenuItem<String>>(
+                        //                     (String value) {
+                        //               return DropdownMenuItem<String>(
+                        //                 value: value,
+                        //                 child: Text(
+                        //                   value,
+                        //                   style: AppTextStyles().secondaryStyle,
+                        //                 ),
+                        //               );
+                        //             }).toList(),
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
                       ],
                     ),
                   ],
@@ -1294,7 +1256,21 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                     ),
                                     userprofileProvider!.isVerified == true
                                         ? Container()
-                                        : _buildVerificationSection(),
+                                        : userprofileProvider.documentStatus ==
+                                                3
+                                            ? Column(
+                                                children: [
+                                                  Container(
+                                                    child: Text(
+                                                        'Verification Status'),
+                                                  ),
+                                                  const Divider(),
+                                                  Container(
+                                                    child: Text('Pending'),
+                                                  ),
+                                                ],
+                                              )
+                                            : _buildVerificationSection(),
 
                                     const SizedBox(
                                       height: 40,

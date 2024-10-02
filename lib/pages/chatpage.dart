@@ -883,6 +883,8 @@ class _ChatPageState extends State<ChatPage> {
                                                               builder:
                                                                   (context) =>
                                                                       RingScreen(
+                                                                        roomId:
+                                                                            "null",
                                                                         endUserDetails:
                                                                             chatRoomMode,
                                                                         clientID:
