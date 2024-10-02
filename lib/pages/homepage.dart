@@ -412,7 +412,13 @@ class _HomePageState extends State<HomePage> {
                           ButtonWithLabel(
                             text: null,
                             labelText: 'Photos',
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const MyProfilePage()));
+                            },
                             icon: const Icon(Icons.photo_library_sharp),
                           ),
 

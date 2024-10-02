@@ -9,6 +9,7 @@ import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/images.dart';
+import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
@@ -148,7 +149,7 @@ class _LikePageState extends State<LikePage> {
                     provider.getUserMatchModel;
 
                 if (isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const ShimmerSkeleton(count: 1, height: 250);
                 } else {
                   switch (_selectedIndex) {
                     case 0:
@@ -1363,10 +1364,70 @@ class _LikePageState extends State<LikePage> {
                                     index: _selectedIndex,
                                     children: [
                                       provider.isInteractionLoading
-                                          ? CircularProgressIndicator()
+                                          ? const Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 350,
+                                                  child: ShimmerSkeleton(
+                                                    height: 300,
+                                                    count: 1,
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 15,
+                                                ),
+                                                SizedBox(
+                                                  width: 350,
+                                                  child: ShimmerSkeleton(
+                                                    height: 300,
+                                                    count: 1,
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 15,
+                                                ),
+                                                SizedBox(
+                                                  width: 350,
+                                                  child: ShimmerSkeleton(
+                                                    height: 300,
+                                                    count: 1,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
                                           : likedMeListDesktop(provider),
                                       provider.isInteractionLoading
-                                          ? CircularProgressIndicator()
+                                          ? const Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 350,
+                                                  child: ShimmerSkeleton(
+                                                    height: 300,
+                                                    count: 1,
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 15,
+                                                ),
+                                                SizedBox(
+                                                  width: 350,
+                                                  child: ShimmerSkeleton(
+                                                    height: 300,
+                                                    count: 1,
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 15,
+                                                ),
+                                                SizedBox(
+                                                  width: 350,
+                                                  child: ShimmerSkeleton(
+                                                    height: 300,
+                                                    count: 1,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
                                           : myLikesListDesktop(provider),
                                       userMatchModel != null
                                           ? mutualLikesListDesktop(
