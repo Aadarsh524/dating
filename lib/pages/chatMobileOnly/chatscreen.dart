@@ -182,7 +182,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                               builder: (context) => RingScreen(
                                     roomId: "null",
                                     endUserDetails: widget.chatRoomModel,
-                                    clientID: user!.uid,
+                                    clientID: widget.recieverId,
                                   )));
                     },
                     icon: const Icon(Icons.call),
