@@ -164,7 +164,9 @@ class NotificationServices {
     try {
       if (kIsWeb) {
         token = await messaging.getToken(
-            vapidKey: 'BMPINEPL03mORAE60pV7_PadxxkwgCsrlgwPXeXDDSwp_x');
+            vapidKey:
+                'BAP9jcEtuZ5CNt_VKDCNZBrcV4qiwgk2PcwZvumXr9VcmLGfTrEnsipE4RsMn1jWr4UkBcs_i-kMFYYYzOKjsDs');
+        print('This is the key for web application: $token');
       } else {
         token = await messaging.getToken();
       }
