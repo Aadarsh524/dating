@@ -2,6 +2,7 @@ import 'package:dating/datamodel/chat/chat_message_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 
 import 'package:dating/platform/platform.dart';
+import 'package:dating/providers/chat_provider/chat_socket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -9,6 +10,7 @@ import '../../backend/MongoDB/token_manager.dart';
 
 class ChatMessageProvider extends ChangeNotifier {
   ChatMessageModel? chatMessageModel;
+  final ChatSocketService _socketService = ChatSocketService();
 
   bool _isMessagesLoading = false;
 
@@ -58,11 +60,11 @@ class ChatMessageProvider extends ChangeNotifier {
       request.fields['SenderId'] = sendMessageModel.senderId.toString();
       request.fields['RecieverId'] = sendMessageModel.receiverId.toString();
 
-      // handle for web 
+      // handle for web
       if (kIsWeb) {
         if (sendMessageModel.fileBytes != null &&
             sendMessageModel.fileName != null) {
-          final file =  http.MultipartFile.fromBytes(
+          final file = http.MultipartFile.fromBytes(
               'File', // Treating the file as an array with 'File[]'
               sendMessageModel.fileBytes!,
               filename: sendMessageModel.fileName![0]);
@@ -94,7 +96,7 @@ class ChatMessageProvider extends ChangeNotifier {
   }
 
   Future<String> fetchImage() async {
-    final url =
+    const url =
         'http://localhost:8001/api/Communication/FileView/2234ca44679f324108ae9ae4ae87d2fde9ec7c167572a07e3234f3991ca0b17c.jpeg';
     final response = await http.get(Uri.parse(url));
 
@@ -135,5 +137,31 @@ class ChatMessageProvider extends ChangeNotifier {
     } finally {
       setMessagesLoading(false);
     }
+  }
+
+  void initializeSocket(String token) {
+    _socketService.initializeSocket(token);
+    _socketService.listenForMessages((data) {
+      // Handle incoming messages
+      final message = ChatMessageModel.fromJson(data);
+      if (chatMessageModel != null) {
+        chatMessageModel!.messages!.add(message as Messages);
+        notifyListeners();
+      }
+    });
+  }
+
+  void sendMessageViaSocket(SendMessageModel sendMessageModel, String chatID) {
+    final messageData = {
+      'SenderId': sendMessageModel.senderId,
+      'ReceiverId': sendMessageModel.receiverId,
+      'MessageContent': sendMessageModel.messageContent,
+      'File': sendMessageModel.fileName?.first, // File logic if required
+    };
+    _socketService.sendMessage(chatID, messageData);
+  }
+
+  void disconnectSocket() {
+    _socketService.disconnectSocket();
   }
 }

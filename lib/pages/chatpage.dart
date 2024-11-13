@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:dating/backend/MongoDB/constants.dart';
+import 'package:dating/backend/MongoDB/token_manager.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart' as chatRoom;
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
@@ -170,6 +171,9 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+
+    // final token = TokenManager.getToken();
+    // context.read<ChatMessageProvider>().initializeSocket(token as String);
 
     final chatRoomProvider = context.read<ChatRoomProvider>();
     chatRoomProvider.fetchChatRoom(context, user!.uid);
