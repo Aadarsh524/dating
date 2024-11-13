@@ -8,12 +8,12 @@ String getApiEndpoint() {
     } else if (Platform.isIOS) {
       return 'http://10.0.2.2:8001/api';
     } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      return 'http://localhost:8001/api';
+      return 'https://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api';
     } else {
-      return 'http://localhost:8001/api';
+      return 'https://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api';
     }
   } catch (e) {
     // If Platform is not available, return a default value
-    return 'http://localhost:8001/api';
+    return 'https://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api';
   }
 }
