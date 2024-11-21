@@ -84,7 +84,18 @@ class _EditInfoState extends State<EditInfo> {
 
   void deletePost(String? postId) async {
     try {
-      await context.read<UserProfileProvider>().deletePost(user!.uid, postId!);
+      await context
+          .read<UserProfileProvider>()
+          .deletePost(user!.uid, postId!)
+          .then((value) {
+        if (value == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Deletion Successful')));
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('Error on Deletion')));
+        }
+      });
     } catch (e) {
       return;
     }
@@ -140,6 +151,17 @@ class _EditInfoState extends State<EditInfo> {
     _controllerSeekingFromAge.dispose();
     _controllerSeekingToAge.dispose();
     super.dispose();
+  }
+
+  bool _isEditingAnyField() {
+    return _isEditingName ||
+        _isEditingAddress ||
+        _isEditingBio ||
+        _isEditingInterests ||
+        _isEditingAge ||
+        _isEditingCountry ||
+        _isEditingSeekingFromAge ||
+        _isEditingSeekingToAge;
   }
 
   Future<void> _saveChanges() async {
@@ -849,69 +871,71 @@ class _EditInfoState extends State<EditInfo> {
           ),
         ],
       ),
-      bottomSheet: Container(
-        height: 60,
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.backgroundColor,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Neumorphic(
-              style: NeumorphicStyle(
-                boxShape: NeumorphicBoxShape.roundRect(
-                  BorderRadius.circular(16),
-                ),
-                depth: 5,
-                intensity: 0.75,
+      bottomSheet: _isEditingAnyField()
+          ? Container(
+              height: 60,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: AppColors.backgroundColor,
               ),
-              child: NeumorphicButton(
-                onPressed: _cancelChanges,
-                padding: EdgeInsets.zero,
-                child: SizedBox(
-                  height: 50,
-                  width: 100,
-                  child: Center(
-                    child: Text(
-                      'Cancel',
-                      style: AppTextStyles().secondaryStyle.copyWith(
-                            color: Colors.red,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Neumorphic(
+                    style: NeumorphicStyle(
+                      boxShape: NeumorphicBoxShape.roundRect(
+                        BorderRadius.circular(16),
+                      ),
+                      depth: 5,
+                      intensity: 0.75,
+                    ),
+                    child: NeumorphicButton(
+                      onPressed: _cancelChanges,
+                      padding: EdgeInsets.zero,
+                      child: SizedBox(
+                        height: 50,
+                        width: 100,
+                        child: Center(
+                          child: Text(
+                            'Cancel',
+                            style: AppTextStyles().secondaryStyle.copyWith(
+                                  color: Colors.red,
+                                ),
                           ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            Neumorphic(
-              style: NeumorphicStyle(
-                boxShape: NeumorphicBoxShape.roundRect(
-                  BorderRadius.circular(16),
-                ),
-                depth: 5,
-                intensity: 0.75,
-              ),
-              child: NeumorphicButton(
-                onPressed: _saveChanges,
-                padding: EdgeInsets.zero,
-                child: Container(
-                  height: 50,
-                  width: 100,
-                  color: Colors.blue,
-                  child: Center(
-                    child: Text(
-                      'Save',
-                      style: AppTextStyles().secondaryStyle.copyWith(
-                            color: Colors.white,
+                  Neumorphic(
+                    style: NeumorphicStyle(
+                      boxShape: NeumorphicBoxShape.roundRect(
+                        BorderRadius.circular(16),
+                      ),
+                      depth: 5,
+                      intensity: 0.75,
+                    ),
+                    child: NeumorphicButton(
+                      onPressed: _saveChanges,
+                      padding: EdgeInsets.zero,
+                      child: Container(
+                        height: 50,
+                        width: 100,
+                        color: Colors.blue,
+                        child: Center(
+                          child: Text(
+                            'Save',
+                            style: AppTextStyles().secondaryStyle.copyWith(
+                                  color: Colors.white,
+                                ),
                           ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ),
-          ],
-        ),
-      ),
+            )
+          : null, // No bottomSheet when no field is being edited
     );
   }
 
