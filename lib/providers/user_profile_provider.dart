@@ -80,7 +80,6 @@ class UserProfileProvider extends ChangeNotifier {
 
   Future<bool> uploadDocumentsForVerification(
       DocumentVerificationModel documentVerificationModel) async {
-    setProfileLoading(true);
     try {
       String api = getApiEndpoint();
 
@@ -219,7 +218,6 @@ class UserProfileProvider extends ChangeNotifier {
   }
 
   Future<Uploads> uploadPost(newUpload, String uid) async {
-    setProfileLoading(true);
     final token = await TokenManager.getToken();
     if (token == null) {
       throw Exception('No token found');

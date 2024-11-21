@@ -123,91 +123,95 @@ class _FavouritePageState extends State<FavouritePage> {
           if (favourites == null || favourites.isEmpty) {
             return Center(child: Text('No favourites found.'));
           }
-          return Container(
-            width: double.infinity,
-            height: 900,
-            child: GridView.builder(
-              clipBehavior: Clip.none,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of columns in the grid
-                crossAxisSpacing: 15, // Horizontal spacing between items
-                mainAxisSpacing: 15, // Vertical spacing between items
-              ),
-              itemCount:
-                  favourites.length, // Total number of containers in the grid
-              itemBuilder: (context, index) {
-                final favourite = favourites[index];
-                return Container(
-                  height: 250,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    image: DecorationImage(
-                      image: favourite.image!.isNotEmpty
-                          ? MemoryImage(base64ToImage(favourite.image!))
-                          : MemoryImage(base64ToImage(
-                              defaultBase64Avatar)), // Image asset path
-                      fit: BoxFit
-                          .cover, // Adjust how the image should fit inside the container
-                    ),
-                  ),
-                  child: Container(
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              // Adjust grid item size based on screen size
+              double gridItemWidth = (constraints.maxWidth - 30) / 2;
+              double gridItemHeight = gridItemWidth * 1.5;
+
+              return GridView.builder(
+                clipBehavior: Clip.none,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: constraints.maxWidth < 600
+                      ? 2
+                      : 3, // Responsive grid for different screen sizes
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                ),
+                itemCount: favourites.length,
+                itemBuilder: (context, index) {
+                  final favourite = favourites[index];
+                  return Container(
+                    height: gridItemHeight,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black
-                              .withOpacity(0), // Transparent black at the top
-                          Colors.black
-                              .withOpacity(0.75), // Solid black at the bottom
-                        ],
+                      image: DecorationImage(
+                        image: favourite.image!.isNotEmpty
+                            ? MemoryImage(base64ToImage(favourite.image!))
+                            : MemoryImage(base64ToImage(defaultBase64Avatar)),
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Stack(
                       children: [
-                        // name address
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 10),
+                        // Gradient overlay for text readability
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.1),
+                                Colors.black.withOpacity(0.75),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Content: Name, Age, Address
+                        Positioned(
+                          bottom: 10,
+                          left: 10,
+                          right: 10,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              // name
+                              // Name and Age
                               Row(
                                 children: [
-                                  Text(
-                                    '${favourite.name ?? 'Unknown'}, ${favourite.age ?? 'N/A'}',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w400,
-                                      height: 0,
+                                  Expanded(
+                                    child: Text(
+                                      '${favourite.name ?? 'Unknown'}, ${favourite.age ?? 'N/A'}',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  // male female
                                 ],
                               ),
-                              // address
+                              // Address
                               Text(
                                 favourite.address ?? 'Unknown location',
                                 style: GoogleFonts.poppins(
-                                  color: Colors.white.withOpacity(0.75),
+                                  color: Colors.white.withOpacity(0.8),
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  height: 0,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              );
+            },
           );
         }),
       ),

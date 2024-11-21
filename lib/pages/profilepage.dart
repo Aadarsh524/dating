@@ -510,34 +510,48 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
 
                     // Check if chat room exists
-                    if (chatRoomId != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ChatScreemMobile(
-                            chatID: chatRoomId,
-                            chatRoomModel: EndUserDetails(
-                              name: widget.dashboardresponsemodel.name,
-                              profileImage: widget.dashboardresponsemodel.image,
+                    if (chatRoomId == null) {
+                      final chatProvider = context.read<ChatMessageProvider>();
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Send a wave to start chat'),
+                          actions: [
+                            TextButton(
+                              onPressed: () async {
+                                await chatProvider.sendChat(
+                                  SendMessageModel(
+                                    senderId: user!.uid,
+                                    messageContent: "👋",
+                                    type: "Text",
+                                    receiverId:
+                                        widget.dashboardresponsemodel.uid!,
+                                  ),
+                                  '',
+                                  user!.uid,
+                                );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const ChatPage()),
+                                );
+                              },
+                              child: const Text('OK'),
                             ),
-                            recieverId: widget.dashboardresponsemodel.uid!,
-                          ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Cancel'),
+                            ),
+                          ],
                         ),
                       );
                     } else {
                       // Handle the case where no chat room was created
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => ChatScreemMobile(
-                            chatID: '',
-                            chatRoomModel: EndUserDetails(
-                              name: widget.dashboardresponsemodel.name,
-                              profileImage: widget.dashboardresponsemodel.image,
-                            ),
-                            recieverId: widget.dashboardresponsemodel.uid!,
-                          ),
-                        ),
+                        MaterialPageRoute(builder: (_) => const ChatPage()),
                       );
                     }
                   } else {
@@ -1096,7 +1110,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (_) =>
-                                                            ChatPage()),
+                                                            const ChatPage()),
                                                   );
                                                 },
                                                 child: const Text('OK'),
@@ -1115,7 +1129,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (_) => ChatPage()),
+                                              builder: (_) => const ChatPage()),
                                         );
                                       }
                                     } else {

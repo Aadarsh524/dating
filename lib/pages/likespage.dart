@@ -174,246 +174,285 @@ class _LikePageState extends State<LikePage> {
   }
 
   Widget likedMeList(UserInteractionProvider provider) {
-    List<LikedByUsers>? likedMeUsers =
-        provider.userInteractionModel?.likedByUsers;
+    List<LikedByUsers>? allUsers = provider.userInteractionModel?.likedByUsers;
 
-    if (likedMeUsers == null || likedMeUsers.isEmpty) {
-      return const Center(child: Text('No users have liked you yet.'));
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        width: double.infinity,
-        height: 900,
-        child: GridView.builder(
-          clipBehavior: Clip.none,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Number of columns in the grid
-            crossAxisSpacing: 15, // Horizontal spacing between items
-            mainAxisSpacing: 15, // Vertical spacing between items
-          ),
-          itemCount: likedMeUsers.length,
-          itemBuilder: (context, index) {
-            LikedByUsers user = likedMeUsers[index];
-            return Container(
-              height: 250,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: user.userDetail!.image!.isNotEmpty
-                      ? MemoryImage(base64ToImage(user.userDetail!.image!))
-                      : MemoryImage(base64ToImage(defaultBase64Avatar)),
-                  fit: BoxFit
-                      .cover, // Adjust how the image should fit inside the container
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black
-                          .withOpacity(0), // Transparent black at the top
-                      Colors.black
-                          .withOpacity(0.75), // Solid black at the bottom
-                    ],
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // like and chat
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SvgPicture.asset('assets/icons/heartoutline.svg'),
-                          const SizedBox(width: 8),
-                          SvgPicture.asset('assets/icons/chatoutline.svg'),
-                        ],
-                      ),
-                    ),
-                    // name and address
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // name
-                          Row(
-                            children: [
-                              Text(
-                                '${user.userDetail!.name!}, ${user.userDetail!.age!}',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400,
-                                  height: 0,
-                                ),
-                              ),
-                              // gender
-                              const Icon(
-                                "male" == 'male' ? Icons.male : Icons.female,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                          // address
-                          Text(
-                            user.userDetail!.address!,
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
-                          ),
-                          Text(
-                            'Sent: ${user.likedDate} ', // Assuming this is static text; adjust if needed
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget myLikesList(UserInteractionProvider provider) {
-    List<LikedUsers>? myLikesUsers = provider.userInteractionModel?.likedUsers;
-
-    if (myLikesUsers == null || myLikesUsers.isEmpty) {
+    if (allUsers == null || allUsers.isEmpty) {
       return const Center(child: Text('You have not liked anyone yet.'));
     }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        width: double.infinity,
-        height: 900,
-        child: GridView.builder(
-          clipBehavior: Clip.none,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Number of columns in the grid
-            crossAxisSpacing: 15, // Horizontal spacing between items
-            mainAxisSpacing: 15, // Vertical spacing between items
-          ),
-          itemCount: myLikesUsers.length,
-          itemBuilder: (context, index) {
-            LikedUsers user = myLikesUsers[index];
-            return Container(
-              height: 250,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: user.userDetail!.image!.isNotEmpty
-                      ? MemoryImage(base64ToImage(user.userDetail!.image!))
-                      : MemoryImage(base64ToImage(defaultBase64Avatar)),
-                  fit: BoxFit
-                      .cover, // Adjust how the image should fit inside the container
-                ),
-              ),
-              child: Container(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Calculate item dimensions
+          double gridItemWidth =
+              (constraints.maxWidth - 30) / 2; // Adjust spacing
+          double gridItemHeight = gridItemWidth * 1.4; // Maintain aspect ratio
+
+          return GridView.builder(
+            clipBehavior: Clip.none,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: constraints.maxWidth < 600
+                  ? 2
+                  : 3, // Adjust for larger screens
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+            ),
+            itemCount: allUsers.length,
+            itemBuilder: (context, index) {
+              LikedByUsers user = allUsers[index];
+
+              return Container(
+                width: gridItemWidth,
+                height: gridItemHeight,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black
-                          .withOpacity(0), // Transparent black at the top
-                      Colors.black
-                          .withOpacity(0.75), // Solid black at the bottom
-                    ],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                  image: DecorationImage(
+                    image: user.userDetail!.image!.isNotEmpty
+                        ? MemoryImage(base64ToImage(user.userDetail!.image!))
+                        : MemoryImage(base64ToImage(defaultBase64Avatar)),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Stack(
                   children: [
-                    // like and chat
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
+                    // Gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0), // Transparent at top
+                            Colors.black.withOpacity(0.6), // Darker at bottom
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Like and Chat Icons
+                    Positioned(
+                      top: 10,
+                      right: 2,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SvgPicture.asset('assets/icons/heartoutline.svg'),
-                          const SizedBox(width: 8),
-                          SvgPicture.asset('assets/icons/chatoutline.svg'),
+                          GestureDetector(
+                            onTap: () {
+                              // Add like functionality
+                            },
+                            child: SvgPicture.asset(
+                              'assets/icons/heartfilled.svg',
+                              color: Colors.white,
+                              height: 20,
+                              width: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
                         ],
                       ),
                     ),
-                    // name and address
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
+                    // User Info
+                    Positioned(
+                      bottom: 10,
+                      left: 10,
+                      right: 10,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          // name
+                          // Name and Age with Gender Icon
                           Row(
                             children: [
-                              Text(
-                                '${user.userDetail!.name!}, ${user.userDetail!.age!}',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400,
-                                  height: 0,
+                              Expanded(
+                                child: Text(
+                                  '${user.userDetail!.name!}, ${user.userDetail!.age!}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              // gender
-                              const Icon(
-                                "male" == 'male' ? Icons.male : Icons.female,
-                                color: Colors.white,
                               ),
                             ],
                           ),
-                          // address
+                          // Address
                           Text(
                             user.userDetail!.address!,
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
+                              color: Colors.white.withOpacity(0.8),
                               fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
+                          // Liked Date
                           Text(
-                            'Sent: ${user.likedDate} ', // Assuming this is static text; adjust if needed
+                            'Sent: ${user.likedDate}',
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
+                              color: Colors.white.withOpacity(0.7),
                               fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget myLikesList(UserInteractionProvider provider) {
+    List<LikedUsers>? allUsers = provider.userInteractionModel?.likedUsers;
+
+    if (allUsers == null || allUsers.isEmpty) {
+      return const Center(child: Text('You have not liked anyone yet.'));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Calculate item dimensions
+          double gridItemWidth =
+              (constraints.maxWidth - 30) / 2; // Adjust spacing
+          double gridItemHeight = gridItemWidth * 1.4; // Maintain aspect ratio
+
+          return GridView.builder(
+            clipBehavior: Clip.none,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: constraints.maxWidth < 600
+                  ? 2
+                  : 3, // Adjust for larger screens
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+            ),
+            itemCount: allUsers.length,
+            itemBuilder: (context, index) {
+              LikedUsers user = allUsers[index];
+
+              return Container(
+                width: gridItemWidth,
+                height: gridItemHeight,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                  image: DecorationImage(
+                    image: user.userDetail!.image!.isNotEmpty
+                        ? MemoryImage(base64ToImage(user.userDetail!.image!))
+                        : MemoryImage(base64ToImage(defaultBase64Avatar)),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    // Gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0), // Transparent at top
+                            Colors.black.withOpacity(0.6), // Darker at bottom
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Like and Chat Icons
+                    Positioned(
+                      top: 10,
+                      right: 2,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              // Add like functionality
+                            },
+                            child: SvgPicture.asset(
+                              'assets/icons/heartfilled.svg',
+                              color: Colors.white,
+                              height: 20,
+                              width: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
+                      ),
+                    ),
+                    // User Info
+                    Positioned(
+                      bottom: 10,
+                      left: 10,
+                      right: 10,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Name and Age with Gender Icon
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${user.userDetail!.name!}, ${user.userDetail!.age!}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Address
+                          Text(
+                            user.userDetail!.address!,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 12,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          // Liked Date
+                          Text(
+                            'Sent: ${user.likedDate}',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 12,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -423,110 +462,137 @@ class _LikePageState extends State<LikePage> {
     if (userMatchesModel.isEmpty) {
       return const Center(child: Text('You have not liked anyone yet.'));
     }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        width: double.infinity,
-        height: 900,
-        child: GridView.builder(
-          clipBehavior: Clip.none,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 15,
-            mainAxisSpacing: 15,
-          ),
-          itemCount: userMatchesModel.length,
-          itemBuilder: (context, index) {
-            UserMatchesModel user = userMatchesModel[index];
-            return Container(
-              height: 250,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: user.userDetail!.image!.isNotEmpty
-                      ? MemoryImage(base64ToImage(user.userDetail!.image!))
-                      : MemoryImage(base64ToImage(defaultBase64Avatar)),
-                  fit: BoxFit
-                      .cover, // Adjust how the image should fit inside the container
-                ),
-              ),
-              child: Container(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Calculate grid item size
+          double gridItemWidth = (constraints.maxWidth - 30) / 2;
+          double gridItemHeight = gridItemWidth * 1.5;
+
+          return GridView.builder(
+            clipBehavior: Clip.none,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: constraints.maxWidth < 600
+                  ? 2
+                  : 3, // Adjust grid for responsiveness
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+            ),
+            itemCount: userMatchesModel.length,
+            itemBuilder: (context, index) {
+              UserMatchesModel user = userMatchesModel[index];
+
+              return Container(
+                height: gridItemHeight,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0),
-                      Colors.black.withOpacity(0.75),
-                    ],
+                  image: DecorationImage(
+                    image: user.userDetail!.image!.isNotEmpty
+                        ? MemoryImage(base64ToImage(user.userDetail!.image!))
+                        : MemoryImage(base64ToImage(defaultBase64Avatar)),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Stack(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
+                    // Gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.1),
+                            Colors.black.withOpacity(0.75),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Icons (like and chat)
+                    Positioned(
+                      top: 10,
+                      right: 10,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SvgPicture.asset('assets/icons/heartoutline.svg'),
-                          const SizedBox(width: 8),
-                          SvgPicture.asset('assets/icons/chatoutline.svg'),
+                          GestureDetector(
+                            onTap: () {
+                              // Add like functionality
+                            },
+                            child: SvgPicture.asset(
+                              'assets/icons/heartoutline.svg',
+                              color: Colors.white,
+                              height: 20,
+                              width: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              // Add chat functionality
+                            },
+                            child: SvgPicture.asset(
+                              'assets/icons/chatoutline.svg',
+                              color: Colors.white,
+                              height: 20,
+                              width: 20,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
+                    // User info
+                    Positioned(
+                      bottom: 10,
+                      left: 10,
+                      right: 10,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
                             children: [
-                              Text(
-                                '${user.userDetail!.name!}, ${user.userDetail!.age!}',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400,
-                                  height: 0,
+                              Expanded(
+                                child: Text(
+                                  '${user.userDetail!.name!}, ${user.userDetail!.age!}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              const Icon(
-                                Icons.male,
-                                color: Colors.white,
                               ),
                             ],
                           ),
                           Text(
                             user.userDetail!.address!,
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
+                              color: Colors.white.withOpacity(0.8),
                               fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Sent: ${user.likedDate} ',
+                            'Sent: ${user.likedDate}',
                             style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.75),
+                              color: Colors.white.withOpacity(0.7),
                               fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 0,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }

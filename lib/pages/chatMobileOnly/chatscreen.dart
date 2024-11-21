@@ -44,8 +44,6 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
   final ScrollController _scrollController = ScrollController();
   User? user = FirebaseAuth.instance.currentUser;
 
-  late bool _isNewChat;
-
   Uint8List base64ToImage(String base64String) {
     return base64Decode(base64String);
   }
@@ -55,12 +53,9 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
   @override
   void initState() {
     super.initState();
-    _isNewChat = widget.chatID == '' && widget.chatRoomModel.message == null;
 
-    if (!_isNewChat) {
-      final chatMessageProvider = context.read<ChatMessageProvider>();
-      chatMessageProvider.getMessage(widget.chatID, 1, user!.uid);
-    }
+    final chatMessageProvider = context.read<ChatMessageProvider>();
+    chatMessageProvider.getMessage(widget.chatID, 1, user!.uid);
     imageUrl =
         Provider.of<ChatMessageProvider>(context, listen: false).fetchImage();
   }
@@ -203,9 +198,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                 ),
               ),
             ),
-            Expanded(
-                child:
-                    _isNewChat ? _buildNewChatContent() : _buildChatContent()),
+            Expanded(child: _buildChatContent()),
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -255,12 +248,6 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                         );
                         _messageController.clear();
                         _scrollToBottom();
-                      }
-                      if (_isNewChat) {
-                        Navigator.pushReplacement(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => const ChatPage()));
                       }
                     },
                     icon: const Icon(Icons.send),

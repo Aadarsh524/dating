@@ -28,6 +28,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -52,26 +53,43 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    NotificationServices notificationServices = NotificationServices();
-    notificationServices.requestNotificationPermission(context);
-    notificationServices.getDeviceToken();
-    notificationServices.firebaseInit(context);
-    notificationServices.setUpInteractMessage(context);
 
+    NotificationServices notificationServices = NotificationServices();
+    _initializeNotifications(notificationServices);
+
+    _loadDashboard();
+  }
+
+  void _loadDashboard() {
     final userprofileProvider =
         Provider.of<UserProfileProvider>(context, listen: false)
             .currentUserProfile;
 
-    if (userprofileProvider!.gender.toString() == 'female') {
+    if (userprofileProvider != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<DashboardProvider>().dashboard(1, context, 'male');
+        final dashboardProvider = context.read<DashboardProvider>();
+        if (userprofileProvider.gender.toString() == 'female') {
+          dashboardProvider.dashboard(1, context, 'male');
+        } else if (userprofileProvider.gender.toString() == 'male') {
+          dashboardProvider.dashboard(1, context, 'female');
+        }
       });
     }
-    if (userprofileProvider.gender.toString() == 'male') {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<DashboardProvider>().dashboard(1, context, 'female');
-      });
+  }
+
+  Future<void> _initializeNotifications(
+      NotificationServices notificationServices) async {
+    // Check and request notification permission
+    final status = await Permission.notification.status;
+
+    if (!status.isGranted) {
+      notificationServices.requestNotificationPermission(context);
     }
+
+    // Set up notifications
+    await notificationServices.getDeviceToken();
+    notificationServices.firebaseInit(context);
+    notificationServices.setUpInteractMessage(context);
   }
 
   @override

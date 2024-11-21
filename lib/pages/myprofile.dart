@@ -34,6 +34,7 @@ class MyProfilePage extends StatefulWidget {
 class _MyProfilePageState extends State<MyProfilePage> {
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
   User? user = FirebaseAuth.instance.currentUser;
+  bool _isLoadingWhileUploading = false;
 
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
@@ -58,8 +59,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions:
-            isDocument ? ['pdf', 'doc', 'docx'] : ['jpg', 'png', 'jpeg'],
+        allowedExtensions: ['jpg', 'png', 'jpeg'],
       );
 
       if (result?.files.isNotEmpty ?? false) {
@@ -112,7 +112,16 @@ class _MyProfilePageState extends State<MyProfilePage> {
     );
     await context
         .read<UserProfileProvider>()
-        .uploadDocumentsForVerification(document);
+        .uploadDocumentsForVerification(document)
+        .then((value) {
+      if (value == true) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Document Uploaded for Verification')));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Error on Uploaded')));
+      }
+    });
   }
 
   Future<void> _uploadPost(String base64) async {
@@ -130,9 +139,35 @@ class _MyProfilePageState extends State<MyProfilePage> {
         .showSnackBar(SnackBar(content: Text('Error: $message')));
   }
 
-// Usage:
-  Future<void> uploadDocument() => _pickAndUploadFile(isDocument: true);
-  Future<void> pickImage() => _pickAndUploadFile(isDocument: false);
+  Future<void> uploadDocument() async {
+    setState(() {
+      _isLoadingWhileUploading = true; // Show loader
+    });
+    try {
+      await _pickAndUploadFile(isDocument: true); // Your existing function
+    } catch (e) {
+      // Handle error if necessary
+    } finally {
+      setState(() {
+        _isLoadingWhileUploading = false; // Hide loader
+      });
+    }
+  }
+
+  Future<void> pickImage() async {
+    setState(() {
+      _isLoadingWhileUploading = true; // Show loader
+    });
+    try {
+      await _pickAndUploadFile(isDocument: false); // Your existing function
+    } catch (e) {
+      // Handle error if necessary
+    } finally {
+      setState(() {
+        _isLoadingWhileUploading = false; // Hide loader
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -161,6 +196,17 @@ class _MyProfilePageState extends State<MyProfilePage> {
         ),
       ),
     );
+  }
+
+  Widget _buildLoadingIndicatorWhileUploading() {
+    return _isLoadingWhileUploading
+        ? Container(
+            color: Colors.black.withOpacity(0.5), // Dim background
+            child: const Center(
+              child: CircularProgressIndicator(), // Loading spinner
+            ),
+          )
+        : const SizedBox.shrink();
   }
 
   Widget MobileProfile() {
@@ -244,6 +290,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
             ),
           ),
           _buildLoadingIndicator(),
+          _buildLoadingIndicatorWhileUploading()
         ],
       ),
     );
@@ -1261,12 +1308,13 @@ class _MyProfilePageState extends State<MyProfilePage> {
                                             ? Column(
                                                 children: [
                                                   Container(
-                                                    child: Text(
+                                                    child: const Text(
                                                         'Verification Status'),
                                                   ),
                                                   const Divider(),
                                                   Container(
-                                                    child: Text('Pending'),
+                                                    child:
+                                                        const Text('Pending'),
                                                   ),
                                                 ],
                                               )
