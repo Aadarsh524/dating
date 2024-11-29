@@ -78,63 +78,44 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     if (widget.roomId == "null") {
       hostUser = _uid;
 
-      UserProfileProvider()
-          .getUserProfile(widget.clientID)
-          .then((userProfile) async {
-        if (userProfile == null) {
-          Fluttertoast.showToast(
-              msg: "Sorry, could not retrieve user profile.");
-          return;
-        }
+      // UserProfileProvider().getUserProfile(widget.clientID).then((userProfile) {
+      //   if (userProfile == null) {
+      //     print("error from the userprofile");
+      //     Fluttertoast.showToast(
+      //         msg: "Sorry, could not retrieve user profile.");
+      //     return;
+      //   }
 
-        clientID = widget.clientID;
+      clientID = widget.clientID;
 
-        // Check if the user is online and not in another call
-        if (userProfile.userStatus == "active") {
-          //make changes here (isCalled or beingCalled)
-          if (userProfile.isVerified == true) {
-            // Create a new room
-            calleeCandidate = db.collection('rooms').doc();
-            roomId = calleeCandidate.id;
+      // Create a new room
+      calleeCandidate = db.collection('rooms').doc();
+      roomId = calleeCandidate.id;
 
-            calleeCandidate.set({'calleeConected': "null"}).then((value) async {
-              WidgetsBinding.instance.addPostFrameCallback((_) async {
-                deviceToken = await getDeviceTokenFromDb(clientID);
+      calleeCandidate.set({'calleeConected': "null"}).then((value) async {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          deviceToken = await getDeviceTokenFromDb(clientID);
 
-                // Check if the device token is not null and print it
-                if (deviceToken != null) {
-                  print("FCM token ::::::> $deviceToken");
-                } else {
-                  print("Failed to retrieve the device token.");
-                }
-
-                await sendNotificationToUser(
-                    "You have a Call from Anonymous",
-                    "Join Now",
-                    deviceToken!,
-                    roomId!,
-                    _uid,
-                    widget.endUserDetails!.name!);
-              });
-
-              getStringFieldStream();
-
-              // Optionally, you can send a notification to the user here
-
-              //update the call status of the users here
-            });
+          // Check if the device token is not null and print it
+          if (deviceToken != null) {
+            print("FCM token ::::::> $deviceToken");
           } else {
-            Fluttertoast.showToast(msg: "You need to be verified");
+            print("Failed to retrieve the device token.");
           }
-        } else {
-          Fluttertoast.showToast(msg: "Sorry, the user is not online.");
-        }
-      }).catchError((error) {
-        // Handle any errors that occur during the fetching process
-        Fluttertoast.showToast(msg: "Error retrieving user profile: $error");
+
+          await sendNotificationToUser(
+              "You have a Call from Anonymous",
+              "Join Now",
+              deviceToken!,
+              roomId!,
+              _uid,
+              widget.endUserDetails!.name!);
+        });
+
+        getStringFieldStream();
       });
     }
-    getStringFieldStream();
+    //getStringFieldStream();
 
     _controller = AnimationController(
       duration: const Duration(seconds: 1),
@@ -204,18 +185,11 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     calleeCandidate = db.collection('rooms').doc('$roomId');
     final userDoc = db.collection('users').doc(_uid);
 
-    userDoc.get().then(
-      (DocumentSnapshot doc) {
-        final data = doc.data() as Map<String, dynamic>;
-      },
-      onError: (e) => print("Error getting document: $e"),
-    );
-
     getUserSignals =
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
       if (snapshot.exists) {
         String callStatus = snapshot.get('calleeConected') ?? "";
-        log(callStatus);
+        log("this call status: $callStatus");
 
         if (callStatus.isNotEmpty) {
           if (callStatus == "done") {

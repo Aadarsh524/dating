@@ -153,6 +153,7 @@ class _ChatPageState extends State<ChatPage> {
   bool doesChatExists = false;
 
   chatRoom.EndUserDetails? chatRoomMode;
+  chatRoom.Conversations? endUserId;
   String? chat;
   String? reciever;
 
@@ -658,6 +659,8 @@ class _ChatPageState extends State<ChatPage> {
                                                       (context, index) {
                                                     var conversation =
                                                         conversations[index];
+                                                    endUserId =
+                                                        conversations[index];
                                                     var endUserDetails =
                                                         conversation
                                                             .endUserDetails;
@@ -884,16 +887,14 @@ class _ChatPageState extends State<ChatPage> {
                                                       Navigator.pushReplacement(
                                                           context,
                                                           MaterialPageRoute(
-                                                              builder:
-                                                                  (context) =>
-                                                                      RingScreen(
-                                                                        roomId:
-                                                                            "null",
-                                                                        endUserDetails:
-                                                                            chatRoomMode,
-                                                                        clientID:
-                                                                            user!.uid,
-                                                                      )));
+                                                              builder: (context) => RingScreen(
+                                                                  roomId:
+                                                                      "null",
+                                                                  endUserDetails:
+                                                                      chatRoomMode,
+                                                                  clientID:
+                                                                      endUserId!
+                                                                          .endUserId!)));
                                                     },
                                                     child: const Icon(
                                                         Icons.call_outlined),
