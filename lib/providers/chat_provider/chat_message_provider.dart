@@ -138,30 +138,4 @@ class ChatMessageProvider extends ChangeNotifier {
       setMessagesLoading(false);
     }
   }
-
-  void initializeSocket(String token) {
-    _socketService.initializeSocket(token);
-    _socketService.listenForMessages((data) {
-      // Handle incoming messages
-      final message = ChatMessageModel.fromJson(data);
-      if (chatMessageModel != null) {
-        chatMessageModel!.messages!.add(message as Messages);
-        notifyListeners();
-      }
-    });
-  }
-
-  void sendMessageViaSocket(SendMessageModel sendMessageModel, String chatID) {
-    final messageData = {
-      'SenderId': sendMessageModel.senderId,
-      'ReceiverId': sendMessageModel.receiverId,
-      'MessageContent': sendMessageModel.messageContent,
-      'File': sendMessageModel.fileName?.first, // File logic if required
-    };
-    _socketService.sendMessage(chatID, messageData);
-  }
-
-  void disconnectSocket() {
-    _socketService.disconnectSocket();
-  }
 }

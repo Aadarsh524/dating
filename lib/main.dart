@@ -7,6 +7,7 @@ import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/providers/chat_provider/call_provider.dart';
 import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
+import 'package:dating/providers/chat_provider/chat_socket_service.dart';
 import 'package:dating/providers/dashboard_provider.dart';
 import 'package:dating/providers/interaction_provider/favourite_provider.dart';
 import 'package:dating/providers/interaction_provider/profile_view_provider.dart';
@@ -76,6 +77,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => LoadingProvider()),
     ChangeNotifierProvider(create: (_) => DashboardProvider()),
     ChangeNotifierProvider(create: (_) => ChatMessageProvider()),
+    ChangeNotifierProvider(create: (_) => SocketMessageProvider()),
     ChangeNotifierProvider(create: (_) => ChatRoomProvider()),
     ChangeNotifierProvider(create: (_) => UserInteractionProvider()),
     ChangeNotifierProvider(create: (_) => SubscriptionProvider()),

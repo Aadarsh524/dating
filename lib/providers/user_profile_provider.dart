@@ -148,24 +148,31 @@ class UserProfileProvider extends ChangeNotifier {
     }
     try {
       String api = getApiEndpoint();
+      print('API Endpoint: $api');
+      print('Token: $token');
       final response = await http.get(
         Uri.parse('$api/UserProfile/$uid'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          // 'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $token',
         },
       );
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
       if (response.statusCode == 200) {
         final userProfile =
             UserProfileModel.fromJson(json.decode(response.body));
-        setCurrentUserProfile(userProfile); // Add this line
+        setCurrentUserProfile(userProfile);
         notifyListeners();
         return userProfile;
       } else {
+        print(
+            'Failed to fetch user profile. Status code: ${response.statusCode}');
         return null;
       }
     } catch (e) {
+      print('Error occurred: $e');
       rethrow;
     } finally {
       setProfileLoading(false);
