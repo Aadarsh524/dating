@@ -140,7 +140,7 @@ class CallScreenState extends State<CallScreen> {
 // Commit the batch
       batch.commit().then((_) {
         Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => ChatPage()),
+            MaterialPageRoute(builder: (context) => const ChatPage()),
             (Route<dynamic> route) => false);
       }).catchError((error) {
         // Commit failed with an error
@@ -176,7 +176,7 @@ class CallScreenState extends State<CallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (chatMessages.length > 3)
+    if (chatMessages.length > 3) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         _controller.animateTo(
           _controller.position.maxScrollExtent,
@@ -184,6 +184,7 @@ class CallScreenState extends State<CallScreen> {
           curve: Curves.easeOut,
         );
       });
+    }
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -201,7 +202,7 @@ class CallScreenState extends State<CallScreen> {
               Positioned(
                 right: 5,
                 top: 5,
-                child: Container(
+                child: SizedBox(
                     height: 195,
                     width: 110,
                     child: ClipRRect(
@@ -220,7 +221,7 @@ class CallScreenState extends State<CallScreen> {
             Positioned(
               bottom: 10,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 width: MediaQuery.of(context).size.width,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -272,7 +273,7 @@ class CallScreenState extends State<CallScreen> {
                       onTap: () {
                         endCall();
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.red,
                         radius: 32,
                         child: Icon(
@@ -310,22 +311,20 @@ class CallScreenState extends State<CallScreen> {
             if (viewImage)
               Positioned(
                 top: 70,
-                child: Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      InteractiveViewer(
-                        maxScale: 3,
-                        child: Container(
-                            height: MediaQuery.of(context).size.height - 190,
-                            alignment: Alignment.topCenter,
-                            child: Image.memory(
-                              currentImage,
-                              width: MediaQuery.of(context).size.width,
-                            )),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InteractiveViewer(
+                      maxScale: 3,
+                      child: Container(
+                          height: MediaQuery.of(context).size.height - 190,
+                          alignment: Alignment.topCenter,
+                          child: Image.memory(
+                            currentImage,
+                            width: MediaQuery.of(context).size.width,
+                          )),
+                    ),
+                  ],
                 ),
               ),
 
@@ -356,8 +355,9 @@ class CallScreenState extends State<CallScreen> {
                 top: 70,
                 left: 10,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: const BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.only(
                         bottomRight: Radius.circular(15),
@@ -392,7 +392,7 @@ class CallScreenState extends State<CallScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     GestureDetector(
@@ -400,16 +400,14 @@ class CallScreenState extends State<CallScreen> {
                         viewImage = false;
                         setState(() {});
                       },
-                      child: Container(
-                        child: Row(
-                          children: [
-                            Icon(Icons.close, color: AppColors.grey2),
-                            Text(" Hide",
-                                style: TextStyle(
-                                    color: AppColors.grey2,
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.close, color: AppColors.grey2),
+                          Text(" Hide",
+                              style: TextStyle(
+                                  color: AppColors.grey2,
+                                  fontWeight: FontWeight.bold)),
+                        ],
                       ),
                     )
                   ]),
@@ -417,7 +415,7 @@ class CallScreenState extends State<CallScreen> {
               ),
 
             if (!cameraPermissionGranted)
-              Positioned(
+              const Positioned(
                   top: 70,
                   left: 10,
                   child: Column(
@@ -438,7 +436,7 @@ class CallScreenState extends State<CallScreen> {
                 child: Container(
                   height: 120,
                   width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.black2,
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(40),
@@ -446,7 +444,7 @@ class CallScreenState extends State<CallScreen> {
                   ),
                   child: Column(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 5,
                       ),
                       Row(
@@ -463,13 +461,13 @@ class CallScreenState extends State<CallScreen> {
                                 setState(() {});
                               },
                               child: Container(
-                                  padding: EdgeInsets.all(3),
+                                  padding: const EdgeInsets.all(3),
                                   decoration: BoxDecoration(
                                     color: AppColors.black.withOpacity(0.5),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10)),
                                   ),
-                                  child: Center(
+                                  child: const Center(
                                     child: CircleAvatar(
                                       radius: 10,
                                       backgroundColor: AppColors.green,
@@ -477,7 +475,7 @@ class CallScreenState extends State<CallScreen> {
                                   )),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 10,
                           ),
                           Opacity(
@@ -491,13 +489,13 @@ class CallScreenState extends State<CallScreen> {
                                 setState(() {});
                               },
                               child: Container(
-                                  padding: EdgeInsets.all(3),
+                                  padding: const EdgeInsets.all(3),
                                   decoration: BoxDecoration(
                                     color: AppColors.black.withOpacity(0.5),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10)),
                                   ),
-                                  child: CircleAvatar(
+                                  child: const CircleAvatar(
                                     radius: 10,
                                     backgroundColor: Colors.red,
                                   )),
@@ -530,9 +528,9 @@ class CallScreenState extends State<CallScreen> {
                               decoration: BoxDecoration(
                                 color: AppColors.black.withOpacity(0.5),
                                 borderRadius:
-                                    BorderRadius.all(Radius.circular(10)),
+                                    const BorderRadius.all(Radius.circular(10)),
                               ),
-                              child: Row(
+                              child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.remove_circle,
@@ -549,7 +547,7 @@ class CallScreenState extends State<CallScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 5,
                       ),
                       GestureDetector(
@@ -565,9 +563,10 @@ class CallScreenState extends State<CallScreen> {
                           width: MediaQuery.of(context).size.width - 50,
                           decoration: BoxDecoration(
                             color: AppColors.black.withOpacity(0.2),
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(20)),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.close,
@@ -594,13 +593,13 @@ class CallScreenState extends State<CallScreen> {
                 color: Colors.black.withOpacity(0.3),
                 child: Center(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.black2,
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
                     height: 180,
                     width: 180,
-                    child: Column(
+                    child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -627,18 +626,18 @@ class CallScreenState extends State<CallScreen> {
 
   Widget ChatBubble(bool sent, String text) {
     return Padding(
-      padding: EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(4.0),
       child: Align(
         alignment: !sent ? Alignment.centerLeft : Alignment.centerRight,
         child: Container(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             color: !sent ? AppColors.green : Colors.grey,
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
             text,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         ),
       ),
@@ -647,22 +646,22 @@ class CallScreenState extends State<CallScreen> {
 
   Widget fileBubble(String filename, String size) {
     return Padding(
-      padding: EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(4.0),
       child: Container(
         width: 220,
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           color: AppColors.black.withOpacity(0.3),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.image,
               color: AppColors.white,
               size: 44,
             ),
-            SizedBox(width: 6),
+            const SizedBox(width: 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -671,7 +670,7 @@ class CallScreenState extends State<CallScreen> {
                   child: Text(
                     filename,
                     maxLines: 1,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -679,7 +678,7 @@ class CallScreenState extends State<CallScreen> {
                 ),
                 Text(
                   size,
-                  style: TextStyle(color: AppColors.grey2),
+                  style: const TextStyle(color: AppColors.grey2),
                 ),
               ],
             ),
