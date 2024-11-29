@@ -408,7 +408,7 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                      builder: (context) => const ChatPage()));
+                                      builder: (context) =>  ChatPage()));
                             },
                             icon: const Icon(Icons.messenger_outline),
                           ),
