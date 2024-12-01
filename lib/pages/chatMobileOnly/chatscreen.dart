@@ -6,7 +6,7 @@ import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/providers/chat_provider/socket_message_provider.dart';
-import 'package:dating/providers/chat_provider/chat_socket_service.dart';
+
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
@@ -84,33 +84,49 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
 
   void pickImage() async {
     try {
-      final storageStatus = await Permission.storage.request();
+      // Request storage permission
+      final storageStatus = await Permission.manageExternalStorage.request();
+      print('Storage permission status: $storageStatus');
+
       if (!storageStatus.isGranted) {
-        throw Exception('Storage permission is required to upload the image.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Please grant manage storage permission to upload images.'),
+          ),
+        );
+        return;
       }
 
+      // Pick file
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png', 'jpeg'],
       );
 
-      if (result != null && result.files.isNotEmpty) {
+      // Ensure a valid file is selected
+      if (result != null &&
+          result.files.isNotEmpty &&
+          result.files.single.path != null) {
         File imageFile = File(result.files.single.path!);
 
         final chatProvider = context.read<SocketMessageProvider>();
-
-        chatProvider.sendChatViaSocket(
-          SendMessageModel(
-            file: imageFile,
-            senderId: user!.uid,
-            receiverId: widget.recieverId,
-          ),
-        );
+        chatProvider.sendChatViaAPI(
+            SendMessageModel(
+              file: imageFile,
+              senderId: user!.uid,
+              receiverId: widget.recieverId,
+            ),
+            widget.chatID,
+            user!.uid);
       } else {
         print('No image selected.');
       }
     } catch (e) {
-      throw Exception(e.toString());
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: ${e.toString()}')),
+      );
     }
   }
 
@@ -187,7 +203,9 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      pickImage();
+                    },
                     icon: const Icon(Icons.image, color: Colors.blue),
                   ),
                   Expanded(
@@ -242,17 +260,85 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                   color: isCurrentUser ? Colors.blue : Colors.grey[300],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  message.messageContent ?? '',
-                  style: TextStyle(
-                    color: isCurrentUser ? Colors.white : Colors.black,
-                  ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                  child: _buildMessageContent(message, isCurrentUser),
                 ),
               ),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildMessageContent(
+      chatmessage.Messages message, bool isCurrentUser) {
+    switch (message.type) {
+      case 'Text':
+        return Text(
+          message.messageContent!,
+          style: AppTextStyles().secondaryStyle.copyWith(
+                color: isCurrentUser ? Colors.white : Colors.black,
+                fontSize: 14,
+              ),
+        );
+      case 'Audio':
+        return _buildImageContent(message.fileName!, isCurrentUser);
+      case 'Image':
+        return _buildImageContent(message.fileName!, isCurrentUser);
+      // case 'Call':
+      //   return CallInfoWidget(callInfo: message.callInfo!);
+      default:
+        return Container();
+    }
+  }
+
+  Widget _buildImageContent(List<String> imageName, bool isCurrentUser) {
+    print(imageName);
+    return SizedBox(
+      height: 50,
+      width: 50,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: imageName.length,
+        itemBuilder: (context, index) {
+          String imageUrl =
+              'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/${imageName[index]}';
+          print(imageUrl);
+          return Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isCurrentUser ? Colors.blue : Colors.grey,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.error);
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes!)
+                          : null,
+                    ),
+                  );
+                }
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

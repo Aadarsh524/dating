@@ -34,7 +34,6 @@ class SocketMessageProvider extends ChangeNotifier {
   /// Send a chat message via API (for fallback or offline)
   Future<void> sendChatViaAPI(
       SendMessageModel sendMessageModel, String chatID, String uid) async {
-    setMessagesLoading(true);
     try {
       // Get API endpoint
       String api = getApiEndpoint();
@@ -92,8 +91,6 @@ class SocketMessageProvider extends ChangeNotifier {
       }
     } catch (e) {
       print(e.toString());
-    } finally {
-      setMessagesLoading(false);
     }
   }
 
