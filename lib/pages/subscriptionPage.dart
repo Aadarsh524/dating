@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:dating/datamodel/subscription_model.dart';
-import 'package:dating/main.dart';
 
 import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/utils/icons.dart';
@@ -31,7 +30,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   String duration = 'Weekly';
 
   bool _isSearchFieldVisible = false;
-  final TextEditingController _searchController = TextEditingController();
 
   void _toggleSearchField() {
     setState(() {
@@ -44,8 +42,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       _isSearchFieldVisible = false;
     });
   }
- 
-  
 
   Future<void> makePayment(
       BuildContext context, Subscription subscription) async {
