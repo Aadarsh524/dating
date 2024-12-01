@@ -7,8 +7,6 @@ import 'package:dating/pages/call_screen.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
 class CallRecieveScreen extends StatefulWidget {
@@ -65,7 +63,7 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
   }
 
   // playAudio() async {
-  //   //await player.setSource(AssetSource('/sounds/ringtone.mp3'));
+  //   await player.setSource(AssetSource('/sounds/ringtone.mp3'));
 
   //   if (!ringingCall) {
   //     ringingCall = true;
@@ -76,7 +74,7 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
   // }
 
   getStringFieldStream() {
-    calleeCandidate = db.collection('rooms').doc('${widget.roomId}');
+    calleeCandidate = db.collection('rooms').doc(widget.roomId);
     getUserSignals =
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
       if (snapshot.exists) {
@@ -91,7 +89,7 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
           } else if (callStatus == "null") {
             if (widget.roomId == "null") {
               if (!hostNavigatedToCall) {
-                getUserSignals?.cancel(); // Cancel the listener
+                getUserSignals.cancel(); // Cancel the listener
                 hostNavigatedToCall = true;
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
@@ -124,174 +122,164 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(
-                height: 10,
-              ),
-              Text("Join a Call",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 45,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.green)),
-              const SizedBox(
-                height: 40,
-              ),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.transparent,
-                        border: Border.all(
-                            color: AppColors.green.withOpacity(0.2))),
-                  ),
-                  Container(
-                    width: 245,
-                    height: 245,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.transparent,
-                        border: Border.all(
-                            color: AppColors.green.withOpacity(0.15))),
-                  ),
-                  Container(
-                    width: 290,
-                    height: 290,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.transparent,
-                        border: Border.all(
-                            color: AppColors.green.withOpacity(0.1))),
-                  ),
-                  Container(
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(
+              height: 10,
+            ),
+            const Text("Join a Call",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 45,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.green)),
+            const SizedBox(
+              height: 40,
+            ),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                    ),
-                    child: Text(widget.name),
+                      color: Colors.transparent,
+                      border:
+                          Border.all(color: AppColors.green.withOpacity(0.2))),
+                ),
+                Container(
+                  width: 245,
+                  height: 245,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.transparent,
+                      border:
+                          Border.all(color: AppColors.green.withOpacity(0.15))),
+                ),
+                Container(
+                  width: 290,
+                  height: 290,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.transparent,
+                      border:
+                          Border.all(color: AppColors.green.withOpacity(0.1))),
+                ),
+                Container(
+                  height: 100,
+                  width: 100,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
                   ),
-                ],
-              ),
-              const SizedBox(
-                height: 50,
-              ),
-              if (widget.roomId != "null")
-                GestureDetector(
-                  onTap: () async {
-                    print('join call');
-                    await db.runTransaction((transaction) async {
-                      final roomRef = await transaction.get(calleeCandidate);
+                  child: Text(widget.name),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 50,
+            ),
+            if (widget.roomId != "null")
+              GestureDetector(
+                onTap: () async {
+                  print('join call');
+                  await db.runTransaction((transaction) async {
+                    final roomRef = await transaction.get(calleeCandidate);
 
-                      if (roomRef.exists) {
-                        final data = roomRef.data() as Map<String, dynamic>;
-                        String calleeConnected = data["calleeConected"];
+                    if (roomRef.exists) {
+                      final data = roomRef.data() as Map<String, dynamic>;
+                      String calleeConnected = data["calleeConected"];
 
-                        Map<String, dynamic> updateCalleeVal = {
-                          'calleeConected': _uid,
-                        };
+                      Map<String, dynamic> updateCalleeVal = {
+                        'calleeConected': _uid,
+                      };
 
-                        print("step 2");
+                      print("step 2");
 
-                        if (calleeConnected == "null") {
-                          // Check for null instead of "null"
-                          try {
-                            print("step 3");
-                            transaction.update(
-                                calleeCandidate, updateCalleeVal);
+                      if (calleeConnected == "null") {
+                        // Check for null instead of "null"
+                        try {
+                          print("step 3");
+                          transaction.update(calleeCandidate, updateCalleeVal);
 
-                            print("step 4");
-                          } catch (e) {
-                            print("Error joining room: $e");
-                            // Handle error, optionally rethrow or return a specific value
-                          }
+                          print("step 4");
+                        } catch (e) {
+                          print("Error joining room: $e");
+                          // Handle error, optionally rethrow or return a specific value
                         }
                       }
-                    }).then((value) async {
-                      iAcceptedCall = true;
-                      //await db.collection("users").doc(clientID).update({"beingcalled": "false",});
-                      player.stop();
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => CallScreen(
-                                userType: "V",
-                                roomId: widget.roomId!,
-                                callerName: 'Aonymous',
-                              )));
-                    });
-                  },
-                  child: RotationTransition(
-                    turns: Tween(begin: 0.0, end: 0.1).animate(
-                      CurvedAnimation(
-                        parent: _joinController,
-                        curve: Curves.elasticIn,
-                      ),
+                    }
+                  }).then((value) async {
+                    iAcceptedCall = true;
+                    //await db.collection("users").doc(clientID).update({"beingcalled": "false",});
+                    player.stop();
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => CallScreen(
+                              userType: "V",
+                              roomId: widget.roomId,
+                              callerName: 'Aonymous',
+                            )));
+                  });
+                },
+                child: RotationTransition(
+                  turns: Tween(begin: 0.0, end: 0.1).animate(
+                    CurvedAnimation(
+                      parent: _joinController,
+                      curve: Curves.elasticIn,
                     ),
-                    child: const CircleAvatar(
-                      backgroundColor: AppColors.green,
-                      radius: 45,
-                      child: Icon(
-                        Icons.phone,
-                        size: 45.0,
-                        color: Colors.white,
-                      ),
+                  ),
+                  child: const CircleAvatar(
+                    backgroundColor: AppColors.green,
+                    radius: 45,
+                    child: Icon(
+                      Icons.phone,
+                      size: 45.0,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-              const SizedBox(
-                height: 25,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      endCallPressed = true;
-                      if (widget.roomId != null) {
-                        getUserSignals.cancel();
+            const SizedBox(
+              height: 25,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    endCallPressed = true;
+                    getUserSignals.cancel();
 
-                        db
-                            .collection('rooms')
-                            .doc('${widget.roomId}')
-                            .update({"calleeConected": "left"}).then((value) {
-                          if (widget.roomId != "null") {
-                            player.stop();
-                          }
-                          Navigator.pop(context);
-                        });
-                      } else {
-                        if (widget.roomId != "null") {
-                          player.stop();
-                        }
-                        Navigator.pop(context);
+                    db
+                        .collection('rooms')
+                        .doc(widget.roomId)
+                        .update({"calleeConected": "left"}).then((value) {
+                      if (widget.roomId != "null") {
+                        player.stop();
                       }
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (builder) => const ChatPage()));
-                    },
-                    child: const CircleAvatar(
-                      backgroundColor: Colors.red,
-                      radius: 40,
-                      child: Icon(
-                        Icons.call_end,
-                        size: 40.0,
-                        color: Colors.white,
-                      ),
+                      Navigator.pop(context);
+                    });
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => const ChatPage()));
+                  },
+                  child: const CircleAvatar(
+                    backgroundColor: Colors.red,
+                    radius: 40,
+                    child: Icon(
+                      Icons.call_end,
+                      size: 40.0,
+                      color: Colors.white,
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -66,25 +66,15 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   late DocumentReference calleeCandidate;
 
   bool userIsconnected = false;
-  late AudioPlayer player;
+  // late AudioPlayer player;
 
   String? deviceToken;
-
-  //TextEditingController textEditingController = TextEditingController(text: '');
 
   @override
   void initState() {
     _uid = _auth.currentUser?.uid;
     if (widget.roomId == "null") {
       hostUser = _uid;
-
-      // UserProfileProvider().getUserProfile(widget.clientID).then((userProfile) {
-      //   if (userProfile == null) {
-      //     print("error from the userprofile");
-      //     Fluttertoast.showToast(
-      //         msg: "Sorry, could not retrieve user profile.");
-      //     return;
-      //   }
 
       clientID = widget.clientID;
 
@@ -142,10 +132,10 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
     _controller.forward();
 
-    if (widget.roomId != "null" && widget.clientID == "null") {
-      player = AudioPlayer();
-      playAudio();
-    }
+    // if (widget.roomId != "null" && widget.clientID == "null") {
+    //   player = AudioPlayer();
+    //   playAudio();
+    // }
     super.initState();
   }
 
@@ -153,15 +143,15 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     return base64Decode(base64String!);
   }
 
-  playAudio() async {
-    await player.setSource(AssetSource('/sounds/ringtone.mp3'));
-    if (!ringingCall) {
-      ringingCall = true;
-      await player.play(AssetSource('sounds/ringtone.mp3')).then((value) async {
-        await player.play(AssetSource('sounds/ringtone.mp3'));
-      });
-    }
-  }
+  // playAudio() async {
+  //   await player.setSource(AssetSource('/sounds/ringtone.mp3'));
+  //   if (!ringingCall) {
+  //     ringingCall = true;
+  //     await player.play(AssetSource('sounds/ringtone.mp3')).then((value) async {
+  //       await player.play(AssetSource('sounds/ringtone.mp3'));
+  //     });
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -177,13 +167,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   }
 
   getStringFieldStream() {
-    if (hostUser == "") {
-      hostUser = widget.roomId;
-      roomId = hostUser;
-    }
-
     calleeCandidate = db.collection('rooms').doc('$roomId');
-    final userDoc = db.collection('users').doc(_uid);
 
     getUserSignals =
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
@@ -198,8 +182,9 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
           } else if (callStatus != "null") {
             if (widget.roomId == "null") {
               if (!hostNavigatedToCall) {
-                getUserSignals?.cancel(); // Cancel the listener
                 hostNavigatedToCall = true;
+                getUserSignals
+                    .cancel(); // Ensure listener is canceled before navigation
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (context) =>
@@ -210,14 +195,14 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
             } else {
               if (!iAcceptedCall) {
                 if (widget.roomId != "null") {
-                  player.stop();
+                  // player.stop();
                 }
                 Navigator.pop(context); // Close the current screen
               }
             }
           } else if (callStatus == "left") {
             if (widget.roomId != "null") {
-              player.stop();
+              // player.stop();
             }
             Navigator.pop(context);
           }
@@ -316,25 +301,25 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                         border: Border.all(
                             color: AppColors.green.withOpacity(0.1))),
                   ),
-                  AnimatedBuilder(
-                      animation: _animation,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: _animation.value,
-                          child: Container(
-                            height: 100,
-                            width: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: MemoryImage(base64ToImage(
-                                    widget.endUserDetails!.profileImage)),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
+                  // AnimatedBuilder(
+                  //     animation: _animation,
+                  //     builder: (context, child) {
+                  //       return Transform.scale(
+                  //         scale: _animation.value,
+                  //         child: Container(
+                  //           height: 100,
+                  //           width: 100,
+                  //           decoration: BoxDecoration(
+                  //             shape: BoxShape.circle,
+                  //             image: DecorationImage(
+                  //               image: MemoryImage(base64ToImage(
+                  //                   widget.endUserDetails!.profileImage)),
+                  //               fit: BoxFit.cover,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       );
+                  //     }),
                 ],
               ),
             ),
