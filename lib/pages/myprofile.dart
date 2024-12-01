@@ -389,43 +389,73 @@ class _MyProfilePageState extends State<MyProfilePage> {
   }
 
   Widget _buildVerificationSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Verify',
-            style: AppTextStyles()
-                .primaryStyle
-                .copyWith(color: AppColors.black.withOpacity(0.75))),
-        const Divider(),
-        Text('Verify that you are real',
-            style: AppTextStyles()
-                .secondaryStyle
-                .copyWith(color: AppColors.black)),
-        Row(
+    return Consumer<UserProfileProvider>(
+      builder: (context, userProfileProvider, _) {
+        // Check if the profile is still loading
+        if (userProfileProvider.isProfileLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Get the user profile model
+        UserProfileModel? userProfileModel =
+            userProfileProvider.currentUserProfile;
+
+        // Ensure userProfileModel is available
+        if (userProfileModel == null) {
+          return const Center(child: Text('User profile not available.'));
+        }
+
+        // If the user is verified, don't show the verification section
+        if (userProfileModel.isVerified == true) {
+          return const SizedBox(); // Return an empty widget if verified
+        }
+
+        // Render the verification section for unverified users
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DropdownButton<String>(
-              value: selectedFileType,
-              items: ['Citizenship', 'Passport'].map((String value) {
-                return DropdownMenuItem<String>(
-                    value: value, child: Text(value));
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedFileType = newValue!;
-                });
-              },
+            Text(
+              'Verify',
+              style: AppTextStyles()
+                  .primaryStyle
+                  .copyWith(color: AppColors.black.withOpacity(0.75)),
             ),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: uploadDocument,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.backgroundColor,
-              ),
-              child: const Text('Select Image'),
+            const Divider(),
+            Text(
+              'Verify that you are real',
+              style: AppTextStyles()
+                  .secondaryStyle
+                  .copyWith(color: AppColors.black),
+            ),
+            Row(
+              children: [
+                DropdownButton<String>(
+                  value: selectedFileType,
+                  items: ['Citizenship', 'Passport'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedFileType = newValue!;
+                    });
+                  },
+                ),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: uploadDocument,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.backgroundColor,
+                  ),
+                  child: const Text('Select Image'),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
