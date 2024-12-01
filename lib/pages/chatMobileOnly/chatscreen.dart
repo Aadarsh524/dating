@@ -5,6 +5,7 @@ import 'package:dating/datamodel/chat/chat_message_model.dart' as chatmessage;
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/pages/ring_screen.dart';
+import 'package:dating/providers/chat_provider/socket_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_socket_service.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -16,6 +17,8 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+
+import '../../providers/chat_provider/chat_message_provider.dart';
 
 class ChatScreemMobile extends StatefulWidget {
   final String chatID;
@@ -43,18 +46,10 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
     super.initState();
 
     // Initialize socket connection and fetch initial messages
-    final socketService = ChatSocketService();
+    final socketService = SocketMessageProvider();
     socketService
-        .connectSocket(widget.recieverId); // Establish WebSocket connection
+        .initializeSocket(widget.recieverId); // Establish WebSocket connection
 
-    socketService.onMessageReceived((newMessage) {
-      // Update the provider when new message is received
-      // context
-      //     .read<SocketMessageProvider>()
-      //     .addMessage(newMessage as chatmessage.Messages);
-    });
-
-    // Fetch initial messages from API or database
     context
         .read<SocketMessageProvider>()
         .getMessage(widget.chatID, 1, user!.uid); // Replace with your userId
@@ -72,15 +67,16 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
 
   void sendMessage(String message) async {
     if (message.isNotEmpty) {
-      final chatProvider = context.read<SocketMessageProvider>();
-      chatProvider.sendChatViaSocket(
-        SendMessageModel(
-          senderId: user!.uid,
-          messageContent: message,
-          type: "Text",
-          receiverId: widget.recieverId,
-        ),
-      );
+      final chatProvider = context.read<ChatMessageProvider>();
+      chatProvider.sendChat(
+          SendMessageModel(
+            senderId: user!.uid,
+            messageContent: message,
+            type: "Text",
+            receiverId: widget.recieverId,
+          ),
+          widget.chatID,
+          user!.uid);
       _messageController.clear(); // Clear message input after sending
       _scrollToBottom(); // Scroll to the bottom of the chat
     }

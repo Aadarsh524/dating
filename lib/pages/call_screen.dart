@@ -1,20 +1,13 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:dating/auth/loginScreen.dart';
-import 'package:dating/datamodel/chat/chat_message_model.dart';
-import 'package:dating/helpers/mypainter.dart';
 import 'package:dating/helpers/signaling.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class CallScreen extends StatefulWidget {
   final String userType;
@@ -51,7 +44,7 @@ class CallScreenState extends State<CallScreen> {
   bool isRemoteConnected = false;
   //TextEditingController textEditingController = TextEditingController(text: '');
   final db = FirebaseFirestore.instance;
-  List<Messages> chatMessages = [];
+
   // List<Files> receivedFiles = [];
   TextEditingController sendText = new TextEditingController();
 
@@ -176,20 +169,10 @@ class CallScreenState extends State<CallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (chatMessages.length > 3) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _controller.animateTo(
-          _controller.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOut,
-        );
-      });
-    }
     return SafeArea(
       child: Scaffold(
         body: Stack(
           children: [
-            Positioned(child: Text(widget.callerName!)),
             SizedBox(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
@@ -197,7 +180,6 @@ class CallScreenState extends State<CallScreen> {
                   _remoteRenderer,
                   objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
                 )),
-
             if (!videoClosed)
               Positioned(
                 right: 5,
@@ -214,10 +196,6 @@ class CallScreenState extends State<CallScreen> {
                               .RTCVideoViewObjectFitContain,
                         ))),
               ),
-
-            // if(imageReceived)
-            //   Image.memory(image, width: MediaQuery.of(context).size.width-100,),
-
             Positioned(
               bottom: 10,
               child: Container(
@@ -307,113 +285,6 @@ class CallScreenState extends State<CallScreen> {
                 ),
               ),
             ),
-
-            if (viewImage)
-              Positioned(
-                top: 70,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    InteractiveViewer(
-                      maxScale: 3,
-                      child: Container(
-                          height: MediaQuery.of(context).size.height - 190,
-                          alignment: Alignment.topCenter,
-                          child: Image.memory(
-                            currentImage,
-                            width: MediaQuery.of(context).size.width,
-                          )),
-                    ),
-                  ],
-                ),
-              ),
-
-            if (shareScreen && !moveImage)
-              GestureDetector(
-                onPanStart: (details) {
-                  setState(() {
-                    points = List.from(points)..add(details.globalPosition);
-                  });
-                },
-                onPanUpdate: (details) {
-                  setState(() {
-                    points = List.from(points)..add(details.globalPosition);
-                  });
-                },
-                onPanEnd: (details) => points.add(null),
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  child: CustomPaint(
-                    painter: MyPainter(points, paintColor, strokeWidth),
-                  ),
-                ),
-              ),
-
-            if (viewImage)
-              Positioned(
-                top: 70,
-                left: 10,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: const BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(15),
-                        bottomLeft: Radius.circular(15)),
-                  ),
-                  child: Row(children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (moveImage) {
-                            moveImage = false;
-                          } else {
-                            moveImage = true;
-                          }
-                          points.clear();
-                        });
-                      },
-                      child: Container(
-                        child: Row(
-                          children: [
-                            Icon(Icons.control_camera_rounded,
-                                color: moveImage
-                                    ? AppColors.green
-                                    : AppColors.grey2),
-                            Text(" Move",
-                                style: TextStyle(
-                                    color: moveImage
-                                        ? AppColors.green
-                                        : AppColors.grey2,
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        viewImage = false;
-                        setState(() {});
-                      },
-                      child: const Row(
-                        children: [
-                          Icon(Icons.close, color: AppColors.grey2),
-                          Text(" Hide",
-                              style: TextStyle(
-                                  color: AppColors.grey2,
-                                  fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    )
-                  ]),
-                ),
-              ),
-
             if (!cameraPermissionGranted)
               const Positioned(
                   top: 70,
@@ -429,163 +300,6 @@ class CallScreenState extends State<CallScreen> {
                       ),
                     ],
                   )),
-
-            if (shareScreen)
-              Positioned(
-                bottom: 0,
-                child: Container(
-                  height: 120,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: const BoxDecoration(
-                    color: AppColors.black2,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(40),
-                        topRight: Radius.circular(40)),
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Opacity(
-                            opacity: greenColorSelected ? 1 : 0.6,
-                            child: GestureDetector(
-                              onTap: () {
-                                greenColorSelected = true;
-                                paintColor = AppColors.green;
-                                points.clear();
-                                moveImage = false;
-                                setState(() {});
-                              },
-                              child: Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.black.withOpacity(0.5),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(10)),
-                                  ),
-                                  child: const Center(
-                                    child: CircleAvatar(
-                                      radius: 10,
-                                      backgroundColor: AppColors.green,
-                                    ),
-                                  )),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Opacity(
-                            opacity: !greenColorSelected ? 1 : 0.6,
-                            child: GestureDetector(
-                              onTap: () {
-                                greenColorSelected = false;
-                                paintColor = Colors.red;
-                                points.clear();
-                                moveImage = false;
-                                setState(() {});
-                              },
-                              child: Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.black.withOpacity(0.5),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(10)),
-                                  ),
-                                  child: const CircleAvatar(
-                                    radius: 10,
-                                    backgroundColor: Colors.red,
-                                  )),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 150,
-                            child: Slider(
-                              activeColor: AppColors.grey3,
-                              inactiveColor: AppColors.white.withOpacity(0.3),
-                              min: 0,
-                              max: 10,
-                              value: strokeWidth,
-                              onChanged: (val) {
-                                moveImage = false;
-                                setState(() => strokeWidth = val);
-                              },
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              moveImage = false;
-                              setState(() {
-                                points.clear();
-                              });
-                            },
-                            child: Container(
-                              height: 40,
-                              width: 90,
-                              decoration: BoxDecoration(
-                                color: AppColors.black.withOpacity(0.5),
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(10)),
-                              ),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.remove_circle,
-                                      color: AppColors.white, size: 22),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "Clear",
-                                    style: TextStyle(
-                                        color: AppColors.white, fontSize: 14),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          shareScreen = false;
-                          print("Screen sharing is false home");
-                          signaling.stopScreenSharing(
-                              _localRenderer, _remoteRenderer);
-                          setState(() {});
-                        },
-                        child: Container(
-                          height: 50,
-                          width: MediaQuery.of(context).size.width - 50,
-                          decoration: BoxDecoration(
-                            color: AppColors.black.withOpacity(0.2),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(20)),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.close,
-                                  color: AppColors.white, size: 28),
-                              SizedBox(width: 10),
-                              Text(
-                                "Cancel Screen Sharing",
-                                style: TextStyle(
-                                    color: AppColors.white, fontSize: 17),
-                              )
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-
             if (endCallPressed)
               Container(
                 height: MediaQuery.of(context).size.height,
@@ -622,90 +336,5 @@ class CallScreenState extends State<CallScreen> {
         ),
       ),
     );
-  }
-
-  Widget ChatBubble(bool sent, String text) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Align(
-        alignment: !sent ? Alignment.centerLeft : Alignment.centerRight,
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: !sent ? AppColors.green : Colors.grey,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Text(
-            text,
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget fileBubble(String filename, String size) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Container(
-        width: 220,
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: AppColors.black.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.image,
-              color: AppColors.white,
-              size: 44,
-            ),
-            const SizedBox(width: 6),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 130,
-                  child: Text(
-                    filename,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Text(
-                  size,
-                  style: const TextStyle(color: AppColors.grey2),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void sendFile(Uint8List img) async {
-    Uint8List fileBytes = img;
-    const chunkSize = 16384; // 16 KB chunks
-    double totalSize = fileBytes.length.toDouble();
-    double sentSize = 0.0;
-    signaling.sendTextMessage("x&*S% $totalSize");
-    for (var i = 0; i < fileBytes.length; i += chunkSize) {
-      var end =
-          (i + chunkSize < fileBytes.length) ? i + chunkSize : fileBytes.length;
-      signaling.fileDataChannel
-          .send(RTCDataChannelMessage.fromBinary(fileBytes.sublist(i, end)));
-      sendingFile = true;
-      sentSize += (end - i).toDouble();
-      sendingPercentage = (sentSize / totalSize) * 100.0;
-      if (end == fileBytes.length) {
-        sendingFile = false;
-      }
-      setState(() {});
-    }
   }
 }
