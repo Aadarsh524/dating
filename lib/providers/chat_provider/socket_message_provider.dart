@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dating/providers/chat_provider/chat_socket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -13,9 +15,6 @@ class SocketMessageProvider extends ChangeNotifier {
 
   bool _isMessagesLoading = false;
   bool get isMessagesLoading => _isMessagesLoading;
-
-  final List<ChatMessageModel> _messages = [];
-  List<ChatMessageModel> get messages => _messages;
 
   /// Set loading state
   Future<void> setMessagesLoading(bool value) async {
@@ -126,44 +125,38 @@ class SocketMessageProvider extends ChangeNotifier {
     }
   }
 
-  /// Initialize WebSocket connection
+  // Initialize WebSocket connection
   void initializeSocket(String userId) {
-    bool _isConnected = _socketService.connectSocket(userId);
+    _socketService.connectSocket(userId);
 
-    if (_isConnected) {
-      // Listen for incoming messages
-      _socketService.onMessageReceived((data) {
-        final newMessage = Messages.fromJson(data);
-        addMessage(newMessage); // Add received message to the list
-      });
-
-      // Handle socket errors or disconnections
-      _socketService.onError((error) {
-        print("Socket error: $error");
-      });
-
-      _socketService.onDisconnect(() {
-        print("Socket disconnected");
-      });
-    }
+    // Set up the callback to handle new messages
+    _socketService.onNewMessage((message) {
+      addMessage(message);
+    });
   }
 
-  /// Add a single message to the chat
+  // Add the received message to the list
   void addMessage(Messages message) {
-    // Add the received message to the list
-    if (chatMessageModel != null) {
-      chatMessageModel!.messages?.add(message);
-      notifyListeners();
+    if (chatMessageModel == null) {
+      print("chatMessageModel is not initialized");
+      return;
     }
+
+    // Initialize messages list if it's null
+    if (chatMessageModel!.messages == null) {
+      chatMessageModel!.messages = [];
+    }
+
+    // Add the received message to the list
+    chatMessageModel!.messages!.add(message);
+
+    // Notify listeners to update the UI
+    notifyListeners();
+    print("New message added: ${message.messageContent}");
   }
 
   /// Disconnect WebSocket
   void disconnectSocket() {
     _socketService.disconnectSocket();
-  }
-
-  /// Send a chat message (WebSocket)
-  void sendChatViaSocket(SendMessageModel sendMessageModel) {
-    _socketService.sendMessage(sendMessageModel.toJson() as SendMessageModel);
   }
 }

@@ -78,7 +78,9 @@ void main() async {
     ChangeNotifierProvider(create: (_) => LoadingProvider()),
     ChangeNotifierProvider(create: (_) => DashboardProvider()),
     ChangeNotifierProvider(create: (_) => ChatMessageProvider()),
-    ChangeNotifierProvider(create: (_) => SocketMessageProvider()),
+    ChangeNotifierProvider(
+      create: (context) => SocketMessageProvider(),
+    ),
     ChangeNotifierProvider(create: (_) => ChatRoomProvider()),
     ChangeNotifierProvider(create: (_) => UserInteractionProvider()),
     ChangeNotifierProvider(create: (_) => SubscriptionProvider()),

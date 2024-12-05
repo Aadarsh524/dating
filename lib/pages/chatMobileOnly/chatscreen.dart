@@ -47,8 +47,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
 
     // Initialize socket connection and fetch initial messages
     final socketService = SocketMessageProvider();
-    socketService
-        .initializeSocket(widget.recieverId); // Establish WebSocket connection
+    socketService.initializeSocket(user!.uid); // Establish WebSocket connection
 
     context
         .read<SocketMessageProvider>()
@@ -305,7 +304,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
         itemCount: imageName.length,
         itemBuilder: (context, index) {
           String imageUrl =
-              'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/${imageName[index]}';
+              'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/Azure/${imageName[index]}';
           print(imageUrl);
           return Container(
             decoration: BoxDecoration(
