@@ -5,7 +5,6 @@ import 'package:dating/firebase_options.dart';
 import 'package:dating/providers/admin_provider.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/providers/chat_provider/call_provider.dart';
-import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/chat_provider/socket_message_provider.dart';
 
@@ -77,7 +76,6 @@ void main() async {
     ChangeNotifierProvider(create: (_) => UserProfileProvider()),
     ChangeNotifierProvider(create: (_) => LoadingProvider()),
     ChangeNotifierProvider(create: (_) => DashboardProvider()),
-    ChangeNotifierProvider(create: (_) => ChatMessageProvider()),
     ChangeNotifierProvider(
       create: (context) => SocketMessageProvider(),
     ),

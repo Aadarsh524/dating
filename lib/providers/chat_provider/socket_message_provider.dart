@@ -135,24 +135,20 @@ class SocketMessageProvider extends ChangeNotifier {
     });
   }
 
-  // Add the received message to the list
   void addMessage(Messages message) {
-    if (chatMessageModel == null) {
-      print("chatMessageModel is not initialized");
-      return;
-    }
+    // Ensure `chatMessageModel` is initialized
+    chatMessageModel ??= ChatMessageModel(messages: []);
 
-    // Initialize messages list if it's null
-    if (chatMessageModel!.messages == null) {
-      chatMessageModel!.messages = [];
-    }
+    // Ensure the messages list is initialized
+    chatMessageModel!.messages ??= [];
 
-    // Add the received message to the list
-    chatMessageModel!.messages!.add(message);
+    // Add the new message at the front of the list
+    chatMessageModel!.messages!.insert(0, message);
 
     // Notify listeners to update the UI
     notifyListeners();
-    print("New message added: ${message.messageContent}");
+
+    print("New message added at the front: ${message.messageContent}");
   }
 
   /// Disconnect WebSocket
