@@ -4,14 +4,15 @@ import 'dart:typed_data';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/chat/chat_room_model.dart';
+
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart' as d;
-import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
+
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/pages/settingpage.dart';
-import 'package:dating/providers/chat_provider/chat_message_provider.dart';
+
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
+import 'package:dating/providers/chat_provider/socket_message_provider.dart';
 import 'package:dating/providers/interaction_provider/favourite_provider.dart';
 import 'package:dating/providers/interaction_provider/profile_view_provider.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';
@@ -511,7 +512,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     // Check if chat room exists
                     if (chatRoomId == null) {
-                      final chatProvider = context.read<ChatMessageProvider>();
+                      final chatProvider =
+                          context.read<SocketMessageProvider>();
                       showDialog(
                         context: context,
                         builder: (_) => AlertDialog(
@@ -519,7 +521,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           actions: [
                             TextButton(
                               onPressed: () async {
-                                await chatProvider.sendChat(
+                                await chatProvider.sendChatViaAPI(
                                   SendMessageModel(
                                     senderId: user!.uid,
                                     messageContent: "👋",
@@ -1084,8 +1086,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
                                       // Check if chat room exists
                                       if (chatRoomId == null) {
-                                        final chatProvider =
-                                            context.read<ChatMessageProvider>();
+                                        final chatProvider = context
+                                            .read<SocketMessageProvider>();
                                         showDialog(
                                           context: context,
                                           builder: (_) => AlertDialog(
@@ -1094,7 +1096,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                             actions: [
                                               TextButton(
                                                 onPressed: () async {
-                                                  await chatProvider.sendChat(
+                                                  await chatProvider
+                                                      .sendChatViaAPI(
                                                     SendMessageModel(
                                                       senderId: user!.uid,
                                                       messageContent: "👋",

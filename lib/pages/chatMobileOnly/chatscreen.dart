@@ -18,8 +18,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
-import '../../providers/chat_provider/chat_message_provider.dart';
-
 class ChatScreemMobile extends StatefulWidget {
   final String chatID;
   final EndUserDetails chatRoomModel;
@@ -39,19 +37,32 @@ class ChatScreemMobile extends StatefulWidget {
 class _ChatScreemMobileState extends State<ChatScreemMobile> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late SocketMessageProvider _socketMessageProvider;
   User? user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize socket connection and fetch initial messages
-    final socketService = SocketMessageProvider();
-    socketService.initializeSocket(user!.uid); // Establish WebSocket connection
+    // Initialize socket connection
+    _socketMessageProvider = context.read<SocketMessageProvider>();
+    _socketMessageProvider
+        .initializeSocket(user!.uid); // Establish WebSocket connection
+    _socketMessageProvider.getMessage(widget.chatID, 1, user!.uid);
 
-    context
-        .read<SocketMessageProvider>()
-        .getMessage(widget.chatID, 1, user!.uid); // Replace with your userId
+    // Fetch initial messages
+  }
+
+  @override
+  void dispose() {
+    // Close the socket connection
+    _socketMessageProvider.disconnectSocket();
+
+    // Dispose controllers
+    _messageController.dispose();
+    _scrollController.dispose();
+
+    super.dispose();
   }
 
   void _scrollToBottom() {
@@ -64,20 +75,20 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
     }
   }
 
-  void sendMessage(String message) async {
+  void sendMessage(String message) {
     if (message.isNotEmpty) {
-      final chatProvider = context.read<ChatMessageProvider>();
-      chatProvider.sendChat(
-          SendMessageModel(
-            senderId: user!.uid,
-            messageContent: message,
-            type: "Text",
-            receiverId: widget.recieverId,
-          ),
-          widget.chatID,
-          user!.uid);
-      _messageController.clear(); // Clear message input after sending
-      _scrollToBottom(); // Scroll to the bottom of the chat
+      _socketMessageProvider.sendChatViaAPI(
+        SendMessageModel(
+          senderId: user!.uid,
+          messageContent: message,
+          type: "Text",
+          receiverId: widget.recieverId,
+        ),
+        widget.chatID,
+        user!.uid,
+      );
+      _messageController.clear(); // Clear the input field
+      _scrollToBottom(); // Scroll to the bottom
     }
   }
 
@@ -242,11 +253,20 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
           return const Center(child: Text('No messages yet.'));
         }
 
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController
+                .jumpTo(_scrollController.position.maxScrollExtent);
+          }
+        });
+
         return ListView.builder(
           controller: _scrollController,
           itemCount: chatRoomModel.messages!.length,
           itemBuilder: (context, index) {
-            var message = chatRoomModel.messages!.reversed.toList()[index];
+            var message = chatRoomModel
+                .messages![(chatRoomModel.messages!.length - 1) - index];
+
             bool isCurrentUser = message.senderId == user!.uid;
 
             return Align(

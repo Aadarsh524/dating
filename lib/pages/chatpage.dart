@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/backend/MongoDB/token_manager.dart';
+
 import 'package:dating/datamodel/chat/chat_room_model.dart' as chatRoom;
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
@@ -10,8 +11,9 @@ import 'package:dating/helpers/signaling.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/pages/settingpage.dart';
-import 'package:dating/providers/chat_provider/chat_message_provider.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
+import 'package:dating/providers/chat_provider/online_status_socket.dart';
+import 'package:dating/providers/chat_provider/socket_message_provider.dart';
 import 'package:dating/providers/user_profile_provider.dart';
 
 import 'package:dating/utils/colors.dart';
@@ -90,8 +92,26 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  Future<bool> initializeOnlineSocket(String userId, String othersId) async {
+    final OnlineSocketService _socketService = OnlineSocketService();
+    Completer<bool> completer = Completer<bool>();
+
+    _socketService.connectSocket(userId, othersId);
+
+    // Set up the callback to handle new status updates
+    _socketService.onNewStatus((isOnline) {
+      print(isOnline ? 'User is online' : 'User is offline');
+
+      // Complete the future with the online status
+      completer.complete(isOnline);
+    });
+
+    // Return the Future<bool> that will be completed when the status is received
+    return completer.future;
+  }
+
   Future<void> addImage(List<int> fileBytes, List<String> fileName) async {
-    final chatProvider = context.read<ChatMessageProvider>();
+    final chatProvider = context.read<SocketMessageProvider>();
     final sendMessage = SendMessageModel(
       fileBytes: fileBytes,
       fileName: fileName,
@@ -99,7 +119,7 @@ class _ChatPageState extends State<ChatPage> {
       receiverId: reciever,
     );
 
-    await chatProvider.sendChat(
+    await chatProvider.sendChatViaAPI(
       sendMessage,
       chat!,
       user!.uid,
@@ -165,16 +185,13 @@ class _ChatPageState extends State<ChatPage> {
       reciever = recieverId;
       doesChatExists = true;
     });
-    final chatMessageProvider = context.read<ChatMessageProvider>();
+    final chatMessageProvider = context.read<SocketMessageProvider>();
     chatMessageProvider.getMessage(chat!, 1, user!.uid);
   }
 
   @override
   void initState() {
     super.initState();
-
-    // final token = TokenManager.getToken();
-    // context.read<ChatMessageProvider>().initializeSocket(token as String);
 
     final chatRoomProvider = context.read<ChatRoomProvider>();
     chatRoomProvider.fetchChatRoom(context, user!.uid);
@@ -409,34 +426,55 @@ class _ChatPageState extends State<ChatPage> {
                                                   const Spacer(),
                                                   Row(
                                                     children: [
-                                                      conversation.seen!
-                                                          ? const Icon(
-                                                              Icons.circle,
-                                                              size: 8,
-                                                              color:
-                                                                  Colors.green,
-                                                            )
-                                                          : const Icon(
-                                                              Icons.circle,
-                                                              size: 8,
-                                                              color: AppColors
-                                                                  .secondaryColor,
-                                                            ),
-                                                      const SizedBox(width: 5),
-                                                      Text(
-                                                        conversation.seen!
-                                                            ? 'online'
-                                                            : 'offline',
-                                                        style: AppTextStyles()
-                                                            .secondaryStyle
-                                                            .copyWith(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                              color: AppColors
-                                                                  .black,
-                                                            ),
+                                                      StreamBuilder<bool>(
+                                                        stream: Stream.fromFuture(
+                                                            initializeOnlineSocket(
+                                                                user!.uid,
+                                                                conversation
+                                                                    .endUserId!)), // Use Stream.fromFuture to convert the Future into a stream
+                                                        builder: (context,
+                                                            snapshot) {
+                                                          bool isOnline =
+                                                              snapshot.data ??
+                                                                  false;
+                                                          return Icon(
+                                                            Icons.circle,
+                                                            size: 8,
+                                                            color: isOnline
+                                                                ? Colors.green
+                                                                : AppColors
+                                                                    .secondaryColor,
+                                                          );
+                                                        },
+                                                      ),
+                                                      StreamBuilder<bool>(
+                                                        stream: Stream.fromFuture(
+                                                            initializeOnlineSocket(
+                                                                user!.uid,
+                                                                conversation
+                                                                    .endUserId!)), // Use Stream.fromFuture to convert the Future into a stream
+                                                        builder: (context,
+                                                            snapshot) {
+                                                          bool isOnline =
+                                                              snapshot.data ??
+                                                                  false;
+                                                          return Text(
+                                                            isOnline
+                                                                ? 'online'
+                                                                : 'offline',
+                                                            style: AppTextStyles()
+                                                                .secondaryStyle
+                                                                .copyWith(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w300,
+                                                                  color:
+                                                                      AppColors
+                                                                          .black,
+                                                                ),
+                                                          );
+                                                        },
                                                       ),
                                                     ],
                                                   ),
@@ -958,9 +996,10 @@ class _ChatPageState extends State<ChatPage> {
                                                   .text.isNotEmpty) {
                                                 final chatProvider =
                                                     context.read<
-                                                        ChatMessageProvider>();
+                                                        SocketMessageProvider>();
 
-                                                await chatProvider.sendChat(
+                                                await chatProvider
+                                                    .sendChatViaAPI(
                                                   SendMessageModel(
                                                     senderId: user!.uid,
                                                     messageContent:
@@ -1000,7 +1039,7 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildChatContent() {
     final ScrollController _scrollController = ScrollController();
     User? user = FirebaseAuth.instance.currentUser;
-    return Consumer<ChatMessageProvider>(
+    return Consumer<SocketMessageProvider>(
       builder: (context, chatMessageProvider, child) {
         ChatMessageModel? chatRoomModel =
             chatMessageProvider.userChatMessageModel;

@@ -39,45 +39,17 @@ class ChatSocketService {
 
           // Check if the message is a "NewMessage" type
           if (decodedData['type'] == 1 &&
-              decodedData['target'].toString() == 'NewMessage') {
-            if (decodedData['arguments'] is List) {
-              // Map each element in decodedData['arguments'] to a Messages object
-              if (decodedData['arguments'] is List &&
-                  decodedData['arguments'].isNotEmpty) {
-                // Extract the first message from the list
-                var messageData = decodedData['arguments']
-                    [0]; // Accessing the first message object
-
-                // Map the message data to a single Messages model
-                Messages message = Messages(
-                  messageId: messageData['messageId'],
-                  senderId: messageData['senderId'],
-                  messageContent: messageData['messageContent'],
-                  recieverId: messageData['recieverId'],
-                  timeStamp: messageData['timeStamp'],
-                  type: messageData['type'],
-                  fileName: List<String>.from(messageData['fileName'] ?? []),
-                  file: messageData['file'] != null
-                      ? File(messageData['file'])
-                      : null,
-                  callDetails: messageData['callDetails'] != null
-                      ? CallDetails.fromJson(messageData['callDetails'])
-                      : null,
-                  call: messageData['call'],
-                );
-
-                // Call the _onNewMessage callback with the single Messages object
-                _onNewMessage?.call(message);
-              } else {
-                print('No valid message found in the arguments list');
-              }
+              decodedData['target'] == 'NewMessage') {
+            if (decodedData['arguments'] is List &&
+                decodedData['arguments'].isNotEmpty) {
+              var messageData = decodedData['arguments'][0];
+              var message = Messages.fromJson(messageData);
+              _onNewMessage?.call(message);
+            } else {
+              print('Invalid message arguments');
             }
-            print(
-                'Message event: ${decodedData['target']} - ${decodedData['arguments']}');
-
-            // Call the onNewMessage callback with the decoded message
-            _onNewMessage?.call(decodedData['arguments']);
           }
+
           // Handle other cases if needed
           else {
             print('Unhandled type: ${decodedData['type']}');
