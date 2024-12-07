@@ -1,69 +1,69 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:async'; // Required for periodic operations
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class OnlineSocketService {
   WebSocketChannel? _channel;
   Function(bool)? _onNewStatus;
-
-  // Modify the setter function to handle a bool (online status)
+  Timer? _statusRequestTimer;
+  // Set the callback function for online status updates
   void onNewStatus(Function(bool) onNewStatus) {
     _onNewStatus = onNewStatus;
   }
 
-  // Connect to the WebSocket with userId and other user details
-  void connectSocket(String userId, String othersId) {
+  // Connect to the WebSocket
+  void connectSocket(String userId, String othersID) {
     final uri = Uri.parse(
-        'ws://your-websocket-url/online?userId=$userId'); // Your backend URL
-    _channel = WebSocketChannel.connect(uri);
+        'ws://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/online?userId=$userId'); // Your backend WebSocket URL
 
-    // Start periodic sending of the handshake message
-    Timer.periodic(const Duration(seconds: 2), (timer) {
-      if (_channel != null && _channel?.sink != null) {
-        final message = '${json.encode({
-              "protocol": "json",
-              "version": 1,
-              'arguments': othersId
-            })}\u001E'; // Adding separator after JSON message
-        _channel?.sink.add(message);
-        print('Periodic WebSocket handshake sent: $message');
-      }
-    });
+    _channel = WebSocketChannel.connect(uri);
+    print('Connected to WebSocket at $uri');
+
+    _channel?.sink.add("${json.encode({
+          "protocol": "json",
+          "version": 1,
+        })}\u001E");
 
     print('WebSocket handshake initiated');
 
-    // Listen for messages from the server
+    // Start listening to WebSocket messages
     _channel?.stream.listen(
       (data) {
         try {
-          // Clean the data by removing the \u001E character and trimming any whitespace
+          // Clean incoming data by removing the \u001E separator
           String cleanData = data.replaceAll('\u001E', '').trim();
 
-          // Decode the cleaned JSON string
+          // Decode the JSON response
           final decodedData = json.decode(cleanData);
 
-          // Check if the message is of type "UpdateStatus"
+          // Handle the ReceiveConnectionId message
           if (decodedData['type'] == 1 &&
-              decodedData['target'] == 'UpdateStatus') {
-            if (decodedData['arguments'] is List &&
-                decodedData['arguments'].isNotEmpty) {
-              var statusData = decodedData['arguments'];
-              bool isOnline = statusData[1];
+              decodedData['target'] == 'ReceiveConnectionId') {
+            print('Handshake successful: ${decodedData['arguments'][0]}');
 
-              // Call the callback with the online status
+            // Perform handshake after connection
+            startPeriodicStatusRequests(othersID);
+          } else if (decodedData['type'] == 1 &&
+              decodedData['target'] == 'UpdateStatus') {
+            // Handle UpdateStatus message
+            if (decodedData['arguments'] is List &&
+                decodedData['arguments'].length > 1) {
+              bool isOnline = decodedData['arguments'][1];
               _onNewStatus?.call(isOnline);
+              print(
+                  'User online status received: ${decodedData['arguments'][0]} is ${isOnline ? 'online' : 'offline'}');
             } else {
-              print('Invalid message arguments');
+              print('Invalid arguments for UpdateStatus');
             }
           } else {
-            print('Unhandled type: ${decodedData['type']}');
+            print('Unhandled WebSocket message: $cleanData');
           }
         } catch (e) {
-          print('Error parsing data: $e');
+          print('Error parsing WebSocket data: $e');
         }
       },
       onDone: () {
-        print('WebSocket stream closed');
+        print('WebSocket connection closed');
       },
       onError: (error) {
         print('WebSocket error: $error');
@@ -71,10 +71,37 @@ class OnlineSocketService {
     );
   }
 
-  // Disconnect WebSocket connection
-  void disconnectSocket() {
-    _channel?.sink.close();
+  // Start sending periodic status requests
+
+  // Request online status for a specific user
+  void requestOnlineStatus(String userId) {
+    final onlineStatusMessage = '${json.encode({
+          "type": 1,
+          "target": "OnlineStatus",
+          "arguments": [userId],
+        })}\u001E'; // Add separator
+    _channel?.sink.add(onlineStatusMessage);
+    print('Online status request sent for user: $userId');
   }
 
-  //
+  // Start periodic status requests
+  void startPeriodicStatusRequests(String userId) {
+    _statusRequestTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      requestOnlineStatus(userId);
+    });
+    print('Started periodic online status requests');
+  }
+
+  // Stop periodic status requests
+  void stopPeriodicStatusRequests() {
+    _statusRequestTimer?.cancel();
+    print('Stopped periodic online status requests');
+  }
+
+  // Disconnect WebSocket connection
+  void disconnectSocket() {
+    stopPeriodicStatusRequests(); // Stop periodic requests before disconnecting
+    _channel?.sink.close();
+    print('WebSocket connection closed manually');
+  }
 }

@@ -19,10 +19,8 @@ class Signaling {
         'urls': [
           'stun:stun3.l.google.com:19302',
           'stun:stun4.l.google.com:19302',
-         
         ]
       },
-     
     ]
   };
 
@@ -468,7 +466,7 @@ class Signaling {
           (value) async {
         // value is false
         if (value) {
-          bool enabled = await FlutterBackground.enableBackgroundExecution();
+          await FlutterBackground.enableBackgroundExecution();
         }
         return value;
       }, onError: (e) {

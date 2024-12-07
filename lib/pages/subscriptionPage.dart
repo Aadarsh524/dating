@@ -4,7 +4,6 @@ import 'package:dating/datamodel/subscription_model.dart';
 
 import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/utils/icons.dart';
-import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -424,30 +423,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// profile button
-class profileButton extends StatelessWidget {
-  const profileButton({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Neumorphic(
-      style: const NeumorphicStyle(
-        boxShape: NeumorphicBoxShape.circle(),
-      ),
-      child: Container(
-        height: 50,
-        width: 50,
-        child: Image.asset(
-          AppImages.loginimage,
-          fit: BoxFit.cover,
-        ),
       ),
     );
   }

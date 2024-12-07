@@ -2,19 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:dating/backend/MongoDB/constants.dart';
 
 import 'package:dating/datamodel/chat/chat_room_model.dart' as chatRoom;
 import 'package:dating/datamodel/chat/send_message_model.dart';
-import 'package:dating/datamodel/user_profile_model.dart';
+
 import 'package:dating/helpers/signaling.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
+import 'package:dating/pages/components/profile_button.dart';
 import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
-import 'package:dating/providers/chat_provider/online_status_socket.dart';
+
 import 'package:dating/providers/chat_provider/socket_message_provider.dart';
-import 'package:dating/providers/user_profile_provider.dart';
+import 'package:dating/providers/chat_provider/socket_online_status_provider.dart';
 
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/shimmer.dart';
@@ -45,21 +45,18 @@ class _ChatPageState extends State<ChatPage> {
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
   User? user = FirebaseAuth.instance.currentUser;
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
   final ScrollController _scrollController = ScrollController();
 
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
-  final TextEditingController _message = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
   List<chatRoom.Message> lastMessage = [];
-  Signaling _signaling = Signaling();
-  Uint8List? _imageBytes;
+  final Signaling _signaling = Signaling();
 
   void _showPopupDialog(BuildContext context) {
-    TextEditingController _textFieldController = TextEditingController();
+    TextEditingController textFieldController = TextEditingController();
 
     showDialog(
       context: context,
@@ -70,7 +67,7 @@ class _ChatPageState extends State<ChatPage> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
-                controller: _textFieldController,
+                controller: textFieldController,
                 decoration: const InputDecoration(hintText: "Enter something"),
               ),
             ],
@@ -79,7 +76,7 @@ class _ChatPageState extends State<ChatPage> {
             ElevatedButton(
               onPressed: () {
                 // Handle button press
-                String enteredText = _textFieldController.text;
+                String enteredText = textFieldController.text;
                 _signaling.joinRoom(enteredText, _localRenderer);
 
                 log("Entered text: $enteredText");
@@ -90,24 +87,6 @@ class _ChatPageState extends State<ChatPage> {
         );
       },
     );
-  }
-
-  Future<bool> initializeOnlineSocket(String userId, String othersId) async {
-    final OnlineSocketService _socketService = OnlineSocketService();
-    Completer<bool> completer = Completer<bool>();
-
-    _socketService.connectSocket(userId, othersId);
-
-    // Set up the callback to handle new status updates
-    _socketService.onNewStatus((isOnline) {
-      print(isOnline ? 'User is online' : 'User is offline');
-
-      // Complete the future with the online status
-      completer.complete(isOnline);
-    });
-
-    // Return the Future<bool> that will be completed when the status is received
-    return completer.future;
   }
 
   Future<void> addImage(List<int> fileBytes, List<String> fileName) async {
@@ -170,6 +149,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+//
   bool doesChatExists = false;
 
   chatRoom.EndUserDetails? chatRoomMode;
@@ -195,6 +175,14 @@ class _ChatPageState extends State<ChatPage> {
 
     final chatRoomProvider = context.read<ChatRoomProvider>();
     chatRoomProvider.fetchChatRoom(context, user!.uid);
+  }
+
+  @override
+  void dispose() {
+    // Disconnect the WebSocket when the screen is disposed
+    Provider.of<SocketOnlineStatusProvider>(context, listen: false)
+        .disconnectSocket();
+    super.dispose();
   }
 
   @override
@@ -224,7 +212,7 @@ class _ChatPageState extends State<ChatPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const ProfileButton(),
+                ProfileImage(),
                 Row(
                   children: [
                     ButtonWithLabel(
@@ -426,17 +414,19 @@ class _ChatPageState extends State<ChatPage> {
                                                   const Spacer(),
                                                   Row(
                                                     children: [
-                                                      StreamBuilder<bool>(
-                                                        stream: Stream.fromFuture(
-                                                            initializeOnlineSocket(
-                                                                user!.uid,
-                                                                conversation
-                                                                    .endUserId!)), // Use Stream.fromFuture to convert the Future into a stream
+                                                      Consumer<
+                                                          SocketOnlineStatusProvider>(
                                                         builder: (context,
-                                                            snapshot) {
-                                                          bool isOnline =
-                                                              snapshot.data ??
-                                                                  false;
+                                                            provider, child) {
+                                                          Provider.of<SocketOnlineStatusProvider>(
+                                                                  context,
+                                                                  listen: false)
+                                                              .initializeSocket(
+                                                                  user!.uid,
+                                                                  conversation
+                                                                      .endUserId!);
+                                                          bool isOnline = provider
+                                                              .userOnlineStatus;
                                                           return Icon(
                                                             Icons.circle,
                                                             size: 8,
@@ -447,17 +437,15 @@ class _ChatPageState extends State<ChatPage> {
                                                           );
                                                         },
                                                       ),
-                                                      StreamBuilder<bool>(
-                                                        stream: Stream.fromFuture(
-                                                            initializeOnlineSocket(
-                                                                user!.uid,
-                                                                conversation
-                                                                    .endUserId!)), // Use Stream.fromFuture to convert the Future into a stream
+                                                      const SizedBox(
+                                                          width:
+                                                              8), // Add spacing between elements
+                                                      Consumer<
+                                                          SocketOnlineStatusProvider>(
                                                         builder: (context,
-                                                            snapshot) {
-                                                          bool isOnline =
-                                                              snapshot.data ??
-                                                                  false;
+                                                            provider, child) {
+                                                          bool isOnline = provider
+                                                              .userOnlineStatus;
                                                           return Text(
                                                             isOnline
                                                                 ? 'online'
@@ -465,19 +453,18 @@ class _ChatPageState extends State<ChatPage> {
                                                             style: AppTextStyles()
                                                                 .secondaryStyle
                                                                 .copyWith(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w300,
-                                                                  color:
-                                                                      AppColors
-                                                                          .black,
-                                                                ),
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w300,
+                                                                    color: AppColors
+                                                                        .black),
                                                           );
                                                         },
                                                       ),
                                                     ],
-                                                  ),
+                                                  )
                                                 ],
                                               ),
                                               const SizedBox(height: 20),
@@ -515,7 +502,7 @@ class _ChatPageState extends State<ChatPage> {
               // profile
               Row(
                 children: [
-                  const ProfileButton(),
+                  ProfileImage(),
                   const SizedBox(
                     width: 20,
                   ),
@@ -1155,47 +1142,6 @@ class _ChatPageState extends State<ChatPage> {
           );
         },
       ),
-    );
-  }
-}
-
-class ProfileButton extends StatelessWidget {
-  const ProfileButton({Key? key}) : super(key: key);
-
-  Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<UserProfileProvider>(
-      builder: (context, userProfileProvider, _) {
-        if (userProfileProvider.isProfileLoading) {
-          return const CircularProgressIndicator();
-        }
-
-        UserProfileModel? userProfileModel =
-            userProfileProvider.currentUserProfile;
-
-        Uint8List imageBytes = userProfileModel!.image != null &&
-                userProfileModel.image!.isNotEmpty
-            ? base64ToImage(userProfileModel.image!)
-            : base64ToImage(defaultBase64Avatar);
-
-        return Neumorphic(
-          style: const NeumorphicStyle(
-            boxShape: NeumorphicBoxShape.circle(),
-          ),
-          child: SizedBox(
-            height: 50,
-            width: 50,
-            child: Image.memory(
-              imageBytes,
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
     );
   }
 }

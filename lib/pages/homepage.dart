@@ -1,17 +1,14 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:dating/backend/MongoDB/constants.dart';
 
 import 'package:dating/datamodel/dashboard_response_model.dart' as d;
 import 'package:dating/datamodel/dashboard_response_model.dart';
 import 'package:dating/datamodel/interaction/user_interaction_model.dart';
 
-import 'package:dating/datamodel/user_profile_model.dart';
-import 'package:dating/helpers/get_service_key.dart';
 import 'package:dating/helpers/notification_services.dart';
-import 'package:dating/pages/call_recieve_screen.dart';
 
 import 'package:dating/pages/chatpage.dart';
+import 'package:dating/pages/components/profile_button.dart';
 import 'package:dating/pages/myprofile.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/dashboard_provider.dart';
@@ -30,7 +27,6 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -131,7 +127,7 @@ class _HomePageState extends State<HomePage> {
                         CupertinoPageRoute(
                             builder: (context) => const MyProfilePage()));
                   },
-                  child: _buildProfileImage()),
+                  child: ProfileImage()),
 
               // search icon
               Row(
@@ -312,7 +308,7 @@ class _HomePageState extends State<HomePage> {
                             MaterialPageRoute(
                                 builder: (context) => const MyProfilePage()));
                       },
-                      child: _buildProfileImage(),
+                      child: ProfileImage(),
                     ),
                     const SizedBox(
                       width: 20,
@@ -408,7 +404,7 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                      builder: (context) =>  ChatPage()));
+                                      builder: (context) => ChatPage()));
                             },
                             icon: const Icon(Icons.messenger_outline),
                           ),
@@ -626,42 +622,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-}
-
-Widget _buildProfileImage() {
-  Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
-  }
-
-  return Consumer<UserProfileProvider>(
-    builder: (context, userProfileProvider, _) {
-      if (userProfileProvider.isProfileLoading) {
-        return const CircularProgressIndicator();
-      }
-
-      UserProfileModel? userProfileModel =
-          userProfileProvider.currentUserProfile;
-
-      Uint8List imageBytes =
-          userProfileModel!.image != null && userProfileModel.image!.isNotEmpty
-              ? base64ToImage(userProfileModel.image!)
-              : base64ToImage(defaultBase64Avatar);
-
-      return Neumorphic(
-        style: const NeumorphicStyle(
-          boxShape: NeumorphicBoxShape.circle(),
-        ),
-        child: SizedBox(
-          height: 50,
-          width: 50,
-          child: Image.memory(
-            imageBytes,
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-    },
-  );
 }
 
 extension UserInteractionModelExtension on UserInteractionModel {

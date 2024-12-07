@@ -68,9 +68,6 @@ class NotificationServices {
 
   void firebaseInit(BuildContext context) async {
     FirebaseMessaging.onMessage.listen((message) {
-      RemoteNotification? remoteNotification = message.notification;
-      AndroidNotification? androidNotification = message.notification!.android;
-
       if (kDebugMode) {
         log(message.notification!.title.toString());
         log(message.notification!.body.toString());
