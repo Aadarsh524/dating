@@ -3,12 +3,12 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:dating/backend/MongoDB/constants.dart';
 
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/datamodel/dashboard_response_model.dart' as d;
 
 import 'package:dating/pages/chatpage.dart';
+import 'package:dating/pages/components/profile_button.dart';
 import 'package:dating/pages/settingpage.dart';
 
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
@@ -32,7 +32,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:insta_image_viewer/insta_image_viewer.dart';
 import 'package:provider/provider.dart';
 
-import '../datamodel/user_profile_model.dart';
 import '../providers/user_profile_provider.dart';
 
 // ignore: must_be_immutable
@@ -611,10 +610,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget DesktopProfile() {
-    final alluploads = widget.dashboardresponsemodel.uploads;
-
-    List<d.Uploads> reversedUploads = alluploads!.reversed.toList();
-
     return Scaffold(
       body: Column(children: [
         const SizedBox(
@@ -628,7 +623,7 @@ class _ProfilePageState extends State<ProfilePage> {
               // profile
               Row(
                 children: [
-                  const ProfileButton(),
+                  ProfileImage(),
                   const SizedBox(
                     width: 20,
                   ),
@@ -1419,48 +1414,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         )
       ]),
-    );
-  }
-}
-
-// profile button
-class ProfileButton extends StatelessWidget {
-  const ProfileButton({Key? key}) : super(key: key);
-
-  Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<UserProfileProvider>(
-      builder: (context, userProfileProvider, _) {
-        if (userProfileProvider.isProfileLoading) {
-          return const CircularProgressIndicator();
-        }
-
-        UserProfileModel? userProfileModel =
-            userProfileProvider.currentUserProfile;
-
-        Uint8List imageBytes = userProfileModel!.image != null &&
-                userProfileModel.image!.isNotEmpty
-            ? base64ToImage(userProfileModel.image!)
-            : base64ToImage(defaultBase64Avatar);
-
-        return Neumorphic(
-          style: const NeumorphicStyle(
-            boxShape: NeumorphicBoxShape.circle(),
-          ),
-          child: SizedBox(
-            height: 50,
-            width: 50,
-            child: Image.memory(
-              imageBytes,
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
     );
   }
 }

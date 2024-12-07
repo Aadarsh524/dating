@@ -23,12 +23,12 @@ class ChatScreemMobile extends StatefulWidget {
   final EndUserDetails chatRoomModel;
   final String recieverId;
 
-  ChatScreemMobile({
-    Key? key,
+  const ChatScreemMobile({
+    super.key,
     required this.chatID,
     required this.chatRoomModel,
     required this.recieverId,
-  }) : super(key: key);
+  });
 
   @override
   State<ChatScreemMobile> createState() => _ChatScreemMobileState();
@@ -39,6 +39,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
   final ScrollController _scrollController = ScrollController();
   late SocketMessageProvider _socketMessageProvider;
   User? user = FirebaseAuth.instance.currentUser;
+  bool isMessageEmpty = true;
 
   @override
   void initState() {
@@ -50,7 +51,11 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
         .initializeSocket(user!.uid); // Establish WebSocket connection
     _socketMessageProvider.getMessage(widget.chatID, 1, user!.uid);
 
-    // Fetch initial messages
+    _messageController.addListener(() {
+      setState(() {
+        isMessageEmpty = _messageController.text.isEmpty;
+      });
+    });
   }
 
   @override
@@ -96,7 +101,6 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
     try {
       // Request storage permission
       final storageStatus = await Permission.manageExternalStorage.request();
-      print('Storage permission status: $storageStatus');
 
       if (!storageStatus.isGranted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -212,27 +216,28 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // Image picker button
                   IconButton(
-                    onPressed: () {
-                      pickImage();
-                    },
+                    onPressed: pickImage,
                     icon: const Icon(Icons.image, color: Colors.blue),
                   ),
+                  // Message input field
                   Expanded(
                     child: AppTextField(
                       hintText: 'Type your message',
                       inputcontroller: _messageController,
                     ),
                   ),
+                  // Send button, only enabled if message is not empty
                   IconButton(
-                    onPressed: () {
-                      sendMessage(_messageController.text);
-                    },
+                    onPressed: isMessageEmpty
+                        ? null // Disable if message is empty
+                        : () => sendMessage(_messageController.text),
                     icon: const Icon(Icons.send, color: Colors.blue),
                   ),
                 ],
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -315,7 +320,6 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
   }
 
   Widget _buildImageContent(List<String> imageName, bool isCurrentUser) {
-    print(imageName);
     return SizedBox(
       height: 50,
       width: 50,

@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/user_profile_model.dart';
+
+import 'package:dating/pages/components/profile_button.dart';
 import 'package:dating/providers/interaction_provider/favourite_provider.dart';
-import 'package:dating/providers/user_profile_provider.dart';
+
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/icons.dart';
 
@@ -357,7 +358,7 @@ class _FavouritePageState extends State<FavouritePage> {
                         //     CupertinoPageRoute(
                         //         builder: (context) => ProfilePage()));
                       },
-                      child: const ProfileButton()),
+                      child: ProfileImage()),
                   const SizedBox(
                     width: 20,
                   ),
@@ -672,47 +673,6 @@ class _FavouritePageState extends State<FavouritePage> {
           ),
         )
       ]),
-    );
-  }
-}
-
-class ProfileButton extends StatelessWidget {
-  const ProfileButton({Key? key}) : super(key: key);
-
-  Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<UserProfileProvider>(
-      builder: (context, userProfileProvider, _) {
-        if (userProfileProvider.isProfileLoading) {
-          return const CircularProgressIndicator();
-        }
-
-        UserProfileModel? userProfileModel =
-            userProfileProvider.currentUserProfile;
-
-        Uint8List imageBytes = userProfileModel!.image != null &&
-                userProfileModel.image!.isNotEmpty
-            ? base64ToImage(userProfileModel.image!)
-            : base64ToImage(defaultBase64Avatar);
-
-        return Neumorphic(
-          style: const NeumorphicStyle(
-            boxShape: NeumorphicBoxShape.circle(),
-          ),
-          child: SizedBox(
-            height: 50,
-            width: 50,
-            child: Image.memory(
-              imageBytes,
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
     );
   }
 }

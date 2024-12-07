@@ -2,21 +2,18 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/helpers/device_token.dart';
 import 'package:dating/helpers/get_service_key.dart';
 import 'package:dating/helpers/notification_services.dart';
 import 'package:dating/pages/call_screen.dart';
-import 'package:dating/pages/chatpage.dart';
-import 'package:dating/providers/user_profile_provider.dart';
+
 import 'package:dating/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class RingScreen extends StatefulWidget {
   final String clientID;
@@ -42,7 +39,6 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   bool connected = false;
   String clientID = "";
 
-  late Animation<double> _animation;
   late AnimationController _joinController;
   late AnimationController _controller;
   int totalleftMinutes = 0;
@@ -111,19 +107,6 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
       duration: const Duration(seconds: 1),
       vsync: this,
     );
-
-    _animation = Tween<double>(begin: 0.9, end: 1.2).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut, // Change this curve as needed
-      ),
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _controller.reverse();
-        } else if (status == AnimationStatus.dismissed) {
-          _controller.forward();
-        }
-      });
 
     _joinController = AnimationController(
       duration: const Duration(milliseconds: 700),

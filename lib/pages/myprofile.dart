@@ -6,6 +6,7 @@ import 'package:dating/auth/loginScreen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
+import 'package:dating/pages/components/profile_button.dart';
 import 'package:dating/pages/editInfo.dart';
 import 'package:dating/pages/likespage.dart';
 import 'package:dating/pages/settingpage.dart';
@@ -616,7 +617,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                   // profile
                   Row(
                     children: [
-                      const ProfileButton(),
+                      ProfileImage(),
                       const SizedBox(
                         width: 20,
                       ),
@@ -1455,48 +1456,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
           ),
         ],
       ),
-    );
-  }
-}
-
-// profile button
-class ProfileButton extends StatelessWidget {
-  const ProfileButton({Key? key}) : super(key: key);
-
-  Uint8List base64ToImage(String base64String) {
-    return base64Decode(base64String);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<UserProfileProvider>(
-      builder: (context, userProfileProvider, _) {
-        if (userProfileProvider.isProfileLoading) {
-          return const CircularProgressIndicator();
-        }
-
-        UserProfileModel? userProfileModel =
-            userProfileProvider.currentUserProfile;
-
-        Uint8List imageBytes = userProfileModel!.image != null &&
-                userProfileModel.image!.isNotEmpty
-            ? base64ToImage(userProfileModel.image!)
-            : base64ToImage(defaultBase64Avatar);
-
-        return Neumorphic(
-          style: const NeumorphicStyle(
-            boxShape: NeumorphicBoxShape.circle(),
-          ),
-          child: SizedBox(
-            height: 50,
-            width: 50,
-            child: Image.memory(
-              imageBytes,
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
     );
   }
 }

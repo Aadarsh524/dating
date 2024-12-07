@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dating/providers/chat_provider/chat_socket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -34,6 +32,16 @@ class SocketMessageProvider extends ChangeNotifier {
   Future<void> sendChatViaAPI(
       SendMessageModel sendMessageModel, String chatID, String uid) async {
     try {
+      Messages newSentMessage = Messages(
+        messageContent: sendMessageModel.messageContent,
+        senderId: sendMessageModel.senderId,
+        recieverId: sendMessageModel.receiverId,
+        fileName: sendMessageModel.fileName,
+        file: sendMessageModel.file,
+        type: sendMessageModel.type,
+      );
+
+      addMessage(newSentMessage);
       // Get API endpoint
       String api = getApiEndpoint();
 
@@ -86,6 +94,7 @@ class SocketMessageProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         await getMessage(chatID, 1, uid);
       } else {
+        removeLastMessage();
         throw Exception('Failed to send chat: ${response.statusCode}');
       }
     } catch (e) {
@@ -149,6 +158,27 @@ class SocketMessageProvider extends ChangeNotifier {
     notifyListeners();
 
     print("New message added at the front: ${message.messageContent}");
+  }
+
+  void removeLastMessage() {
+    // Ensure `chatMessageModel` is initialized
+    chatMessageModel ??= ChatMessageModel(messages: []);
+
+    // Ensure the messages list is initialized
+    chatMessageModel!.messages ??= [];
+
+    // Check if there are any messages in the list
+    if (chatMessageModel!.messages!.isNotEmpty) {
+      // Remove the last message from the list
+      chatMessageModel!.messages!.removeLast();
+
+      // Notify listeners to update the UI
+      notifyListeners();
+
+      print("Last message removed.");
+    } else {
+      print("No messages to remove.");
+    }
   }
 
   /// Disconnect WebSocket

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:dating/helpers/signaling.dart';
 import 'package:dating/pages/chatpage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -51,9 +50,6 @@ class CallScreenState extends State<CallScreen> {
 // Initialize your RTCPeerConnection
   late RTCDataChannel messageChannel;
   late RTCDataChannel fileChannel;
-  List<Uint8List> _receivedData = [];
-
-  ScrollController _controller = ScrollController();
 
   List<Offset?> points = [];
   double strokeWidth = 5;
@@ -83,7 +79,7 @@ class CallScreenState extends State<CallScreen> {
       signaling
           .openUserMedia(_localRenderer, _remoteRenderer)
           .then((value) async {
-        await signaling.createRoom(_localRenderer, widget.roomId!);
+        await signaling.createRoom(_localRenderer, widget.roomId);
         // textEditingController.text = roomId!;
 
         //initializeDataTransfer();
@@ -123,7 +119,6 @@ class CallScreenState extends State<CallScreen> {
       await signaling.hangUp(_localRenderer);
 
       final batch = db.batch();
-      String _uid = FirebaseAuth.instance.currentUser!.uid;
       final calleCandidate = db.collection('rooms').doc('$roomId');
 
       if (roomId != null) {
