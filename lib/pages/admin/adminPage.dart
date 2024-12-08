@@ -1,5 +1,5 @@
 import 'package:dating/auth/db_client.dart';
-import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/auth/login_screen.dart';
 import 'package:dating/pages/admin/customNav.dart';
 import 'package:dating/pages/admin/pages/approvePicture.dart';
 import 'package:dating/pages/admin/pages/complaints_page.dart';

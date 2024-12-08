@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dating/auth/db_client.dart';
-import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/auth/login_screen.dart';
 import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/document_verification_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';

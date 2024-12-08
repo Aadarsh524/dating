@@ -1,4 +1,4 @@
-import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/auth/login_screen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/providers/loading_provider.dart';
@@ -6,7 +6,7 @@ import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/images.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
-import 'package:dating/widgets/textField.dart';
+import 'package:dating/widgets/text_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +43,9 @@ class _SignUpMobileState extends State<SignUpMobile> {
     final authenticationProvider =
         Provider.of<AuthenticationProvider>(context, listen: false);
 
-    User? user = await authenticationProvider.registerWithEmailAndPassword(
+    try {
+      // Perform registration
+      User? user = await authenticationProvider.registerWithEmailAndPassword(
         context,
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -52,60 +54,80 @@ class _SignUpMobileState extends State<SignUpMobile> {
         age: _selectedAge,
         seekingAgeFrom: _seekingAgeFrom,
         seekingAgeTo: _seekingAgeTo,
-        country: _selectedCountry);
-
-    if (user != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration successful!'),
-        ),
+        country: _selectedCountry,
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration error: Could not register.'),
-        ),
-      );
+      // Handle success
+      if (user != null) {
+        _showSnackBar(context, 'Registration successful!');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      } else {
+        _showSnackBar(context, 'Registration error: Could not register.');
+      }
+    } catch (e) {
+      // Catch any error during registration
+      _showSnackBar(context, 'Registration error: ${e.toString()}');
     }
   }
 
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Widget _buildLabeledField(String label, Widget field) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppTextStyles().authLabelStyle),
-        const SizedBox(height: 6),
-        field,
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(
+          bottom: 10.0), // Use padding instead of SizedBox for spacing
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles().authLabelStyle,
+          ),
+          field, // Directly add the field widget here
+        ],
+      ),
     );
   }
 
   Widget _buildGenderSelect(
       String gender, IconData icon, bool isSelected, VoidCallback onTap) {
+    final boxDecoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(15),
+      border: Border.all(
+        color: isSelected ? Colors.blue : Colors.transparent,
+        width: 2.0,
+      ),
+    );
+
+    final neumorphicStyle = NeumorphicStyle(
+      shape: NeumorphicShape.concave,
+      boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15)),
+      depth: 8,
+      intensity: 0.6,
+    );
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 50,
         height: 50,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(
-              color: isSelected ? Colors.blue : Colors.transparent, width: 2.0),
-        ),
+        decoration: boxDecoration, // Using the reusable style variable
         child: Neumorphic(
-          style: NeumorphicStyle(
-            shape: NeumorphicShape.concave,
-            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(15)),
-            depth: 8,
-            intensity: 0.6,
-          ),
+          style:
+              neumorphicStyle, // Using the reusable Neumorphic style variable
           child: Center(
-              child: Icon(icon, color: isSelected ? Colors.blue : Colors.grey)),
+            child: Icon(
+              icon,
+              color: isSelected ? Colors.blue : Colors.grey,
+            ),
+          ),
         ),
       ),
     );
@@ -473,20 +495,23 @@ class _SignUpMobileState extends State<SignUpMobile> {
 }
 
 Widget _buildNeomorphicDropdown(String label, Widget child) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: AppTextStyles().authLabelStyle),
-      const SizedBox(height: 8),
-      Neumorphic(
-        style: NeumorphicStyle(
-          depth: 8,
-          intensity: 0.7,
-          surfaceIntensity: 0.5,
-          boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles().authLabelStyle),
+        const SizedBox(height: 8),
+        Neumorphic(
+          style: NeumorphicStyle(
+            depth: 8,
+            intensity: 0.7,
+            surfaceIntensity: 0.5,
+            boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(12)),
+          ),
+          child: child,
         ),
-        child: child,
-      ),
-    ],
+      ],
+    ),
   );
 }
