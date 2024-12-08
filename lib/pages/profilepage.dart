@@ -12,7 +12,7 @@ import 'package:dating/pages/components/profile_button.dart';
 import 'package:dating/pages/settingpage.dart';
 
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
-import 'package:dating/providers/chat_provider/socket_message_provider.dart';
+import 'package:dating/providers/chat_provider/socket_provider.dart';
 import 'package:dating/providers/interaction_provider/favourite_provider.dart';
 import 'package:dating/providers/interaction_provider/profile_view_provider.dart';
 import 'package:dating/providers/interaction_provider/user_interaction_provider.dart';

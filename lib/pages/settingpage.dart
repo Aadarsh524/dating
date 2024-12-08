@@ -1,5 +1,5 @@
 import 'package:dating/auth/db_client.dart';
-import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/auth/login_screen.dart';
 
 import 'package:dating/pages/components/profile_button.dart';
 import 'package:dating/pages/subscriptionPage.dart';

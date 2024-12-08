@@ -7,30 +7,32 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class StateLoaderPage extends StatelessWidget {
-  const StateLoaderPage({Key? key}) : super(key: key);
+  const StateLoaderPage({super.key});
 
+  /// Fetches user data and initializes notification services.
   Future<void> _fetchData(BuildContext context) async {
-    final userprofileProvider =
-        Provider.of<UserProfileProvider>(context, listen: false);
-    firebase.User? user = firebase.FirebaseAuth.instance.currentUser;
+    try {
+      final userProfileProvider =
+          Provider.of<UserProfileProvider>(context, listen: false);
+      final firebase.User? user = firebase.FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
-      try {
-        GetServieKey key = GetServieKey();
-        final String token = await key.getServerKeyToken();
-
-        NotificationServices notificationServices = NotificationServices();
-        notificationServices.onTokenRefresh(user.uid);
-
-        print(token);
-
-        // Wait for the user profile to be fully loaded
-        await userprofileProvider.getUserProfile(user.uid);
-      } catch (e) {
-        print("Error fetching user profile: $e");
+      if (user == null) {
+        debugPrint("No user is currently logged in.");
+        return;
       }
-    } else {
-      print("No user is currently logged in");
+
+      final key = GetServieKey();
+      final String token = await key.getServerKeyToken();
+
+      final notificationServices = NotificationServices();
+      notificationServices.onTokenRefresh(user.uid);
+
+      debugPrint("Service key token: $token");
+
+      // Load the user profile
+      await userProfileProvider.getUserProfile(user.uid);
+    } catch (e) {
+      debugPrint("Error fetching user profile: $e");
     }
   }
 
@@ -41,14 +43,23 @@ class StateLoaderPage extends StatelessWidget {
         future: _fetchData(context),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            // Delay the navigation to ensure build process is complete
+            // Navigate after the future completes
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (_) => const HomePage()),
               );
             });
-            return Container();
+            return const SizedBox.shrink();
+          } else if (snapshot.hasError) {
+            // Handle errors gracefully
+            return const Center(
+              child: Text(
+                'An error occurred. Please try again.',
+                style: TextStyle(color: Colors.red, fontSize: 16),
+              ),
+            );
           } else {
+            // Show loading indicator
             return const Center(child: CircularProgressIndicator());
           }
         },

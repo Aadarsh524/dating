@@ -1,4 +1,4 @@
-import 'package:dating/providers/chat_provider/chat_socket_service.dart';
+import 'package:dating/providers/chat_provider/socket_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,27 +8,37 @@ import '../../datamodel/chat/chat_message_model.dart';
 import '../../datamodel/chat/send_message_model.dart';
 
 class SocketMessageProvider extends ChangeNotifier {
-  ChatMessageModel? chatMessageModel;
-  final ChatSocketService _socketService = ChatSocketService();
+  final SocketService _socketService = SocketService();
+
+  bool _isUserOnline = false;
+  bool get isUserOnline => _isUserOnline;
 
   bool _isMessagesLoading = false;
   bool get isMessagesLoading => _isMessagesLoading;
 
-  /// Set loading state
+  ChatMessageModel? chatMessageModel;
+
+  /// Set loading state for online status
+  Future<void> setOnlineStatus(bool value) async {
+    _isUserOnline = value;
+    notifyListeners();
+  }
+
+  /// Set loading state for messages
   Future<void> setMessagesLoading(bool value) async {
     _isMessagesLoading = value;
     notifyListeners();
   }
 
-  /// Set chat message provider (for state updates)
-  void setChatMessageProvider(ChatMessageModel chatRoomModel) {
+  /// Set chat message model for state updates
+  void setChatMessageModel(ChatMessageModel chatRoomModel) {
     chatMessageModel = chatRoomModel;
     notifyListeners();
   }
 
   ChatMessageModel? get userChatMessageModel => chatMessageModel;
 
-  /// Send a chat message via API (for fallback or offline)
+  /// Send a chat message via API
   Future<void> sendChatViaAPI(
       SendMessageModel sendMessageModel, String chatID, String uid) async {
     try {
@@ -42,26 +52,20 @@ class SocketMessageProvider extends ChangeNotifier {
       );
 
       addMessage(newSentMessage);
-      // Get API endpoint
       String api = getApiEndpoint();
-
-      // Get bearer token
       final token = await TokenManager.getToken();
 
       if (token == null) {
         throw Exception('No token found');
       }
 
-      // Set params in URI
       final uri = Uri.parse("$api/Communication");
 
-      // Create a multipart request
       var request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
         ..headers['Accept'] = 'application/json'
         ..headers['Content-Type'] = 'multipart/form-data';
 
-      // Add text fields
       if (sendMessageModel.messageContent != null &&
           sendMessageModel.messageContent!.isNotEmpty) {
         request.fields['MessageContent'] = sendMessageModel.messageContent!;
@@ -70,7 +74,6 @@ class SocketMessageProvider extends ChangeNotifier {
       request.fields['SenderId'] = sendMessageModel.senderId.toString();
       request.fields['RecieverId'] = sendMessageModel.receiverId.toString();
 
-      // Handle file uploads
       if (kIsWeb) {
         if (sendMessageModel.fileBytes != null &&
             sendMessageModel.fileName != null) {
@@ -121,7 +124,7 @@ class SocketMessageProvider extends ChangeNotifier {
         final jsonData = json.decode(response.body);
         final chatRoomModel = ChatMessageModel.fromJson(jsonData);
 
-        setChatMessageProvider(chatRoomModel);
+        setChatMessageModel(chatRoomModel);
         return chatRoomModel;
       } else {
         return null;
@@ -134,55 +137,40 @@ class SocketMessageProvider extends ChangeNotifier {
     }
   }
 
-  // Initialize WebSocket connection
-  void initializeSocket(String userId) {
-    _socketService.connectSocket(userId);
+  /// Initialize WebSocket connection for both online status and messages
+  void initializeSocket(String userId, String othersID) {
+    _socketService.connectSocket(userId, othersID);
 
-    // Set up the callback to handle new messages
+    _socketService.onNewStatus((value) {
+      setOnlineStatus(value);
+    });
+
     _socketService.onNewMessage((message) {
       addMessage(message);
     });
   }
 
+  /// Add a new chat message
   void addMessage(Messages message) {
-    // Ensure `chatMessageModel` is initialized
     chatMessageModel ??= ChatMessageModel(messages: []);
-
-    // Ensure the messages list is initialized
     chatMessageModel!.messages ??= [];
-
-    // Add the new message at the front of the list
     chatMessageModel!.messages!.insert(0, message);
-
-    // Notify listeners to update the UI
     notifyListeners();
-
-    print("New message added at the front: ${message.messageContent}");
   }
 
+  /// Remove the last message
   void removeLastMessage() {
-    // Ensure `chatMessageModel` is initialized
     chatMessageModel ??= ChatMessageModel(messages: []);
-
-    // Ensure the messages list is initialized
     chatMessageModel!.messages ??= [];
-
-    // Check if there are any messages in the list
     if (chatMessageModel!.messages!.isNotEmpty) {
-      // Remove the last message from the list
       chatMessageModel!.messages!.removeLast();
-
-      // Notify listeners to update the UI
       notifyListeners();
-
-      print("Last message removed.");
-    } else {
-      print("No messages to remove.");
     }
   }
 
   /// Disconnect WebSocket
   void disconnectSocket() {
+    _socketService.disconnectSocket();
     _socketService.disconnectSocket();
   }
 }

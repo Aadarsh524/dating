@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -16,40 +16,53 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isUserLoggedIn = false;
-  bool isSavedToLoggedIn = false;
+  bool _isSavedToLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
-    NotificationServices notificationServices = NotificationServices();
-    notificationServices.firebaseInit(context);
-
+    _initializeNotificationServices();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkLoginStatus();
+      _checkLoginStatus();
     });
   }
 
-  Future<void> checkLoginStatus() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      isSavedToLoggedIn = prefs.getBool('isSavedToLoggedIn') ?? false;
+  /// Initializes notification services
+  void _initializeNotificationServices() {
+    final notificationServices = NotificationServices();
+    notificationServices.firebaseInit(context);
+  }
 
-      if (isSavedToLoggedIn) {
-        bool isUserLoggedIn = await context
+  /// Checks login status and updates the state accordingly
+  Future<void> _checkLoginStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isSavedToLoggedIn = prefs.getBool('isSavedToLoggedIn') ?? false;
+
+      if (_isSavedToLoggedIn) {
+        final isUserLoggedIn = await context
             .read<AuthenticationProvider>()
             .checkLoginStatus(context);
+
         setState(() {
           _isUserLoggedIn = isUserLoggedIn;
         });
       } else {
-        await context.read<AuthenticationProvider>().signOut().then((_) async {
-          await context.read<AuthenticationProvider>().clearData(context);
-        });
+        await _handleLogout();
       }
-
-      print(_isUserLoggedIn);
     } catch (e) {
-      print("Error checking login status: $e");
+      debugPrint("Error checking login status: $e");
+    }
+  }
+
+  /// Handles logout by signing out and clearing data
+  Future<void> _handleLogout() async {
+    try {
+      final authProvider = context.read<AuthenticationProvider>();
+      await authProvider.signOut();
+      await authProvider.clearData(context);
+    } catch (e) {
+      debugPrint("Error during logout: $e");
     }
   }
 
@@ -58,19 +71,16 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_isUserLoggedIn) {
       return const StateLoaderPage();
     }
+
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.white, // Change background color if needed
+        backgroundColor: Colors.white,
         body: Center(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              if (constraints.maxWidth < 600) {
-                // For smaller screen sizes (e.g., mobile)
-                return const LoginMobile();
-              } else {
-                // For larger screen sizes (e.g., tablet or desktop)
-                return const LoginDesktop();
-              }
+              return constraints.maxWidth < 600
+                  ? const LoginMobile() // Mobile view
+                  : const LoginDesktop(); // Desktop view
             },
           ),
         ),

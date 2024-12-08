@@ -1,10 +1,10 @@
-import 'package:dating/auth/loginScreen.dart';
+import 'package:dating/auth/login_screen.dart';
 import 'package:dating/pages/homepage.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
-import 'package:dating/widgets/textField.dart';
+import 'package:dating/widgets/text_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';

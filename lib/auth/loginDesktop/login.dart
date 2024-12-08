@@ -1,11 +1,11 @@
-import 'package:dating/auth/signupScreen.dart';
+import 'package:dating/auth/signup_screen.dart';
 import 'package:dating/pages/admin/adminPage.dart';
 import 'package:dating/pages/state_loader.dart';
 import 'package:dating/providers/authentication_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
-import 'package:dating/widgets/textField.dart';
+import 'package:dating/widgets/text_field.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';

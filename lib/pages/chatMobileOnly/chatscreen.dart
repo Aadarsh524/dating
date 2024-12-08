@@ -5,12 +5,11 @@ import 'package:dating/datamodel/chat/chat_message_model.dart' as chatmessage;
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/pages/ring_screen.dart';
-import 'package:dating/providers/chat_provider/socket_message_provider.dart';
-
+import 'package:dating/providers/chat_provider/socket_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
-import 'package:dating/widgets/textField.dart';
+import 'package:dating/widgets/text_field.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -18,23 +17,23 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
-class ChatScreemMobile extends StatefulWidget {
+class ChatScreenMobile extends StatefulWidget {
   final String chatID;
   final EndUserDetails chatRoomModel;
-  final String recieverId;
+  final String receiverId;
 
-  const ChatScreemMobile({
+  const ChatScreenMobile({
     super.key,
     required this.chatID,
     required this.chatRoomModel,
-    required this.recieverId,
+    required this.receiverId,
   });
 
   @override
-  State<ChatScreemMobile> createState() => _ChatScreemMobileState();
+  State<ChatScreenMobile> createState() => _ChatScreenMobileState();
 }
 
-class _ChatScreemMobileState extends State<ChatScreemMobile> {
+class _ChatScreenMobileState extends State<ChatScreenMobile> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late SocketMessageProvider _socketMessageProvider;
@@ -47,8 +46,8 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
 
     // Initialize socket connection
     _socketMessageProvider = context.read<SocketMessageProvider>();
-    _socketMessageProvider
-        .initializeSocket(user!.uid); // Establish WebSocket connection
+    _socketMessageProvider.initializeSocket(
+        user!.uid, widget.receiverId); // Establish WebSocket connection
     _socketMessageProvider.getMessage(widget.chatID, 1, user!.uid);
 
     _messageController.addListener(() {
@@ -87,7 +86,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
           senderId: user!.uid,
           messageContent: message,
           type: "Text",
-          receiverId: widget.recieverId,
+          receiverId: widget.receiverId,
         ),
         widget.chatID,
         user!.uid,
@@ -129,7 +128,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
             SendMessageModel(
               file: imageFile,
               senderId: user!.uid,
-              receiverId: widget.recieverId,
+              receiverId: widget.receiverId,
             ),
             widget.chatID,
             user!.uid);
@@ -177,11 +176,54 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                                 widget.chatRoomModel.profileImage!))
                             : MemoryImage(base64Decode(defaultBase64Avatar)),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        widget.chatRoomModel.name ?? 'New Chat',
-                        style:
-                            AppTextStyles().primaryStyle.copyWith(fontSize: 16),
+                      const SizedBox(width: 10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.chatRoomModel.name ?? 'New Chat',
+                            style: AppTextStyles()
+                                .primaryStyle
+                                .copyWith(fontSize: 16),
+                          ),
+                          // Updated Online/Offline status UI
+                          Consumer<SocketMessageProvider>(
+                            builder: (context, provider, child) {
+                              bool isOnline = provider.isUserOnline;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.circle,
+                                        size: 10,
+                                        color: isOnline
+                                            ? Colors.green
+                                            : AppColors.secondaryColor,
+                                      ),
+                                      const SizedBox(
+                                          width:
+                                              5), // Space between the dot and text
+                                      Text(
+                                        isOnline ? 'Online' : 'Offline',
+                                        style: AppTextStyles()
+                                            .secondaryStyle
+                                            .copyWith(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w300,
+                                              color: AppColors.black,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  // Additional details like last seen time can be added here
+                                ],
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -194,7 +236,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                           builder: (context) => RingScreen(
                             roomId: "null",
                             endUserDetails: widget.chatRoomModel,
-                            clientID: widget.recieverId,
+                            clientID: widget.receiverId,
                           ),
                         ),
                       );
@@ -237,7 +279,7 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -321,43 +363,53 @@ class _ChatScreemMobileState extends State<ChatScreemMobile> {
 
   Widget _buildImageContent(List<String> imageName, bool isCurrentUser) {
     return SizedBox(
-      height: 50,
-      width: 50,
+      height: 70, // Increased height for better visibility
+      width: double.infinity, // Make it take full width of its parent
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: imageName.length,
         itemBuilder: (context, index) {
           String imageUrl =
               'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/Azure/${imageName[index]}';
-          print(imageUrl);
-          return Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: isCurrentUser ? Colors.blue : Colors.grey,
-                width: 1,
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 8.0), // Add spacing between images
+            child: Container(
+              height: 60, // Consistent size for each container
+              width: 60, // Square container for images
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15), // Rounded corners
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 4),
+                  ),
+                ], // Adding subtle shadow for depth
+                border: Border.all(
+                  color: isCurrentUser ? Colors.blue : Colors.grey,
+                  width: 2, // Thicker border for distinction
+                ),
               ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.error);
-              },
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              (loadingProgress.expectedTotalBytes!)
-                          : null,
-                    ),
-                  );
-                }
-              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(
+                    15), // Ensure the image fits within rounded borders
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover, // Ensure the image covers the container
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.error, color: Colors.red);
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                ),
+              ),
             ),
           );
         },

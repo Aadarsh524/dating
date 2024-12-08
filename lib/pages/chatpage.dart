@@ -12,16 +12,14 @@ import 'package:dating/pages/components/profile_button.dart';
 import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
-
-import 'package:dating/providers/chat_provider/socket_message_provider.dart';
-import 'package:dating/providers/chat_provider/socket_online_status_provider.dart';
+import 'package:dating/providers/chat_provider/socket_provider.dart';
 
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
-import 'package:dating/widgets/textField.dart';
+import 'package:dating/widgets/text_field.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -159,12 +157,15 @@ class _ChatPageState extends State<ChatPage> {
 
   void getChat(
       chatRoom.EndUserDetails chatRoomModel, String chatId, String recieverId) {
-    setState(() {
-      chatRoomMode = chatRoomModel;
-      chat = chatId;
-      reciever = recieverId;
-      doesChatExists = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        chatRoomMode = chatRoomModel;
+        chat = chatId;
+        reciever = recieverId;
+        doesChatExists = true;
+      });
     });
+
     final chatMessageProvider = context.read<SocketMessageProvider>();
     chatMessageProvider.getMessage(chat!, 1, user!.uid);
   }
@@ -177,13 +178,13 @@ class _ChatPageState extends State<ChatPage> {
     chatRoomProvider.fetchChatRoom(context, user!.uid);
   }
 
-  @override
-  void dispose() {
-    // Disconnect the WebSocket when the screen is disposed
-    Provider.of<SocketOnlineStatusProvider>(context, listen: false)
-        .disconnectSocket();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   // Disconnect the WebSocket when the screen is disposed
+  //   Provider.of<SocketOnlineStatusProvider>(context, listen: false)
+  //       .disconnectSocket();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -343,12 +344,12 @@ class _ChatPageState extends State<ChatPage> {
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: (_) =>
-                                                        ChatScreemMobile(
+                                                        ChatScreenMobile(
                                                           chatRoomModel:
                                                               endUserDetails,
                                                           chatID: conversation
                                                               .chatId!,
-                                                          recieverId:
+                                                          receiverId:
                                                               conversation
                                                                   .endUserId!,
                                                         )));
@@ -412,59 +413,6 @@ class _ChatPageState extends State<ChatPage> {
                                                     ],
                                                   ),
                                                   const Spacer(),
-                                                  Row(
-                                                    children: [
-                                                      Consumer<
-                                                          SocketOnlineStatusProvider>(
-                                                        builder: (context,
-                                                            provider, child) {
-                                                          Provider.of<SocketOnlineStatusProvider>(
-                                                                  context,
-                                                                  listen: false)
-                                                              .initializeSocket(
-                                                                  user!.uid,
-                                                                  conversation
-                                                                      .endUserId!);
-                                                          bool isOnline = provider
-                                                              .userOnlineStatus;
-                                                          return Icon(
-                                                            Icons.circle,
-                                                            size: 8,
-                                                            color: isOnline
-                                                                ? Colors.green
-                                                                : AppColors
-                                                                    .secondaryColor,
-                                                          );
-                                                        },
-                                                      ),
-                                                      const SizedBox(
-                                                          width:
-                                                              8), // Add spacing between elements
-                                                      Consumer<
-                                                          SocketOnlineStatusProvider>(
-                                                        builder: (context,
-                                                            provider, child) {
-                                                          bool isOnline = provider
-                                                              .userOnlineStatus;
-                                                          return Text(
-                                                            isOnline
-                                                                ? 'online'
-                                                                : 'offline',
-                                                            style: AppTextStyles()
-                                                                .secondaryStyle
-                                                                .copyWith(
-                                                                    fontSize:
-                                                                        14,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w300,
-                                                                    color: AppColors
-                                                                        .black),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ],
-                                                  )
                                                 ],
                                               ),
                                               const SizedBox(height: 20),
