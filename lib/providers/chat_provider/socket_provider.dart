@@ -43,13 +43,13 @@ class SocketMessageProvider extends ChangeNotifier {
       SendMessageModel sendMessageModel, String chatID, String uid) async {
     try {
       Messages newSentMessage = Messages(
-        messageContent: sendMessageModel.messageContent,
-        senderId: sendMessageModel.senderId,
-        recieverId: sendMessageModel.receiverId,
-        fileName: sendMessageModel.fileName,
-        file: sendMessageModel.file,
-        type: sendMessageModel.type,
-      );
+          messageContent: sendMessageModel.messageContent,
+          senderId: sendMessageModel.senderId,
+          recieverId: sendMessageModel.receiverId,
+          fileName: sendMessageModel.fileName,
+          file: sendMessageModel.file,
+          type: sendMessageModel.type,
+          callDetails: sendMessageModel.callDetails);
 
       addMessage(newSentMessage);
       String api = getApiEndpoint();
@@ -66,7 +66,9 @@ class SocketMessageProvider extends ChangeNotifier {
         ..headers['Accept'] = 'application/json'
         ..headers['Content-Type'] = 'multipart/form-data';
 
-      if (sendMessageModel.messageContent != null &&
+      // Handle different types of messages based on 'type'
+      if (sendMessageModel.type == 'Text' &&
+          sendMessageModel.messageContent != null &&
           sendMessageModel.messageContent!.isNotEmpty) {
         request.fields['MessageContent'] = sendMessageModel.messageContent!;
       }
@@ -74,28 +76,29 @@ class SocketMessageProvider extends ChangeNotifier {
       request.fields['SenderId'] = sendMessageModel.senderId.toString();
       request.fields['RecieverId'] = sendMessageModel.receiverId.toString();
 
-      if (kIsWeb) {
-        if (sendMessageModel.fileBytes != null &&
-            sendMessageModel.fileName != null) {
-          final file = http.MultipartFile.fromBytes(
-            'File',
-            sendMessageModel.fileBytes!,
-            filename: sendMessageModel.fileName![0],
-          );
-          request.files.add(file);
-        }
-      } else if (sendMessageModel.file != null &&
-          sendMessageModel.file!.path.isNotEmpty) {
-        final file = await http.MultipartFile.fromPath(
+      // Handle image file upload
+      if (sendMessageModel.type == 'Image' &&
+          sendMessageModel.fileBytes != null &&
+          sendMessageModel.fileName != null) {
+        final file = http.MultipartFile.fromBytes(
           'File',
-          sendMessageModel.file!.path,
+          sendMessageModel.fileBytes!,
+          filename: sendMessageModel.fileName![0],
         );
         request.files.add(file);
       }
 
+      // Handle call details
+      if (sendMessageModel.type == 'Call' &&
+          sendMessageModel.callDetails != null) {
+        request.fields['duration'] = sendMessageModel.callDetails!.duration!;
+        request.fields['status'] = sendMessageModel.callDetails!.status!;
+      }
+
       var response = await request.send();
       if (response.statusCode == 200) {
-        await getMessage(chatID, 1, uid);
+        // await getMessage(chatID, 1, uid);
+        print('Message sent');
       } else {
         removeLastMessage();
         throw Exception('Failed to send chat: ${response.statusCode}');

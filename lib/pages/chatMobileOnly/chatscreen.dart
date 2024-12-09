@@ -16,6 +16,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ChatScreenMobile extends StatefulWidget {
   final String chatID;
@@ -39,48 +40,38 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
   late SocketMessageProvider _socketMessageProvider;
   User? user = FirebaseAuth.instance.currentUser;
   bool isMessageEmpty = true;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize socket connection
-    _socketMessageProvider = context.read<SocketMessageProvider>();
-    _socketMessageProvider.initializeSocket(
-        user!.uid, widget.receiverId); // Establish WebSocket connection
-    _socketMessageProvider.getMessage(widget.chatID, 1, user!.uid);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Initialize socket connection
+      _socketMessageProvider = context.read<SocketMessageProvider>();
+      _socketMessageProvider.initializeSocket(
+          user!.uid, widget.receiverId); // Establish WebSocket connection
+      _socketMessageProvider.getMessage(widget.chatID, 1, user!.uid);
 
-    _messageController.addListener(() {
-      setState(() {
-        isMessageEmpty = _messageController.text.isEmpty;
+      _messageController.addListener(() {
+        setState(() {
+          isMessageEmpty = _messageController.text.isEmpty;
+        });
       });
     });
   }
 
   @override
   void dispose() {
-    // Close the socket connection
     _socketMessageProvider.disconnectSocket();
-
-    // Dispose controllers
+    _focusNode.dispose();
     _messageController.dispose();
     _scrollController.dispose();
-
     super.dispose();
   }
 
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
-  }
-
   void sendMessage(String message) {
-    if (message.isNotEmpty) {
+    if (message.isNotEmpty && mounted) {
       _socketMessageProvider.sendChatViaAPI(
         SendMessageModel(
           senderId: user!.uid,
@@ -91,14 +82,19 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
         widget.chatID,
         user!.uid,
       );
-      _messageController.clear(); // Clear the input field
-      _scrollToBottom(); // Scroll to the bottom
+      _messageController.clear();
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     }
   }
 
   void pickImage() async {
     try {
-      // Request storage permission
       final storageStatus = await Permission.manageExternalStorage.request();
 
       if (!storageStatus.isGranted) {
@@ -126,10 +122,10 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
         final chatProvider = context.read<SocketMessageProvider>();
         chatProvider.sendChatViaAPI(
             SendMessageModel(
-              file: imageFile,
-              senderId: user!.uid,
-              receiverId: widget.receiverId,
-            ),
+                file: imageFile,
+                senderId: user!.uid,
+                receiverId: widget.receiverId,
+                type: 'Image'),
             widget.chatID,
             user!.uid);
       } else {
@@ -147,6 +143,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         backgroundColor: AppColors.backgroundColor,
         body: Column(
           children: [
@@ -230,6 +227,18 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
                   ButtonWithLabel(
                     text: null,
                     onPressed: () {
+                      final chatProvider =
+                          context.read<SocketMessageProvider>();
+                      chatProvider.sendChatViaAPI(
+                          SendMessageModel(
+                              senderId: user!.uid,
+                              receiverId: widget.receiverId,
+                              callDetails: chatmessage.CallDetails(
+                                  status: "Received", duration: "10"),
+                              type: 'Call'),
+                          widget.chatID,
+                          user!.uid);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -268,6 +277,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
                     child: AppTextField(
                       hintText: 'Type your message',
                       inputcontroller: _messageController,
+                      focusNode: _focusNode,
                     ),
                   ),
                   // Send button, only enabled if message is not empty
@@ -309,10 +319,10 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
 
         return ListView.builder(
           controller: _scrollController,
+          reverse: true,
           itemCount: chatRoomModel.messages!.length,
           itemBuilder: (context, index) {
-            var message = chatRoomModel
-                .messages![(chatRoomModel.messages!.length - 1) - index];
+            var message = chatRoomModel.messages![index];
 
             bool isCurrentUser = message.senderId == user!.uid;
 
@@ -341,23 +351,26 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
 
   Widget _buildMessageContent(
       chatmessage.Messages message, bool isCurrentUser) {
+    if (message.messageContent == null && message.fileName == null) {
+      return const SizedBox(); // Return an empty widget if no content
+    }
+
     switch (message.type) {
       case 'Text':
         return Text(
-          message.messageContent!,
+          message.messageContent ?? '',
           style: AppTextStyles().secondaryStyle.copyWith(
                 color: isCurrentUser ? Colors.white : Colors.black,
                 fontSize: 14,
               ),
         );
-      case 'Audio':
-        return _buildImageContent(message.fileName!, isCurrentUser);
       case 'Image':
+        if (message.fileName == null) {
+          return const Text("Invalid Image");
+        }
         return _buildImageContent(message.fileName!, isCurrentUser);
-      // case 'Call':
-      //   return CallInfoWidget(callInfo: message.callInfo!);
       default:
-        return Container();
+        return Container(); // Handle any unknown message types here
     }
   }
 
@@ -372,43 +385,17 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
           String imageUrl =
               'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/Azure/${imageName[index]}';
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 8.0), // Add spacing between images
-            child: Container(
-              height: 60, // Consistent size for each container
-              width: 60, // Square container for images
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15), // Rounded corners
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 6,
-                    offset: const Offset(0, 4),
-                  ),
-                ], // Adding subtle shadow for depth
-                border: Border.all(
-                  color: isCurrentUser ? Colors.blue : Colors.grey,
-                  width: 2, // Thicker border for distinction
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(
-                    15), // Ensure the image fits within rounded borders
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover, // Ensure the image covers the container
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.error, color: Colors.red);
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    }
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                ),
+          return SizedBox(
+            height: 60, // Consistent size for each container
+            width: 60, // Square container for images
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(
+                  5), // Ensure the image fits within rounded borders
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                placeholder: (context, url) =>
+                    const CircularProgressIndicator(),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),
           );
