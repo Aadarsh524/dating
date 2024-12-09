@@ -364,7 +364,18 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
                 fontSize: 14,
               ),
         );
+      case 'Call':
+        if (message.fileName == null) {
+          return const Text("Call Data");
+        }
+        return _buildCallContent(
+            message.callDetails!.status!, message.callDetails!.status!, true);
       case 'Image':
+        if (message.fileName == null) {
+          return const Text("Invalid Image");
+        }
+        return _buildImageContent(message.fileName!, isCurrentUser);
+      case 'Audio':
         if (message.fileName == null) {
           return const Text("Invalid Image");
         }
@@ -374,9 +385,62 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
     }
   }
 
+  Widget _buildCallContent(
+      String callStatus, String callDuration, bool isOngoing) {
+    return SizedBox(
+      height: 80, // Height for the container
+      width: double.infinity, // Full width
+      child: Row(
+        children: [
+          // Call Icon
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Icon(
+              isOngoing
+                  ? Icons.call
+                  : Icons.call_end, // Ongoing or ended call icon
+              size: 40, // Icon size
+              color: isOngoing
+                  ? Colors.green
+                  : Colors.red, // Color based on call status
+            ),
+          ),
+
+          // Call Status and Duration
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Call Status Text
+                Text(
+                  callStatus,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        isOngoing ? Colors.green : Colors.red, // Status color
+                  ),
+                ),
+                // Call Duration Text
+                Text(
+                  'Duration: $callDuration', // Format like "02:30"
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54, // A softer color for the duration
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildImageContent(List<String> imageName, bool isCurrentUser) {
     return SizedBox(
-      height: 70, // Increased height for better visibility
+      height: 90, // Slightly larger for better visibility
       width: double.infinity, // Make it take full width of its parent
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -385,17 +449,30 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
           String imageUrl =
               'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/Azure/${imageName[index]}';
 
-          return SizedBox(
-            height: 60, // Consistent size for each container
-            width: 60, // Square container for images
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(
-                  5), // Ensure the image fits within rounded borders
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                placeholder: (context, url) =>
-                    const CircularProgressIndicator(),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 8.0), // Spacing between images
+            child: Container(
+              height: 70, // Consistent size for each container
+              width: 70, // Square container for images
+              decoration: BoxDecoration(
+                shape: BoxShape.circle, // Makes the image round
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // Subtle shadow
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover, // Makes sure the image fills the circle
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
               ),
             ),
           );
