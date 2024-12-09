@@ -76,14 +76,23 @@ class SocketMessageProvider extends ChangeNotifier {
       request.fields['SenderId'] = sendMessageModel.senderId.toString();
       request.fields['RecieverId'] = sendMessageModel.receiverId.toString();
 
-      // Handle image file upload
-      if (sendMessageModel.type == 'Image' &&
-          sendMessageModel.fileBytes != null &&
-          sendMessageModel.fileName != null) {
-        final file = http.MultipartFile.fromBytes(
+      if (kIsWeb) {
+        if (sendMessageModel.type == 'Image' &&
+            sendMessageModel.fileBytes != null &&
+            sendMessageModel.fileName != null) {
+          final file = http.MultipartFile.fromBytes(
+            'File',
+            sendMessageModel.fileBytes!,
+            filename: sendMessageModel.fileName![0],
+          );
+          request.files.add(file);
+        }
+      } else if (sendMessageModel.type == 'Image' &&
+          sendMessageModel.file != null &&
+          sendMessageModel.file!.path.isNotEmpty) {
+        final file = await http.MultipartFile.fromPath(
           'File',
-          sendMessageModel.fileBytes!,
-          filename: sendMessageModel.fileName![0],
+          sendMessageModel.file!.path,
         );
         request.files.add(file);
       }
