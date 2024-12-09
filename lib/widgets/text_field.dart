@@ -8,6 +8,7 @@ class AppTextField extends StatefulWidget {
   final IconData? suffixIcon;
   final IconData? prefixIcon;
   final TextEditingController inputcontroller;
+  final FocusNode? focusNode;
 
   const AppTextField({
     super.key,
@@ -17,6 +18,7 @@ class AppTextField extends StatefulWidget {
     this.suffixIcon,
     this.prefixIcon,
     required this.inputcontroller,
+    this.focusNode,
   });
 
   @override
@@ -51,8 +53,9 @@ class _AppTextFieldState extends State<AppTextField> {
         ),
         child: TextFormField(
           controller: widget.inputcontroller,
+          focusNode: widget.focusNode, // Use the provided focus node
           keyboardType: widget.keyboardType,
-          obscureText: _obscureText, // Directly use the state value
+          obscureText: _obscureText,
           decoration: InputDecoration(
             prefixIcon:
                 widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,

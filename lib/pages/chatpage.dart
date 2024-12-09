@@ -174,17 +174,11 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
 
-    final chatRoomProvider = context.read<ChatRoomProvider>();
-    chatRoomProvider.fetchChatRoom(context, user!.uid);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final chatRoomProvider = context.read<ChatRoomProvider>();
+      chatRoomProvider.fetchChatRoom(context, user!.uid);
+    });
   }
-
-  // @override
-  // void dispose() {
-  //   // Disconnect the WebSocket when the screen is disposed
-  //   Provider.of<SocketOnlineStatusProvider>(context, listen: false)
-  //       .disconnectSocket();
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
