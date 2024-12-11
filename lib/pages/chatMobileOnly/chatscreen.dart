@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:dating/backend/MongoDB/constants.dart';
-import 'package:dating/datamodel/chat/chat_message_model.dart' as chatmessage;
+import 'package:dating/datamodel/chat/chat_message_model.dart'
+    as chatmessageModel;
 import 'package:dating/datamodel/chat/chat_room_model.dart';
 import 'package:dating/datamodel/chat/send_message_model.dart';
 import 'package:dating/pages/ring_screen.dart';
@@ -49,8 +51,8 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Initialize socket connection
       _socketMessageProvider = context.read<SocketMessageProvider>();
-      _socketMessageProvider.initializeSocket(
-          user!.uid, widget.receiverId); // Establish WebSocket connection
+      // _socketMessageProvider.initializeSocket(
+      //     user!.uid, widget.receiverId); // Establish WebSocket connection
       _socketMessageProvider.getMessage(widget.chatID, 1, user!.uid);
 
       _messageController.addListener(() {
@@ -95,6 +97,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
 
   void pickImage() async {
     try {
+      // Request storage permission
       final storageStatus = await Permission.manageExternalStorage.request();
 
       if (!storageStatus.isGranted) {
@@ -119,15 +122,21 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
           result.files.single.path != null) {
         File imageFile = File(result.files.single.path!);
 
+        // Read the image as bytes (for web platforms)
+        Uint8List imageBytes = await imageFile.readAsBytes();
+
         final chatProvider = context.read<SocketMessageProvider>();
         chatProvider.sendChatViaAPI(
-            SendMessageModel(
-                file: imageFile,
-                senderId: user!.uid,
-                receiverId: widget.receiverId,
-                type: 'Image'),
-            widget.chatID,
-            user!.uid);
+          SendMessageModel(
+            files: [imageFile], // Send list of files for non-web platforms
+            fileBytes: [imageBytes], // Send list of bytes for web platforms
+            senderId: user!.uid,
+            receiverId: widget.receiverId,
+            type: 'Image',
+          ),
+          widget.chatID,
+          user!.uid,
+        );
       } else {
         print('No image selected.');
       }
@@ -233,8 +242,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
                           SendMessageModel(
                               senderId: user!.uid,
                               receiverId: widget.receiverId,
-                              callDetails: chatmessage.CallDetails(
-                                  status: "Received", duration: "10"),
+                              // callDetails: chatmessageModel.CallDetails(duration:"" ,status: ""),
                               type: 'Call'),
                           widget.chatID,
                           user!.uid);
@@ -299,7 +307,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
   Widget _buildChatContent() {
     return Consumer<SocketMessageProvider>(
       builder: (context, chatMessageProvider, child) {
-        chatmessage.ChatMessageModel? chatRoomModel =
+        chatmessageModel.ChatMessageModel? chatRoomModel =
             chatMessageProvider.userChatMessageModel;
 
         if (chatMessageProvider.isMessagesLoading) {
@@ -309,13 +317,6 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
         if (chatRoomModel == null || chatRoomModel.messages!.isEmpty) {
           return const Center(child: Text('No messages yet.'));
         }
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients) {
-            _scrollController
-                .jumpTo(_scrollController.position.maxScrollExtent);
-          }
-        });
 
         return ListView.builder(
           controller: _scrollController,
@@ -330,17 +331,13 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
               alignment:
                   isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
               child: Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(5),
                 margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 decoration: BoxDecoration(
                   color: isCurrentUser ? Colors.blue : Colors.grey[300],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-                  child: _buildMessageContent(message, isCurrentUser),
-                ),
+                child: _buildMessageContent(message, isCurrentUser),
               ),
             );
           },
@@ -350,11 +347,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
   }
 
   Widget _buildMessageContent(
-      chatmessage.Messages message, bool isCurrentUser) {
-    if (message.messageContent == null && message.fileName == null) {
-      return const SizedBox(); // Return an empty widget if no content
-    }
-
+      chatmessageModel.Messages message, bool isCurrentUser) {
     switch (message.type) {
       case 'Text':
         return Text(
@@ -365,21 +358,12 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
               ),
         );
       case 'Call':
-        if (message.fileName == null) {
-          return const Text("Call Data");
-        }
         return _buildCallContent(
             message.callDetails!.status!, message.callDetails!.status!, true);
       case 'Image':
-        if (message.fileName == null) {
-          return const Text("Invalid Image");
-        }
-        return _buildImageContent(message.fileName!, isCurrentUser);
+        return _buildImageContent(message, isCurrentUser);
       case 'Audio':
-        if (message.fileName == null) {
-          return const Text("Invalid Image");
-        }
-        return _buildImageContent(message.fileName!, isCurrentUser);
+        return _buildImageContent(message, isCurrentUser);
       default:
         return Container(); // Handle any unknown message types here
     }
@@ -387,97 +371,150 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
 
   Widget _buildCallContent(
       String callStatus, String callDuration, bool isOngoing) {
-    return SizedBox(
-      height: 80, // Height for the container
-      width: double.infinity, // Full width
-      child: Row(
-        children: [
-          // Call Icon
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Icon(
-              isOngoing
-                  ? Icons.call
-                  : Icons.call_end, // Ongoing or ended call icon
-              size: 40, // Icon size
-              color: isOngoing
-                  ? Colors.green
-                  : Colors.red, // Color based on call status
+    return Row(
+      children: [
+        Icon(
+          isOngoing ? Icons.call : Icons.call_end,
+          size: 24,
+          color: isOngoing ? Colors.green : Colors.red,
+        ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              callStatus,
+              style: TextStyle(
+                color: isOngoing ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-
-          // Call Status and Duration
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Call Status Text
-                Text(
-                  callStatus,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        isOngoing ? Colors.green : Colors.red, // Status color
-                  ),
-                ),
-                // Call Duration Text
-                Text(
-                  'Duration: $callDuration', // Format like "02:30"
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54, // A softer color for the duration
-                  ),
-                ),
-              ],
+            Text(
+              'Duration: $callDuration',
+              style: const TextStyle(fontSize: 12),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildImageContent(List<String> imageName, bool isCurrentUser) {
-    return SizedBox(
-      height: 90, // Slightly larger for better visibility
-      width: double.infinity, // Make it take full width of its parent
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: imageName.length,
-        itemBuilder: (context, index) {
-          String imageUrl =
-              'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/Azure/${imageName[index]}';
+  Widget _buildImageContent(
+      chatmessageModel.Messages messages, bool isCurrentUser) {
+    // Check if fileBytes is null and use fileName otherwise
+    bool showImageFromBytes = messages.fileBytes != null;
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 8.0), // Spacing between images
-            child: Container(
-              height: 70, // Consistent size for each container
-              width: 70, // Square container for images
-              decoration: BoxDecoration(
-                shape: BoxShape.circle, // Makes the image round
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2), // Subtle shadow
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
+    // When showImageFromBytes is true, we display images from fileBytes
+    if (showImageFromBytes) {
+      return SizedBox(
+        height: 160,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount:
+              messages.fileBytes?.length ?? 0, // Only one image from fileBytes
+          itemBuilder: (context, index) {
+            // Use MemoryImage to display the image from fileBytes
+            ImageProvider imageProvider =
+                MemoryImage(messages.fileBytes![index]);
+
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    child: InteractiveViewer(
+                      child: Image(image: imageProvider, fit: BoxFit.contain),
+                    ),
                   ),
-                ],
-              ),
-              child: ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  fit: BoxFit.cover, // Makes sure the image fills the circle
-                  placeholder: (context, url) =>
-                      const CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                );
+              },
+              child: Container(
+                width: 150,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(2, 2),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Image(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.error, color: Colors.red),
+                    );
+                  },
                 ),
               ),
-            ),
-          );
-        },
-      ),
-    );
+            );
+          },
+        ),
+      );
+    } else {
+      // When showImageFromBytes is false, we display images from fileName (URL or file path)
+      return SizedBox(
+        height: 160,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: messages.fileName?.length ?? 0, // Number of images
+          itemBuilder: (context, index) {
+            // Use fileName to construct image URL and load with CachedNetworkImageProvider
+            String imageUrl =
+                'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/Azure/${messages.fileName![index]}';
+
+            // Use CachedNetworkImageProvider to load the image from the URL
+            ImageProvider imageProvider = CachedNetworkImageProvider(
+              imageUrl,
+            );
+
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    child: InteractiveViewer(
+                      child: Image(image: imageProvider, fit: BoxFit.contain),
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                width: 150,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(2, 2),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Image(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Custom error UI for image loading failure
+                    return Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.error, color: Colors.red),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
   }
 }

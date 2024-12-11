@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../platform/platform_stub.dart';
 import '../../backend/MongoDB/token_manager.dart';
-import '../../datamodel/chat/chat_message_model.dart';
+import '../../datamodel/chat/chat_message_model.dart' as messages;
 import '../../datamodel/chat/send_message_model.dart';
 
 class SocketMessageProvider extends ChangeNotifier {
@@ -16,7 +16,7 @@ class SocketMessageProvider extends ChangeNotifier {
   bool _isMessagesLoading = false;
   bool get isMessagesLoading => _isMessagesLoading;
 
-  ChatMessageModel? chatMessageModel;
+  messages.ChatMessageModel? chatMessageModel;
 
   /// Set loading state for online status
   Future<void> setOnlineStatus(bool value) async {
@@ -31,25 +31,24 @@ class SocketMessageProvider extends ChangeNotifier {
   }
 
   /// Set chat message model for state updates
-  void setChatMessageModel(ChatMessageModel chatRoomModel) {
+  void setChatMessageModel(messages.ChatMessageModel chatRoomModel) {
     chatMessageModel = chatRoomModel;
     notifyListeners();
   }
 
-  ChatMessageModel? get userChatMessageModel => chatMessageModel;
+  messages.ChatMessageModel? get userChatMessageModel => chatMessageModel;
 
   /// Send a chat message via API
   Future<void> sendChatViaAPI(
       SendMessageModel sendMessageModel, String chatID, String uid) async {
     try {
-      Messages newSentMessage = Messages(
-          messageContent: sendMessageModel.messageContent,
-          senderId: sendMessageModel.senderId,
-          recieverId: sendMessageModel.receiverId,
-          fileName: sendMessageModel.fileName,
-          file: sendMessageModel.file,
-          type: sendMessageModel.type,
-          callDetails: sendMessageModel.callDetails);
+      messages.Messages newSentMessage = messages.Messages(
+        messageContent: sendMessageModel.messageContent,
+        senderId: sendMessageModel.senderId,
+        recieverId: sendMessageModel.receiverId,
+        fileBytes: sendMessageModel.fileBytes,
+        type: sendMessageModel.type,
+      );
 
       addMessage(newSentMessage);
       String api = getApiEndpoint();
@@ -77,24 +76,31 @@ class SocketMessageProvider extends ChangeNotifier {
       request.fields['RecieverId'] = sendMessageModel.receiverId.toString();
 
       if (kIsWeb) {
+        // Handling fileBytes for web platform
         if (sendMessageModel.type == 'Image' &&
             sendMessageModel.fileBytes != null &&
             sendMessageModel.fileName != null) {
           final file = http.MultipartFile.fromBytes(
             'File',
-            sendMessageModel.fileBytes!,
-            filename: sendMessageModel.fileName![0],
+            sendMessageModel.fileBytes!.first,
+            filename: sendMessageModel.fileName!.first,
           );
           request.files.add(file);
         }
-      } else if (sendMessageModel.type == 'Image' &&
-          sendMessageModel.file != null &&
-          sendMessageModel.file!.path.isNotEmpty) {
-        final file = await http.MultipartFile.fromPath(
-          'File',
-          sendMessageModel.file!.path,
-        );
-        request.files.add(file);
+      } else {
+        // Handling files for non-web platform
+        if (sendMessageModel.type == 'Image' &&
+            sendMessageModel.files != null &&
+            sendMessageModel.files!.isNotEmpty) {
+          for (var file in sendMessageModel.files!) {
+            final filePart = await http.MultipartFile.fromPath(
+              'File',
+              file.path,
+              filename: sendMessageModel.fileName?.first ?? 'image.jpg',
+            );
+            request.files.add(filePart);
+          }
+        }
       }
 
       // Handle call details
@@ -118,7 +124,7 @@ class SocketMessageProvider extends ChangeNotifier {
   }
 
   /// Fetch older messages via API
-  Future<ChatMessageModel?> getMessage(
+  Future<messages.ChatMessageModel?> getMessage(
       String chatID, int page, String uid) async {
     String api = getApiEndpoint();
     setMessagesLoading(true);
@@ -134,7 +140,7 @@ class SocketMessageProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        final chatRoomModel = ChatMessageModel.fromJson(jsonData);
+        final chatRoomModel = messages.ChatMessageModel.fromJson(jsonData);
 
         setChatMessageModel(chatRoomModel);
         return chatRoomModel;
@@ -163,8 +169,8 @@ class SocketMessageProvider extends ChangeNotifier {
   }
 
   /// Add a new chat message
-  void addMessage(Messages message) {
-    chatMessageModel ??= ChatMessageModel(messages: []);
+  void addMessage(messages.Messages message) {
+    chatMessageModel ??= messages.ChatMessageModel(messages: []);
     chatMessageModel!.messages ??= [];
     chatMessageModel!.messages!.insert(0, message);
     notifyListeners();
@@ -172,12 +178,17 @@ class SocketMessageProvider extends ChangeNotifier {
 
   /// Remove the last message
   void removeLastMessage() {
-    chatMessageModel ??= ChatMessageModel(messages: []);
+    // Initialize chatMessageModel and messages if null
+    chatMessageModel ??= messages.ChatMessageModel(messages: []);
     chatMessageModel!.messages ??= [];
+
+    // Check if the list is not empty before removing the first element
     if (chatMessageModel!.messages!.isNotEmpty) {
-      chatMessageModel!.messages!.removeLast();
-      notifyListeners();
+      chatMessageModel!.messages!.removeAt(0); // Remove the first message
     }
+
+    // Notify listeners of the change
+    notifyListeners();
   }
 
   /// Disconnect WebSocket

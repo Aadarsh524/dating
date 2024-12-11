@@ -87,7 +87,8 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Future<void> addImage(List<int> fileBytes, List<String> fileName) async {
+  Future<void> addImage(
+      List<Uint8List> fileBytes, List<String> fileName) async {
     final chatProvider = context.read<SocketMessageProvider>();
     final sendMessage = SendMessageModel(
       fileBytes: fileBytes,
@@ -122,7 +123,7 @@ class _ChatPageState extends State<ChatPage> {
         final pickedFile = result!.files.single;
         final imageBytes = pickedFile.bytes;
         final fileName = pickedFile.name;
-        addImage(imageBytes!, [fileName]);
+        addImage([imageBytes!], [fileName]);
       } else {
         print('No image selected.');
       }
