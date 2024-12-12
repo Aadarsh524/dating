@@ -43,12 +43,15 @@ class SocketMessageProvider extends ChangeNotifier {
       SendMessageModel sendMessageModel, String chatID, String uid) async {
     try {
       messages.Messages newSentMessage = messages.Messages(
-        messageContent: sendMessageModel.messageContent,
-        senderId: sendMessageModel.senderId,
-        recieverId: sendMessageModel.receiverId,
-        fileBytes: sendMessageModel.fileBytes,
-        type: sendMessageModel.type,
-      );
+          messageContent: sendMessageModel.messageContent,
+          senderId: sendMessageModel.senderId,
+          recieverId: sendMessageModel.receiverId,
+          fileBytes: sendMessageModel.fileBytes,
+          type: sendMessageModel.type,
+          callDetails: messages.CallDetails(
+            duration: sendMessageModel.callDetails!.duration,
+            status: sendMessageModel.callDetails!.status,
+          ));
 
       addMessage(newSentMessage);
       String api = getApiEndpoint();
@@ -64,6 +67,8 @@ class SocketMessageProvider extends ChangeNotifier {
         ..headers['Authorization'] = 'Bearer $token'
         ..headers['Accept'] = 'application/json'
         ..headers['Content-Type'] = 'multipart/form-data';
+
+      request.fields['Type'] = sendMessageModel.type.toString();
 
       // Handle different types of messages based on 'type'
       if (sendMessageModel.type == 'Text' &&

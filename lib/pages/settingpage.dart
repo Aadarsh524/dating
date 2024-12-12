@@ -51,7 +51,7 @@ class _SettingPageState extends State<SettingPage> {
 
   Widget MobileProfile() {
     return Scaffold(
-      body: ListView(
+      body: Column(
         children: [
           const SizedBox(height: 10),
           Padding(
@@ -88,76 +88,16 @@ class _SettingPageState extends State<SettingPage> {
               selectedIndex: _selectedIndex,
               children: [
                 ToggleElement(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 202, 215, 225),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Billing',
-                        style: AppTextStyles()
-                            .secondaryStyle
-                            .copyWith(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                  foreground: Center(
-                    child: Text(
-                      'Billing',
-                      style: AppTextStyles()
-                          .secondaryStyle
-                          .copyWith(color: Colors.black),
-                    ),
-                  ),
+                  background: toggleBackground('Billing'),
+                  foreground: toggleForeground('Billing'),
                 ),
                 ToggleElement(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 202, 215, 225),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Profile',
-                        style: AppTextStyles()
-                            .secondaryStyle
-                            .copyWith(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                  foreground: Center(
-                    child: Text(
-                      'Profile',
-                      style: AppTextStyles()
-                          .secondaryStyle
-                          .copyWith(color: Colors.black),
-                    ),
-                  ),
+                  background: toggleBackground('Profile'),
+                  foreground: toggleForeground('Profile'),
                 ),
                 ToggleElement(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 202, 215, 225),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Email',
-                        style: AppTextStyles()
-                            .secondaryStyle
-                            .copyWith(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                  foreground: Center(
-                    child: Text(
-                      'Email',
-                      style: AppTextStyles()
-                          .secondaryStyle
-                          .copyWith(color: Colors.black),
-                    ),
-                  ),
+                  background: toggleBackground('Email'),
+                  foreground: toggleForeground('Email'),
                 ),
               ],
               onChanged: (index) {
@@ -174,116 +114,21 @@ class _SettingPageState extends State<SettingPage> {
             ),
           ),
           const SizedBox(height: 10),
-          Container(
-            height: MediaQuery.of(context).size.height,
+          Expanded(
             child: IndexedStack(
               index: _selectedIndex,
               children: [
-                Consumer<UserProfileProvider>(builder: (context, provider, _) {
-                  // Check if userProfileModel or userSubscription is null
-                  if (provider.currentUserProfileModel == null ||
-                      provider.currentUserProfileModel!.userSubscription ==
-                          null) {
-                    // If userSubscription is null, show the SubscriptionPage
-                    return SubscriptionPage();
-                  } else {
-                    // If userSubscription exists, display the subscription details
-                    return Center(
-                      child: Container(
-                        padding: EdgeInsets.all(16.0),
-                        margin: EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 20.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Your Current Subscription',
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
-                            Divider(
-                                color: Colors.grey), // Divider for separation
-                            SizedBox(height: 10.0),
-                            Row(
-                              children: [
-                                Icon(Icons.subscriptions,
-                                    color: Colors.greenAccent),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Plan Type:',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Spacer(),
-                                Text(
-                                  provider.currentUserProfileModel!
-                                      .userSubscription!.planType
-                                      .toString(),
-                                  style: TextStyle(
-                                      color: Colors.black87, fontSize: 16),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10.0),
-                            Row(
-                              children: [
-                                Icon(Icons.timer, color: Colors.orangeAccent),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Duration:',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Spacer(),
-                                Text(
-                                  provider.currentUserProfileModel!
-                                      .userSubscription!.duration
-                                      .toString(),
-                                  style: TextStyle(
-                                      color: Colors.black87, fontSize: 16),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10.0),
-                            Row(
-                              children: [
-                                Icon(Icons.calendar_today,
-                                    color: Colors.redAccent),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Expiration Date:',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Spacer(),
-                                Text(
-                                  provider.currentUserProfileModel!
-                                      .userSubscription!.expirationDate
-                                      .toString(),
-                                  style: TextStyle(
-                                      color: Colors.black87, fontSize: 16),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                }),
+                Consumer<UserProfileProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.currentUserProfileModel == null ||
+                        provider.currentUserProfileModel!.userSubscription ==
+                            null) {
+                      return const SubscriptionPage();
+                    } else {
+                      return subscriptionDetails(provider);
+                    }
+                  },
+                ),
                 profileTab(),
                 Container(
                   color: Colors.orange,
@@ -291,65 +136,150 @@ class _SettingPageState extends State<SettingPage> {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
-      bottomSheet: Container(
-        height: 60,
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.backgroundColor,
+      bottomSheet:
+          _selectedIndex == 0 ? const SizedBox(height: 0) : BottomActionSheet(),
+    );
+  }
+
+  Widget toggleBackground(String label) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 202, 215, 225),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Center(
+        child: Text(
+          label,
+          style: AppTextStyles().secondaryStyle.copyWith(color: Colors.black),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      ),
+    );
+  }
+
+  Widget toggleForeground(String label) {
+    return Center(
+      child: Text(
+        label,
+        style: AppTextStyles().secondaryStyle.copyWith(color: Colors.black),
+      ),
+    );
+  }
+
+  Widget subscriptionDetails(UserProfileProvider provider) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            NeumorphicButton(
-              style: NeumorphicStyle(
-                boxShape:
-                    NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
-                depth: 5,
-                intensity: 0.75,
-              ),
-              child: SizedBox(
-                height: 50,
-                width: 100,
-                child: Center(
-                  child: Text(
-                    'Cancel',
-                    style: AppTextStyles()
-                        .secondaryStyle
-                        .copyWith(color: Colors.red),
-                  ),
-                ),
+            const Text(
+              'Your Current Subscription',
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
               ),
             ),
-            NeumorphicButton(
-              style: NeumorphicStyle(
-                boxShape:
-                    NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
-                depth: 5,
-                intensity: 0.75,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Container(
-                height: 50,
-                width: 100,
-                color: Colors.blue,
-                child: Center(
-                  child: Text(
-                    'Save',
-                    style: AppTextStyles()
-                        .secondaryStyle
-                        .copyWith(color: Colors.white),
-                  ),
-                ),
-              ),
+            const Divider(color: Colors.grey),
+            const SizedBox(height: 10.0),
+            subscriptionRow(
+              icon: Icons.subscriptions,
+              color: Colors.greenAccent,
+              label: 'Plan Type:',
+              value:
+                  provider.currentUserProfileModel!.userSubscription!.planType!,
+            ),
+            subscriptionRow(
+              icon: Icons.timer,
+              color: Colors.orangeAccent,
+              label: 'Duration:',
+              value:
+                  provider.currentUserProfileModel!.userSubscription!.duration!,
+            ),
+            subscriptionRow(
+              icon: Icons.calendar_today,
+              color: Colors.redAccent,
+              label: 'Expiration Date:',
+              value: provider
+                  .currentUserProfileModel!.userSubscription!.expirationDate!,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget BottomActionSheet() {
+    return Container(
+      height: 60,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: AppColors.backgroundColor,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          neumorphicButton('Cancel', Colors.red, () {}),
+          neumorphicButton('Save', Colors.blue, () {}),
+        ],
+      ),
+    );
+  }
+
+  Widget neumorphicButton(String text, Color color, VoidCallback onPressed) {
+    return NeumorphicButton(
+      style: NeumorphicStyle(
+        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
+        depth: 5,
+        intensity: 0.75,
+      ),
+      onPressed: onPressed,
+      child: SizedBox(
+        height: 50,
+        width: 100,
+        child: Center(
+          child: Text(
+            text,
+            style: AppTextStyles().secondaryStyle.copyWith(color: color),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget subscriptionRow(
+      {required IconData icon,
+      required Color color,
+      required String label,
+      required String value}) {
+    return Row(
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(width: 8),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const Spacer(),
+        Text(
+          value,
+          style: const TextStyle(color: Colors.black87, fontSize: 16),
+        ),
+      ],
     );
   }
 
@@ -956,7 +886,7 @@ class _SettingPageState extends State<SettingPage> {
                               children: [
                                 // profile pic
 
-                                Container(
+                                SizedBox(
                                   height:
                                       MediaQuery.sizeOf(context).height * 1.01,
                                   child: IndexedStack(
@@ -972,15 +902,17 @@ class _SettingPageState extends State<SettingPage> {
                                                     .userSubscription ==
                                                 null) {
                                           // If userSubscription is null, show the SubscriptionPage
-                                          return SubscriptionPage();
+                                          return const SubscriptionPage();
                                         } else {
                                           // If userSubscription exists, display the subscription details
                                           return Center(
                                             child: Container(
-                                              padding: EdgeInsets.all(16.0),
-                                              margin: EdgeInsets.symmetric(
-                                                  horizontal: 16.0,
-                                                  vertical: 20.0),
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 16.0,
+                                                      vertical: 20.0),
                                               decoration: BoxDecoration(
                                                 color: Colors.white,
                                                 borderRadius:
@@ -991,7 +923,7 @@ class _SettingPageState extends State<SettingPage> {
                                                         .withOpacity(0.5),
                                                     spreadRadius: 2,
                                                     blurRadius: 5,
-                                                    offset: Offset(0, 3),
+                                                    offset: const Offset(0, 3),
                                                   ),
                                                 ],
                                               ),
@@ -1000,7 +932,7 @@ class _SettingPageState extends State<SettingPage> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
+                                                  const Text(
                                                     'Your Current Subscription',
                                                     style: TextStyle(
                                                       fontSize: 20.0,
@@ -1009,87 +941,89 @@ class _SettingPageState extends State<SettingPage> {
                                                       color: Colors.blueAccent,
                                                     ),
                                                   ),
-                                                  Divider(
+                                                  const Divider(
                                                       color: Colors
                                                           .grey), // Divider for separation
-                                                  SizedBox(height: 10.0),
+                                                  const SizedBox(height: 10.0),
                                                   Row(
                                                     children: [
-                                                      Icon(Icons.subscriptions,
+                                                      const Icon(
+                                                          Icons.subscriptions,
                                                           color: Colors
                                                               .greenAccent),
-                                                      SizedBox(width: 8),
-                                                      Text(
+                                                      const SizedBox(width: 8),
+                                                      const Text(
                                                         'Plan Type:',
                                                         style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight
                                                                     .bold),
                                                       ),
-                                                      Spacer(),
+                                                      const Spacer(),
                                                       Text(
                                                         provider
                                                             .currentUserProfileModel!
                                                             .userSubscription!
                                                             .planType
                                                             .toString(),
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color:
                                                                 Colors.black87,
                                                             fontSize: 16),
                                                       ),
                                                     ],
                                                   ),
-                                                  SizedBox(height: 10.0),
+                                                  const SizedBox(height: 10.0),
                                                   Row(
                                                     children: [
-                                                      Icon(Icons.timer,
+                                                      const Icon(Icons.timer,
                                                           color: Colors
                                                               .orangeAccent),
-                                                      SizedBox(width: 8),
-                                                      Text(
+                                                      const SizedBox(width: 8),
+                                                      const Text(
                                                         'Duration:',
                                                         style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight
                                                                     .bold),
                                                       ),
-                                                      Spacer(),
+                                                      const Spacer(),
                                                       Text(
                                                         provider
                                                             .currentUserProfileModel!
                                                             .userSubscription!
                                                             .duration
                                                             .toString(),
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color:
                                                                 Colors.black87,
                                                             fontSize: 16),
                                                       ),
                                                     ],
                                                   ),
-                                                  SizedBox(height: 10.0),
+                                                  const SizedBox(height: 10.0),
                                                   Row(
                                                     children: [
-                                                      Icon(Icons.calendar_today,
+                                                      const Icon(
+                                                          Icons.calendar_today,
                                                           color:
                                                               Colors.redAccent),
-                                                      SizedBox(width: 8),
-                                                      Text(
+                                                      const SizedBox(width: 8),
+                                                      const Text(
                                                         'Expiration Date:',
                                                         style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight
                                                                     .bold),
                                                       ),
-                                                      Spacer(),
+                                                      const Spacer(),
                                                       Text(
                                                         provider
                                                             .currentUserProfileModel!
                                                             .userSubscription!
                                                             .expirationDate
                                                             .toString(),
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color:
                                                                 Colors.black87,
                                                             fontSize: 16),

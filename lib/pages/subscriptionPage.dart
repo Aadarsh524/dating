@@ -28,20 +28,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   String country = 'COUNTRY';
   String duration = 'Weekly';
 
-  bool _isSearchFieldVisible = false;
-
-  void _toggleSearchField() {
-    setState(() {
-      _isSearchFieldVisible = !_isSearchFieldVisible;
-    });
-  }
-
-  void _hideSearchField() {
-    setState(() {
-      _isSearchFieldVisible = false;
-    });
-  }
-
   Future<void> makePayment(
       BuildContext context, Subscription subscription) async {
     try {
@@ -263,50 +249,28 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           if (subscriptionProvider.isSubscriptionLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          return Column(children: [
-            const SizedBox(
-              height: 10,
-            ),
-
-            // icons
-
-            // post
-            const SizedBox(
-              height: 30,
-            ),
-
-            Expanded(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                child: GridView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 1, // Adjust to show 2 cards per row
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20,
-                    childAspectRatio: 3 / 4,
-                  ),
-                  itemCount: subscriptions.length,
-                  itemBuilder: (context, index) {
-                    return SubscriptionCard(
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: SafeArea(
+              child: ListView.builder(
+                itemCount: subscriptions.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: SubscriptionCard(
                       duration: duration,
                       subscription: subscriptions[index],
                       onTap: () {
                         makePayment(context, subscriptions[index]);
                       },
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ),
-            const SizedBox(
-              height: 25,
-            ),
-          ]);
+          );
         },
       ),
-      // bottomSheet: NavBar(),
     );
   }
 
@@ -383,36 +347,29 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           const Spacer(),
                         ],
                       ),
-                      const SizedBox(
-                        height: 30,
-                      ),
                       Consumer<SubscriptionProvider>(
                           builder: (context, subscription, _) {
                         return Expanded(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 100),
-                            child: GridView.builder(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount:
-                                    3, // Adjust to show 2 cards per row
-                                mainAxisSpacing: 20,
-                                crossAxisSpacing: 20,
-                                childAspectRatio: 3 / 4,
-                              ),
-                              itemCount: subscriptions.length,
-                              itemBuilder: (context, index) {
-                                final subscription = subscriptions[index];
-                                return SubscriptionCard(
-                                  duration: duration,
-                                  subscription: subscription,
-                                  onTap: () {
-                                    makePayment(context, subscriptions[index]);
-                                  },
-                                );
-                              },
+                          child: GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  1, // Adjust to show 2 cards per row
+                              mainAxisSpacing: 20,
+                              crossAxisSpacing: 20,
+                              childAspectRatio: 3 / 4,
                             ),
+                            itemCount: subscriptions.length,
+                            itemBuilder: (context, index) {
+                              final subscription = subscriptions[index];
+                              return SubscriptionCard(
+                                duration: duration,
+                                subscription: subscription,
+                                onTap: () {
+                                  makePayment(context, subscriptions[index]);
+                                },
+                              );
+                            },
                           ),
                         );
                       }),
@@ -427,8 +384,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 }
-
-// subscription
 
 class Subscription {
   final String type;
@@ -450,14 +405,16 @@ class Subscription {
   });
 }
 
-// ignore: must_be_immutable
 class SubscriptionCard extends StatelessWidget {
   final Subscription subscription;
-  final String duration; // Add a duration parameter to display correct price
+  final String duration;
   final VoidCallback? onTap;
 
-  SubscriptionCard(
-      {required this.subscription, required this.duration, this.onTap});
+  SubscriptionCard({
+    required this.subscription,
+    required this.duration,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -466,13 +423,13 @@ class SubscriptionCard extends StatelessWidget {
     // Set the price based on the selected duration
     switch (duration) {
       case 'Weekly':
-        price = '\$${subscription.weeklyPrice.toString()} / week';
+        price = '\$${subscription.weeklyPrice.toStringAsFixed(2)} / week';
         break;
       case 'Monthly':
-        price = '\$${subscription.monthlyPrice.toString()} / month';
+        price = '\$${subscription.monthlyPrice.toStringAsFixed(2)} / month';
         break;
       case 'Yearly':
-        price = '\$${subscription.yearlyPrice.toString()} / year';
+        price = '\$${subscription.yearlyPrice.toStringAsFixed(2)} / year';
         break;
     }
 
@@ -484,49 +441,52 @@ class SubscriptionCard extends StatelessWidget {
         color: Colors.white,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Subscription type
             Text(
               subscription.type,
               style: GoogleFonts.poppins(
                 color: const Color(0xFF1A1A1A),
                 fontSize: 27,
                 fontWeight: FontWeight.w700,
-                letterSpacing: -0.54,
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  price, // Display the price based on the selected duration
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFF1A1A1A),
-                    fontSize: 27,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.54,
-                  ),
-                ),
-              ],
+
+            // Price and Duration
+            Text(
+              price,
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF1A1A1A),
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+
+            // Description
             Text(
               subscription.description,
               style: GoogleFonts.poppins(
                 color: const Color(0xFF667085),
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w400,
               ),
             ),
             const SizedBox(height: 15),
+
+            // Divider
             Container(
               height: 1,
               color: const Color(0xFFD9D9D9),
             ),
             const SizedBox(height: 15),
+
+            // Subtitle
             Text(
               subscription.subTitle,
               style: GoogleFonts.poppins(
@@ -536,36 +496,41 @@ class SubscriptionCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Features List
             Column(
+              mainAxisSize: MainAxisSize.min,
               children: subscription.features
-                  .map((feature) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(AppIcons.check),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                feature,
-                                style: GoogleFonts.poppins(
-                                  color: const Color(0xFF1A1A1A),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
+                  .map((feature) => Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            AppIcons.check,
+                            height: 20,
+                            width: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            feature,
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFF1A1A1A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ))
                   .toList(),
             ),
-            const Spacer(),
+            const SizedBox(height: 20),
+
+            // Subscribe Button
             GestureDetector(
               onTap: onTap,
               child: Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                 decoration: ShapeDecoration(
                   color: const Color(0xFF5400FF),
                   shape: RoundedRectangleBorder(
@@ -573,17 +538,17 @@ class SubscriptionCard extends StatelessWidget {
                   ),
                 ),
                 child: Center(
-                  child: Text(
-                    'Subscribe Now',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    child: Text(
+                  'Subscribe Now',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                   ),
-                ),
+                  overflow: TextOverflow.ellipsis, // Handle text overflow
+                )),
               ),
-            ),
+            )
           ],
         ),
       ),

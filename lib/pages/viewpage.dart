@@ -218,10 +218,10 @@ class _ViewPageState extends State<ViewPage> {
         child:
             Consumer<ProfileViewProvider>(builder: (context, provider, child) {
           if (provider.isProfileViewLoading) {
-            return const Row(
+            return const Column(
               children: [
                 SizedBox(
-                  width: 350,
+                  width: double.infinity,
                   child: ShimmerSkeleton(
                     height: 300,
                     count: 1,
@@ -231,7 +231,7 @@ class _ViewPageState extends State<ViewPage> {
                   width: 15,
                 ),
                 SizedBox(
-                  width: 350,
+                  width: double.infinity,
                   child: ShimmerSkeleton(
                     height: 300,
                     count: 1,
@@ -241,7 +241,7 @@ class _ViewPageState extends State<ViewPage> {
                   width: 15,
                 ),
                 SizedBox(
-                  width: 350,
+                  width: double.infinity,
                   child: ShimmerSkeleton(
                     height: 300,
                     count: 1,
@@ -261,7 +261,7 @@ class _ViewPageState extends State<ViewPage> {
             child: GridView.builder(
               clipBehavior: Clip.none,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of columns in the grid
+                crossAxisCount: 1, // Number of columns in the grid
                 crossAxisSpacing: 15, // Horizontal spacing between items
                 mainAxisSpacing: 15, // Vertical spacing between items
               ),
@@ -270,6 +270,7 @@ class _ViewPageState extends State<ViewPage> {
               itemBuilder: (context, index) {
                 final profile = profiles[index];
                 return Container(
+                  width: double.infinity,
                   height: 250,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
@@ -355,10 +356,10 @@ class _ViewPageState extends State<ViewPage> {
         child:
             Consumer<ProfileViewProvider>(builder: (context, provider, child) {
           if (provider.isProfileViewLoading) {
-            return const Row(
+            return const Column(
               children: [
                 SizedBox(
-                  width: 350,
+                  width: double.infinity,
                   child: ShimmerSkeleton(
                     height: 300,
                     count: 1,
@@ -368,7 +369,7 @@ class _ViewPageState extends State<ViewPage> {
                   width: 15,
                 ),
                 SizedBox(
-                  width: 350,
+                  width: double.infinity,
                   child: ShimmerSkeleton(
                     height: 300,
                     count: 1,
@@ -378,7 +379,7 @@ class _ViewPageState extends State<ViewPage> {
                   width: 15,
                 ),
                 SizedBox(
-                  width: 350,
+                  width: double.infinity,
                   child: ShimmerSkeleton(
                     height: 300,
                     count: 1,
@@ -398,7 +399,7 @@ class _ViewPageState extends State<ViewPage> {
             child: GridView.builder(
               clipBehavior: Clip.none,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of columns in the grid
+                crossAxisCount: 1, // Number of columns in the grid
                 crossAxisSpacing: 15, // Horizontal spacing between items
                 mainAxisSpacing: 15, // Vertical spacing between items
               ),
@@ -407,6 +408,7 @@ class _ViewPageState extends State<ViewPage> {
               itemBuilder: (context, index) {
                 final profile = profiles[index];
                 return Container(
+                  width: double.infinity,
                   height: 250,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
