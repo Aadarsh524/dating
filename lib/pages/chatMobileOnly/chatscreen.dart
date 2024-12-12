@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -5,20 +6,20 @@ import 'package:dating/backend/MongoDB/constants.dart';
 import 'package:dating/datamodel/chat/chat_message_model.dart'
     as chatmessageModel;
 import 'package:dating/datamodel/chat/chat_room_model.dart';
-import 'package:dating/datamodel/chat/send_message_model.dart';
+import 'package:dating/datamodel/chat/send_message_model.dart' as sendModel;
+
 import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/providers/chat_provider/socket_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
-import 'package:dating/widgets/text_field.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class ChatScreenMobile extends StatefulWidget {
   final String chatID;
@@ -49,10 +50,13 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Initialize socket connection
       _socketMessageProvider = context.read<SocketMessageProvider>();
-      // _socketMessageProvider.initializeSocket(
-      //     user!.uid, widget.receiverId); // Establish WebSocket connection
+      try {
+        _socketMessageProvider.initializeSocket(user!.uid, widget.receiverId);
+      } catch (e) {
+        print('Error initializing socket: $e');
+      }
+
       _socketMessageProvider.getMessage(widget.chatID, 1, user!.uid);
 
       _messageController.addListener(() {
@@ -75,7 +79,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
   void sendMessage(String message) {
     if (message.isNotEmpty && mounted) {
       _socketMessageProvider.sendChatViaAPI(
-        SendMessageModel(
+        sendModel.SendMessageModel(
           senderId: user!.uid,
           messageContent: message,
           type: "Text",
@@ -91,7 +95,11 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -127,7 +135,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
 
         final chatProvider = context.read<SocketMessageProvider>();
         chatProvider.sendChatViaAPI(
-          SendMessageModel(
+          sendModel.SendMessageModel(
             files: [imageFile], // Send list of files for non-web platforms
             fileBytes: [imageBytes], // Send list of bytes for web platforms
             senderId: user!.uid,
@@ -239,10 +247,11 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
                       final chatProvider =
                           context.read<SocketMessageProvider>();
                       chatProvider.sendChatViaAPI(
-                          SendMessageModel(
+                          sendModel.SendMessageModel(
                               senderId: user!.uid,
                               receiverId: widget.receiverId,
-                              // callDetails: chatmessageModel.CallDetails(duration:"" ,status: ""),
+                              callDetails: sendModel.CallDetails(
+                                  duration: "10", status: "Received"),
                               type: 'Call'),
                           widget.chatID,
                           user!.uid);
@@ -282,10 +291,12 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
                   ),
                   // Message input field
                   Expanded(
-                    child: AppTextField(
-                      hintText: 'Type your message',
-                      inputcontroller: _messageController,
-                      focusNode: _focusNode,
+                    child: CustomTextField(
+                      hintText: "Enter your text",
+                      controller: _messageController,
+                      keyboardType: TextInputType.text,
+                      prefixIcon: Icons.text_fields,
+                      obscureText: false, // Set to true for password fields
                     ),
                   ),
                   // Send button, only enabled if message is not empty
@@ -350,13 +361,7 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
       chatmessageModel.Messages message, bool isCurrentUser) {
     switch (message.type) {
       case 'Text':
-        return Text(
-          message.messageContent ?? '',
-          style: AppTextStyles().secondaryStyle.copyWith(
-                color: isCurrentUser ? Colors.white : Colors.black,
-                fontSize: 14,
-              ),
-        );
+        return _buildTextMessage(message, isCurrentUser);
       case 'Call':
         return _buildCallContent(
             message.callDetails!.status!, message.callDetails!.status!, true);
@@ -365,37 +370,79 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
       case 'Audio':
         return _buildImageContent(message, isCurrentUser);
       default:
-        return Container(); // Handle any unknown message types here
+        return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildTextMessage(
+      chatmessageModel.Messages message, bool isCurrentUser) {
+    return Text(
+      message.messageContent ?? '',
+      style: AppTextStyles().secondaryStyle.copyWith(
+            color: isCurrentUser ? Colors.white : Colors.black,
+            fontSize: 14,
+          ),
+    );
   }
 
   Widget _buildCallContent(
       String callStatus, String callDuration, bool isOngoing) {
-    return Row(
-      children: [
-        Icon(
-          isOngoing ? Icons.call : Icons.call_end,
-          size: 24,
-          color: isOngoing ? Colors.green : Colors.red,
-        ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              callStatus,
-              style: TextStyle(
-                color: isOngoing ? Colors.green : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isOngoing
+            ? Colors.green.withOpacity(0.1)
+            : Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          // Icon with background circle
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isOngoing ? Colors.green : Colors.red,
+              shape: BoxShape.circle,
             ),
-            Text(
-              'Duration: $callDuration',
-              style: const TextStyle(fontSize: 12),
+            child: Icon(
+              isOngoing ? Icons.call : Icons.call_end,
+              size: 24,
+              color: Colors.white,
             ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(width: 12),
+          // Status and duration text
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  callStatus,
+                  style: TextStyle(
+                    color: isOngoing ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Duration: $callDuration',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Action icon (optional, like a replay button)
+          if (!isOngoing)
+            IconButton(
+              icon: const Icon(Icons.replay, color: Colors.grey),
+              onPressed: () {}, // Define action here
+            ),
+        ],
+      ),
     );
   }
 
@@ -516,5 +563,139 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
         ),
       );
     }
+  }
+}
+
+class CustomTextField extends StatefulWidget {
+  final String hintText;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final IconData? suffixIcon;
+  final IconData? prefixIcon;
+  final TextEditingController controller;
+  final FocusNode? focusNode;
+  final double borderRadius;
+  final double minHeight;
+  final double maxHeight;
+
+  const CustomTextField({
+    super.key,
+    required this.hintText,
+    this.keyboardType = TextInputType.text,
+    this.obscureText = false,
+    this.suffixIcon,
+    this.prefixIcon,
+    required this.controller,
+    this.focusNode,
+    this.borderRadius = 20.0,
+    this.minHeight = 55.0,
+    this.maxHeight = 150.0,
+  });
+
+  @override
+  State<CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  late bool _obscureText;
+  late KeyboardVisibilityController _keyboardVisibilityController;
+  late StreamSubscription<bool> _keyboardSubscription;
+  bool isKeyboardVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.obscureText;
+
+    _keyboardVisibilityController = KeyboardVisibilityController();
+    _keyboardSubscription =
+        _keyboardVisibilityController.onChange.listen((visible) {
+      setState(() {
+        isKeyboardVisible = visible;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _keyboardSubscription.cancel(); // Cancel the subscription
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Neumorphic(
+          style: NeumorphicStyle(
+            shape: NeumorphicShape.flat,
+            boxShape: NeumorphicBoxShape.roundRect(
+              BorderRadius.circular(widget.borderRadius),
+            ),
+            depth: -5,
+            intensity: 1,
+            surfaceIntensity: 0.5,
+            lightSource: LightSource.topLeft,
+          ),
+          drawSurfaceAboveChild: false,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: widget.minHeight,
+              maxHeight: widget.maxHeight,
+            ),
+            child: TextFormField(
+              controller: widget.controller,
+              focusNode: widget.focusNode,
+              keyboardType: widget.keyboardType,
+              obscureText: _obscureText,
+              decoration: InputDecoration(
+                prefixIcon:
+                    widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+                suffixIcon: widget.obscureText
+                    ? IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          size: 20,
+                        ),
+                      )
+                    : widget.suffixIcon != null
+                        ? IconButton(
+                            onPressed: () {
+                              // Custom suffix icon action
+                            },
+                            icon: Icon(widget.suffixIcon),
+                          )
+                        : null,
+                hintText: widget.hintText,
+                hintStyle: AppTextStyles().secondaryStyle,
+                border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 15,
+                  vertical: 15,
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (isKeyboardVisible)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Keyboard is visible",
+              style: AppTextStyles().secondaryStyle,
+            ),
+          ),
+      ],
+    );
   }
 }
