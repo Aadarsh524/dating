@@ -15,6 +15,7 @@ import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -316,6 +317,10 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
   }
 
   Widget _buildChatContent() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
+
     return Consumer<SocketMessageProvider>(
       builder: (context, chatMessageProvider, child) {
         chatmessageModel.ChatMessageModel? chatRoomModel =
