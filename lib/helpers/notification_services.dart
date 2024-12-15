@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:app_settings/app_settings.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:dating/helpers/device_token.dart';
 import 'package:dating/pages/call_recieve_screen.dart';
 
@@ -66,12 +67,23 @@ class NotificationServices {
     });
   }
 
+  void playNotificationSound() async {
+    final player = AudioPlayer();
+    try {
+      // Ensure the audio file is correctly added to your assets folder
+      await player.play(AssetSource('assets/sounds/ringtone.mp3'));
+    } catch (e) {
+      print("Error playing notification sound: $e");
+    }
+  }
+
   void firebaseInit(BuildContext context) async {
     FirebaseMessaging.onMessage.listen((message) {
       if (kDebugMode) {
         log(message.notification!.title.toString());
         log(message.notification!.body.toString());
       }
+      playNotificationSound();
       if (Platform.isIOS) {
         iosForegroundMessage();
       }
