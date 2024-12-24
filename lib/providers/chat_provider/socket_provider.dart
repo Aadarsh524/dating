@@ -111,8 +111,10 @@ class SocketMessageProvider extends ChangeNotifier {
       // Handle call details
       if (sendMessageModel.type == 'Call' &&
           sendMessageModel.callDetails != null) {
-        request.fields['duration'] = sendMessageModel.callDetails!.duration!;
-        request.fields['status'] = sendMessageModel.callDetails!.status!;
+        request.fields['CallDetails'] = jsonEncode({
+          'duration': sendMessageModel.callDetails!.duration!,
+          'status': sendMessageModel.callDetails!.status!,
+        });
       }
 
       var response = await request.send();
