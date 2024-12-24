@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:dating/datamodel/subscription_model.dart';
-
 import 'package:dating/providers/subscription_provider.dart';
 import 'package:dating/utils/icons.dart';
 import 'package:dating/utils/textStyles.dart';
@@ -22,82 +20,59 @@ class SubscriptionPage extends StatefulWidget {
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
+  User? user = FirebaseAuth.instance.currentUser;
+
   bool kIsWeb = const bool.fromEnvironment('dart.library.js_util');
 
-  String seeking = 'SEEKING';
-  String country = 'COUNTRY';
   String duration = 'Weekly';
 
   Future<void> makePayment(
       BuildContext context, Subscription subscription) async {
     try {
       // Step 1: Create Payment Intent
-      String? amount;
+      String? productId;
 
       switch (duration) {
         case 'Weekly':
           switch (subscription.type) {
             case 'Basic':
-              amount = subscription.weeklyPrice.toString();
+              productId = 'product1';
               break;
             case 'Plus':
-              amount = subscription.weeklyPrice.toString();
+              productId = 'product2';
               break;
             case 'Gold':
-              amount = subscription.weeklyPrice.toString();
+              productId = 'product3';
               break;
             default:
-              amount = null; // Handle unexpected plan type
-              break;
-          }
-          break;
-
-        case 'Monthly':
-          switch (subscription.type) {
-            case 'Basic':
-              amount = subscription.monthlyPrice.toString();
-              break;
-            case 'Plus':
-              amount = subscription.monthlyPrice.toString();
-              break;
-            case 'Gold':
-              amount = subscription.monthlyPrice.toString();
-              break;
-            default:
-              amount = null; // Handle unexpected plan type
-              break;
-          }
-          break;
-
-        case 'Yearly':
-          switch (subscription.type) {
-            case 'Basic':
-              amount = subscription.yearlyPrice.toString();
-              break;
-            case 'Plus':
-              amount = subscription.yearlyPrice.toString();
-              break;
-            case 'Gold':
-              amount = subscription.yearlyPrice.toString();
-              break;
-            default:
-              amount = null; // Handle unexpected plan type
+              productId = null; // Handle unexpected plan type
               break;
           }
           break;
 
         default:
-          amount = null; // Handle unexpected duration values
+          productId = null; // Handle unexpected duration values
           break;
       }
-      final paymentIntent = await createPaymentIntent(amount!);
-      final clientSecret = paymentIntent['client_secret'];
+
+      final paymentIntentResponse =
+          await createPaymentIntent(user!.uid, productId!);
+
+// Fetch the `client_key` from the response
+      final clientKey = paymentIntentResponse['client_key'];
+
+      if (clientKey != null) {
+        print("Client Key: $clientKey");
+        // Use the clientKey as needed
+      } else {
+        throw Exception("Client key not found in the response.");
+      }
 
       // Step 2: Initialize Payment Sheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: "Your Company Name",
+          paymentIntentClientSecret: clientKey,
+          merchantDisplayName: "Dating App",
           googlePay: const PaymentSheetGooglePay(
             merchantCountryCode: "US",
             currencyCode: "USD",
@@ -120,7 +95,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       );
 
       // Step 3: Display Payment Sheet
-      await displayPaymentSheet(subscription, context, clientSecret);
+      await displayPaymentSheet(subscription, context, clientKey);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -132,27 +107,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Future<void> displayPaymentSheet(Subscription subscription,
       BuildContext context, String paymentIntentToken) async {
-    User? user = FirebaseAuth.instance.currentUser;
-
     try {
       await Stripe.instance.presentPaymentSheet();
 
-      final subscriptionProvider = context.read<SubscriptionProvider>();
-
-      final subscriptionModel = SubscriptionModel(
-        userId: user!.uid,
-        duration: duration,
-        planType: subscription.type,
-        paymentMethod: "stripe",
-        paymentId: paymentIntentToken,
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment successful!')),
       );
-      final result =
-          await subscriptionProvider.buySubcription(subscriptionModel, context);
-      if (result == true && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment successful!')),
-        );
-      }
     } catch (e) {
       if (e is StripeException) {
         if (context.mounted) {
@@ -172,24 +132,32 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
   }
 
-  Future<Map<String, dynamic>> createPaymentIntent(String amount) async {
+  Future<Map<String, dynamic>> createPaymentIntent(
+      String userId, String productId) async {
     try {
       final body = {
-        "amount": amount,
-        "currency": "USD",
+        "userId": userId,
+        "paymentMethod": "stripe",
+        "productid": productId,
       };
-      http.Response response = await http.post(
-        Uri.parse('https://api.stripe.com/v1/payment_intents'),
-        body: body,
+
+      final response = await http.post(
+        Uri.parse(
+            'https://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Subscription'),
         headers: {
-          "Authorization":
-              "Bearer sk_test_51PVaJmAL5L5DqNFSUgCjWSSbZXrwyoErFjgdCOQMIrK4FoDG5cz3IikJjnpZ6LOJm8u37JrjUjqDDcKQ9eRqXcO700J2wqRvgK",
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json", // Ensure JSON format
         },
+        body: json.encode(body), // Encode body to JSON
       );
-      return json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception(
+            "Failed to create payment intent: ${response.statusCode} ${response.body}");
+      }
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception("Error creating payment intent: $e");
     }
   }
 
@@ -202,15 +170,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       description: 'Basic plan with essential features.',
       subTitle: 'Get started with basic features',
       features: ['Feature 1', 'Feature 2'],
+      productId: 'product1',
     ),
     Subscription(
       type: 'Plus',
-      weeklyPrice: 3,
+      weeklyPrice: 4,
       monthlyPrice: 9,
       yearlyPrice: 75,
       description: 'Intermediate plan for regular users.',
       subTitle: 'Enjoy more features and flexibility',
       features: ['Feature 1', 'Feature 2', 'Feature 3'],
+      productId: 'product2',
     ),
     Subscription(
       type: 'Gold',
@@ -220,6 +190,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       description: 'Premium plan for professionals.',
       subTitle: 'Unlock all features and priority support',
       features: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4'],
+      productId: 'product3',
     ),
   ];
 
@@ -386,6 +357,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 }
 
 class Subscription {
+  final String productId;
   final String type;
   final double weeklyPrice;
   final double monthlyPrice;
@@ -395,6 +367,7 @@ class Subscription {
   final List<String> features;
 
   Subscription({
+    required this.productId, // Added comma and corrected syntax
     required this.type,
     required this.weeklyPrice,
     required this.monthlyPrice,

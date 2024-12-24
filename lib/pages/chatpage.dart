@@ -11,7 +11,6 @@ import 'package:dating/helpers/signaling.dart';
 import 'package:dating/pages/chatMobileOnly/chatscreen.dart';
 import 'package:dating/pages/chat_page_desktop.dart';
 import 'package:dating/pages/components/profile_button.dart';
-import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/pages/settingpage.dart';
 import 'package:dating/providers/chat_provider/chat_room_provider.dart';
 import 'package:dating/providers/chat_provider/socket_provider.dart';
@@ -21,7 +20,6 @@ import 'package:dating/utils/shimmer.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
 import 'package:dating/widgets/navbar.dart';
-import 'package:dating/widgets/text_field.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -51,7 +49,6 @@ class _ChatPageState extends State<ChatPage> {
   String seeking = 'SEEKING';
   String country = 'COUNTRY';
   String age = 'AGE';
-  final TextEditingController _messageController = TextEditingController();
 
   List<chatRoom.Message> lastMessage = [];
   final Signaling _signaling = Signaling();
