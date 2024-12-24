@@ -120,12 +120,29 @@ class _SettingPageState extends State<SettingPage> {
               children: [
                 Consumer<UserProfileProvider>(
                   builder: (context, provider, _) {
-                    if (provider.currentUserProfileModel == null ||
-                        provider.currentUserProfileModel!.userSubscription ==
-                            null) {
+                    final userProfile = provider.currentUserProfileModel;
+
+                    if (userProfile != null &&
+                        userProfile.userSubscription != null) {
+                      final expirationDateString =
+                          userProfile.userSubscription!.expirationDate;
+
+                      if (expirationDateString != null) {
+                        // Convert the string to DateTime
+                        final expirationDate =
+                            DateTime.parse(expirationDateString);
+
+                        if (expirationDate.isAfter(DateTime.now())) {
+                          // Subscription is still valid
+                          return subscriptionDetails(provider);
+                        }
+                      }
+
+                      // Subscription expired or invalid expiration date
                       return const SubscriptionPage();
                     } else {
-                      return subscriptionDetails(provider);
+                      // No subscription or user profile available
+                      return const SubscriptionPage();
                     }
                   },
                 ),
