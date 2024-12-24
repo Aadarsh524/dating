@@ -63,8 +63,8 @@ void main() async {
   });
 
   // Set Stripe Publishable Key
-  Stripe.publishableKey =
-      "pk_test_51PVaJmAL5L5DqNFSGw0OoujleoUPkpH0nsWCQ1RyVlPruzpInF7Gv9iwtT2qd1WIOB19GJeNLJNeAqOFDidbqI0V00slOhPWCy";
+  // Stripe.publishableKey =
+  //     "pk_test_51PVaJmAL5L5DqNFSGw0OoujleoUPkpH0nsWCQ1RyVlPruzpInF7Gv9iwtT2qd1WIOB19GJeNLJNeAqOFDidbqI0V00slOhPWCy";
 
   // Run App
   runApp(
