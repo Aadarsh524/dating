@@ -161,7 +161,6 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
         backgroundColor: AppColors.backgroundColor,
         body: Column(
           children: [
