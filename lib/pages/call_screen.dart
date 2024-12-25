@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:dating/helpers/signaling.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,31 +15,63 @@ class CallScreen extends StatefulWidget {
   const CallScreen(
       {Key? key, required this.userType, required this.roomId, this.callerName})
       : super(key: key);
-
   @override
   CallScreenState createState() => CallScreenState();
 }
 
 class CallScreenState extends State<CallScreen> {
   String? userType;
+  DateTime? compareDate;
+  int i = 0;
   bool loudspeaker = true;
   bool muted = false;
   bool videoClosed = false;
+  bool shareScreen = false;
   bool endCallPressed = false;
+  bool messageTapped = false;
+  int newMessagecount = 0;
+  bool greenColorSelected = true;
   bool cameraPermissionGranted = true;
 
+  //HomePageState(this.userType);
   Signaling signaling = Signaling();
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
   final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
   String? roomId;
+  MediaStream? stream;
+  bool? hangUpState;
   bool isRemoteConnected = false;
+  //TextEditingController textEditingController = TextEditingController(text: '');
   final db = FirebaseFirestore.instance;
 
+  // List<Files> receivedFiles = [];
+  TextEditingController sendText = new TextEditingController();
+
+// Initialize your RTCPeerConnection
+  late RTCDataChannel messageChannel;
+  late RTCDataChannel fileChannel;
+
+  List<Offset?> points = [];
+  double strokeWidth = 5;
+  Color paintColor = AppColors.green;
+  List<Uint8List> receivedFileData = [];
+  bool sendingFile = false;
+  bool receivingFile = false;
+  bool imageReceived = false;
+  late Uint8List currentImage;
+  double receivingPercentage = 0;
+  double sendingPercentage = 0;
+  double totalFileSize = 0;
+  String sendingFileUpdate = "";
+  String receivedFileName = "";
+  bool imagesTapped = false;
+  bool viewImage = false;
+  bool moveImage = false;
   late StreamSubscription getUserSignals;
 
   @override
   void initState() {
-    super.initState();
+    hangUpState = false;
     userType = widget.userType;
     _localRenderer.initialize();
     _remoteRenderer.initialize();
@@ -47,24 +80,31 @@ class CallScreenState extends State<CallScreen> {
           .openUserMedia(_localRenderer, _remoteRenderer)
           .then((value) async {
         await signaling.createRoom(_localRenderer, widget.roomId);
+        // textEditingController.text = roomId!;
+
+        //initializeDataTransfer();
       });
     } else if (userType == 'V') {
       signaling.openUserMedia(_localRenderer, _remoteRenderer);
-      Future.delayed(const Duration(seconds: 7)).then((val) async {
-        await signaling.joinRoom(widget.roomId, _remoteRenderer);
-      });
-    }
 
+      Future.delayed(const Duration(seconds: 5)).then((val) async {
+        await signaling.joinRoom(widget.roomId, _remoteRenderer);
+        // initializeDataTransfer();
+      });
+      //signaling.getData();
+    }
     signaling.onAddRemoteStream = ((stream) {
       _remoteRenderer.srcObject = stream;
       setState(() {
-        isRemoteConnected = true;
+        isRemoteConnected = (!isRemoteConnected);
       });
     });
-
+    // final tsToMillis = DateTime.now().millisecond;
+    // final compareDate = DateTime(tsToMillis - (24 * 60 * 60 * 1000));
     roomId = widget.roomId;
     signaling.initializeBackgroundService();
     getStringFieldStream();
+    super.initState();
   }
 
   void endCall() async {
@@ -156,10 +196,13 @@ class CallScreenState extends State<CallScreen> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        setState(() {
-                          muted = !muted;
-                        });
-                        signaling.muteAudio(muted);
+                        if (muted) {
+                          muted = false;
+                        } else {
+                          muted = true;
+                        }
+                        setState(() {});
+                        signaling.muteAudio(!muted);
                       },
                       child: CircleAvatar(
                         backgroundColor: Colors.black54,
@@ -173,10 +216,13 @@ class CallScreenState extends State<CallScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        setState(() {
-                          videoClosed = !videoClosed;
-                        });
-                        signaling.closeVideo(videoClosed);
+                        if (videoClosed) {
+                          videoClosed = false;
+                        } else {
+                          videoClosed = true;
+                        }
+                        setState(() {});
+                        signaling.closeVideo(!videoClosed);
                       },
                       child: CircleAvatar(
                         backgroundColor: Colors.black54,
@@ -205,10 +251,13 @@ class CallScreenState extends State<CallScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          loudspeaker = !loudspeaker;
-                        });
+                      onTap: () async {
+                        if (loudspeaker) {
+                          loudspeaker = false;
+                        } else {
+                          loudspeaker = true;
+                        }
+                        setState(() {});
                         signaling.loudSpeaker(loudspeaker);
                       },
                       child: CircleAvatar(
@@ -227,20 +276,19 @@ class CallScreenState extends State<CallScreen> {
             ),
             if (!cameraPermissionGranted)
               const Positioned(
-                top: 70,
-                left: 10,
-                child: Column(
-                  children: [
-                    Text(
-                      "Camera Permission is not granted!",
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
+                  top: 70,
+                  left: 10,
+                  child: Column(
+                    children: [
+                      Text(
+                        "Camera Permission is not granted!",
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  )),
             if (endCallPressed)
               Container(
                 height: MediaQuery.of(context).size.height,
