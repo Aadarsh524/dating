@@ -10,6 +10,7 @@ import 'package:dating/datamodel/chat/send_message_model.dart' as sendModel;
 
 import 'package:dating/pages/ring_screen.dart';
 import 'package:dating/providers/chat_provider/socket_provider.dart';
+import 'package:dating/providers/user_profile_provider.dart';
 import 'package:dating/utils/colors.dart';
 import 'package:dating/utils/textStyles.dart';
 import 'package:dating/widgets/buttons.dart';
@@ -77,21 +78,65 @@ class _ChatScreenMobileState extends State<ChatScreenMobile> {
     super.dispose();
   }
 
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
   void sendMessage(String message) {
-    if (message.isNotEmpty && mounted) {
-      _socketMessageProvider.sendChatViaAPI(
-        sendModel.SendMessageModel(
-          senderId: user!.uid,
-          messageContent: message,
-          type: "Text",
-          receiverId: widget.receiverId,
-        ),
-        widget.chatID,
-        user!.uid,
-      );
-      _messageController.clear();
-      _scrollToBottom();
+    final userProfileProvider = context.read<UserProfileProvider>();
+    final chatLength =
+        userProfileProvider.currentUserProfileModel!.dailyCount!.wordsSentToday;
+    final chatLimit = userProfileProvider
+            .currentUserProfileModel!.dailyCount!.maximumMessageLimit ??
+        1000;
+    final lastMessageDate = DateTime.parse(userProfileProvider
+        .currentUserProfileModel!.dailyCount!.lastMessageSentDate!);
+
+    final today = DateTime.now();
+
+    if (!_isSameDay(lastMessageDate, today)) {
+      userProfileProvider.currentUserProfileModel!.dailyCount!.wordsSentToday =
+          0; // Reset for new day
     }
+
+    if (chatLength! + message.length < chatLimit) {
+      if (message.isNotEmpty && mounted) {
+        _socketMessageProvider.sendChatViaAPI(
+          sendModel.SendMessageModel(
+            senderId: user!.uid,
+            messageContent: message,
+            type: "Text",
+            receiverId: widget.receiverId,
+          ),
+          widget.chatID,
+          user!.uid,
+        );
+        _messageController.clear();
+        _scrollToBottom();
+      }
+    } else {
+      // Show a warning that the daily limit has been reached
+      showMessageLimitReachedWarning(context, chatLimit);
+    }
+  }
+
+  void showMessageLimitReachedWarning(BuildContext context, int chatLimit) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Daily Limit Reached"),
+        content: Text(
+            "You have reached your daily limit of $chatLimit messages. Please upgrade your plan."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   void _scrollToBottom() {
