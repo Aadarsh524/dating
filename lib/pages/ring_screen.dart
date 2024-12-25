@@ -20,11 +20,11 @@ class RingScreen extends StatefulWidget {
   final String roomId;
   final EndUserDetails? endUserDetails;
   const RingScreen({
-    Key? key,
+    super.key,
     this.clientID = "null",
     this.roomId = "null",
     this.endUserDetails,
-  }) : super(key: key);
+  });
 
   @override
   RingScreenState createState() => RingScreenState();
@@ -78,7 +78,9 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
       calleeCandidate = db.collection('rooms').doc();
       roomId = calleeCandidate.id;
 
-      calleeCandidate.set({'calleeConected': "null"}).then((value) async {
+      calleeCandidate
+          .set({'calleeConected': "null", "callStatus": "initiated"}).then(
+              (value) async {
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           deviceToken = await getDeviceTokenFromDb(clientID);
 

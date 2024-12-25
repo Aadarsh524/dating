@@ -70,7 +70,7 @@ class CallScreenState extends State<CallScreen> {
   late StreamSubscription getUserSignals;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     hangUpState = false;
     userType = widget.userType;
     _localRenderer.initialize();
@@ -80,19 +80,37 @@ class CallScreenState extends State<CallScreen> {
           .openUserMedia(_localRenderer, _remoteRenderer)
           .then((value) async {
         await signaling.createRoom(_localRenderer, widget.roomId);
-        // textEditingController.text = roomId!;
 
-        //initializeDataTransfer();
+        // Set a timer to end the call after 20 seconds if not joined
+        Future.delayed(const Duration(seconds: 20), () async {
+          final roomSnapshot =
+              await db.collection('rooms').doc(widget.roomId).get();
+          if (roomSnapshot.exists &&
+              roomSnapshot.get('callStatus') == 'initiated') {
+            await db
+                .collection('rooms')
+                .doc(widget.roomId)
+                .update({'callStatus': 'ended'});
+            endCall();
+          }
+        });
       });
     } else if (userType == 'V') {
       signaling.openUserMedia(_localRenderer, _remoteRenderer);
 
+      final roomSnapshot =
+          await db.collection('rooms').doc(widget.roomId).get();
+      if (roomSnapshot.exists && roomSnapshot.get('callStatus') == 'ended') {
+        Fluttertoast.showToast(msg: "Call has already ended");
+        Navigator.pop(context);
+        return;
+      }
+
       Future.delayed(const Duration(seconds: 7)).then((val) async {
         await signaling.joinRoom(widget.roomId, _remoteRenderer);
-        // initializeDataTransfer();
       });
-      //signaling.getData();
     }
+
     signaling.onAddRemoteStream = ((stream) {
       _remoteRenderer.srcObject = stream;
       setState(() {
@@ -108,41 +126,59 @@ class CallScreenState extends State<CallScreen> {
   }
 
   void endCall() async {
+    // Close the current page
     Navigator.pop(context);
-    if (!endCallPressed) {
-      if (userType == "H") {}
 
-      setState(() {
-        endCallPressed = true;
-      });
+    // Prevent multiple calls to endCall if it's already in progress
+    if (endCallPressed) {
+      Fluttertoast.showToast(msg: "Please wait");
+      return;
+    }
 
+    // Handle user type-specific actions (if required)
+    if (userType == "H") {
+      // Add any specific logic here for userType "H"
+    }
+
+    setState(() {
+      endCallPressed = true;
+    });
+
+    try {
+      // Hang up the call using signaling
       await signaling.hangUp(_localRenderer);
 
-      final batch = db.batch();
-      final calleCandidate = db.collection('rooms').doc('$roomId');
-
+      // Update Firestore in a batch
       if (roomId != null) {
+        final calleCandidate = db.collection('rooms').doc('$roomId');
+        final batch = db.batch();
         batch.update(calleCandidate, {"calleeConected": "done"});
+
+        await batch.commit(); // Commit the batch operation
       }
 
-// Commit the batch
-      batch.commit().then((_) {
+      // Navigate to the ChatPage
+      if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const ChatPage()),
-            (Route<dynamic> route) => false);
-      }).catchError((error) {
-        // Commit failed with an error
-        print("Error during batch commit: $error");
-        // You can handle the error here, e.g., show a message to the user
+          MaterialPageRoute(builder: (context) => const ChatPage()),
+          (Route<dynamic> route) => false,
+        );
+      }
+    } catch (error) {
+      // Log and display error messages
+      print("Error during end call: $error");
+      Fluttertoast.showToast(msg: "Error ending call: $error");
+    } finally {
+      // Reset the state if needed
+      setState(() {
+        endCallPressed = false;
       });
-    } else {
-      Fluttertoast.showToast(msg: "Please wait");
     }
   }
 
   //We are using this function to end call in remote users device.
   getStringFieldStream() {
-    var calleeCandidate = db.collection('rooms').doc('${widget.roomId}');
+    var calleeCandidate = db.collection('rooms').doc(widget.roomId);
     getUserSignals =
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
       if (snapshot.exists) {
@@ -150,6 +186,10 @@ class CallScreenState extends State<CallScreen> {
         if (callStatus == "done") {
           endCall();
           // getUserSignals.cancel();
+        }
+        if (callStatus == "ended") {
+          Fluttertoast.showToast(msg: "Call has ended");
+          endCall();
         }
       }
     });
