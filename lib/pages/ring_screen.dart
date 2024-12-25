@@ -8,7 +8,6 @@ import 'package:dating/helpers/device_token.dart';
 import 'package:dating/helpers/get_service_key.dart';
 import 'package:dating/helpers/notification_services.dart';
 import 'package:dating/pages/call_screen.dart';
-
 import 'package:dating/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -97,15 +96,22 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
         getStringFieldStream();
 
-        // Set a timer to end the call after 15 seconds
-        Future.delayed(const Duration(seconds: 15), () async {
-          if (!connected) {
-            // Update call status to 'failed' in Firestore
-            await calleeCandidate.update({'callStatus': 'failed'});
+        // Execute the delayed action only when the callStatus is 'pending'
+        calleeCandidate.snapshots().listen((snapshot) {
+          if (snapshot.exists) {
+            String callStatus = snapshot.get('callStatus') ?? "";
+            if (callStatus == "pending") {
+              Future.delayed(const Duration(seconds: 15), () async {
+                if (!connected) {
+                  // Update call status to 'failed' only if call status is still 'pending'
+                  await calleeCandidate.update({'callStatus': 'failed'});
 
-            // Close the RingScreen if still connected
-            if (mounted) {
-              Navigator.pop(context);
+                  // Close the RingScreen if still connected
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
+                }
+              });
             }
           }
         });
@@ -130,16 +136,6 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   Uint8List base64ToImage(String? base64String) {
     return base64Decode(base64String!);
   }
-
-  // playAudio() async {
-  //   await player.setSource(AssetSource('/sounds/ringtone.mp3'));
-  //   if (!ringingCall) {
-  //     ringingCall = true;
-  //     await player.play(AssetSource('sounds/ringtone.mp3')).then((value) async {
-  //       await player.play(AssetSource('sounds/ringtone.mp3'));
-  //     });
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -171,25 +167,15 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
             }
           } else if (callStatus == "connected") {
             connected = true;
-          } else if (callStatus == "pending" && !connected) {
-            // Start the call if pending
-            await calleeCandidate.update({'callStatus': 'connected'});
-
-            if (widget.roomId == "null") {
-              if (!hostNavigatedToCall) {
-                hostNavigatedToCall = true;
-                getUserSignals.cancel();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        CallScreen(userType: "H", roomId: roomId!),
-                  ),
-                );
-              }
-            } else {
-              if (!iAcceptedCall) {
-                Navigator.pop(context);
-              }
+            if (!hostNavigatedToCall) {
+              hostNavigatedToCall = true;
+              getUserSignals.cancel();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CallScreen(userType: "H", roomId: roomId!),
+                ),
+              );
             }
           }
         }
