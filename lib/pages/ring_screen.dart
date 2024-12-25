@@ -62,6 +62,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   bool userIsConnected = false;
 
   String? deviceToken;
+  Timer? callTimeoutTimer;
 
   @override
   void initState() {
@@ -96,28 +97,19 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
         getStringFieldStream();
 
-        // Execute the delayed action only when the callStatus is 'pending'
-        calleeCandidate.snapshots().listen((snapshot) {
-          if (snapshot.exists) {
-            String callStatus = snapshot.get('callStatus') ?? "";
-            if (callStatus == "pending") {
-              Future.delayed(const Duration(seconds: 15), () async {
-                if (!connected) {
-                  // Update call status to 'failed' only if call status is still 'pending'
-                  await calleeCandidate.update({'callStatus': 'failed'});
+        callTimeoutTimer = Timer(const Duration(seconds: 25), () async {
+          if (!connected) {
+            // Update call status to 'failed' only if call status is still 'pending'
+            await calleeCandidate.update({'callStatus': 'failed'});
 
-                  // Close the RingScreen if still connected
-                  if (mounted) {
-                    Navigator.pop(context);
-                  }
-                }
-              });
+            // Close the RingScreen if still connected
+            if (mounted) {
+              Navigator.pop(context);
             }
           }
         });
       });
     }
-
     _controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
@@ -139,6 +131,9 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    if (callTimeoutTimer != null) {
+      callTimeoutTimer!.cancel();
+    }
     getUserSignals.cancel();
     _joinController.dispose();
     _controller.dispose();
