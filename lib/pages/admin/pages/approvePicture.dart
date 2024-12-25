@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dating/datamodel/admin/approve_document_model.dart';
 import 'package:dating/datamodel/user_profile_model.dart';
 import 'package:dating/providers/admin_provider.dart';
@@ -306,28 +307,51 @@ class _ApprovePicturesPageState extends State<ApprovePicturesPage> {
                 } else {
                   final document = snapshot.data!;
                   String imageUrl =
-                      'http://localhost:8001/api/Communication/FileView/${document.documents!.first.fileName}';
+                      'http://dating-aybxhug7hfawfjh3.centralindia-01.azurewebsites.net/api/Communication/FileView/Azure/${document.documents!.first.fileName}';
+                  print(imageUrl);
 
-                  return Image.network(
+                  ImageProvider imageProvider = CachedNetworkImageProvider(
                     imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.error);
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child;
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    (loadingProgress.expectedTotalBytes!)
-                                : null,
+                  );
+
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                          child: InteractiveViewer(
+                            child: Image(
+                                image: imageProvider, fit: BoxFit.contain),
                           ),
-                        );
-                      }
+                        ),
+                      );
                     },
+                    child: Container(
+                      width: 150,
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Image(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Custom error UI for image loading failure
+                          return Container(
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.error, color: Colors.red),
+                          );
+                        },
+                      ),
+                    ),
                   );
                 }
               },
