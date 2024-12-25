@@ -6,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dating/pages/call_screen.dart';
 import 'package:dating/pages/chatpage.dart';
 import 'package:dating/utils/colors.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
 class CallRecieveScreen extends StatefulWidget {
@@ -27,9 +26,8 @@ class CallRecieveScreen extends StatefulWidget {
 class _CallRecieveScreenState extends State<CallRecieveScreen>
     with TickerProviderStateMixin {
   final db = FirebaseFirestore.instance;
-  late DocumentReference calleeCandidate;
-  late StreamSubscription getUserSignals;
-  late var _uid;
+  late DocumentReference callRoomRef;
+  late StreamSubscription getCallStatusStream;
   late AudioPlayer player;
   bool endCallPressed = false;
   bool iAcceptedCall = false;
@@ -39,57 +37,46 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
 
   @override
   void initState() {
-    // TODO: implement initState
-    _uid = FirebaseAuth.instance.currentUser!.uid;
-
     getStringFieldStream();
     _joinController = AnimationController(
       duration: const Duration(milliseconds: 700),
       vsync: this,
     )..repeat(reverse: true);
+
     if (widget.roomId != "null") {
       player = AudioPlayer();
-      //playAudio();
     }
     super.initState();
   }
 
   @override
   void dispose() {
-    getUserSignals.cancel();
+    getCallStatusStream.cancel();
     _joinController.dispose();
-
     super.dispose();
   }
 
-  // playAudio() async {
-  //   await player.setSource(AssetSource('/sounds/ringtone.mp3'));
-
-  //   if (!ringingCall) {
-  //     ringingCall = true;
-  //     await player.play(AssetSource('sounds/ringtone.mp3')).then((value) async {
-  //       await player.play(AssetSource('sounds/ringtone.mp3'));
-  //     });
-  //   }
-  // }
-
   getStringFieldStream() {
-    calleeCandidate = db.collection('rooms').doc(widget.roomId);
-    getUserSignals =
-        calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
+    callRoomRef = db.collection('rooms').doc(widget.roomId);
+
+    getCallStatusStream =
+        callRoomRef.snapshots().listen((DocumentSnapshot snapshot) async {
       if (snapshot.exists) {
-        String callStatus = snapshot.get('calleeConected') ?? "";
-        callStatus = 'true';
-        log(callStatus);
+        String callStatus = snapshot.get('callStatus') ?? "";
+
+        log("Current call status: $callStatus");
 
         if (callStatus.isNotEmpty) {
-          if (callStatus == "done") {
-            // connected = false;
-            // Handle disconnection or completion logic if needed
-          } else if (callStatus == "null") {
-            if (widget.roomId == "null") {
+          switch (callStatus) {
+            case "pending":
+              // Call is pending but not yet picked up
+              log("Call pending, waiting for callee to respond.");
+              break;
+
+            case "connected":
+              // Call is active; navigate to the call screen
               if (!hostNavigatedToCall) {
-                getUserSignals.cancel(); // Cancel the listener
+                getCallStatusStream.cancel(); // Cancel the listener
                 hostNavigatedToCall = true;
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
@@ -98,23 +85,30 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
                   ),
                 );
               }
-            } else {
-              if (!iAcceptedCall) {
-                if (widget.roomId != "null") {
-                  player.stop();
-                }
-                Navigator.pop(context); // Close the current screen
+              break;
+
+            case "failed":
+              // Call was not picked; close the current screen
+              log("Call missed. Closing the screen.");
+              if (mounted) {
+                Navigator.pop(context);
               }
-            }
-          } else if (callStatus == "left") {
-            if (widget.roomId != "null") {
-              player.stop();
-            }
-            Navigator.pop(context);
+              break;
+
+            case "ended":
+              // Call was ended successfully; clean up and close the screen
+              log("Call ended. Cleaning up.");
+              if (mounted) {
+                Navigator.pop(context);
+              }
+              break;
+
+            default:
+              log("Unhandled call status: $callStatus");
           }
         }
       } else {
-        print("Document does not exist");
+        log("Call document does not exist.");
       }
     });
   }
@@ -187,34 +181,31 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
                 onTap: () async {
                   print('join call');
                   await db.runTransaction((transaction) async {
-                    final roomRef = await transaction.get(calleeCandidate);
+                    final roomRef = await transaction.get(callRoomRef);
 
                     if (roomRef.exists) {
                       final data = roomRef.data() as Map<String, dynamic>;
-                      String calleeConnected = data["calleeConected"];
+                      String currentCallStatus = data["callStatus"];
 
-                      Map<String, dynamic> updateCalleeVal = {
-                        'calleeConected': _uid,
+                      Map<String, dynamic> updateCallStatusVal = {
+                        'callStatus': 'connected',
                       };
 
                       print("step 2");
 
-                      if (calleeConnected == "null") {
-                        // Check for null instead of "null"
+                      if (currentCallStatus == "pending") {
                         try {
                           print("step 3");
-                          transaction.update(calleeCandidate, updateCalleeVal);
+                          transaction.update(callRoomRef, updateCallStatusVal);
 
                           print("step 4");
                         } catch (e) {
                           print("Error joining room: $e");
-                          // Handle error, optionally rethrow or return a specific value
                         }
                       }
                     }
                   }).then((value) async {
                     iAcceptedCall = true;
-                    //await db.collection("users").doc(clientID).update({"beingcalled": "false",});
                     player.stop();
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (context) => CallScreen(
@@ -251,12 +242,12 @@ class _CallRecieveScreenState extends State<CallRecieveScreen>
                 GestureDetector(
                   onTap: () {
                     endCallPressed = true;
-                    getUserSignals.cancel();
+                    getCallStatusStream.cancel();
 
                     db
                         .collection('rooms')
                         .doc(widget.roomId)
-                        .update({"calleeConected": "left"}).then((value) {
+                        .update({"callStatus": "ended"}).then((value) {
                       if (widget.roomId != "null") {
                         player.stop();
                       }

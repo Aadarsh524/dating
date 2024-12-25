@@ -41,7 +41,6 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
   late AnimationController _joinController;
   late AnimationController _controller;
-  int totalleftMinutes = 0;
   String hostUser = "";
 
   final _auth = FirebaseAuth.instance;
@@ -61,8 +60,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
   bool endCallPressed = false;
   late DocumentReference calleeCandidate;
 
-  bool userIsconnected = false;
-  // late AudioPlayer player;
+  bool userIsConnected = false;
 
   String? deviceToken;
 
@@ -78,13 +76,10 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
       calleeCandidate = db.collection('rooms').doc();
       roomId = calleeCandidate.id;
 
-      calleeCandidate
-          .set({'calleeConected': "null", "callStatus": "initiated"}).then(
-              (value) async {
+      calleeCandidate.set({"callStatus": "pending"}).then((value) async {
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           deviceToken = await getDeviceTokenFromDb(clientID);
 
-          // Check if the device token is not null and print it
           if (deviceToken != null) {
             print("FCM token ::::::> $deviceToken");
           } else {
@@ -92,7 +87,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
           }
 
           await sendNotificationToUser(
-              "You have a Call from Anonymous",
+              "You have a Call from ${widget.endUserDetails!.name}",
               "Join Now",
               deviceToken!,
               roomId!,
@@ -101,9 +96,21 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
         });
 
         getStringFieldStream();
+
+        // Set a timer to end the call after 15 seconds
+        Future.delayed(const Duration(seconds: 15), () async {
+          if (!connected) {
+            // Update call status to 'failed' in Firestore
+            await calleeCandidate.update({'callStatus': 'failed'});
+
+            // Close the RingScreen if still connected
+            if (mounted) {
+              Navigator.pop(context);
+            }
+          }
+        });
       });
     }
-    //getStringFieldStream();
 
     _controller = AnimationController(
       duration: const Duration(seconds: 1),
@@ -117,10 +124,6 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
 
     _controller.forward();
 
-    // if (widget.roomId != "null" && widget.clientID == "null") {
-    //   player = AudioPlayer();
-    //   playAudio();
-    // }
     super.initState();
   }
 
@@ -157,19 +160,25 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
     getUserSignals =
         calleeCandidate.snapshots().listen((DocumentSnapshot snapshot) async {
       if (snapshot.exists) {
-        String callStatus = snapshot.get('calleeConected') ?? "";
+        String callStatus = snapshot.get('callStatus') ?? "";
         log("this call status: $callStatus");
 
         if (callStatus.isNotEmpty) {
-          if (callStatus == "done") {
+          if (callStatus == "ended" || callStatus == "failed") {
             connected = false;
-            // Handle disconnection or completion logic if needed
-          } else if (callStatus != "null") {
+            if (mounted) {
+              Navigator.pop(context); // Exit the screen if call ends
+            }
+          } else if (callStatus == "connected") {
+            connected = true;
+          } else if (callStatus == "pending" && !connected) {
+            // Start the call if pending
+            await calleeCandidate.update({'callStatus': 'connected'});
+
             if (widget.roomId == "null") {
               if (!hostNavigatedToCall) {
                 hostNavigatedToCall = true;
-                getUserSignals
-                    .cancel(); // Ensure listener is canceled before navigation
+                getUserSignals.cancel();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (context) =>
@@ -179,17 +188,9 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
               }
             } else {
               if (!iAcceptedCall) {
-                if (widget.roomId != "null") {
-                  // player.stop();
-                }
-                Navigator.pop(context); // Close the current screen
+                Navigator.pop(context);
               }
             }
-          } else if (callStatus == "left") {
-            if (widget.roomId != "null") {
-              // player.stop();
-            }
-            Navigator.pop(context);
           }
         }
       } else {
@@ -286,25 +287,6 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
                         border: Border.all(
                             color: AppColors.green.withOpacity(0.1))),
                   ),
-                  // AnimatedBuilder(
-                  //     animation: _animation,
-                  //     builder: (context, child) {
-                  //       return Transform.scale(
-                  //         scale: _animation.value,
-                  //         child: Container(
-                  //           height: 100,
-                  //           width: 100,
-                  //           decoration: BoxDecoration(
-                  //             shape: BoxShape.circle,
-                  //             image: DecorationImage(
-                  //               image: MemoryImage(base64ToImage(
-                  //                   widget.endUserDetails!.profileImage)),
-                  //               fit: BoxFit.cover,
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       );
-                  //     }),
                 ],
               ),
             ),
@@ -313,7 +295,8 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    await calleeCandidate.update({'callStatus': 'ended'});
                     Navigator.pop(context);
                   },
                   child: const Text(
