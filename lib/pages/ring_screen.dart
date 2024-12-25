@@ -17,12 +17,14 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 class RingScreen extends StatefulWidget {
   final String clientID;
   final String roomId;
+  final String clientName;
   final EndUserDetails? endUserDetails;
   const RingScreen({
     super.key,
     this.clientID = "null",
     this.roomId = "null",
     this.endUserDetails,
+    this.clientName = "unknown",
   });
 
   @override
@@ -87,7 +89,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
           }
 
           await sendNotificationToUser(
-              "You have a Call from ${widget.endUserDetails!.name}",
+              "You have a Call from ${widget.clientName}",
               "Join Now",
               deviceToken!,
               roomId!,
@@ -277,7 +279,7 @@ class RingScreenState extends State<RingScreen> with TickerProviderStateMixin {
               children: [
                 GestureDetector(
                   onTap: () async {
-                    await calleeCandidate.update({'callStatus': 'ended'});
+                    await calleeCandidate.update({'callStatus': 'failed'});
                     Navigator.pop(context);
                   },
                   child: const Text(

@@ -126,8 +126,6 @@ class CallScreenState extends State<CallScreen> {
       }).catchError((error) {
         print("Error during batch commit: $error");
       });
-    } else {
-      Fluttertoast.showToast(msg: "Please wait");
     }
   }
 
